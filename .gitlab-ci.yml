@@ -1,0 +1,40 @@
+stages:
+  - docker
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  CI_REGISTRY: registry.nguyenanh-est.com
+  CI_REGISTRY_URL: https://registry.nguyenanh-est.com
+  IMAGE_NAME: "$CI_REGISTRY/$CI_PROJECT_PATH"
+  IMAGE_TAG: "$IMAGE_NAME:$CI_COMMIT_SHORT_SHA"
+
+docker-build-and-push:  # Tên job phải nhất quán
+  stage: docker
+  image: docker:latest
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never  # Không chạy khi mở merge request
+    - if: '$CI_COMMIT_BRANCH == "deploy" && $CI_MERGE_REQUEST_STATE == "merged"'
+      when: on_success  # Chỉ chạy khi merge vào branch deploy
+    - if: '$CI_COMMIT_BRANCH == "deploy" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success  # Dự phòng nếu CI_MERGE_REQUEST_STATE không hoạt động
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
+  script:
+    - |
+      TAG_LATEST="latest"
+      TAG_SHA="$CI_COMMIT_SHA"
+      TAG_BRANCH="$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
+
+      echo "Building and pushing Docker image with tags:"
+      echo "$IMAGE_NAME:$TAG_LATEST"
+      echo "$IMAGE_NAME:$TAG_BRANCH"
+
+      docker build -t $IMAGE_NAME:$TAG_LATEST -t $IMAGE_NAME:$TAG_SHA -t $IMAGE_NAME:$TAG_BRANCH .
+      docker push $IMAGE_NAME:$TAG_LATEST
+      docker push $IMAGE_NAME:$TAG_BRANCH
+
+      # Clean up
+      docker rmi $IMAGE_NAME:$TAG_LATEST $IMAGE_NAME:$TAG_SHA $IMAGE_NAME:$TAG_BRANCH
+      docker image prune -f
