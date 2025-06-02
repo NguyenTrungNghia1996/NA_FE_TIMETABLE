@@ -39,11 +39,9 @@ docker-build-and-push:
       docker build \
         --build-arg BUILDKIT_INLINE_CACHE=1 \
         --cache-from=type=registry,ref=$IMAGE_NAME:$TAG_CACHE \
-        --cache-to=type=registry,ref=$IMAGE_NAME:$TAG_CACHE,mode=max \
         -t $IMAGE_NAME:$TAG_LATEST \
         -t $IMAGE_NAME:$TAG_SHA \
         -t $IMAGE_NAME:$TAG_BRANCH \
-        -t $IMAGE_NAME:$TAG_CACHE \
         .
 
       docker push $IMAGE_NAME:$TAG_LATEST
