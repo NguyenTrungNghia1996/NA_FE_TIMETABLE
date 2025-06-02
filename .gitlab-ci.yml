@@ -32,18 +32,17 @@ docker-build-and-push:
       TAG_BRANCH="$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
       TAG_CACHE="cache"
 
-      echo "Building and pushing Docker image with tags:"
-      echo "$IMAGE_NAME:$TAG_LATEST"
-      echo "$IMAGE_NAME:$TAG_BRANCH"
-
+      echo "Building and tagging Docker image..."
       docker build \
         --build-arg BUILDKIT_INLINE_CACHE=1 \
         --cache-from=type=registry,ref=$IMAGE_NAME:$TAG_CACHE \
         -t $IMAGE_NAME:$TAG_LATEST \
         -t $IMAGE_NAME:$TAG_SHA \
         -t $IMAGE_NAME:$TAG_BRANCH \
+        -t $IMAGE_NAME:$TAG_CACHE \
         .
 
+      echo "Pushing Docker image..."
       docker push $IMAGE_NAME:$TAG_LATEST
       docker push $IMAGE_NAME:$TAG_BRANCH
       docker push $IMAGE_NAME:$TAG_CACHE
@@ -57,12 +56,11 @@ docker-cleanup:
   script:
     - |
       TAG_LATEST="latest"
-      TAG_SHA="$CI_COMMIT_SHA"
       TAG_BRANCH="$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
       TAG_CACHE="cache"
 
       echo "Cleaning up local Docker images..."
-      docker rmi $IMAGE_NAME:$TAG_LATEST $IMAGE_NAME:$TAG_SHA $IMAGE_NAME:$TAG_BRANCH $IMAGE_NAME:$TAG_CACHE || true
+      docker rmi $IMAGE_NAME:$TAG_LATEST $IMAGE_NAME:$TAG_BRANCH $IMAGE_NAME:$TAG_CACHE || true
 
       echo "Pruning dangling images..."
       docker image prune -f
