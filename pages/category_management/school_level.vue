@@ -15,7 +15,7 @@
     </div>
 
     <div class="overflow-x-auto">
-      <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: 'max-content' }" @change="handleTableChange" bordered size="small">
+      <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: '800' }" @change="handleTableChange" bordered size="small">
         <template #bodyCell="{ column, record, index }">
           <template v-if="column.key === 'stt'">
             {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
@@ -84,7 +84,6 @@ const columns = [
     title: 'Tên cấp học',
     dataIndex: 'ten',
     key: 'ten',
-    width: 200,
     ellipsis: true
   },
   {
