@@ -2,7 +2,10 @@
   <div class="p-2 md:p-4 bg-white min-h-full">
     <!-- <h1 class="text-xl md:text-2xl font-bold mb-4 md:mb-6">Quản lý cấp học</h1> -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4">
-      <a-input-search v-model:value="searchText" placeholder="Tìm kiếm..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
+      <a-input-search v-model:value="searchText" placeholder="Tìm kiếm..." @search="handleSearch" class="w-full md:w-1/3" />
+      <a-button @click="resetForm" class="w-full md:w-auto">
+        <span class="md:inline">Đặt lại</span>
+      </a-button>
       <a-button type="primary" @click="showModal" class="w-full md:w-auto">
         <template #icon>
           <PlusOutlined />
@@ -12,7 +15,7 @@
     </div>
 
     <div class="overflow-x-auto">
-      <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: 800 }" :sticky="true" @change="handleTableChange" bordered size="small" class="custom-table">
+      <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: 'max-content' }" @change="handleTableChange" bordered size="small">
         <template #bodyCell="{ column, record, index }">
           <template v-if="column.key === 'stt'">
             {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
@@ -69,14 +72,13 @@
 
 <script setup>
 const { RestApi } = useApi();
-const param = ref({ PageIndex: 1, PageSize: 10 });
+const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
 const columns = [
   {
     title: 'STT',
     key: 'stt',
-    width: 70,
-    align: 'center',
-    fixed: 'left'
+    width: 50,
+    align: 'center',  
   },
   {
     title: 'Tên cấp học',
@@ -114,7 +116,7 @@ const pagination = reactive({
   pageSize: 10,
   total: 0,
   showSizeChanger: true,
-  pageSizeOptions: ['1', '5', '10', '20', '50'],
+  pageSizeOptions: ['1', '10', '20', '50'],
   showTotal: (total) => `Tổng ${total} bản ghi`
 })
 
@@ -131,10 +133,10 @@ const rules = reactive({
 })
 
 // Methods
-const fetchData = async q => {
+const fetchData = async (param) => {
   try {
     loading.value = true
-    const { data, status } = await RestApi.school_level.list({ params: q.value })
+    const { data, status } = await RestApi.school_level.list({ params: param })
     if (data.value?.status === 'success') {
       dataSource.value = data.value.data.items || []
       pagination.total = data.value.data.totalrecord
@@ -142,6 +144,7 @@ const fetchData = async q => {
       dataSource.value = []
       pagination.total = 0
     }
+
   } catch (error) {
     console.error('Error fetching data:', error)
     message.error('Lỗi khi tải dữ liệu')
@@ -150,17 +153,18 @@ const fetchData = async q => {
   }
 }
 
-const handleTableChange = (pag) => {
+const handleTableChange = async (pag) => {
   pagination.current = pag.current
   pagination.pageSize = pag.pageSize
   param.value.PageIndex = pag.current
   param.value.PageSize = pag.pageSize
-  fetchData({ ...param })
+  await fetchData({ ...param.value })
 }
 
-const handleSearch = () => {
+const handleSearch = async () => {
+  param.value.search = searchText.value
   pagination.current = 1
-  fetchData({ ...param })
+  await fetchData({ ...param.value })
 }
 
 const showModal = () => {
@@ -208,7 +212,7 @@ const handleOk = async () => {
     console.error('Error saving data:', error)
     message.error('Có lỗi xảy ra khi lưu dữ liệu')
   } finally {
-    fetchData({ ...param })
+    await fetchData({ ...param.value })
     confirmLoading.value = false
     visible.value = false
     formRef.value.resetFields()
@@ -232,11 +236,22 @@ const deleteItem = async (id) => {
     console.error('Error deleting data:', error)
     message.error('Có lỗi xảy ra khi xóa dữ liệu')
   } finally {
-    fetchData({ ...param })
+    await fetchData({ ...param.value })
   }
 }
+const resetForm = async () => {
+  if (formRef.value) {
+    formRef.value.resetFields();
+  }
+  param.value.PageIndex = 1;
+  param.value.PageSize = 10;
+  param.value.search = "";
+  pagination.current = 1;
+  pagination.pageSize = 10;
+  await fetchData({ ...param.value })
+}
 
-fetchData({ ...param })
+await fetchData({ ...param.value })
 </script>
 
 <style scoped></style>
