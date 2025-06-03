@@ -8,20 +8,38 @@
     <!-- User dropdown with modern styling -->
     <div class="flex items-center">
       <a-dropdown>
-        <div class="flex items-center cursor-pointer transition-all duration-200 ease-out p-1.5 rounded-full hover:bg-gray-700/50 group" @click.prevent>
-          <div class="relative">
-            <a-avatar v-if="userStore.user.avatar" :src="userStore.user.avatar" class="w-9 h-9 transition-all duration-300 ease-out group-hover:ring-2 group-hover:ring-blue-400 group-hover:scale-110" />
-            <a-avatar v-else class="w-9 h-9 bg-gray-600 transition-all duration-300 ease-out group-hover:ring-2 group-hover:ring-blue-400 group-hover:scale-110" :style="{ verticalAlign: 'middle' }" style="background-color: #8e8e8e">
-              <template #icon>
-                <UserOutlined class="text-gray-300" />
-              </template>
-            </a-avatar>
-            <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></div>
+        <div class="flex items-center cursor-pointer transition-all duration-200 ease-out p-1.5 rounded-lg hover:bg-gray-700/50 group" @click.prevent>
+          <div class="flex items-center gap-3">
+            <!-- User name display -->
+            <div class="hidden md:block text-right">
+              <div class="text-sm font-medium text-gray-200 group-hover:text-white">
+                {{ userStore.name }}
+              </div>
+              <div class="text-xs text-gray-400">
+                {{ userStore.role }}
+              </div>
+            </div>
+
+            <!-- Avatar -->
+            <div class="relative">
+              <a-avatar v-if="userStore.user.avatar" :src="userStore.user.avatar" class="w-9 h-9 transition-all duration-300 ease-out group-hover:ring-2 group-hover:ring-blue-400 group-hover:scale-110" />
+              <a-avatar v-else class="w-9 h-9 bg-gray-600 transition-all duration-300 ease-out group-hover:ring-2 group-hover:ring-blue-400 group-hover:scale-110" :style="{ verticalAlign: 'middle' }" style="background-color: #8e8e8e">
+                <template #icon>
+                  <UserOutlined class="text-gray-300" />
+                </template>
+              </a-avatar>
+            </div>
           </div>
         </div>
 
         <template #overlay>
           <a-menu class="min-w-[180px] bg-gray-800 border border-gray-700 rounded-lg py-1 shadow-xl">
+            <a-menu-item key="profile" class="hover:bg-gray-700/50 !px-4 !py-2.5 !mx-0 text-gray-200 hover:text-white" @click="navigateTo('/profile')">
+              <div class="flex items-center gap-2">
+                <UserOutlined class="text-blue-400" />
+                <span>Hồ sơ cá nhân</span>
+              </div>
+            </a-menu-item>
             <a-menu-item key="change_password" class="hover:bg-gray-700/50 !px-4 !py-2.5 !mx-0 text-gray-200 hover:text-white" @click="showChangePasswordModal">
               <div class="flex items-center gap-2">
                 <KeyOutlined class="text-blue-400" />

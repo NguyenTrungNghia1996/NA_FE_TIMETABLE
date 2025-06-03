@@ -11,7 +11,7 @@ services:
       NODE_ENV: production
       HOST: 0.0.0.0
       PORT: 3000
-      NUXT_PUBLIC_BASE_URL: https://api.nghia.myds.me
+      NUXT_PUBLIC_BASE_URL: https://api-test-tkb.nguyenanh-est.com
       NUXT_ENCRYPTION_KEY: key-32-chars-123456
     ports:
       - "3000:3000"

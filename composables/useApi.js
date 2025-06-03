@@ -1,5 +1,5 @@
 let ENDPOINTS = {
-  LOGIN: "/login",
+  LOGIN: "/api/users/login",
   S3: "/api/presigned_url",
 };
 import { useUserStore } from "~~/stores/userStore";
