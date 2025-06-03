@@ -3,7 +3,7 @@
     <div class="h-15">
       <BaseHeader />
     </div>
-    <div class="w-full flex-1 flex overflow-hidden h-[calc(100vh-60px)]">
+    <div class="w-full flex-1 flex overflow-hidden min-h-[calc(100vh-60px)]">
       <BaseMenu />
       <div class="flex-1 flex flex-col overflow-hidden">
         <div class="sticky top-0 z-10 bg-white">

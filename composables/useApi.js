@@ -1,22 +1,29 @@
 let ENDPOINTS = {
   LOGIN: "/api/users/login",
+  //SCHOOL_LEVEL
+  SCHOOL_LEVEL: "/api/caphoc",
+  SCHOOL_LEVEL_DETAIL: "/api/caphoc/detail",
+
+
   S3: "/api/presigned_url",
 };
 import { useUserStore } from "~~/stores/userStore";
 class Request {
   constructor() {
     this.handler = {
-      onRequest({ request, options }) {},
-      onRequestError({ request, options, error }) {},
+      onRequest({ request, options }) { },
+      onRequestError({ request, options, error }) { },
       onResponse({ request, response, options }) {
         return response._data;
       },
       async onResponseError({ request, response, options }) {
         if (response.status == 401) {
+          message.info("Phiên Đăng Nhập Kết Thúc Vui Lòng Đăng Nhập Lại! ");
           const userStore = useUserStore();
           userStore.logout();
           return await navigateTo("/auth/login");
         }
+
         return response._data;
       },
     };
@@ -90,6 +97,7 @@ class RestApi {
   constructor() {
     this.request = new Request();
     this.user = new User(this.request);
+    this.school_level = new SchoolLevel(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -142,6 +150,27 @@ class User {
   async login(data) {
     return await this.request.post(ENDPOINTS.LOGIN, data);
   }
+}
+class SchoolLevel {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.SCHOOL_LEVEL, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.SCHOOL_LEVEL_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.SCHOOL_LEVEL, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.SCHOOL_LEVEL, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.SCHOOL_LEVEL, data);
+  }
+
 }
 export default () => {
   return { RestApi: new RestApi() };

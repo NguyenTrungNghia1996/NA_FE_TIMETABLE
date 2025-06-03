@@ -18,10 +18,10 @@ export const useUserStore = defineStore(
         return state.user?.token || null;
       },
       name: state => {
-        return state.user?.item.hoten || null;
+        return state.user?.item?.hoten || null;
       },
       role: state => {
-        return state.user?.item.username || null;
+        return state.user?.item?.username || null;
       },
     },
     persist: {
