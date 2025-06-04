@@ -1,8 +1,8 @@
 <template>
   <div class="p-2 md:p-4 bg-white min-h-full">
-    <!-- <h1 class="text-xl md:text-2xl font-bold mb-4 md:mb-6">Quản lý cấp học</h1> -->
+    <!-- <h1 class="text-xl md:text-2xl font-bold mb-4 md:mb-6">Quản lý ca học</h1> -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4">
-      <a-input-search v-model:value="searchText" placeholder="Tìm kiếm cấp học..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
+      <a-input-search v-model:value="searchText" placeholder="Tìm kiếm ca học..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
       <a-button @click="resetForm" class="w-full md:w-auto">
         <span class="md:inline">Đặt lại</span>
       </a-button>
@@ -44,10 +44,10 @@
         </template>
       </a-table>
     </ClientOnly>
-    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa cấp học' : 'Thêm mới cấp học'" @cancel="handleCancel" :width="600">
+    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa ca học' : 'Thêm mới ca học'" @cancel="handleCancel" :width="600">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
-        <a-form-item label="Tên cấp học" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
-          <a-input v-model:value="formState.ten" placeholder="Nhập tên cấp học" :maxlength="200" show-count />
+        <a-form-item label="Tên ca học" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
+          <a-input v-model:value="formState.ten" placeholder="Nhập tên ca học" :maxlength="200" show-count />
         </a-form-item>
 
         <a-form-item label="Ghi chú" name="ghichu" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
@@ -78,7 +78,7 @@ const columns = [
     align: 'center',
   },
   {
-    title: 'Tên cấp học',
+    title: 'Tên ca học',
     dataIndex: 'ten',
     key: 'ten',
     ellipsis: true
@@ -123,8 +123,8 @@ const formState = reactive({
 
 const rules = reactive({
   ten: [
-    { required: true, message: 'Vui lòng nhập tên cấp học', trigger: 'blur' },
-    { min: 2, message: 'Tên cấp học phải có ít nhất 2 ký tự', trigger: 'blur' }
+    { required: true, message: 'Vui lòng nhập tên ca học', trigger: 'blur' },
+    { min: 2, message: 'Tên ca học phải có ít nhất 2 ký tự', trigger: 'blur' }
   ]
 })
 
@@ -132,7 +132,7 @@ const rules = reactive({
 const fetchData = async (param) => {
   try {
     loading.value = true
-    const { data, status } = await RestApi.school_level.list({ params: param })
+    const { data, status } = await RestApi.school_shift.list({ params: param })
     if (data.value?.status === 'success') {
       dataSource.value = data.value.data.items || []
       pagination.total = data.value.data.totalrecord
@@ -187,9 +187,9 @@ const handleOk = async () => {
     await formRef.value.validate()
     confirmLoading.value = true
     if (isEdit.value) {
-      const { data, error } = await RestApi.school_level.update({ body: { ...formState } })
+      const { data, error } = await RestApi.school_shift.update({ body: { ...formState } })
       if (data.value?.status === 'success') {
-        message.success(data.value?.message || "Cập nhật cấp học thành công")
+        message.success(data.value?.message || "Cập nhật thành công")
       } else {
         throw new Error(error.value?.data?.message || 'Thêm mới không thành công')
       }
@@ -197,15 +197,15 @@ const handleOk = async () => {
       if (formState) {
         delete formState.id
       }
-      const { data, error } = await RestApi.school_level.create({ body: { ...formState } })
+      const { data, error } = await RestApi.school_shift.create({ body: { ...formState } })
       if (data.value?.status === 'success') {
-        message.success(data.value?.message || "Tạo mới cấp học thành công")
+        message.success(data.value?.message || "Tạo mới thành công")
       } else {
         throw new Error(error.value?.data?.message || 'Thêm mới không thành công')
       }
     }
   } catch (error) {
-    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin cấp học')
+    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin')
   } finally {
     await fetchData({ ...param.value })
     confirmLoading.value = false
@@ -221,7 +221,7 @@ const handleCancel = () => {
 
 const deleteItem = async (id) => {
   try {
-    const { data } = await RestApi.school_level.delete({ params: { id: id } })
+    const { data } = await RestApi.school_shift.delete({ params: { id: id } })
     if (data.value?.status === 'success') {
       message.success(data.value?.message || 'Xóa thành công')
     } else {
