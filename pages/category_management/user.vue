@@ -340,33 +340,30 @@ const handleOk = async () => {
     confirmLoading.value = true
 
     if (isEdit.value) {
-      const { data ,status} = await RestApi.user.update({ body: { ...formState } })
+      const { data, error } = await RestApi.user.update({ body: { ...formState } })
       if (data.value?.status === 'success') {
         message.success(data.value.message || 'Cập nhật người dùng thành công')
         visible.value = false
         await fetchData({ ...param.value })
       } else {
-        message.error(status.value.data.message || 'Cập nhật không thành công')
+        throw new Error(error.value?.data?.message || 'Cập nhật không thành công')
       }
     } else {
       if (formState) {
         delete formState.id
       }
-      const { data, status } = await RestApi.user.create({ body: { ...formState } })
+      const { data, error } = await RestApi.user.create({ body: { ...formState } })
       if (data.value?.status === 'success') {
         message.success(data.value.message || 'Thêm mới người dùng thành công')
         visible.value = false
         await fetchData({ ...param.value })
       } else {
-        message.error(status.value.data.message || 'Thêm mới không thành công')
+        throw new Error(error.value?.data?.message || 'Thêm mới không thành công')
       }
+        
     }
   } catch (error) {
-    if (error.response?.data?.message) {
-      message.error(error.response.data.message)
-    } else {
-      message.error('Đã xảy ra lỗi khi lưu thông tin người dùng')
-    }
+    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin người dùng')
   } finally {
     confirmLoading.value = false
   }

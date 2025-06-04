@@ -189,26 +189,25 @@ const handleOk = async () => {
     await formRef.value.validate()
     confirmLoading.value = true
     if (isEdit.value) {
-      const { data, status } = await RestApi.school_level.update({ body: { ...formState } })
+      const { data, error } = await RestApi.school_level.update({ body: { ...formState } })
       if (data.value?.status === 'success') {
         message.success(data.value?.message || "Cập nhật cấp học thành công")
       } else {
-        message.error(status.value?.data?.message || "Cập nhật cấp học không thành công")
+        throw new Error(error.value?.data?.message || 'Thêm mới không thành công')
       }
     } else {
       if (formState) {
         delete formState.id
       }
-      const { data, status } = await RestApi.school_level.create({ body: { ...formState } })
+      const { data, error } = await RestApi.school_level.create({ body: { ...formState } })
       if (data.value?.status === 'success') {
         message.success(data.value?.message || "Tạo mới cấp học thành công")
       } else {
-        message.error(status.value?.data?.message || "Tạo mới cấp học không thành công")
+        throw new Error(error.value?.data?.message || 'Thêm mới không thành công')
       }
     }
   } catch (error) {
-    console.error('Error saving data:', error)
-    message.error('Có lỗi xảy ra khi lưu dữ liệu')
+    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin cấp học')
   } finally {
     await fetchData({ ...param.value })
     confirmLoading.value = false
