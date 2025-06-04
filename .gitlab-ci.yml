@@ -1,5 +1,7 @@
 stages:
   - docker
+  - cleanup
+  - deploy
 
 variables:
   DOCKER_DRIVER: overlay2
@@ -8,39 +10,79 @@ variables:
   CI_REGISTRY_URL: https://registry.nguyenanh-est.com
   IMAGE_NAME: "$CI_REGISTRY/$CI_PROJECT_PATH"
   IMAGE_TAG: "$IMAGE_NAME:$CI_COMMIT_SHORT_SHA"
-  GIT_DEPTH: 0                     # Fix lỗi fetch-pack shallow list
-  GIT_STRATEGY: clone              # Tránh reinit repo bị lỗi
-  GIT_SUBMODULE_STRATEGY: none     # Tuỳ chọn nếu không dùng submodule
-  GIT_TRACE: 1                     # Debug git
-  GIT_CURL_VERBOSE: 1             # Debug HTTP kết nối git
+  GIT_DEPTH: 0
+  GIT_STRATEGY: clone     
+  GIT_SUBMODULE_STRATEGY: none
 
 docker-build-and-push:
   stage: docker
   image: docker:latest
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-      when: never  # Không chạy khi mở merge request
-    - if: '$CI_COMMIT_BRANCH == "deploy" && $CI_MERGE_REQUEST_STATE == "merged"'
-      when: on_success  # Chạy khi merge vào branch deploy
-    - if: '$CI_COMMIT_BRANCH == "deploy" && $CI_PIPELINE_SOURCE == "push"'
-      when: on_success  # Dự phòng nếu CI_MERGE_REQUEST_STATE không hoạt động
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_MERGE_REQUEST_STATE == "merged"'
+      when: on_success
+    - if: '$CI_COMMIT_BRANCH == "dev" && $CI_PIPELINE_SOURCE == "push"'
+      when: on_success
   before_script:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   script:
     - |
+      export DOCKER_BUILDKIT=1
+      export BUILDKIT_INLINE_CACHE=1
+
       TAG_LATEST="latest"
       TAG_SHA="$CI_COMMIT_SHA"
       TAG_BRANCH="$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
+      TAG_CACHE="cache"
 
-      echo "Building and pushing Docker image with tags:"
-      echo "$IMAGE_NAME:$TAG_LATEST"
-      echo "$IMAGE_NAME:$TAG_BRANCH"
+      echo "Building and tagging Docker image..."
+      docker build \
+        --build-arg BUILDKIT_INLINE_CACHE=1 \
+        --cache-from=type=registry,ref=$IMAGE_NAME:$TAG_CACHE \
+        -t $IMAGE_NAME:$TAG_LATEST \
+        -t $IMAGE_NAME:$TAG_SHA \
+        -t $IMAGE_NAME:$TAG_BRANCH \
+        -t $IMAGE_NAME:$TAG_CACHE \
+        .
 
-      docker build -t $IMAGE_NAME:$TAG_LATEST -t $IMAGE_NAME:$TAG_SHA -t $IMAGE_NAME:$TAG_BRANCH .
+      echo "Pushing Docker image..."
       docker push $IMAGE_NAME:$TAG_LATEST
       docker push $IMAGE_NAME:$TAG_BRANCH
+      docker push $IMAGE_NAME:$TAG_CACHE
 
-      # Clean up
-      docker rmi $IMAGE_NAME:$TAG_LATEST $IMAGE_NAME:$TAG_SHA $IMAGE_NAME:$TAG_BRANCH
+docker-cleanup:
+  stage: cleanup
+  image: docker:latest
+  needs: ["docker-build-and-push"]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+  script:
+    - |
+      TAG_LATEST="latest"
+      TAG_BRANCH="$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
+      TAG_CACHE="cache"
+
+      echo "Cleaning up local Docker images..."
+      docker rmi $IMAGE_NAME:$TAG_LATEST $IMAGE_NAME:$TAG_BRANCH $IMAGE_NAME:$TAG_CACHE || true
+
+      echo "Pruning dangling images..."
       docker image prune -f
 
+      echo "Pruning build cache (intermediate layers)..."
+      docker builder prune -f
+
+docker-deploy:
+  stage: deploy
+  image: docker:latest
+  needs: ["docker-build-and-push","docker-cleanup"]
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "deploy"'
+      when: on_success
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - echo "Deploying frontend service using Docker Compose..."
+    - cd /root/docker/fe_timetable
+    - docker-compose pull frontend
+    - docker-compose up -d frontend
