@@ -2,7 +2,7 @@
   <div class="p-2 md:p-4 bg-white min-h-full">
     <!-- <h1 class="text-xl md:text-2xl font-bold mb-4 md:mb-6">Quản lý cấp học</h1> -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4">
-      <a-input-search v-model:value="searchText" placeholder="Tìm kiếm..." @search="handleSearch" class="w-full md:w-1/3" />
+      <a-input-search v-model:value="searchText" placeholder="Tìm kiếm cấp học..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
       <a-button @click="resetForm" class="w-full md:w-auto">
         <span class="md:inline">Đặt lại</span>
       </a-button>
@@ -11,7 +11,7 @@
       </a-button>
     </div>
 
-    <div class="overflow-x-auto">
+    <ClientOnly class="overflow-x-auto">
       <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: '800' }" @change="handleTableChange" bordered size="small">
         <template #bodyCell="{ column, record, index }">
           <template v-if="column.key === 'stt'">
@@ -43,7 +43,7 @@
           </template>
         </template>
       </a-table>
-    </div>
+    </ClientOnly>
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa cấp học' : 'Thêm mới cấp học'" @cancel="handleCancel" :width="600">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <a-form-item label="Tên cấp học" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
@@ -68,6 +68,8 @@
 </template>
 
 <script setup>
+import { ClientOnly } from '#components';
+
 const { RestApi } = useApi();
 const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
 const columns = [
@@ -75,7 +77,7 @@ const columns = [
     title: 'STT',
     key: 'stt',
     width: 50,
-    align: 'center',  
+    align: 'center',
   },
   {
     title: 'Tên cấp học',
@@ -189,9 +191,9 @@ const handleOk = async () => {
     if (isEdit.value) {
       const { data, status } = await RestApi.school_level.update({ body: { ...formState } })
       if (data.value?.status === 'success') {
-        message.success(data.value.message)
+        message.success(data.value?.message || "Cập nhật cấp học thành công")
       } else {
-        message.error(data.value.message)
+        message.error(status.value?.data?.message || "Cập nhật cấp học không thành công")
       }
     } else {
       if (formState) {
@@ -199,9 +201,9 @@ const handleOk = async () => {
       }
       const { data, status } = await RestApi.school_level.create({ body: { ...formState } })
       if (data.value?.status === 'success') {
-        message.success(data.value.message)
+        message.success(data.value?.message || "Tạo mới cấp học thành công")
       } else {
-        message.error(data.value.message)
+        message.error(status.value?.data?.message || "Tạo mới cấp học không thành công")
       }
     }
   } catch (error) {

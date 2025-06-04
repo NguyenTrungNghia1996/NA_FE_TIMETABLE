@@ -4,7 +4,9 @@ let ENDPOINTS = {
   SCHOOL_LEVEL: "/api/caphoc",
   SCHOOL_LEVEL_DETAIL: "/api/caphoc/detail",
 
-
+  //USER
+  USER: "/api/users",
+  USER_DETAIL:"/api/users/detail",
   S3: "/api/presigned_url",
 };
 import { useUserStore } from "~~/stores/userStore";
@@ -149,6 +151,21 @@ class User {
   }
   async login(data) {
     return await this.request.post(ENDPOINTS.LOGIN, data);
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.USER, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.USER_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.USER, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.USER, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.USER, data);
   }
 }
 class SchoolLevel {

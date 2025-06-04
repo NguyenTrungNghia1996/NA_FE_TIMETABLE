@@ -12,7 +12,7 @@ export const useSettingStore = defineStore(
       },
       menu: [
         {
-          id: 6,
+          id: 1,
           title: "Dashboard",
           key: "parent-6",
           url: "/dashboard",
@@ -20,18 +20,25 @@ export const useSettingStore = defineStore(
           children: [],
         },
         {
-          id: 1,
+          id: 2,
           title: "Quản lý danh mục",
           key: "parent-1",
           url: null,
           icon: "ant-design:database-twotone",
           children: [
             {
-              id: 2,
-              title: "Quản lý cấp học",
-              key: "child-1-1",
+              id: 2-1,
+              title: "Cấp học",
+              key: "child-2-1",
               url: "/category_management/school_level",
               icon: "ant-design:unordered-list-outlined",
+            },
+            {
+              id: 2-2,
+              title: "Người dùng",
+              key: "child-2-2",
+              url: "/category_management/user",
+              icon: "ant-design:user-outlined",
             },
           ],
         },
