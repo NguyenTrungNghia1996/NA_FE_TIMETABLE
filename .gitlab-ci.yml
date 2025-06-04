@@ -57,6 +57,7 @@ docker-cleanup:
   needs: ["docker-build-and-push"]
   rules:
     - if: '$CI_COMMIT_BRANCH == "deploy"'
+      when: on_success
   script:
     - |
       TAG_LATEST="latest"
@@ -75,14 +76,12 @@ docker-cleanup:
 docker-deploy:
   stage: deploy
   image: docker:latest
-  needs: ["docker-build-and-push","docker-cleanup"]
+  needs: ["docker-build-and-push"]
   rules:
     - if: '$CI_COMMIT_BRANCH == "deploy"'
       when: on_success
   before_script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - sudo docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
-    - echo "Deploying frontend service using Docker Compose..."
-    - cd /root/docker/fe_timetable
-    - docker-compose pull frontend
-    - docker-compose up -d frontend
+    - echo "Deploying frontend service using Docker Compose as root..."
+    - sudo bash -c "cd /root/docker/fe_timetable && docker-compose pull frontend && docker-compose up -d frontend"
