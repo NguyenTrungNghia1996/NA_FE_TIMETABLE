@@ -8,15 +8,20 @@ variables:
   CI_REGISTRY_URL: https://registry.nguyenanh-est.com
   IMAGE_NAME: "$CI_REGISTRY/$CI_PROJECT_PATH"
   IMAGE_TAG: "$IMAGE_NAME:$CI_COMMIT_SHORT_SHA"
+  GIT_DEPTH: 0                     # Fix lỗi fetch-pack shallow list
+  GIT_STRATEGY: clone              # Tránh reinit repo bị lỗi
+  GIT_SUBMODULE_STRATEGY: none     # Tuỳ chọn nếu không dùng submodule
+  GIT_TRACE: 1                     # Debug git
+  GIT_CURL_VERBOSE: 1             # Debug HTTP kết nối git
 
-docker-build-and-push:  # Tên job phải nhất quán
+docker-build-and-push:
   stage: docker
   image: docker:latest
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       when: never  # Không chạy khi mở merge request
     - if: '$CI_COMMIT_BRANCH == "deploy" && $CI_MERGE_REQUEST_STATE == "merged"'
-      when: on_success  # Chỉ chạy khi merge vào branch deploy
+      when: on_success  # Chạy khi merge vào branch deploy
     - if: '$CI_COMMIT_BRANCH == "deploy" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success  # Dự phòng nếu CI_MERGE_REQUEST_STATE không hoạt động
   before_script:
@@ -38,3 +43,4 @@ docker-build-and-push:  # Tên job phải nhất quán
       # Clean up
       docker rmi $IMAGE_NAME:$TAG_LATEST $IMAGE_NAME:$TAG_SHA $IMAGE_NAME:$TAG_BRANCH
       docker image prune -f
+
