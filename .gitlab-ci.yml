@@ -57,6 +57,7 @@ docker-cleanup:
   needs: ["docker-build-and-push"]
   rules:
     - if: '$CI_COMMIT_BRANCH == "deploy"'
+      when: on_success
   script:
     - |
       TAG_LATEST="latest"
