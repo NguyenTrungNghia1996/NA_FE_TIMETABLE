@@ -84,4 +84,4 @@ docker-deploy:
     - sudo docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - echo "Deploying frontend service using Docker Compose as root..."
-    - sudo bash -c "cd /root/docker/fe_timetable && docker-compose pull frontend && docker-compose up -d frontend"
+    - sudo bash -c "cd /root/docker/fe_timetable && docker compose pull frontend && docker compose up -d frontend"
