@@ -3,10 +3,13 @@ let ENDPOINTS = {
   //SCHOOL_LEVEL
   SCHOOL_LEVEL: "/api/caphoc",
   SCHOOL_LEVEL_DETAIL: "/api/caphoc/detail",
-
   //USER
   USER: "/api/users",
-  USER_DETAIL:"/api/users/detail",
+  USER_DETAIL: "/api/users/detail",
+  //SCHOOL_SHIFT
+  SCHOOL_SHIFT: "/api/cahoc",
+  SCHOOL_SHIFT_DETAIL: "/api/cahoc/detail",
+
   S3: "/api/presigned_url",
 };
 import { useUserStore } from "~~/stores/userStore";
@@ -100,6 +103,7 @@ class RestApi {
     this.request = new Request();
     this.user = new User(this.request);
     this.school_level = new SchoolLevel(this.request);
+    this.school_shift = new SchoolShift(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -187,7 +191,26 @@ class SchoolLevel {
   async delete(data) {
     return await this.request.delete(ENDPOINTS.SCHOOL_LEVEL, data);
   }
-
+}
+class SchoolShift {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.SCHOOL_SHIFT, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.SCHOOL_SHIFT_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.SCHOOL_SHIFT, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.SCHOOL_SHIFT, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.SCHOOL_SHIFT, data);
+  }
 }
 export default () => {
   return { RestApi: new RestApi() };
