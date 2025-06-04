@@ -8,7 +8,6 @@ variables:
   CI_REGISTRY: registry.nguyenanh-est.com
   CI_REGISTRY_URL: https://registry.nguyenanh-est.com
   IMAGE_NAME: "$CI_REGISTRY/$CI_PROJECT_PATH"
-  IMAGE_TAG: "$IMAGE_NAME:$CI_COMMIT_SHORT_SHA"
 
 docker-build-and-push:
   stage: docker
@@ -28,42 +27,22 @@ docker-build-and-push:
       export BUILDKIT_INLINE_CACHE=1
 
       TAG_LATEST="latest"
-      TAG_SHA="$CI_COMMIT_SHA"
       TAG_BRANCH="$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
       TAG_CACHE="cache"
 
-      echo "Building and tagging Docker image..."
-      docker build \
-        --build-arg BUILDKIT_INLINE_CACHE=1 \
-        --cache-from=type=registry,ref=$IMAGE_NAME:$TAG_CACHE \
-        -t $IMAGE_NAME:$TAG_LATEST \
-        -t $IMAGE_NAME:$TAG_SHA \
-        -t $IMAGE_NAME:$TAG_BRANCH \
-        -t $IMAGE_NAME:$TAG_CACHE \
-        .
+      echo "Building Docker image with tags:"
+      echo " - $IMAGE_NAME:$TAG_LATEST"
+      echo " - $IMAGE_NAME:$TAG_BRANCH"
 
-      echo "Pushing Docker image..."
+      docker build --pull --rm \
+        -t $IMAGE_NAME:$TAG_LATEST \
+        -t $IMAGE_NAME:$TAG_BRANCH .
+
+      echo "Pushing Docker images..."
       docker push $IMAGE_NAME:$TAG_LATEST
       docker push $IMAGE_NAME:$TAG_BRANCH
       docker push $IMAGE_NAME:$TAG_CACHE
 
-docker-cleanup:
-  stage: cleanup
-  image: docker:latest
-  needs: ["docker-build-and-push"]
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "deploy"'
-  script:
-    - |
-      TAG_LATEST="latest"
-      TAG_BRANCH="$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
-      TAG_CACHE="cache"
-
-      echo "Cleaning up local Docker images..."
-      docker rmi $IMAGE_NAME:$TAG_LATEST $IMAGE_NAME:$TAG_BRANCH $IMAGE_NAME:$TAG_CACHE || true
-
-      echo "Pruning dangling images..."
-      docker image prune -f
-
-      echo "Pruning build cache (intermediate layers)..."
-      docker builder prune -f
+      echo "Cleaning up Docker images..."
+      docker rmi $IMAGE_NAME:$TAG_LATEST $IMAGE_NAME:$TAG_BRANCH || true
+      docker image prune -f --filter "dangling=true"
