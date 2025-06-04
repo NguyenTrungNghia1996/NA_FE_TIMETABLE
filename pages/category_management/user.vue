@@ -306,9 +306,8 @@ const editItem = async (record) => {
   try {
     loading.value = true
     const { data } = await RestApi.user.detail({ params: { id: record.id } })
-
     if (data.value?.status === 'success') {
-      const userData = data.value.data.item
+      const userData = data.value.data
       Object.assign(formState, {
         id: userData.id,
         username: userData.username,
@@ -318,7 +317,6 @@ const editItem = async (record) => {
         isAdmin: userData.isAdmin,
         idRoles: userData.idRoles || [1]
       })
-
       isEdit.value = true
       visible.value = true
     } else {
