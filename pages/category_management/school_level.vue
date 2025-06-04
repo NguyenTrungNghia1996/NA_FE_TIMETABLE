@@ -7,9 +7,6 @@
         <span class="md:inline">Đặt lại</span>
       </a-button>
       <a-button type="primary" @click="showModal" class="w-full md:w-auto">
-        <template #icon>
-          <PlusOutlined />
-        </template>
         <span class="md:inline">Thêm mới</span>
       </a-button>
     </div>
