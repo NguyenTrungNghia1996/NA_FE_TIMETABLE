@@ -316,7 +316,7 @@ const editItem = async (record) => {
         id_Donvi: userData.id_Donvi,
         isActive: userData.isActive,
         isAdmin: userData.isAdmin,
-        idRoles: userData.idRoles || []
+        idRoles: userData.idRoles || [1]
       })
 
       isEdit.value = true
