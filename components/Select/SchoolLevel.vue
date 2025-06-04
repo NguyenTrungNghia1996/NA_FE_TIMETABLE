@@ -1,4 +1,3 @@
-<!-- 
 <template>
   <a-form-item
     v-if="withFormItem"
@@ -7,11 +6,13 @@
     :rules="rules"
   >
     <a-select
-      v-model:value="modelValue"
+      :value="modelValue"
+      @update:value="emit('update:modelValue', $event)"
       :placeholder="placeholder"
       :options="options"
       :loading="loading"
       :allowClear="true"
+      :mode="multiple ? 'multiple' : undefined"
       show-search
       :filter-option="false"
       @search="handleSearch"
@@ -21,11 +22,13 @@
   <template v-else>
     <label class="block mb-1 font-medium">{{ label }}</label>
     <a-select
-      v-model:value="modelValue"
+      :value="modelValue"
+      @update:value="emit('update:modelValue', $event)"
       :placeholder="placeholder"
       :options="options"
       :loading="loading"
       :allowClear="true"
+      :mode="multiple ? 'multiple' : undefined"
       show-search
       :filter-option="false"
       @search="handleSearch"
@@ -34,6 +37,7 @@
 </template>
 
 <script setup>
+const { RestApi } = useApi();
 import { ref } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useFetch } from '#app'
@@ -41,10 +45,14 @@ import { useFetch } from '#app'
 const props = defineProps({
   label: String,
   name: String,
-  modelValue: [String, Number],
+  modelValue: [String, Number, Array],
   placeholder: String,
   rules: Array,
   withFormItem: {
+    type: Boolean,
+    default: true
+  },
+  multiple: {
     type: Boolean,
     default: true
   }
@@ -58,7 +66,7 @@ const loading = ref(false)
 const fetchOptions = async (search = '') => {
   loading.value = true
   try {
-    const { data } = await useFetch(`/api/Caphoc?pageIndex=1&pageSize=10&search=${search}`)
+    const { data, status } = await RestApi.school_level.list({ params: { PageIndex: 1, PageSize: 10, search: search } })
     if (data.value?.data?.items) {
       options.value = data.value.data.items.map(item => ({
         label: item.ten,
@@ -72,15 +80,9 @@ const fetchOptions = async (search = '') => {
   }
 }
 
-// Gọi API khi người dùng nhập từ khoá, debounce 500ms
 const handleSearch = useDebounceFn((value) => {
   fetchOptions(value)
 }, 500)
 
-// Load dữ liệu mặc định ban đầu (tất cả hoặc search mặc định)
 fetchOptions()
-
-</script> -->
-<template>
-  
-</template>
+</script>
