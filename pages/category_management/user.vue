@@ -1,6 +1,6 @@
 <template>
   <div class="p-2 md:p-4 bg-white min-h-full">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-6">
       <a-input-search v-model:value="searchText" placeholder="Tìm kiếm người dùng..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
       <a-button @click="resetForm" class="w-full md:w-auto">
         <span class="md:inline">Đặt lại</span>
