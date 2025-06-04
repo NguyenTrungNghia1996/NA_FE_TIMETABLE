@@ -1,5 +1,6 @@
 stages:
   - docker
+  - cleanup
 
 variables:
   DOCKER_DRIVER: overlay2
@@ -22,8 +23,12 @@ docker-build-and-push:
     - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   script:
     - |
+      export DOCKER_BUILDKIT=1
+      export BUILDKIT_INLINE_CACHE=1
+
       TAG_LATEST="latest"
       TAG_BRANCH="$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
+      TAG_CACHE="cache"
 
       echo "Building Docker image with tags:"
       echo " - $IMAGE_NAME:$TAG_LATEST"
@@ -36,6 +41,7 @@ docker-build-and-push:
       echo "Pushing Docker images..."
       docker push $IMAGE_NAME:$TAG_LATEST
       docker push $IMAGE_NAME:$TAG_BRANCH
+      docker push $IMAGE_NAME:$TAG_CACHE
 
       echo "Cleaning up Docker images..."
       docker rmi $IMAGE_NAME:$TAG_LATEST $IMAGE_NAME:$TAG_BRANCH || true
