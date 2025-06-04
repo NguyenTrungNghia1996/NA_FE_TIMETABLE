@@ -55,6 +55,8 @@ const handleLogin = async () => {
   settingStore.setLoading(true);
   try {
     const { data, status, error } = await RestApi.user.login({ body: JSON.stringify(form) });
+    
+    console.log("🚀 ~ handleLogin ~ data:", data)
     if (status.value == "success") {
       if (rememberMe.value) {
         saveCredentials(form.username, form.password);
