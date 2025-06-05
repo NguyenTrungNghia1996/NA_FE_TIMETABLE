@@ -219,12 +219,11 @@ const fetchData = async (param) => {
     const { data } = await RestApi.user.list({ params: param })
 
     if (data.value?.status === 'success') {
-      dataSource.value = data.value.data.items.map((item, index) => ({
-        ...item,
-        key: item.id,
-        stt: (param.PageIndex - 1) * param.PageSize + index + 1
-      }))
+      dataSource.value = data.value.data.items
       pagination.total = data.value.data.totalrecord
+    }else {
+      dataSource.value = []
+      pagination.total = 0
     }
   } catch (error) {
     console.error('Error fetching users:', error)

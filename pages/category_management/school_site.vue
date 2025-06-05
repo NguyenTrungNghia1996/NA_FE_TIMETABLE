@@ -131,7 +131,7 @@ const pagination = reactive({
   pageSize: 10,
   total: 0,
   showSizeChanger: true,
-  pageSizeOptions: ['5', '10', '20', '50'],
+  pageSizeOptions: ['1','5', '10', '20', '50'],
   showTotal: (total) => `Tổng ${total} bản ghi`
 })
 
@@ -148,7 +148,7 @@ const rules = {
 }
 
 // Methods
-const fetchData = async () => {
+const fetchData = async (param) => {
   try {
     loading.value = true
     const { data } = await RestApi.school_site.list({ params: param })
@@ -156,6 +156,9 @@ const fetchData = async () => {
     if (data.value?.status === 'success') {
       dataSource.value = data.value.data.items
       pagination.total = data.value.data.totalrecord
+    }else {
+      dataSource.value = []
+      pagination.total = 0
     }
   } catch (error) {
     console.error('Error fetching data:', error)
@@ -165,21 +168,26 @@ const fetchData = async () => {
   }
 }
 
-const handleTableChange = (pag) => {
+const handleTableChange = async (pag) => {
   pagination.current = pag.current
   pagination.pageSize = pag.pageSize
-  fetchData()
+  param.value.PageIndex = pag.current
+  param.value.PageSize = pag.pageSize
+  await fetchData({ ...param.value })
 }
 
-const handleSearch = () => {
+const handleSearch = async () => {
+  param.value.search = searchText.value
   pagination.current = 1
-  fetchData()
+  param.value.PageIndex = 1
+  await fetchData({ ...param.value })
 }
 
-const resetSearch = () => {
+const resetSearch = async () => {
   searchText.value = ''
   pagination.current = 1
-  fetchData()
+  param.value.PageIndex = 1
+  await fetchData({ ...param.value })
 }
 
 const showModal = () => {
