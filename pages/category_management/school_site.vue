@@ -67,11 +67,11 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa điểm trường' : 'Thêm mới điểm trường'" @cancel="handleCancel" :width="600" :footer="null">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <a-form-item label="Tên điểm trường" name="ten" :rules="[{ required: true, message: 'Vui lòng nhập tên điểm trường' }]">
-          <a-input v-model:value="formState.ten" placeholder="Nhập tên điểm trường" />
+          <a-input v-model:value="formState.ten" placeholder="Nhập tên điểm trường" :maxlength="200" show-count/>
         </a-form-item>
 
         <a-form-item label="Ghi chú" name="ghichu">
-          <a-textarea v-model:value="formState.ghichu" :rows="4" placeholder="Nhập ghi chú (nếu có)" />
+          <a-textarea v-model:value="formState.ghichu" :rows="4" placeholder="Nhập ghi chú (nếu có)" :maxlength="200" show-count/>
         </a-form-item>
 
         <div class="flex justify-end gap-2 mt-6">
@@ -131,7 +131,7 @@ const pagination = reactive({
   pageSize: 10,
   total: 0,
   showSizeChanger: true,
-  pageSizeOptions: ['5', '10', '20', '50'],
+  pageSizeOptions: ['1','5', '10', '20', '50'],
   showTotal: (total) => `Tổng ${total} bản ghi`
 })
 
@@ -148,7 +148,7 @@ const rules = {
 }
 
 // Methods
-const fetchData = async () => {
+const fetchData = async (param) => {
   try {
     loading.value = true
     const { data } = await RestApi.school_site.list({ params: param })
@@ -156,6 +156,9 @@ const fetchData = async () => {
     if (data.value?.status === 'success') {
       dataSource.value = data.value.data.items
       pagination.total = data.value.data.totalrecord
+    }else {
+      dataSource.value = []
+      pagination.total = 0
     }
   } catch (error) {
     console.error('Error fetching data:', error)
@@ -165,21 +168,26 @@ const fetchData = async () => {
   }
 }
 
-const handleTableChange = (pag) => {
+const handleTableChange = async (pag) => {
   pagination.current = pag.current
   pagination.pageSize = pag.pageSize
-  fetchData()
+  param.value.PageIndex = pag.current
+  param.value.PageSize = pag.pageSize
+  await fetchData({ ...param.value })
 }
 
-const handleSearch = () => {
+const handleSearch = async () => {
+  param.value.search = searchText.value
   pagination.current = 1
-  fetchData()
+  param.value.PageIndex = 1
+  await fetchData({ ...param.value })
 }
 
-const resetSearch = () => {
+const resetSearch = async () => {
   searchText.value = ''
   pagination.current = 1
-  fetchData()
+  param.value.PageIndex = 1
+  await fetchData({ ...param.value })
 }
 
 const showModal = () => {
@@ -205,11 +213,10 @@ const handleOk = async () => {
   try {
     await formRef.value.validate()
     confirmLoading.value = true
-
     if (isEdit.value) {
       const { data, error } = await RestApi.school_site.update({ body: { ...formState } })
       if (data.value?.status === 'success') {
-        message.success(data.value.message || 'Cập nhật người dùng thành công')
+        message.success(data.value.message || 'Cập nhật thành công')
       } else {
         throw new Error(error.value?.data?.message || 'Cập nhật không thành công')
       }
@@ -219,13 +226,13 @@ const handleOk = async () => {
       }
       const { data, error } = await RestApi.school_site.create({ body: { ...formState } })
       if (data.value?.status === 'success') {
-        message.success(data.value.message || 'Thêm mới người dùng thành công')
+        message.success(data.value.message || 'Thêm mới thành công')
       } else {
         throw new Error(error.value?.data?.message || 'Thêm mới không thành công')
       }
     }
   } catch (error) {
-    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin người dùng')
+    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin')
   } finally {
     visible.value = false
     await fetchData({ ...param.value })
