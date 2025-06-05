@@ -68,11 +68,11 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa loại phòng học' : 'Thêm mới loại phòng học'" @cancel="handleCancel" :width="600" :footer="null">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <a-form-item label="Tên loại phòng học" name="ten" :rules="[{ required: true, message: 'Vui lòng nhập tên loại phòng học' }]">
-          <a-input v-model:value="formState.ten" placeholder="Nhập tên loại phòng học" />
+          <a-input v-model:value="formState.ten" placeholder="Nhập tên loại phòng học" :maxlength="200" show-count/>
         </a-form-item>
 
         <a-form-item label="Ghi chú" name="ghichu">
-          <a-textarea v-model:value="formState.ghichu" :rows="4" placeholder="Nhập ghi chú (nếu có)" />
+          <a-textarea v-model:value="formState.ghichu" :rows="4" placeholder="Nhập ghi chú (nếu có)" :maxlength="200" show-count/>
         </a-form-item>
 
         <div class="flex justify-end gap-2 mt-6">
@@ -125,7 +125,6 @@ const searchText = ref('')
 const visible = ref(false)
 const confirmLoading = ref(false)
 const isEdit = ref(false)
-const currentId = ref(null)
 const formRef = ref()
 
 const pagination = reactive({
@@ -158,7 +157,7 @@ const fetchData = async (param) => {
     if (data.value?.status === 'success') {
       dataSource.value = data.value.data.items
       pagination.total = data.value.data.totalrecord
-    }else {
+    } else {
       dataSource.value = []
       pagination.total = 0
     }
@@ -194,7 +193,6 @@ const resetSearch = async () => {
 
 const showModal = () => {
   isEdit.value = false
-  currentId.value = null
   Object.assign(formState, {
     ten: '',
     ghichu: ''
@@ -204,8 +202,8 @@ const showModal = () => {
 
 const editItem = (record) => {
   isEdit.value = true
-  currentId.value = record.id
   Object.assign(formState, {
+    id: record.id,
     ten: record.ten,
     ghichu: record.ghichu || ''
   })
@@ -213,29 +211,32 @@ const editItem = (record) => {
 }
 
 const handleOk = async () => {
-  try {
+ try {
     await formRef.value.validate()
     confirmLoading.value = true
-
-    const url = isEdit.value ? `/api/loaiphonghoc/${currentId.value}` : '/api/loaiphonghoc'
-    const method = isEdit.value ? 'put' : 'post'
-
-    const { data } = await useFetch(url, {
-      method,
-      body: formState
-    })
-
-    if (data.value?.status === 'success') {
-      message.success(isEdit.value ? 'Cập nhật loại phòng học thành công' : 'Thêm mới loại phòng học thành công')
-      visible.value = false
-      fetchData()
+    if (isEdit.value) {
+      const { data, error } = await RestApi.classroom_type.update({ body: { ...formState } })
+      if (data.value?.status === 'success') {
+        message.success(data.value.message || 'Cập nhật thành công')
+      } else {
+        throw new Error(error.value?.data?.message || 'Cập nhật không thành công')
+      }
     } else {
-      message.error(data.value?.message || 'Có lỗi xảy ra')
+      if (formState) {
+        delete formState.id
+      }
+      const { data, error } = await RestApi.classroom_type.create({ body: { ...formState } })
+      if (data.value?.status === 'success') {
+        message.success(data.value.message || 'Thêm mới thành công')
+      } else {
+        throw new Error(error.value?.data?.message || 'Thêm mới không thành công')
+      }
     }
   } catch (error) {
-    console.error('Error saving data:', error)
-    message.error('Có lỗi xảy ra khi lưu dữ liệu')
+    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin')
   } finally {
+    visible.value = false
+    await fetchData({ ...param.value })
     confirmLoading.value = false
   }
 }
