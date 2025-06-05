@@ -9,6 +9,15 @@ let ENDPOINTS = {
   //SCHOOL_SHIFT
   SCHOOL_SHIFT: "/api/cahoc",
   SCHOOL_SHIFT_DETAIL: "/api/cahoc/detail",
+  //UNIT
+  UNIT: "/api/donvi",
+  UNIT_DETAIL: "/api/donvi/detail",
+  //SCHOOL_SITE
+  SCHOOL_SITE: "/api/diemtruong",
+  SCHOOL_SITE_DETAIL: "/api/diemtruong/detail",
+  //CLASSROOM_TYPE
+  CLASSROOM_TYPE: "/api/loaiphonghoc",
+  CLASSROOM_TYPE_DETAIL: "/api/loaiphonghoc/detail",
 
   S3: "/api/presigned_url",
 };
@@ -104,6 +113,9 @@ class RestApi {
     this.user = new User(this.request);
     this.school_level = new SchoolLevel(this.request);
     this.school_shift = new SchoolShift(this.request);
+    this.unit = new Unit(this.request);
+    this.school_site = new SchoolSite(this.request);
+    this.classroom_type = new ClassroomType(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -210,6 +222,66 @@ class SchoolShift {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.SCHOOL_SHIFT, data);
+  }
+}
+class Unit {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.UNIT, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.UNIT_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.UNIT, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.UNIT, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.UNIT, data);
+  }
+}
+class SchoolSite {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.SCHOOL_SITE, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.SCHOOL_SITE_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.SCHOOL_SITE, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.SCHOOL_SITE, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.SCHOOL_SITE, data);
+  }
+}
+class ClassroomType {
+ constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.CLASSROOM_TYPE, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.CLASSROOM_TYPE_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.CLASSROOM_TYPE, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.CLASSROOM_TYPE, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.CLASSROOM_TYPE, data);
   }
 }
 export default () => {
