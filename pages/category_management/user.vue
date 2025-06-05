@@ -2,12 +2,8 @@
   <div class="p-2 md:p-4 bg-white min-h-full">
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-6">
       <a-input-search v-model:value="searchText" placeholder="Tìm kiếm người dùng..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
-      <a-button @click="resetForm" class="w-full md:w-auto">
-        <span class="md:inline">Đặt lại</span>
-      </a-button>
-      <a-button type="primary" @click="showModal">
-        Thêm mới
-      </a-button>
+      <a-button @click="resetForm" class="w-full md:w-auto">Đặt lại</a-button>
+      <a-button type="primary" @click="showModal" class="w-full md:w-auto">Thêm mới</a-button>
     </div>
     <ClientOnly class="overflow-x-auto">
       <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: 1000 }" @change="handleTableChange" bordered size="small">
@@ -123,8 +119,6 @@
 </template>
 
 <script setup>
-import { ClientOnly } from '#components';
-
 const { RestApi } = useApi();
 const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
 const columns = [
@@ -341,8 +335,6 @@ const handleOk = async () => {
       const { data, error } = await RestApi.user.update({ body: { ...formState } })
       if (data.value?.status === 'success') {
         message.success(data.value.message || 'Cập nhật người dùng thành công')
-        visible.value = false
-        await fetchData({ ...param.value })
       } else {
         throw new Error(error.value?.data?.message || 'Cập nhật không thành công')
       }
@@ -353,16 +345,15 @@ const handleOk = async () => {
       const { data, error } = await RestApi.user.create({ body: { ...formState } })
       if (data.value?.status === 'success') {
         message.success(data.value.message || 'Thêm mới người dùng thành công')
-        visible.value = false
-        await fetchData({ ...param.value })
       } else {
         throw new Error(error.value?.data?.message || 'Thêm mới không thành công')
       }
-        
     }
   } catch (error) {
     message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin người dùng')
   } finally {
+    visible.value = false
+    await fetchData({ ...param.value })
     confirmLoading.value = false
   }
 }
@@ -374,16 +365,16 @@ const handleCancel = () => {
 
 const deleteItem = async (id) => {
   try {
-    const { data } = await RestApi.user.delete({ params: { id } })
+    const { data,error } = await RestApi.user.delete({ params: { id } })
     if (data.value?.status === 'success') {
       message.success(data.value?.message || 'Xóa người dùng thành công')
-      await fetchData({ ...param.value })
     } else {
-      message.error(data.value?.message || 'Xóa không thành công')
+      throw new Error(error.value?.data?.message || 'Xóa không thành công')
     }
   } catch (error) {
-    console.error('Error deleting user:', error)
-    message.error('Đã xảy ra lỗi khi xóa người dùng')
+    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi xóa thông tin người dùng')
+  } finally {
+    await fetchData({ ...param.value })
   }
 }
 
