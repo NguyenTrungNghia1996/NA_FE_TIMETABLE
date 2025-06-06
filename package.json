@@ -23,6 +23,7 @@
     "ant-design-vue": ">=4",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.13",
+    "lodash": "^4.17.21",
     "nuxt": "^3.17.4",
     "pinia": "^3.0.2",
     "pinia-plugin-persistedstate": "^4.3.0",

@@ -65,7 +65,7 @@
     </ClientOnly>
 
     <!-- Modal thêm/sửa đơn vị -->
-    <a-modal v-model:visible="visible" :title="isEdit ? 'Chỉnh sửa đơn vị' : 'Thêm mới đơn vị'" @cancel="handleCancel" :width="700" :footer="null">
+    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa đơn vị' : 'Thêm mới đơn vị'" @cancel="handleCancel" :width="700" :footer="null">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <a-form-item label="Tên đơn vị" name="tenDonvi" :rules="[{ required: true, message: 'Vui lòng nhập tên đơn vị' }]">
