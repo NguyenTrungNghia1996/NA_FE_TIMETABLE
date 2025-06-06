@@ -174,7 +174,6 @@ const visible = ref(false)
 const confirmLoading = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
-const donviOptions = ref([])
 const roleOptions = ref([])
 
 const pagination = reactive({
