@@ -14,7 +14,7 @@ export const useSettingStore = defineStore(
         {
           id: "1",
           title: "Dashboard",
-          key: "parent-6",
+          key: "parent-1",
           url: "/dashboard",
           icon: "ant-design:project-outlined",
           children: [],
@@ -26,13 +26,6 @@ export const useSettingStore = defineStore(
           url: null,
           icon: "ant-design:database-twotone",
           children: [
-            {
-              id: "2-2",
-              title: "Người Dùng",
-              key: "child-2-2",
-              url: "/category_management/user",
-              icon: "ant-design:user-outlined",
-            },
             {
               id: "2-1",
               title: "Cấp Học",
@@ -48,13 +41,6 @@ export const useSettingStore = defineStore(
               icon: "ant-design:calendar-twotone",
             },
             {
-              id: "2-4",
-              title: "Đơn Vị",
-              key: "child-2-4",
-              url: "/category_management/unit",
-              icon: "ant-design:deployment-unit-outlined",
-            },
-            {
               id: "2-5",
               title: "Điểm Trường",
               key: "child-2-5",
@@ -67,6 +53,29 @@ export const useSettingStore = defineStore(
               key: "child-2-6",
               url: "/category_management/classroom_type",
               icon: "ant-design:home-outlined",
+            },
+          ],
+        },
+        {
+          id: "3",
+          title: "Cài đặt quản trị",
+          key: "parent-2",
+          url: null,
+          icon: "ant-design:setting-twotone",
+          children: [
+            {
+              id: "3-2",
+              title: "Người Dùng",
+              key: "child-3-2",
+              url: "/administration/user",
+              icon: "ant-design:user-outlined",
+            },
+            {
+              id: "2-4",
+              title: "Đơn Vị",
+              key: "child-3-4",
+              url: "/administration/unit",
+              icon: "ant-design:deployment-unit-outlined",
             },
           ],
         },
