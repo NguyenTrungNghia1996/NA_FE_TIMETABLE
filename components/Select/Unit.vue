@@ -25,12 +25,12 @@ const { RestApi } = useApi()
 
 const props = defineProps({
   modelValue: [Array, Number, String],
-  label: { type: String, default: 'Cấp học' },
-  name: { type: String, default: 'caphoc' },
+  label: { type: String, default: 'Đơn vị' },
+  name: { type: String, default: 'donvi' },
   multiple: { type: Boolean, default: false },
-  placeholder: { type: String, default: 'Chọn cấp học' },
+  placeholder: { type: String, default: 'Chọn đơn vị' },
   rules: { type: Array, default: () => [] },
-  disabled: { type: Boolean, default: false }
+  disabled: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -38,47 +38,39 @@ const emit = defineEmits(['update:modelValue'])
 const options = ref([])
 const loading = ref(false)
 
-const fetchCaphoc = async (search = '') => {
+const fetchUnits = async (search = '') => {
   loading.value = true
   try {
-    const { data } = await RestApi.school_level.list({
-      params: { search }
-    })
+    const { data } = await RestApi.unit.list({ params: { search } })
 
     if (data.value?.data?.items) {
       options.value = data.value.data.items.map(item => ({
-        label: item.ten,
-        value: item.id
+        label: item.tenDonvi,
+        value: item.id,
       }))
 
-      // Nếu chưa có modelValue, gán luôn giá trị đầu tiên
       if (
-        (props.modelValue === undefined || props.modelValue === null) &&
-        options.value.length > 0
+        props.modelValue === null ||
+        props.modelValue === undefined
       ) {
-        emit('update:modelValue', options.value[0].value)
+        const first = options.value[0]
+        if (first) emit('update:modelValue', first.value)
       }
-    } else {
-      options.value = []
     }
   } catch (error) {
-    console.error('❌ Lỗi khi fetch cấp học:', error)
-    options.value = []
+    console.error('❌ Lỗi fetch đơn vị:', error)
   } finally {
     loading.value = false
   }
 }
 
-// Debounced search
 const debouncedFetch = debounce((val) => {
-  fetchCaphoc(val)
-}, 200)
+  fetchUnits(val.trim())
+}, 300)
 
-// Xử lý input trim khi người dùng tìm kiếm
 const onSearch = (val) => {
-  debouncedFetch(val.trim())
+  debouncedFetch(val)
 }
 
-// Fetch ban đầu
-await fetchCaphoc()
+await fetchUnits()
 </script>
