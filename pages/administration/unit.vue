@@ -83,7 +83,7 @@
           <a-form-item label="Email" name="email">
             <a-input v-model:value="formState.email" placeholder="Nhập email" />
           </a-form-item>
-          <SelectSchoolShift v-model="formState.tenCahoc" label="Ca học" name="tenCahoc" placeholder="Chọn Cấp Học" :rules="rules.tenCaphoc" />
+          <SelectSchoolShift v-model="formState.tenCahoc" label="Ca học" name="tenCahoc" placeholder="Chọn Ca Học" :rules="rules.tenCahoc" />
         </div>
         <div class="flex justify-end gap-2 mt-6">
           <a-button @click="handleCancel">Hủy</a-button>
@@ -176,10 +176,13 @@ const formState = reactive({
 
 const rules = {
   tenCaphoc: [
-    { required: true, message: 'Vui lòng nhập tên cấp học', trigger: 'blur' }
+    { required: true, message: 'Vui lòng chọn cấp học', trigger: 'blur' }
   ],
+  tenCahoc: [
+    { required: true, message: 'Vui lòng chọn ca học', trigger: 'blur' }
+  ],  
   tenDonvi: [
-    { required: true, message: 'Vui lòng nhập tên đơn vị', trigger: 'blur' }
+    { required: true, message: 'Vui lòng chọn đơn vị', trigger: 'blur' }
   ],
   diachi: [
     { required: true, message: 'Vui lòng nhập địa chỉ', trigger: 'blur' }
