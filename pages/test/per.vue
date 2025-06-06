@@ -1,4 +1,4 @@
-<!-- <script setup>
+<script setup>
 // Các trạng thái quyền
 const PERMISSION_STATE = {
   NO_ACCESS: 0,  // 00
@@ -93,8 +93,5 @@ function hasPermission(shift, minState) {
 select {
   min-width: 140px;
 }
-</style> -->
-<template>
-  
-</template>
+</style>
 

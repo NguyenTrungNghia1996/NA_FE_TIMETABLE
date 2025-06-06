@@ -18,7 +18,10 @@ let ENDPOINTS = {
   //CLASSROOM_TYPE
   CLASSROOM_TYPE: "/api/loaiphonghoc",
   CLASSROOM_TYPE_DETAIL: "/api/loaiphonghoc/detail",
-
+  //MENU 
+  MENU: "/api/menus",
+  MENU_DETAIL: "/api/menus/detail",
+  
   S3: "/api/presigned_url",
 };
 import { useUserStore } from "~~/stores/userStore";
@@ -116,6 +119,7 @@ class RestApi {
     this.unit = new Unit(this.request);
     this.school_site = new SchoolSite(this.request);
     this.classroom_type = new ClassroomType(this.request);
+    this.menu = new Menu(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -282,6 +286,26 @@ class ClassroomType {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.CLASSROOM_TYPE, data);
+  }
+}
+class Menu {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.MENU, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.MENU_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.MENU, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.MENU, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.MENU, data);
   }
 }
 export default () => {
