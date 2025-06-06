@@ -1,19 +1,6 @@
 <template>
   <a-form-item :label="label" :name="name" :rules="rules">
-    <a-select
-      :value="modelValue"
-      @update:value="val => $emit('update:modelValue', val)"
-      :mode="multiple ? 'multiple' : undefined"
-      show-search
-      :placeholder="placeholder"
-      :loading="loading"
-      :disabled="disabled"
-      allow-clear
-      class="w-full"
-      :options="options"
-      @search="onSearch"
-      :filter-option="false"
-    />
+    <a-select :value="modelValue" @update:value="val => $emit('update:modelValue', val)" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" :filter-option="false" />
   </a-form-item>
 </template>
 
@@ -49,12 +36,8 @@ const fetchCaHoc = async (search = '') => {
         value: item.id,
       }))
 
-      if (
-        props.modelValue === null ||
-        props.modelValue === undefined
-      ) {
-        const first = options.value[0]
-        if (first) emit('update:modelValue', first.value)
+      if (props.modelValue === undefined || props.modelValue === null || props.modelValue === "") {
+        emit('update:modelValue', props.modelValue)
       }
     }
   } catch (err) {

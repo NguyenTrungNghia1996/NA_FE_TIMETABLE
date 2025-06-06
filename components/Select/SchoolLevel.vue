@@ -1,19 +1,6 @@
 <template>
   <a-form-item :label="label" :name="name" :rules="rules">
-    <a-select
-      :value="modelValue"
-      @update:value="val => $emit('update:modelValue', val)"
-      :mode="multiple ? 'multiple' : undefined"
-      show-search
-      :placeholder="placeholder"
-      :loading="loading"
-      :disabled="disabled"
-      allow-clear
-      class="w-full"
-      :options="options"
-      @search="onSearch"
-      :filter-option="false"
-    />
+    <a-select :value="modelValue" @update:value="val => $emit('update:modelValue', val)" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" :filter-option="false" />
   </a-form-item>
 </template>
 
@@ -52,11 +39,8 @@ const fetchCaphoc = async (search = '') => {
       }))
 
       // Nếu chưa có modelValue, gán luôn giá trị đầu tiên
-      if (
-        (props.modelValue === undefined || props.modelValue === null) &&
-        options.value.length > 0
-      ) {
-        emit('update:modelValue', options.value[0].value)
+      if (props.modelValue === undefined || props.modelValue === null || props.modelValue === "") {
+        emit('update:modelValue', props.modelValue)
       }
     } else {
       options.value = []
