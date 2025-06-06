@@ -80,17 +80,15 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa người dùng' : 'Thêm mới người dùng'" @cancel="handleCancel" :width="700" :footer="null">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <a-form-item label="Tên đăng nhập" name="username" :rules="[{ required: true, message: 'Vui lòng nhập tên đăng nhập' }]">
+          <a-form-item label="Tên đăng nhập" name="username">
             <a-input v-model:value="formState.username" :disabled="isEdit" />
           </a-form-item>
 
-          <a-form-item label="Họ và tên" name="hoten" :rules="[{ required: true, message: 'Vui lòng nhập họ tên' }]">
+          <a-form-item label="Họ và tên" name="hoten">
             <a-input v-model:value="formState.hoten" />
           </a-form-item>
 
-          <a-form-item label="Đơn vị" name="id_Donvi">
-            <a-select v-model:value="formState.id_Donvi" show-search placeholder="Chọn đơn vị" :options="donviOptions" :filter-option="filterOption" />
-          </a-form-item>
+          <SelectUnit v-model="formState.id_Donvi" label="Đơn vị" name="id_Donvi" placeholder="Chọn đơn vị" :rules="rules.id_Donvi"  />
 
           <a-form-item label="Vai trò" name="idRoles">
             <a-select v-model:value="formState.idRoles" mode="multiple" placeholder="Chọn vai trò" :options="roleOptions" :filter-option="filterOption" />
@@ -176,7 +174,6 @@ const visible = ref(false)
 const confirmLoading = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
-const donviOptions = ref([])
 const roleOptions = ref([])
 
 const pagination = reactive({
@@ -209,6 +206,9 @@ const rules = {
   ],
   hoten: [
     { required: true, message: 'Vui lòng nhập họ tên', trigger: 'blur' }
+  ],
+  id_Donvi: [
+     { required: true, message: 'Vui lòng chọn Đơn vị', trigger: 'blur' }
   ]
 }
 
@@ -221,7 +221,7 @@ const fetchData = async (param) => {
     if (data.value?.status === 'success') {
       dataSource.value = data.value.data.items
       pagination.total = data.value.data.totalrecord
-    }else {
+    } else {
       dataSource.value = []
       pagination.total = 0
     }
@@ -232,35 +232,6 @@ const fetchData = async (param) => {
     loading.value = false
   }
 }
-
-const fetchDonvi = async () => {
-  try {
-    const { data } = await RestApi.donvi.list()
-    if (data.value?.status === 'success') {
-      donviOptions.value = data.value.data.items.map(item => ({
-        value: item.id,
-        label: item.tenDonvi
-      }))
-    }
-  } catch (error) {
-    console.error('Error fetching donvi:', error)
-  }
-}
-
-const fetchRoles = async () => {
-  try {
-    const { data } = await RestApi.role.list()
-    if (data.value?.status === 'success') {
-      roleOptions.value = data.value.data.items.map(item => ({
-        value: item.id,
-        label: item.tenRole
-      }))
-    }
-  } catch (error) {
-    console.error('Error fetching roles:', error)
-  }
-}
-
 const filterOption = (input, option) => {
   return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
 }
@@ -285,7 +256,7 @@ const showModal = async () => {
   Object.assign(formState, {
     username: '',
     hoten: '',
-    id_Donvi: 1,
+    id_Donvi: undefined,
     isActive: true,
     isAdmin: false,
     idRoles: [1]
@@ -364,7 +335,7 @@ const handleCancel = () => {
 
 const deleteItem = async (id) => {
   try {
-    const { data,error } = await RestApi.user.delete({ params: { id } })
+    const { data, error } = await RestApi.user.delete({ params: { id } })
     if (data.value?.status === 'success') {
       message.success(data.value?.message || 'Xóa người dùng thành công')
     } else {
@@ -392,8 +363,6 @@ const resetForm = async () => {
 
 // Lifecycle
 await fetchData({ ...param.value })
-// await fetchDonvi()
-// await fetchRoles()
 </script>
 
 <style scoped>

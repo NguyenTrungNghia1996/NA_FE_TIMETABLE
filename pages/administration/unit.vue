@@ -68,31 +68,23 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa đơn vị' : 'Thêm mới đơn vị'" @cancel="handleCancel" :width="700" :footer="null">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <a-form-item label="Tên đơn vị" name="tenDonvi" :rules="[{ required: true, message: 'Vui lòng nhập tên đơn vị' }]">
+          <a-form-item label="Tên đơn vị" name="tenDonvi">
             <a-input v-model:value="formState.tenDonvi" placeholder="Nhập tên đơn vị" />
           </a-form-item>
+          <SelectSchoolLevel v-model="formState.tenCaphoc" placeholder="Chọn Cấp học" label="Cấp học" name="tenCaphoc" :rules="rules.tenCaphoc" />
 
-          <a-form-item label="Cấp học" name="tenCaphoc">
-            <a-input v-model:value="formState.tenCaphoc" placeholder="Nhập cấp học" />
-          </a-form-item>
-
-          <a-form-item label="Địa chỉ" name="diachi" :rules="[{ required: true, message: 'Vui lòng nhập địa chỉ' }]">
+          <a-form-item label="Địa chỉ" name="diachi">
             <a-input v-model:value="formState.diachi" placeholder="Nhập địa chỉ" />
           </a-form-item>
 
           <a-form-item label="Số điện thoại" name="sodienthoai">
             <a-input v-model:value="formState.sodienthoai" placeholder="Nhập số điện thoại" />
           </a-form-item>
-
-          <a-form-item label="Email" name="email" :rules="[{ type: 'email', message: 'Email không hợp lệ' }]">
+          <a-form-item label="Email" name="email">
             <a-input v-model:value="formState.email" placeholder="Nhập email" />
           </a-form-item>
-
-          <a-form-item label="Ca học" name="tenCahoc">
-            <a-input v-model:value="formState.tenCahoc" placeholder="Nhập ca học" />
-          </a-form-item>
+          <SelectSchoolShift v-model="formState.tenCahoc" label="Ca học" name="tenCahoc" placeholder="Chọn Ca Học" :rules="rules.tenCahoc" />
         </div>
-
         <div class="flex justify-end gap-2 mt-6">
           <a-button @click="handleCancel">Hủy</a-button>
           <a-button type="primary" @click="handleOk" :loading="confirmLoading">
@@ -178,19 +170,34 @@ const formState = reactive({
   diachi: '',
   sodienthoai: '',
   email: '',
-  tenCaphoc: '',
-  tenCahoc: ''
+  tenCaphoc: undefined,
+  tenCahoc: undefined
 })
 
 const rules = {
+  tenCaphoc: [
+    { required: true, message: 'Vui lòng chọn cấp học', trigger: 'blur' }
+  ],
+  tenCahoc: [
+    { required: true, message: 'Vui lòng chọn ca học', trigger: 'blur' }
+  ],  
   tenDonvi: [
-    { required: true, message: 'Vui lòng nhập tên đơn vị', trigger: 'blur' }
+    { required: true, message: 'Vui lòng chọn đơn vị', trigger: 'blur' }
   ],
   diachi: [
     { required: true, message: 'Vui lòng nhập địa chỉ', trigger: 'blur' }
   ],
   email: [
+    { required: true, message: 'Vui lòng nhập địa chỉ email', trigger: 'blur' },
     { type: 'email', message: 'Email không hợp lệ', trigger: 'blur' }
+  ],
+  sodienthoai: [
+    { required: true, message: 'Vui lòng nhập số điện thoại', trigger: 'blur' },
+    {
+      pattern: /^(0|\+84)[3|5|7|8|9]\d{8}$/,
+      message: 'Số điện thoại không hợp lệ (phải là số di động Việt Nam)',
+      trigger: 'blur'
+    }
   ]
 }
 
@@ -203,7 +210,7 @@ const fetchData = async (param) => {
     if (data.value?.status === 'success') {
       dataSource.value = data.value.data.items
       pagination.total = data.value.data.totalrecord
-    }else {
+    } else {
       dataSource.value = []
       pagination.total = 0
     }
@@ -239,14 +246,13 @@ const resetSearch = async () => {
 
 const showModal = () => {
   isEdit.value = false
-  currentId.value = null
   Object.assign(formState, {
     tenDonvi: '',
     diachi: '',
     sodienthoai: '',
     email: '',
-    tenCaphoc: '',
-    tenCahoc: ''
+    tenCaphoc: undefined,
+    tenCahoc: undefined
   })
   visible.value = true
 }

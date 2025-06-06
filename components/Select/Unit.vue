@@ -49,12 +49,8 @@ const fetchUnits = async (search = '') => {
         value: item.id,
       }))
 
-      if (
-        props.modelValue === null ||
-        props.modelValue === undefined
-      ) {
-        const first = options.value[0]
-        if (first) emit('update:modelValue', first.value)
+      if (props.modelValue === undefined || props.modelValue === null || props.modelValue === "") {
+        emit('update:modelValue', props.modelValue)
       }
     }
   } catch (error) {

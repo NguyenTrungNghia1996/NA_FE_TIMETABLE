@@ -15,5 +15,8 @@
     <a-button type="primary" class="font-roboto w-full md:w-auto" @click="() => { navigateTo('/demo/donvi') }">
       Demo: SelectUnit (Đơn vị)
     </a-button>
+    <a-button type="primary" class="font-roboto w-full md:w-auto" @click="() => { navigateTo('/demo/nguoidung') }">
+      Demo: SelectUser (Người dùng)
+    </a-button>
   </div>
 </template>

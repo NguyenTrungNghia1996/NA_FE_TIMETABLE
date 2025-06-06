@@ -12,10 +12,10 @@ const { RestApi } = useApi()
 
 const props = defineProps({
   modelValue: [Array, Number, String],
-  label: { type: String, default: 'Loại phòng học' },
-  name: { type: String, default: 'loaiphonghoc' },
+  label: { type: String, default: 'Người dùng' },
+  name: { type: String, default: 'nguoidung' },
   multiple: { type: Boolean, default: false },
-  placeholder: { type: String, default: 'Chọn loại phòng học' },
+  placeholder: { type: String, default: 'Chọn người dùng' },
   rules: { type: Array, default: () => [] },
   disabled: { type: Boolean, default: false },
 })
@@ -25,14 +25,14 @@ const emit = defineEmits(['update:modelValue'])
 const options = ref([])
 const loading = ref(false)
 
-const fetchClassroomTypes = async (search = '') => {
+const fetchUsers = async (search = '') => {
   loading.value = true
   try {
-    const { data } = await RestApi.classroom_type.list({ params: { search } })
+    const { data } = await RestApi.user.list({ params: { search } })
 
     if (data.value?.data?.items) {
       options.value = data.value.data.items.map(item => ({
-        label: item.ten,
+        label: `${item.hoten} (${item.username})`,
         value: item.id,
       }))
 
@@ -41,19 +41,19 @@ const fetchClassroomTypes = async (search = '') => {
       }
     }
   } catch (error) {
-    console.error('❌ Lỗi fetch loại phòng học:', error)
+    console.error('❌ Lỗi fetch người dùng:', error)
   } finally {
     loading.value = false
   }
 }
 
 const debouncedFetch = debounce((val) => {
-  fetchClassroomTypes(val.trim())
+  fetchUsers(val.trim())
 }, 300)
 
 const onSearch = (val) => {
   debouncedFetch(val)
 }
 
-await fetchClassroomTypes()
+await fetchUsers()
 </script>
