@@ -63,7 +63,7 @@ const updateBreadcrumb = () => {
     breadcrumbItems.value.unshift({
       title: "Trang chủ",
       icon: "ant-design:home-outlined",
-      path: "/",
+      path: "/dashboard",
     });
   }
 

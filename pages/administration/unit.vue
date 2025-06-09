@@ -71,7 +71,7 @@
           <a-form-item label="Tên đơn vị" name="tenDonvi">
             <a-input v-model:value="formState.tenDonvi" placeholder="Nhập tên đơn vị" />
           </a-form-item>
-          <SelectSchoolLevel v-model="formState.tenCaphoc" placeholder="Chọn Cấp học" label="Cấp học" name="tenCaphoc" :rules="rules.tenCaphoc" />
+          <SelectSchoolLevel v-model="formState.id_caphoc" placeholder="Chọn Cấp học" label="Cấp học" name="id_caphoc" :rules="rules.id_caphoc" />
 
           <a-form-item label="Địa chỉ" name="diachi">
             <a-input v-model:value="formState.diachi" placeholder="Nhập địa chỉ" />
@@ -83,7 +83,7 @@
           <a-form-item label="Email" name="email">
             <a-input v-model:value="formState.email" placeholder="Nhập email" />
           </a-form-item>
-          <SelectSchoolShift v-model="formState.tenCahoc" label="Ca học" name="tenCahoc" placeholder="Chọn Ca Học" :rules="rules.tenCahoc" />
+          <SelectSchoolShift v-model="formState.id_cahoc" label="Ca học" name="id_cahoc" placeholder="Chọn Ca Học" :rules="rules.id_cahoc" />
         </div>
         <div class="flex justify-end gap-2 mt-6">
           <a-button @click="handleCancel">Hủy</a-button>
@@ -153,7 +153,6 @@ const searchText = ref('')
 const visible = ref(false)
 const confirmLoading = ref(false)
 const isEdit = ref(false)
-const currentId = ref(null)
 const formRef = ref()
 
 const pagination = reactive({
@@ -170,17 +169,17 @@ const formState = reactive({
   diachi: '',
   sodienthoai: '',
   email: '',
-  tenCaphoc: undefined,
-  tenCahoc: undefined
+  id_caphoc: undefined,
+  id_cahoc: undefined
 })
 
 const rules = {
-  tenCaphoc: [
+  id_caphoc: [
     { required: true, message: 'Vui lòng chọn cấp học', trigger: 'blur' }
   ],
-  tenCahoc: [
+  id_cahoc: [
     { required: true, message: 'Vui lòng chọn ca học', trigger: 'blur' }
-  ],  
+  ],
   tenDonvi: [
     { required: true, message: 'Vui lòng chọn đơn vị', trigger: 'blur' }
   ],
@@ -251,24 +250,39 @@ const showModal = () => {
     diachi: '',
     sodienthoai: '',
     email: '',
-    tenCaphoc: undefined,
-    tenCahoc: undefined
+    id_caphoc: undefined,
+    id_cahoc: undefined
   })
   visible.value = true
 }
 
-const editItem = (record) => {
-  isEdit.value = true
-  currentId.value = record.id
-  Object.assign(formState, {
-    tenDonvi: record.tenDonvi,
-    diachi: record.diachi,
-    sodienthoai: record.sodienthoai,
-    email: record.email,
-    tenCaphoc: record.tenCaphoc,
-    tenCahoc: record.tenCahoc
-  })
-  visible.value = true
+const editItem = async (record) => {
+  try {
+    loading.value = true
+    const { data , error } = await RestApi.unit.detail({ params: { id: record.id } })
+    if (data.value?.status === 'success') {
+      const unitData = data.value.data
+      Object.assign(formState, {
+        id: unitData.id,
+        tenDonvi: unitData.tenDonvi,
+        diachi: unitData.diachi,
+        sodienthoai: unitData.sodienthoai,
+        email: unitData.email,
+        id_caphoc: unitData.id_Caphoc,
+        id_cahoc: unitData.id_Cahoc
+      })
+      isEdit.value = true
+      visible.value = true
+    } else {
+      throw new Error(error.value?.data?.message || 'Không thể tải thông tin đơn vị')
+    }
+  } catch (error) {
+    console.error('Error fetching unit detail:', error)
+    message.error(error.message || error.response?.data?.message || 'Không thể tải thông tin đơn vị')
+  } finally {
+    loading.value = false
+    formRef.value?.clearValidate()
+  }
 }
 
 const handleOk = async () => {
@@ -276,25 +290,29 @@ const handleOk = async () => {
     await formRef.value.validate()
     confirmLoading.value = true
 
-    const url = isEdit.value ? `/api/donvi/${currentId.value}` : '/api/donvi'
-    const method = isEdit.value ? 'put' : 'post'
-
-    const { data } = await useFetch(url, {
-      method,
-      body: formState
-    })
-
-    if (data.value?.status === 'success') {
-      message.success(isEdit.value ? 'Cập nhật đơn vị thành công' : 'Thêm mới đơn vị thành công')
-      visible.value = false
-      fetchData()
+    if (isEdit.value) {
+      const { data, error } = await RestApi.unit.update({ body: { ...formState } })
+      if (data.value?.status === 'success') {
+        message.success(data.value.message || 'Cập nhật thành công')
+      } else {
+        throw new Error(error.value?.data?.message || 'Cập nhật không thành công')
+      }
     } else {
-      message.error(data.value?.message || 'Có lỗi xảy ra')
+      if (formState) {
+        delete formState.id
+      }
+      const { data, error } = await RestApi.unit.create({ body: { ...formState } })
+      if (data.value?.status === 'success') {
+        message.success(data.value.message || 'Thêm mới thành công')
+      } else {
+        throw new Error(error.value?.data?.message || 'Thêm mới không thành công')
+      }
     }
   } catch (error) {
-    console.error('Error saving data:', error)
-    message.error('Có lỗi xảy ra khi lưu dữ liệu')
+    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin')
   } finally {
+    visible.value = false
+    await fetchData({ ...param.value })
     confirmLoading.value = false
   }
 }
