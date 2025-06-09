@@ -54,6 +54,20 @@ export const useSettingStore = defineStore(
               url: "/category_management/classroom_type",
               icon: "ant-design:home-outlined",
             },
+            {
+              title: "Khối Kiến Thức",
+              key: "knowledge",
+              bitIndex: 8,
+              url: "/category_management/knowledge",
+              icon: "ant-design:database-outlined",
+            },
+            {
+              title: "Tổ Chuyên Môn",
+              key: "expertise",
+              bitIndex: 10,
+              url: "/category_management/expertise",
+              icon: "ant-design:experiment-twotone",
+            },
           ],
         },
         {
