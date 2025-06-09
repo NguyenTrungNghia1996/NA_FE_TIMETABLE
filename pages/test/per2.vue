@@ -1,6 +1,8 @@
 <template>
   <div class="p-4 space-y-8">
     <!-- 🌳 Cây Menu Phân Quyền -->
+     {{menuTree}} <br/>
+     {{menuPermissions}}
     <a-card title="🌳 Cây Menu Phân Quyền" class="space-y-4">
       <a-button type="primary" @click="addTopLevel">➕ Thêm menu cha</a-button>
 
@@ -98,7 +100,7 @@ const menuTree = reactive([
   {
     title: 'Dashboard',
     key: 'dashboard',
-    bitIndex: 0,
+    bit_index: 0,
     url: '/dashboard',
     icon: 'ant-design:dashboard-outlined',
     children: [],
@@ -106,11 +108,11 @@ const menuTree = reactive([
   {
     title: 'Danh Mục',
     key: 'category',
-    bitIndex: 2,
+    bit_index: 2,
     url: null,
     icon: 'ant-design:database-twotone',
     children: [
-      { title: 'Cấp Học', key: 'school_level', bitIndex: 0, url: '/school', icon: 'icon-school' },
+      { title: 'Cấp Học', key: 'school_level', bit_index: 0, url: '/school', icon: 'icon-school' },
     ],
   },
 ])
@@ -129,7 +131,7 @@ const permissionOptions = [
   { label: 'Sửa', value: 2 },
 ]
 
-/** Sinh key và bitIndex tự động */
+/** Sinh key và bit_index tự động */
 const genKey = () => 'key_' + Math.random().toString(36).slice(2, 8)
 const nextAvailableBitIndex = (used = []) => {
   for (let i = 0; i < 32; i += 2) {
@@ -155,13 +157,13 @@ const isTopLevel = (key) => menuTree.some(m => m.key === key)
 
 /** Thêm menu cha */
 const addTopLevel = () => {
-  const used = menuTree.map(n => n.bitIndex)
-  const bitIndex = nextAvailableBitIndex(used)
+  const used = menuTree.map(n => n.bit_index)
+  const bit_index = nextAvailableBitIndex(used)
   const key = genKey()
   menuTree.push({
     title: 'Menu mới',
     key,
-    bitIndex,
+    bit_index,
     url: '',
     icon: '',
     children: [],
@@ -173,13 +175,13 @@ const addTopLevel = () => {
 const addChild = (parentKey) => {
   const parent = findNodeByKey(parentKey)
   if (!parent) return
-  const used = parent.children.map(c => c.bitIndex)
-  const bitIndex = nextAvailableBitIndex(used)
+  const used = parent.children.map(c => c.bit_index)
+  const bit_index = nextAvailableBitIndex(used)
   const key = genKey()
   parent.children.push({
     title: 'Sub mới',
     key,
-    bitIndex,
+    bit_index,
     url: '',
     icon: '',
   })
@@ -202,18 +204,43 @@ const removeNode = (key, list = menuTree) => {
 const findParentKey = (childKey) => {
   return menuTree.find(p => p.children?.some(c => c.key === childKey))?.key
 }
-const getPermission = (key, bitIndex) => {
+
+const getPermission = (key, bit_index) => {
   const isParent = isTopLevel(key)
   const parentKey = isParent ? 'menu' : findParentKey(key)
-  return ((menuPermissions[parentKey] ?? 0) >> bitIndex) & 0b11
+  return ((menuPermissions[parentKey] ?? 0) >> bit_index) & 0b11
 }
-const setPermission = (key, bitIndex, val) => {
+
+const setPermission = (key, bit_index, val) => {
   const isParent = isTopLevel(key)
   const parentKey = isParent ? 'menu' : findParentKey(key)
   const current = menuPermissions[parentKey] ?? 0
-  const cleared = current & ~(0b11 << bitIndex)
-  const updated = cleared | (val << bitIndex)
+  const cleared = current & ~(0b11 << bit_index)
+  const updated = cleared | (val << bit_index)
   menuPermissions[parentKey] = updated
+
+  // Nếu là menu cha => cập nhật quyền con theo
+  if (isParent) {
+    const parent = findNodeByKey(key)
+    if (val === 0 && parent?.children?.length) {
+      parent.children.forEach(child => {
+        if (child.bit_index !== undefined) {
+          setPermission(child.key, child.bit_index, 0)
+        }
+      })
+    }
+  } else {
+    // Nếu là con => kiểm tra xem có cần ẩn cha không
+    const parent = findNodeByKey(parentKey)
+    if (parent?.children?.length) {
+      const allChildrenHidden = parent.children.every(child =>
+        getPermission(child.key, child.bit_index) === 0
+      )
+      if (allChildrenHidden && parent.bit_index !== undefined) {
+        setPermission(parent.key, parent.bit_index, 0)
+      }
+    }
+  }
 }
 
 /** Bảng phân quyền */
@@ -222,24 +249,28 @@ const columns = [
   { title: 'Key', dataIndex: 'key' },
   { title: 'Quyền', dataIndex: 'permission' },
 ]
+
 const formatPermission = (val) => val === 0 ? 'Ẩn' : val === 1 ? 'Xem' : 'Sửa'
+
 const flatten = (nodes) =>
   nodes.flatMap(n => {
     const row = []
-    if (n.bitIndex !== undefined)
-      row.push({ title: n.title, key: n.key, permission: getPermission(n.key, n.bitIndex) })
+    if (n.bit_index !== undefined)
+      row.push({ title: n.title, key: n.key, permission: getPermission(n.key, n.bit_index) })
     if (n.children) row.push(...flatten(n.children))
     return row
   })
+
 const flatPermissions = computed(() => flatten(menuTree))
 
 /** Xây menu thực tế theo quyền */
-const isVisible = (key, bitIndex) => getPermission(key, bitIndex) > 0
+const isVisible = (key, bit_index) => getPermission(key, bit_index) > 0
+
 const visibleMenu = computed(() =>
   menuTree
     .map(m => {
-      const children = (m.children || []).filter(c => isVisible(c.key, c.bitIndex))
-      const visibleSelf = isVisible(m.key, m.bitIndex ?? 0)
+      const children = (m.children || []).filter(c => isVisible(c.key, c.bit_index))
+      const visibleSelf = isVisible(m.key, m.bit_index ?? 0)
       return visibleSelf || children.length > 0
         ? { ...m, children }
         : null
@@ -247,3 +278,4 @@ const visibleMenu = computed(() =>
     .filter(Boolean)
 )
 </script>
+
