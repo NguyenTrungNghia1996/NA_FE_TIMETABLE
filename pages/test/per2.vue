@@ -1,8 +1,9 @@
 <template>
   <div class="p-4 space-y-8">
     <!-- 🌳 Cây Menu Phân Quyền -->
-     {{menuTree}} <br/>
-     {{menuPermissions}}
+    {{ menuTree }} <br />
+    {{ menuPermissions }}
+
     <a-card title="🌳 Cây Menu Phân Quyền" class="space-y-4">
       <a-button type="primary" @click="addTopLevel">➕ Thêm menu cha</a-button>
 
@@ -11,10 +12,8 @@
         :field-names="{ title: 'title', key: 'key', children: 'children' }"
         default-expand-all
       >
-        <template #title="{ key, bitIndex }">
-          <div
-            class="grid grid-cols-[1fr_auto_auto] items-center gap-2 px-2 py-1 rounded hover:bg-gray-50"
-          >
+        <template #title="{ key, permissionBit }">
+          <div class="grid grid-cols-[1fr_auto_auto] items-center gap-2 px-2 py-1 rounded hover:bg-gray-50">
             <div class="space-y-1 w-full">
               <a-input
                 v-model:value="findNodeByKey(key).title"
@@ -38,16 +37,15 @@
             <a-select
               size="small"
               style="width: 100px"
-              v-if="bitIndex !== undefined"
-              :value="getPermission(key, bitIndex)"
+              v-if="permissionBit !== undefined"
+              :value="getPermission(key, permissionBit)"
               :options="permissionOptions"
-              @change="val => setPermission(key, bitIndex, val)"
+              @change="val => setPermission(key, permissionBit, val)"
             />
 
             <a-dropdown>
               <template #overlay>
                 <a-menu>
-                  <!-- ✅ CHỈ menu cha có nút thêm con -->
                   <a-menu-item v-if="isTopLevel(key)" @click="addChild(key)">➕ Thêm con</a-menu-item>
                   <a-menu-item danger @click="removeNode(key)">🗑 Xoá</a-menu-item>
                 </a-menu>
@@ -80,7 +78,8 @@
     <a-card title="👁️‍🗨️ Menu Theo Quyền">
       <ul class="space-y-2">
         <li v-for="item in visibleMenu" :key="item.key">
-          <strong>{{ item.title }}</strong> <small class="text-gray-500">{{ item.icon }}</small>
+          <strong>{{ item.title }}</strong>
+          <small class="text-gray-500">{{ item.icon }}</small>
           <ul v-if="item.children?.length" class="ml-4 list-disc">
             <li v-for="child in item.children" :key="child.key">
               {{ child.title }} <small class="text-gray-400">{{ child.url }}</small>
@@ -95,44 +94,119 @@
 <script setup>
 import { reactive, computed } from 'vue'
 
-/** Cây menu 2 cấp */
 const menuTree = reactive([
   {
-    title: 'Dashboard',
-    key: 'dashboard',
-    bitIndex: 0,
-    url: '/dashboard',
-    icon: 'ant-design:dashboard-outlined',
+    title: "Dashboard",
+    key: "dashboard",
+    url: "/dashboard",
+    permissionBit: 0,
+    icon: "ant-design:project-outlined",
     children: [],
   },
   {
-    title: 'Danh Mục',
-    key: 'category',
-    bitIndex: 2,
+    title: "Quản Lý Danh Mục",
+    key: "category_management",
     url: null,
-    icon: 'ant-design:database-twotone',
+    permissionBit: 2,
+    icon: "ant-design:database-twotone",
     children: [
-      { title: 'Cấp Học', key: 'school_level', bitIndex: 0, url: '/school', icon: 'icon-school' },
+      {
+        title: "Cấp Học",
+        key: "school_level",
+        permissionBit: 0,
+        url: "/category_management/school_level",
+        icon: "ant-design:unordered-list-outlined",
+      },
+      {
+        title: "Ca Học",
+        key: "school_shift",
+        permissionBit: 2,
+        url: "/category_management/school_shift",
+        icon: "ant-design:calendar-twotone",
+      },
+      {
+        title: "Điểm Trường",
+        key: "school_site",
+        permissionBit: 4,
+        url: "/category_management/school_site",
+        icon: "ant-design:environment-outlined",
+      },
+      {
+        title: "Loại Phòng Học",
+        key: "classroom_type",
+        permissionBit: 6,
+        url: "/category_management/classroom_type",
+        icon: "ant-design:home-outlined",
+      },
+      {
+        title: "Khối Kiến Thức",
+        key: "knowledge",
+        permissionBit: 8,
+        url: "/category_management/knowledge",
+        icon: "ant-design:database-outlined",
+      },
+      {
+        title: "Tổ Chuyên Môn",
+        key: "expertise",
+        permissionBit: 10,
+        url: "/category_management/expertise",
+        icon: "ant-design:experiment-twotone",
+      },
+    ],
+  },
+  {
+    title: "Cài đặt quản trị",
+    key: "administration",
+    url: null,
+    permissionBit: 4,
+    icon: "ant-design:setting-twotone",
+    children: [
+      {
+        title: "Người Dùng",
+        key: "user",
+        permissionBit: 0,
+        url: "/administration/user",
+        icon: "ant-design:user-outlined",
+      },
+      {
+        title: "Đơn Vị",
+        key: "unit",
+        permissionBit: 2,
+        url: "/administration/unit",
+        icon: "ant-design:deployment-unit-outlined",
+      },
+      {
+        title: "Menu",
+        key: "menu",
+        permissionBit: 4,
+        url: "/administration/menu",
+        icon: "ant-design:menu-outlined",
+      },
+      {
+        title: "Nhóm quyền",
+        key: "permission",
+        permissionBit: 4,
+        url: "/administration/permission",
+        icon: "ant-design:safety-outlined",
+      },
     ],
   },
 ])
 
-/** Quyền lưu theo nhóm bit cha */
 const menuPermissions = reactive({
-  menu: 0,              // quyền cho dashboard, category,...
-  dashboard: 0,         // quyền cho con
+  menu: 0,
+  dashboard: 0,
   category: 0,
 })
 
-/** Quyền 2-bit */
 const permissionOptions = [
   { label: 'Ẩn', value: 0 },
   { label: 'Xem', value: 1 },
   { label: 'Sửa', value: 2 },
 ]
 
-/** Sinh key và bitIndex tự động */
 const genKey = () => 'key_' + Math.random().toString(36).slice(2, 8)
+
 const nextAvailableBitIndex = (used = []) => {
   for (let i = 0; i < 32; i += 2) {
     if (!used.includes(i)) return i
@@ -140,7 +214,6 @@ const nextAvailableBitIndex = (used = []) => {
   return used.length * 2
 }
 
-/** Tìm node theo key */
 const findNodeByKey = (key, list = menuTree) => {
   for (const node of list) {
     if (node.key === key) return node
@@ -152,18 +225,16 @@ const findNodeByKey = (key, list = menuTree) => {
   return null
 }
 
-/** Xác định có phải menu cha */
 const isTopLevel = (key) => menuTree.some(m => m.key === key)
 
-/** Thêm menu cha */
 const addTopLevel = () => {
-  const used = menuTree.map(n => n.bitIndex)
-  const bitIndex = nextAvailableBitIndex(used)
+  const used = menuTree.map(n => n.permissionBit)
+  const permissionBit = nextAvailableBitIndex(used)
   const key = genKey()
   menuTree.push({
     title: 'Menu mới',
     key,
-    bitIndex,
+    permissionBit,
     url: '',
     icon: '',
     children: [],
@@ -171,24 +242,22 @@ const addTopLevel = () => {
   menuPermissions[key] = 0
 }
 
-/** Thêm menu con */
 const addChild = (parentKey) => {
   const parent = findNodeByKey(parentKey)
   if (!parent) return
-  const used = parent.children.map(c => c.bitIndex)
-  const bitIndex = nextAvailableBitIndex(used)
+  const used = parent.children.map(c => c.permissionBit)
+  const permissionBit = nextAvailableBitIndex(used)
   const key = genKey()
   parent.children.push({
     title: 'Sub mới',
     key,
-    bitIndex,
+    permissionBit,
     url: '',
     icon: '',
   })
   if (!menuPermissions[parentKey]) menuPermissions[parentKey] = 0
 }
 
-/** Xoá node bất kỳ */
 const removeNode = (key, list = menuTree) => {
   const index = list.findIndex(n => n.key === key)
   if (index !== -1) {
@@ -200,48 +269,50 @@ const removeNode = (key, list = menuTree) => {
   }
 }
 
-/** Phân quyền cha–con */
 const findParentKey = (childKey) => {
   return menuTree.find(p => p.children?.some(c => c.key === childKey))?.key
 }
-const getPermission = (key, bitIndex) => {
+
+const getPermission = (key, permissionBit) => {
   const isParent = isTopLevel(key)
   const parentKey = isParent ? 'menu' : findParentKey(key)
-  return ((menuPermissions[parentKey] ?? 0) >> bitIndex) & 0b11
+  return ((menuPermissions[parentKey] ?? 0) >> permissionBit) & 0b11
 }
-const setPermission = (key, bitIndex, val) => {
+
+const setPermission = (key, permissionBit, val) => {
   const isParent = isTopLevel(key)
   const parentKey = isParent ? 'menu' : findParentKey(key)
   const current = menuPermissions[parentKey] ?? 0
-  const cleared = current & ~(0b11 << bitIndex)
-  const updated = cleared | (val << bitIndex)
+  const cleared = current & ~(0b11 << permissionBit)
+  const updated = cleared | (val << permissionBit)
   menuPermissions[parentKey] = updated
 }
 
-/** Bảng phân quyền */
 const columns = [
   { title: 'Tên', dataIndex: 'title' },
   { title: 'Key', dataIndex: 'key' },
   { title: 'Quyền', dataIndex: 'permission' },
 ]
+
 const formatPermission = (val) => val === 0 ? 'Ẩn' : val === 1 ? 'Xem' : 'Sửa'
+
 const flatten = (nodes) =>
   nodes.flatMap(n => {
     const row = []
-    if (n.bitIndex !== undefined)
-      row.push({ title: n.title, key: n.key, permission: getPermission(n.key, n.bitIndex) })
+    if (n.permissionBit !== undefined)
+      row.push({ title: n.title, key: n.key, permission: getPermission(n.key, n.permissionBit) })
     if (n.children) row.push(...flatten(n.children))
     return row
   })
 const flatPermissions = computed(() => flatten(menuTree))
 
-/** Xây menu thực tế theo quyền */
-const isVisible = (key, bitIndex) => getPermission(key, bitIndex) > 0
+const isVisible = (key, permissionBit) => getPermission(key, permissionBit) > 0
+
 const visibleMenu = computed(() =>
   menuTree
     .map(m => {
-      const children = (m.children || []).filter(c => isVisible(c.key, c.bitIndex))
-      const visibleSelf = isVisible(m.key, m.bitIndex ?? 0)
+      const children = (m.children || []).filter(c => isVisible(c.key, c.permissionBit))
+      const visibleSelf = isVisible(m.key, m.permissionBit ?? 0)
       return visibleSelf || children.length > 0
         ? { ...m, children }
         : null

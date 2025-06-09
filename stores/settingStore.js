@@ -68,6 +68,13 @@ export const useSettingStore = defineStore(
               url: "/category_management/expertise",
               icon: "ant-design:experiment-twotone",
             },
+            {
+              title: "Khối lớp",
+              key: "grade_level",
+              bitIndex: 12,
+              url: "/category_management/grade_level",
+              icon: "ant-design:code-sandbox-outlined",
+            },
           ],
         },
         {
@@ -97,6 +104,14 @@ export const useSettingStore = defineStore(
               bitIndex: 4,
               url: "/administration/menu",
               icon: "ant-design:menu-outlined",
+            },
+            // permission
+            {
+              title: "Nhóm quyền",
+              key: "permission",
+              bitIndex: 4,
+              url: "/administration/permission",
+              icon: "ant-design:safety-outlined",
             },
           ],
         },
