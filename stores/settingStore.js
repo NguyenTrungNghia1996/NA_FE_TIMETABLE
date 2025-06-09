@@ -98,6 +98,14 @@ export const useSettingStore = defineStore(
               url: "/administration/menu",
               icon: "ant-design:menu-outlined",
             },
+            // permission
+            {
+              title: "Nhóm quyền",
+              key: "permission",
+              bitIndex: 4,
+              url: "/administration/permission",
+              icon: "ant-design:safety-outlined",
+            },
           ],
         },
       ],
