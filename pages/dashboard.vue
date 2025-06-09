@@ -18,5 +18,11 @@
     <a-button type="primary" class="font-roboto w-full md:w-auto" @click="() => { navigateTo('/demo/nguoidung') }">
       Demo: SelectUser (Người dùng)
     </a-button>
+    <a-button type="primary" class="font-roboto w-full md:w-auto" @click="() => { navigateTo('/demo/khoikienthuc') }">
+      Demo: SelectKnowledge (Khối kiến thức)
+    </a-button>
+     <a-button type="primary" class="font-roboto w-full md:w-auto" @click="() => { navigateTo('/demo/tochuyenmon') }">
+      Demo: SelectExpertise (Tổ chuyên môn)
+    </a-button>
   </div>
 </template>

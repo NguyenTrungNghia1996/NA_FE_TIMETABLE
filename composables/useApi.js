@@ -18,7 +18,11 @@ let ENDPOINTS = {
   //CLASSROOM_TYPE
   CLASSROOM_TYPE: "/api/loaiphonghoc",
   CLASSROOM_TYPE_DETAIL: "/api/loaiphonghoc/detail",
-  //MENU 
+  //KNOWLEDGE
+  KNOWLEDGE: "/api/khoikienthuc",
+  //EXPERTISE
+  EXPERTISE:"/api/tochuyenmon",
+  //MENU
   MENU: "/api/menus",
   MENU_DETAIL: "/api/menus/detail",
   
@@ -120,6 +124,8 @@ class RestApi {
     this.school_site = new SchoolSite(this.request);
     this.classroom_type = new ClassroomType(this.request);
     this.menu = new Menu(this.request);
+    this.knowledge = new Knowledge(this.request);
+    this.expertise = new Expertise(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -306,6 +312,46 @@ class Menu {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.MENU, data);
+  }
+}
+class Knowledge{
+   constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.KNOWLEDGE, data);
+  }
+  // async detail(data) {
+  //   return await this.request.get(ENDPOINTS.MENU_DETAIL, data);
+  // }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.KNOWLEDGE, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.KNOWLEDGE, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.KNOWLEDGE, data);
+  }
+}
+class Expertise{
+   constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.EXPERTISE, data);
+  }
+  // async detail(data) {
+  //   return await this.request.get(ENDPOINTS.MENU_DETAIL, data);
+  // }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.EXPERTISE, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.EXPERTISE, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.EXPERTISE, data);
   }
 }
 export default () => {
