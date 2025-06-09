@@ -66,12 +66,13 @@
 
     <!-- Modal thêm/sửa đơn vị -->
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa đơn vị' : 'Thêm mới đơn vị'" @cancel="handleCancel" :width="700" :footer="null">
+      {{ formState }}
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <a-form-item label="Tên đơn vị" name="tenDonvi">
             <a-input v-model:value="formState.tenDonvi" placeholder="Nhập tên đơn vị" />
           </a-form-item>
-          <SelectSchoolLevel v-model="formState.id_caphoc" name="id_caphoc" :rules="rules.id_caphoc" />
+          <SelectSchoolLevel v-model="formState.idCap" name="idCap" :rules="rules.idCap" :multiple="true" />
 
           <a-form-item label="Địa chỉ" name="diachi">
             <a-input v-model:value="formState.diachi" placeholder="Nhập địa chỉ" />
@@ -83,7 +84,7 @@
           <a-form-item label="Email" name="email">
             <a-input v-model:value="formState.email" placeholder="Nhập email" />
           </a-form-item>
-          <SelectSchoolShift v-model="formState.id_cahoc"  name="id_cahoc" :rules="rules.id_cahoc" />
+          <SelectSchoolShift v-model="formState.id_cahoc" name="id_cahoc" :rules="rules.id_cahoc" />
         </div>
         <div class="flex justify-end gap-2 mt-6">
           <a-button @click="handleCancel">Hủy</a-button>
@@ -169,13 +170,13 @@ const formState = reactive({
   diachi: '',
   sodienthoai: '',
   email: '',
-  id_caphoc: undefined,
+  idCap: undefined,
   id_cahoc: undefined
 })
 
 const rules = {
-  id_caphoc: [
-    { required: true, message: 'Vui lòng chọn cấp học', trigger: 'blur' }
+  idCap: [
+    { required: true, message: 'Vui lòng chọn cấp học', trigger: 'blur', type: 'array' }
   ],
   id_cahoc: [
     { required: true, message: 'Vui lòng chọn ca học', trigger: 'blur' }
@@ -250,7 +251,7 @@ const showModal = () => {
     diachi: '',
     sodienthoai: '',
     email: '',
-    id_caphoc: undefined,
+    idCap: undefined,
     id_cahoc: undefined
   })
   visible.value = true
@@ -259,7 +260,7 @@ const showModal = () => {
 const editItem = async (record) => {
   try {
     loading.value = true
-    const { data , error } = await RestApi.unit.detail({ params: { id: record.id } })
+    const { data, error } = await RestApi.unit.detail({ params: { id: record.id } })
     if (data.value?.status === 'success') {
       const unitData = data.value.data
       Object.assign(formState, {
@@ -268,7 +269,7 @@ const editItem = async (record) => {
         diachi: unitData.diachi,
         sodienthoai: unitData.sodienthoai,
         email: unitData.email,
-        id_caphoc: unitData.id_Caphoc,
+        idCap: unitData.idCap,
         id_cahoc: unitData.id_Cahoc
       })
       isEdit.value = true

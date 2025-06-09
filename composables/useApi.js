@@ -21,7 +21,10 @@ let ENDPOINTS = {
   //KNOWLEDGE
   KNOWLEDGE: "/api/khoikienthuc",
   //EXPERTISE
-  EXPERTISE:"/api/tochuyenmon",
+  EXPERTISE: "/api/tochuyenmon",
+  //GRADE_LEVEL
+  GRADE_LEVEL: "/api/khoilop",
+  GRADE_LEVEL_DETAIL:"/api/khoilop/detail",
   //MENU
   MENU: "/api/menus",
   MENU_DETAIL: "/api/menus/detail",
@@ -126,6 +129,7 @@ class RestApi {
     this.menu = new Menu(this.request);
     this.knowledge = new Knowledge(this.request);
     this.expertise = new Expertise(this.request);
+    this.grade_level = new GradeLevel(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -335,7 +339,7 @@ class Knowledge{
   }
 }
 class Expertise{
-   constructor() {
+  constructor() {
     this.request = new Request();
   }
   async list(data) {
@@ -352,6 +356,27 @@ class Expertise{
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.EXPERTISE, data);
+  }
+}
+
+class GradeLevel {
+constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.GRADE_LEVEL, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.GRADE_LEVEL_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.GRADE_LEVEL, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.GRADE_LEVEL, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.GRADE_LEVEL, data);
   }
 }
 export default () => {

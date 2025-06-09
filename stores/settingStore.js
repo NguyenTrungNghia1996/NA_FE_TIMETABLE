@@ -68,6 +68,13 @@ export const useSettingStore = defineStore(
               url: "/category_management/expertise",
               icon: "ant-design:experiment-twotone",
             },
+            {
+              title: "Khối lớp",
+              key: "grade_level",
+              bitIndex: 12,
+              url: "/category_management/grade_level",
+              icon: "ant-design:code-sandbox-outlined",
+            },
           ],
         },
         {
