@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 bg-white rounded shadow">
+  <div class="p-4 bg-white rounded shadow min-h-full">
     <!-- 🧭 Thanh công cụ tìm kiếm & thêm mới -->
     <div class="flex flex-col md:flex-row justify-end items-end md:items-center gap-2 mb-6">
       <a-button type="primary" @click="showModal(null)" class="w-full md:w-auto">Thêm mới</a-button>
@@ -68,7 +68,7 @@
         <a-form-item label="Icon" name="icon">
           <a-input v-model:value="formState.icon" />
         </a-form-item>
-        <a-form-item label="Menu cha" v-if="!currentParentId">
+        <!-- <a-form-item label="Menu cha" v-if="!currentParentId">
           <a-tree-select
             v-model:value="formState.parent_Id"
             :tree-data="menuOptions"
@@ -76,7 +76,7 @@
             :field-names="{ label: 'title', value: 'id', children: 'children' }"
             allow-clear
           />
-        </a-form-item>
+        </a-form-item> -->
         <div class="flex justify-end gap-2 mt-6">
           <a-button @click="handleCancel">Hủy</a-button>
           <a-button type="primary" @click="handleOk" :loading="confirmLoading">
@@ -125,6 +125,7 @@ const columns = [
   { title: 'Tiêu đề', dataIndex: 'title', key: 'title', width: 200 },
   { title: 'Key', dataIndex: 'key', key: 'key', width: 150 },
   { title: 'Đường dẫn', dataIndex: 'url', key: 'url', width: 200, ellipsis: true },
+  { title: 'BitIndex', dataIndex: 'permissionBit', key: 'permissionBit', width: 100, ellipsis: true },
   { title: 'Icon', dataIndex: 'icon', key: 'icon', width: 100, ellipsis: true },
   { title: 'Thao tác', key: 'action', align: 'center', fixed: 'right', width: 160 }
 ]

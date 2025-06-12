@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 bg-white rounded shadow">
+  <div class="p-4 bg-white rounded shadow min-h-full">
     <!-- Header với tìm kiếm và nút thêm mới -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-6">
       <a-input-search v-model:value="searchText" placeholder="Tìm kiếm điểm trường..." enter-button @search="handleSearch" class="w-full md:w-1/3" />

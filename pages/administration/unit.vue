@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 bg-white rounded shadow">
+  <div class="p-4 bg-white rounded shadow min-h-full">
     <!-- Header với tìm kiếm và nút thêm mới -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-6">
       <a-input-search v-model:value="searchText" placeholder="Tìm kiếm đơn vị..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
@@ -66,7 +66,6 @@
 
     <!-- Modal thêm/sửa đơn vị -->
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa đơn vị' : 'Thêm mới đơn vị'" @cancel="handleCancel" :width="700" :footer="null">
-      {{ formState }}
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <a-form-item label="Tên đơn vị" name="tenDonvi">

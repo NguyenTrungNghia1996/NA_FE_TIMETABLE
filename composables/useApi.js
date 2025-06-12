@@ -24,11 +24,14 @@ let ENDPOINTS = {
   EXPERTISE: "/api/tochuyenmon",
   //GRADE_LEVEL
   GRADE_LEVEL: "/api/khoilop",
-  GRADE_LEVEL_DETAIL:"/api/khoilop/detail",
+  GRADE_LEVEL_DETAIL: "/api/khoilop/detail",
   //MENU
   MENU: "/api/menus",
   MENU_DETAIL: "/api/menus/detail",
-  
+  //ROLES
+  ROLES: "/api/roles",
+  ROLES_DETAIL: "/api/roles/detail",
+
   S3: "/api/presigned_url",
 };
 import { useUserStore } from "~~/stores/userStore";
@@ -279,7 +282,7 @@ class SchoolSite {
   }
 }
 class ClassroomType {
- constructor() {
+  constructor() {
     this.request = new Request();
   }
   async list(data) {
@@ -318,8 +321,8 @@ class Menu {
     return await this.request.delete(ENDPOINTS.MENU, data);
   }
 }
-class Knowledge{
-   constructor() {
+class Knowledge {
+  constructor() {
     this.request = new Request();
   }
   async list(data) {
@@ -338,7 +341,7 @@ class Knowledge{
     return await this.request.delete(ENDPOINTS.KNOWLEDGE, data);
   }
 }
-class Expertise{
+class Expertise {
   constructor() {
     this.request = new Request();
   }
@@ -358,9 +361,8 @@ class Expertise{
     return await this.request.delete(ENDPOINTS.EXPERTISE, data);
   }
 }
-
 class GradeLevel {
-constructor() {
+  constructor() {
     this.request = new Request();
   }
   async list(data) {
@@ -377,6 +379,27 @@ constructor() {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.GRADE_LEVEL, data);
+  }
+}
+
+class Roles {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.ROLES, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.ROLES_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.ROLES, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.ROLES, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.ROLES, data);
   }
 }
 export default () => {
