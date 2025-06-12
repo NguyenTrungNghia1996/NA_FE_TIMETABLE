@@ -7,41 +7,18 @@
     <a-card title="🌳 Cây Menu Phân Quyền" class="space-y-4">
       <a-button type="primary" @click="addTopLevel">➕ Thêm menu cha</a-button>
 
-      <a-tree
-        :tree-data="menuTree"
-        :field-names="{ title: 'title', key: 'key', children: 'children' }"
-        default-expand-all
-      >
+      <a-tree :tree-data="menuTree" :field-names="{ title: 'title', key: 'key', children: 'children' }" default-expand-all>
         <template #title="{ key, permissionBit }">
           <div class="grid grid-cols-[1fr_auto_auto] items-center gap-2 px-2 py-1 rounded hover:bg-gray-50">
             <div class="space-y-1 w-full">
-              <a-input
-                v-model:value="findNodeByKey(key).title"
-                size="small"
-                placeholder="Tên menu"
-              />
+              <a-input v-model:value="findNodeByKey(key).title" size="small" placeholder="Tên menu" />
               <div class="grid grid-cols-2 gap-2">
-                <a-input
-                  v-model:value="findNodeByKey(key).url"
-                  size="small"
-                  placeholder="URL"
-                />
-                <a-input
-                  v-model:value="findNodeByKey(key).icon"
-                  size="small"
-                  placeholder="Icon"
-                />
+                <a-input v-model:value="findNodeByKey(key).url" size="small" placeholder="URL" />
+                <a-input v-model:value="findNodeByKey(key).icon" size="small" placeholder="Icon" />
               </div>
             </div>
 
-            <a-select
-              size="small"
-              style="width: 100px"
-              v-if="permissionBit !== undefined"
-              :value="getPermission(key, permissionBit)"
-              :options="permissionOptions"
-              @change="val => setPermission(key, permissionBit, val)"
-            />
+            <a-select size="small" style="width: 100px" v-if="permissionBit !== undefined" :value="getPermission(key, permissionBit)" :options="permissionOptions" @change="val => setPermission(key, permissionBit, val)" />
 
             <a-dropdown>
               <template #overlay>
@@ -59,13 +36,7 @@
 
     <!-- 📋 Quyền đã thiết lập -->
     <a-card title="📋 Bảng Quyền">
-      <a-table
-        :columns="columns"
-        :data-source="flatPermissions"
-        size="small"
-        bordered
-        :pagination="false"
-      >
+      <a-table :columns="columns" :data-source="flatPermissions" size="small" bordered :pagination="false">
         <template #bodyCell="{ column, record }">
           <span v-if="column.dataIndex === 'permission'">
             {{ formatPermission(record.permission) }}
