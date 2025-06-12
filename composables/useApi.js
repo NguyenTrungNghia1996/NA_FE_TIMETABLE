@@ -133,6 +133,7 @@ class RestApi {
     this.knowledge = new Knowledge(this.request);
     this.expertise = new Expertise(this.request);
     this.grade_level = new GradeLevel(this.request);
+    this.roles = new Roles(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };

@@ -1,93 +1,91 @@
 <template>
-  <a-tree
-    :treeData="filteredTreeData"
-    defaultExpandAll
-    :fieldNames="{ title: 'title', key: 'key', children: 'children' }"
-    block-node
-  >
-    <template #title="{ key }">
-      <div class="flex justify-between items-center w-full">
-        <span>{{ getTitleByKey(key) }}</span>
-        <a-select
-          size="small"
-          class="w-24"
-          :value="getPermissionByKey(key)"
-          @change="(val) => updatePermission(key, val)"
-        >
-          <a-select-option :value="0">Ẩn</a-select-option>
-          <a-select-option :value="1">Xem</a-select-option>
-          <a-select-option :value="2">Sửa</a-select-option>
-        </a-select>
-      </div>
-    </template>
-  </a-tree>
+  {{permissions}}
+  <a-card title="🌳 Cây Menu Phân Quyền" class="space-y-4">
+    <a-tree
+      :tree-data="treeData"
+      :field-names="{ title: 'title', key: 'key', children: 'children' }"
+      default-expand-all
+    >
+      <template #title="{ key, permissionBit }">
+        <div class="grid grid-cols-[1fr_auto] items-center gap-2 px-2 py-1 rounded hover:bg-gray-50">
+          <div>{{ findNodeTitle(key) }}</div>
+          <a-select
+            size="small"
+            style="width: 100px"
+            v-if="permissionBit !== undefined"
+            :value="getPermissionValue(key, permissionBit)"
+            :options="permissionOptions"
+            @change="val => updatePermission(key, permissionBit, val)"
+          />
+        </div>
+      </template>
+    </a-tree>
+  </a-card>
 </template>
 
 <script setup>
-import { computed } from 'vue'
-
 const props = defineProps({
-  menuTree: Array,
-  permissionBits: Array
-})
+  menuList: Array,
+  permissions: Array
+});
+const emit = defineEmits(['update:permissions']);
 
-const emit = defineEmits(['update:permissionBits'])
+const permissionOptions = [
+  { label: 'Ẩn', value: 0 },
+  { label: 'Xem', value: 1 },
+  { label: 'Sửa', value: 2 }
+];
 
-// Lấy quyền từ permissionBits
-const getPermissionByKey = (key) => {
-  const findNode = (nodes) => {
-    for (const item of nodes) {
-      if (item.key === key) return props.permissionBits[item.bitIndex] ?? 0
-      if (item.children) {
-        const found = findNode(item.children)
-        if (found !== undefined) return found
-      }
+const treeData = computed(() => {
+  const map = {};
+  const roots = [];
+  props.menuList.forEach((item) => {
+    const node = { ...item, children: [] };
+    map[item.id] = node;
+  });
+  props.menuList.forEach((item) => {
+    const node = map[item.id];
+    if (item.parent_Id == null) {
+      roots.push(node);
+    } else if (map[item.parent_Id]) {
+      map[item.parent_Id].children.push(node);
     }
-    return 0
+  });
+  return roots;
+});
+
+const findNodeTitle = (key) => {
+  const node = props.menuList.find(i => i.key === key);
+  return node?.title || key;
+};
+
+const getPermissionValue = (key, permissionBit) => {
+  const parent = findParentKey(key);
+  const parentPerm = props.permissions.find(p => p.key === parent);
+  if (!parentPerm) return 0;
+  return (parentPerm.permissionValue >> permissionBit) & 0b11;
+};
+
+const updatePermission = (key, permissionBit, val) => {
+  const parent = findParentKey(key);
+  let parentPerm = props.permissions.find(p => p.key === parent);
+  if (!parentPerm) {
+    parentPerm = { key: parent, permissionValue: 0 };
+    props.permissions.push(parentPerm);
   }
-  return findNode(props.menuTree)
-}
+  const cleared = parentPerm.permissionValue & ~(0b11 << permissionBit);
+  const updated = cleared | (val << permissionBit);
+  parentPerm.permissionValue = updated;
+  emit('update:permissions', [...props.permissions]);
+};
 
-// Cập nhật bit tại vị trí tương ứng
-const updatePermission = (key, value) => {
-  const findAndUpdate = (nodes) => {
-    for (const item of nodes) {
-      if (item.key === key) {
-        const updated = [...props.permissionBits]
-        updated[item.bitIndex] = value
-        emit('update:permissionBits', updated)
-        break
-      }
-      if (item.children) findAndUpdate(item.children)
-    }
-  }
-  findAndUpdate(props.menuTree)
-}
-
-// Lấy title từ key
-const getTitleByKey = (key) => {
-  const findTitle = (nodes) => {
-    for (const item of nodes) {
-      if (item.key === key) return item.title
-      if (item.children) {
-        const found = findTitle(item.children)
-        if (found) return found
-      }
-    }
-    return ''
-  }
-  return findTitle(props.menuTree)
-}
-
-// Lọc menu: chỉ hiển thị những node có quyền > 0
-const filterTree = (nodes) => {
-  return nodes
-    .filter(item => props.permissionBits[item.bitIndex] > 0)
-    .map(item => ({
-      ...item,
-      children: item.children ? filterTree(item.children) : undefined
-    }))
-}
-
-const filteredTreeData = computed(() => filterTree(props.menuTree))
+const findParentKey = (childKey) => {
+  const child = props.menuList.find(i => i.key === childKey);
+  const parent = props.menuList.find(i => i.id === child?.parent_Id);
+  return parent?.key || 'menu';
+};
 </script>
+
+<style scoped>
+/* Optional styles */
+</style>

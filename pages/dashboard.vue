@@ -27,5 +27,8 @@
     <a-button type="primary" class="font-roboto w-full md:w-auto" @click="() => { navigateTo('/demo/khoilop') }">
       Demo: SelectGradeLevel (Khối lớp)
     </a-button>
+    <a-button type="primary" class="font-roboto w-full md:w-auto" @click="() => { navigateTo('/demo/role') }">
+      Demo: SelectRole (Nhóm quyền)
+    </a-button>
   </div>
 </template>
