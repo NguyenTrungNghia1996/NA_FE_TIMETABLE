@@ -87,12 +87,8 @@
           <a-form-item label="Họ và tên" name="hoten">
             <a-input v-model:value="formState.hoten" />
           </a-form-item>
-
-          <SelectUnit v-model="formState.id_Donvi" label="Đơn vị" name="id_Donvi" placeholder="Chọn đơn vị" :rules="rules.id_Donvi"  />
-
-          <a-form-item label="Vai trò" name="idRoles">
-            <a-select v-model:value="formState.idRoles" mode="multiple" placeholder="Chọn vai trò" :options="roleOptions" :filter-option="filterOption" />
-          </a-form-item>
+          <SelectUnit v-model="formState.id_Donvi" label="Đơn vị" name="id_Donvi" placeholder="Chọn đơn vị" :rules="rules.id_Donvi" />
+          <SelectRole v-model="formState.idRoles" label="Vai trò" name="idRoles" placeholder="Chọn vai trò" :multiple="true" :rules="rules.idRoles" />
         </div>
 
         <div class="flex gap-4 mt-4">
@@ -174,7 +170,6 @@ const visible = ref(false)
 const confirmLoading = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
-const roleOptions = ref([])
 
 const pagination = reactive({
   current: 1,
@@ -191,7 +186,7 @@ const formState = reactive({
   id_Donvi: undefined,
   isActive: true,
   isAdmin: false,
-  idRoles: []
+  idRoles: undefined
 })
 
 const rules = {
@@ -208,7 +203,10 @@ const rules = {
     { required: true, message: 'Vui lòng nhập họ tên', trigger: 'blur' }
   ],
   id_Donvi: [
-     { required: true, message: 'Vui lòng chọn Đơn vị', trigger: 'blur' }
+    { required: true, message: 'Vui lòng chọn Đơn vị', trigger: 'blur' }
+  ],
+  idRoles: [
+    { required: true, message: 'Vui lòng Vai trò', trigger: 'blur' }
   ]
 }
 
@@ -232,10 +230,6 @@ const fetchData = async (param) => {
     loading.value = false
   }
 }
-const filterOption = (input, option) => {
-  return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0
-}
-
 const handleTableChange = async (pag) => {
   pagination.current = pag.current
   pagination.pageSize = pag.pageSize
@@ -256,10 +250,10 @@ const showModal = async () => {
   Object.assign(formState, {
     username: '',
     hoten: '',
-    id_Donvi: undefined,
+    id_Donvi: [],
     isActive: true,
     isAdmin: false,
-    idRoles: [1]
+    idRoles: []
   })
   await nextTick()
   formRef.value?.clearValidate()
@@ -276,10 +270,10 @@ const editItem = async (record) => {
         id: userData.id,
         username: userData.username,
         hoten: userData.hoten,
-        id_Donvi: userData.id_Donvi,
+        id_Donvi: userData.id_Donvi || undefined,
         isActive: userData.isActive,
         isAdmin: userData.isAdmin,
-        idRoles: userData.idRoles || [1]
+        idRoles: userData.idRoles || undefined
       })
       isEdit.value = true
       visible.value = true
