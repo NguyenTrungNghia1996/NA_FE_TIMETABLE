@@ -75,6 +75,13 @@ export const useSettingStore = defineStore(
               url: "/category_management/grade_level",
               icon: "ant-design:code-sandbox-outlined",
             },
+            {
+              title: "Phòng Học",
+              key: "classroom",
+              bitIndex: 14,
+              url: "/category_management/classroom",
+              icon: "ant-design:home-twotone",
+            },
           ],
         },
         {
