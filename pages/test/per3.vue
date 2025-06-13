@@ -7,23 +7,40 @@
       <pre>{{ permissionList }}</pre>
     </a-card>
 
-    <a-card title="🌳 Cây Menu Phân Quyền" class="space-y-4">
-      <a-tree :tree-data="menuTree" :field-names="{ title: 'title', key: 'key', children: 'children' }" default-expand-all>
-        <template #title="{ key, title, permissionBit }">
-          <div class="flex justify-between items-center gap-2 px-2 py-1 rounded hover:bg-gray-50">
-            <div class="font-medium">{{ title }}</div>
-
-            <a-radio-group size="small" option-type="button" button-style="solid" v-if="permissionBit !== undefined" :value="getPermission(key, permissionBit)" @click.stop @change="e => setPermission(key, permissionBit, e.target.value)">
+    <a-card title="📋 Bảng Menu Phân Quyền" class="space-y-4">
+      <a-table 
+        :columns="menuColumns" 
+        :data-source="flatMenuData" 
+        size="small" 
+        bordered 
+        :pagination="false"
+      >
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.dataIndex === 'permission' && record.permissionBit !== undefined">
+            <a-radio-group 
+              size="small" 
+              option-type="button" 
+              button-style="solid" 
+              :value="getPermission(record.key, record.permissionBit)" 
+              @change="e => setPermission(record.key, record.permissionBit, e.target.value)"
+            >
               <a-radio :value="0">Ẩn</a-radio>
               <a-radio :value="1">Xem</a-radio>
               <a-radio :value="2">Sửa</a-radio>
             </a-radio-group>
-          </div>
+          </template>
+          <template v-else-if="column.dataIndex === 'title'">
+            <div :style="{ paddingLeft: (record.level * 16) + 'px' }" class="flex items-center">
+              <span v-if="record.children" class="mr-1">📁</span>
+              <span v-else class="mr-1">📄</span>
+              {{ record.title }}
+            </div>
+          </template>
         </template>
-      </a-tree>
+      </a-table>
     </a-card>
 
-    <a-card title="📋 Bảng Quyền">
+    <a-card title="📋 Bảng Quyền (Xem thử)">
       <a-table :columns="columns" :data-source="flatPermissions" size="small" bordered :pagination="false">
         <template #bodyCell="{ column, record }">
           <span v-if="column.dataIndex === 'permission'">
@@ -35,7 +52,6 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { message } from 'ant-design-vue'
@@ -44,22 +60,20 @@ const { RestApi } = useApi()
 // Dữ liệu phẳng từ API
 const flatData = ref([])
 
-// Chuyển flat list thành cây
-function buildMenuTree(data) {
-  const map = new Map()
-  const tree = []
-  data.forEach(item => {
-    map.set(item.id, { ...item, children: [] })
-  })
-  data.forEach(item => {
-    if (item.parent_Id === null) {
-      tree.push(map.get(item.id))
-    } else {
-      const parent = map.get(item.parent_Id)
-      if (parent) parent.children.push(map.get(item.id))
-    }
-  })
-  return tree
+// Chuyển flat list thành nested structure với level
+function buildMenuWithLevel(data, parentId = null, level = 0) {
+  const result = []
+  data
+    .filter(item => item.parent_Id === parentId)
+    .forEach(item => {
+      const children = buildMenuWithLevel(data, item.id, level + 1)
+      result.push({
+        ...item,
+        level,
+        children: children.length > 0 ? children : undefined
+      })
+    })
+  return result
 }
 
 // Sinh object permission với key là menu cha + 'menu'
@@ -70,7 +84,7 @@ function buildMenuPermissions(data) {
   return base
 }
 
-const menuTree = ref([])
+const flatMenuData = ref([])
 const menuPermissions = reactive({ menu: 0 })
 
 const fetchData = async () => {
@@ -78,7 +92,7 @@ const fetchData = async () => {
     const { data } = await RestApi.menu.list()
     if (data.value?.status === 'success') {
       flatData.value = data.value.data.items
-      menuTree.value = buildMenuTree(flatData.value)
+      flatMenuData.value = buildMenuWithLevel(flatData.value)
       Object.assign(menuPermissions, buildMenuPermissions(flatData.value))
     }
   } catch (e) {
@@ -87,15 +101,25 @@ const fetchData = async () => {
 }
 await fetchData()
 
+const menuColumns = [
+  { title: 'Tên Menu', dataIndex: 'title' },
+  { title: 'Key', dataIndex: 'key' },
+  { title: 'Quyền', dataIndex: 'permission' },
+]
+
 const permissionOptions = [
   { label: 'Ẩn', value: 0 },
   { label: 'Xem', value: 1 },
   { label: 'Sửa', value: 2 },
 ]
 
-const isTopLevel = (key) => menuTree.value.some(m => m.key === key)
-const findParentKey = (childKey) =>
-  menuTree.value.find(p => p.children?.some(c => c.key === childKey))?.key
+const isTopLevel = (key) => flatMenuData.value.some(m => m.key === key)
+const findParentKey = (childKey) => {
+  const child = flatData.value.find(item => item.key === childKey)
+  if (!child) return null
+  const parent = flatData.value.find(item => item.id === child.parent_Id)
+  return parent?.key
+}
 
 const getPermission = (key, permissionBit) => {
   const isParent = isTopLevel(key)
@@ -125,15 +149,15 @@ const serverColumns = [
 
 const formatPermission = (val) => val === 0 ? 'Ẩn' : val === 1 ? 'Xem' : 'Sửa'
 
-const flatten = (nodes) =>
+const flattenPermissions = (nodes) =>
   nodes.flatMap(n => {
     const row = []
     if (n.permissionBit !== undefined)
       row.push({ title: n.title, key: n.key, permission: getPermission(n.key, n.permissionBit) })
-    if (n.children) row.push(...flatten(n.children))
+    if (n.children) row.push(...flattenPermissions(n.children))
     return row
   })
-const flatPermissions = computed(() => flatten(menuTree.value))
+const flatPermissions = computed(() => flattenPermissions(flatMenuData.value))
 
 const permissionList = computed(() =>
   Object.entries(menuPermissions).map(([key, permissionValue]) => ({
