@@ -4,7 +4,7 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-6">
       <a-input-search v-model:value="searchText" placeholder="Tìm kiếm điểm trường..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
       <a-button @click="resetSearch" class="w-full md:w-auto">Đặt lại</a-button>
-      <a-button type="primary" @click="showModal" class="w-full md:w-auto">Thêm mới</a-button>
+      <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Thêm mới</a-button>
     </div>
     <!-- Bảng dữ liệu -->
     <ClientOnly>
@@ -16,7 +16,7 @@
               <!-- Desktop view - full buttons -->
               <div class="hidden md:flex space-x-2">
                 <a-tooltip title="Sửa">
-                  <a-button type="link" size="small" @click="editItem(record)">
+                  <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission">
                     <template #icon>
                       <EditOutlined />
                     </template>
@@ -24,7 +24,7 @@
                 </a-tooltip>
                 <a-popconfirm title="Bạn chắc chắn muốn xóa?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
                   <a-tooltip title="Xóa">
-                    <a-button type="link" danger size="small">
+                    <a-button type="link" danger size="small" :disabled="!settingStore.currentPermission">
                       <template #icon>
                         <DeleteOutlined />
                       </template>
@@ -41,13 +41,13 @@
                   </a-button>
                   <template #overlay>
                     <a-menu>
-                      <a-menu-item key="1" @click="editItem(record)">
+                      <a-menu-item key="1" @click="editItem(record)" :disabled="!settingStore.currentPermission">
                         <template #icon>
                           <EditOutlined />
                         </template>
                         Sửa
                       </a-menu-item>
-                      <a-menu-item key="2" danger @click="deleteItem(record.id)">
+                      <a-menu-item key="2" danger @click="deleteItem(record.id)" :disabled="!settingStore.currentPermission">
                         <template #icon>
                           <DeleteOutlined />
                         </template>
@@ -86,6 +86,7 @@
 </template>
 
 <script setup>
+const settingStore = useSettingStore();
 const { RestApi } = useApi();
 const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
 const columns = [
