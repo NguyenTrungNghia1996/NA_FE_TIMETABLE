@@ -16,7 +16,7 @@ export const useSettingStore = defineStore(
           key: "dashboard",
           url: "/dashboard",
           bitIndex: 0,
-          icon: "ant-design:project-outlined",
+          icon: "ant-design:dashboard-outlined",
           children: [],
         },
         {
@@ -24,21 +24,21 @@ export const useSettingStore = defineStore(
           key: "category_management",
           url: null,
           bitIndex: 2,
-          icon: "ant-design:database-twotone",
+          icon: "ant-design:appstore-outlined",
           children: [
             {
               title: "Cấp Học",
               key: "school_level",
               bitIndex: 0,
               url: "/category_management/school_level",
-              icon: "ant-design:unordered-list-outlined",
+              icon: "ant-design:read-outlined",
             },
             {
               title: "Ca Học",
               key: "school_shift",
               bitIndex: 2,
               url: "/category_management/school_shift",
-              icon: "ant-design:calendar-twotone",
+              icon: "ant-design:schedule-outlined",
             },
             {
               title: "Điểm Trường",
@@ -66,7 +66,7 @@ export const useSettingStore = defineStore(
               key: "expertise",
               bitIndex: 10,
               url: "/category_management/expertise",
-              icon: "ant-design:experiment-twotone",
+              icon: "ant-design:team-outlined",
             },
             {
               title: "Khối lớp",
@@ -74,6 +74,13 @@ export const useSettingStore = defineStore(
               bitIndex: 12,
               url: "/category_management/grade_level",
               icon: "ant-design:code-sandbox-outlined",
+            },
+            {
+              title: "Phòng Học",
+              key: "classroom",
+              bitIndex: 14,
+              url: "/category_management/classroom",
+              icon: "ant-design:build-outlined",
             },
           ],
         },
@@ -96,7 +103,7 @@ export const useSettingStore = defineStore(
               key: "unit",
               bitIndex: 2,
               url: "/administration/unit",
-              icon: "ant-design:deployment-unit-outlined",
+              icon: "ant-design:apartment-outlined",
             },
             {
               title: "Menu",

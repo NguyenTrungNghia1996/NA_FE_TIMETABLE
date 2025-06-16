@@ -31,6 +31,9 @@ let ENDPOINTS = {
   //ROLES
   ROLES: "/api/roles",
   ROLES_DETAIL: "/api/roles/detail",
+  //CLASSROOM
+  CLASSROOM: "/api/phonghoc",
+  CLASSROOM_DETAIL:"/api/phonghoc/detail",
 
   S3: "/api/presigned_url",
 };
@@ -134,6 +137,7 @@ class RestApi {
     this.expertise = new Expertise(this.request);
     this.grade_level = new GradeLevel(this.request);
     this.roles = new Roles(this.request);
+    this.classroom = new Classroom(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -382,7 +386,6 @@ class GradeLevel {
     return await this.request.delete(ENDPOINTS.GRADE_LEVEL, data);
   }
 }
-
 class Roles {
   constructor() {
     this.request = new Request();
@@ -401,6 +404,26 @@ class Roles {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.ROLES, data);
+  }
+}
+class Classroom {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.CLASSROOM, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.CLASSROOM_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.CLASSROOM, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.CLASSROOM, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.CLASSROOM, data);
   }
 }
 export default () => {

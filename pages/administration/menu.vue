@@ -277,18 +277,18 @@ const deleteItem = async (id) => {
   }
 }
 
-// 📌 Tìm kiếm menu
-const handleSearch = async () => {
-  param.value.search = searchText.value
-  await fetchData({ ...param.value })
-}
+// // 📌 Tìm kiếm menu
+// const handleSearch = async () => {
+//   param.value.search = searchText.value
+//   await fetchData({ ...param.value })
+// }
 
-// 📌 Đặt lại tìm kiếm
-const resetSearch = async () => {
-  searchText.value = ''
-  param.value.search = ''
-  await fetchData({ ...param.value })
-}
+// // 📌 Đặt lại tìm kiếm
+// const resetSearch = async () => {
+//   searchText.value = ''
+//   param.value.search = ''
+//   await fetchData({ ...param.value })
+// }
 
 // 📌 Gọi API lấy dữ liệu menu
 const fetchData = async (param) => {

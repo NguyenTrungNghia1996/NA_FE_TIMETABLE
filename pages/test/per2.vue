@@ -18,7 +18,14 @@
               </div>
             </div>
 
-            <a-select size="small" style="width: 100px" v-if="permissionBit !== undefined" :value="getPermission(key, permissionBit)" :options="permissionOptions" @change="val => setPermission(key, permissionBit, val)" />
+            <a-select
+              size="small"
+              style="width: 100px"
+              v-if="permissionBit !== undefined"
+              :value="getPermission(key, permissionBit)"
+              :options="permissionOptions"
+              @change="val => setPermission(key, permissionBit, val)"
+            />
 
             <a-dropdown>
               <template #overlay>
@@ -45,6 +52,12 @@
       </a-table>
     </a-card>
 
+    <!-- 📤 Dữ liệu gửi server -->
+    <a-card title="📤 Dữ liệu Gửi lên Server">
+      <a-table :columns="serverColumns" :data-source="permissionList" size="small" bordered :pagination="false" />
+      <pre>{{ permissionList }}</pre>
+    </a-card>
+
     <!-- 👁️‍🗨️ Menu hiển thị thực tế -->
     <a-card title="👁️‍🗨️ Menu Theo Quyền">
       <ul class="space-y-2">
@@ -61,7 +74,6 @@
     </a-card>
   </div>
 </template>
-
 <script setup>
 import { reactive, computed } from 'vue'
 
@@ -166,8 +178,6 @@ const menuTree = reactive([
 
 const menuPermissions = reactive({
   menu: 0,
-  dashboard: 0,
-  category: 0,
 })
 
 const permissionOptions = [
@@ -265,6 +275,11 @@ const columns = [
   { title: 'Quyền', dataIndex: 'permission' },
 ]
 
+const serverColumns = [
+  { title: 'Key', dataIndex: 'key' },
+  { title: 'Permission Value', dataIndex: 'permissionValue' },
+]
+
 const formatPermission = (val) => val === 0 ? 'Ẩn' : val === 1 ? 'Xem' : 'Sửa'
 
 const flatten = (nodes) =>
@@ -289,5 +304,13 @@ const visibleMenu = computed(() =>
         : null
     })
     .filter(Boolean)
+)
+
+// ✅ Đây là phần bạn yêu cầu: format dữ liệu theo dạng [{key, permissionValue}]
+const permissionList = computed(() =>
+  Object.entries(menuPermissions).map(([key, permissionValue]) => ({
+    key,
+    permissionValue,
+  }))
 )
 </script>
