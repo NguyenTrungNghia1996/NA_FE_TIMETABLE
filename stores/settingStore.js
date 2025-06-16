@@ -10,119 +10,8 @@ export const useSettingStore = defineStore(
         showLogo: true,
         transparent: false,
       },
-      menu: [
-        {
-          title: "Dashboard",
-          key: "dashboard",
-          url: "/dashboard",
-          bitIndex: 0,
-          icon: "ant-design:dashboard-outlined",
-          children: [],
-        },
-        {
-          title: "Quản Lý Danh Mục",
-          key: "category_management",
-          url: null,
-          bitIndex: 2,
-          icon: "ant-design:appstore-outlined",
-          children: [
-            {
-              title: "Cấp Học",
-              key: "school_level",
-              bitIndex: 0,
-              url: "/category_management/school_level",
-              icon: "ant-design:read-outlined",
-            },
-            {
-              title: "Ca Học",
-              key: "school_shift",
-              bitIndex: 2,
-              url: "/category_management/school_shift",
-              icon: "ant-design:schedule-outlined",
-            },
-            {
-              title: "Điểm Trường",
-              key: "school_site",
-              bitIndex: 4,
-              url: "/category_management/school_site",
-              icon: "ant-design:environment-outlined",
-            },
-            {
-              title: "Loại Phòng Học",
-              key: "classroom_type",
-              bitIndex: 6,
-              url: "/category_management/classroom_type",
-              icon: "ant-design:home-outlined",
-            },
-            {
-              title: "Khối Kiến Thức",
-              key: "knowledge",
-              bitIndex: 8,
-              url: "/category_management/knowledge",
-              icon: "ant-design:database-outlined",
-            },
-            {
-              title: "Tổ Chuyên Môn",
-              key: "expertise",
-              bitIndex: 10,
-              url: "/category_management/expertise",
-              icon: "ant-design:team-outlined",
-            },
-            {
-              title: "Khối lớp",
-              key: "grade_level",
-              bitIndex: 12,
-              url: "/category_management/grade_level",
-              icon: "ant-design:code-sandbox-outlined",
-            },
-            {
-              title: "Phòng Học",
-              key: "classroom",
-              bitIndex: 14,
-              url: "/category_management/classroom",
-              icon: "ant-design:build-outlined",
-            },
-          ],
-        },
-        {
-          title: "Cài đặt quản trị",
-          key: "administration",
-          url: null,
-          bitIndex: 4,
-          icon: "ant-design:setting-twotone",
-          children: [
-            {
-              title: "Người Dùng",
-              key: "user",
-              bitIndex: 0,
-              url: "/administration/user",
-              icon: "ant-design:user-outlined",
-            },
-            {
-              title: "Đơn Vị",
-              key: "unit",
-              bitIndex: 2,
-              url: "/administration/unit",
-              icon: "ant-design:apartment-outlined",
-            },
-            {
-              title: "Menu",
-              key: "menu",
-              bitIndex: 4,
-              url: "/administration/menu",
-              icon: "ant-design:menu-outlined",
-            },
-            // permission
-            {
-              title: "Nhóm quyền",
-              key: "permission",
-              bitIndex: 4,
-              url: "/administration/permission",
-              icon: "ant-design:safety-outlined",
-            },
-          ],
-        },
-      ],
+      menu: [],
+      permissions: [],
     }),
     actions: {
       setLoading(value) {
@@ -134,9 +23,13 @@ export const useSettingStore = defineStore(
       setMenu(value) {
         this.menu = value;
       },
+      setPermissions(value) {
+        this.permissions = value;
+      },
     },
     getters: {
       menuItems: state => state.menu,
+      menuPermissions: state => state.permissions,
       isLoading: state => state.loading.isActive,
     },
     // persist: {

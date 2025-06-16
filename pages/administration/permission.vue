@@ -38,7 +38,7 @@
       </a-table>
     </ClientOnly>
 
-    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa Nhóm quyền' : 'Thêm mới Nhóm quyền'" @cancel="handleCancel" :width="modalWidth">
+    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa Nhóm quyền' : 'Thêm mới Nhóm quyền'" @cancel="handleCancel" :width="modalWidth" :bodyStyle="{ maxHeight: '70vh', overflowY: 'auto' }">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
         <a-form ref="formRef" :model="formState" layout="vertical">
           <a-form-item label="Tên Nhóm quyền" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }" :rules="rules.ten">
@@ -218,3 +218,23 @@ const resetForm = async () => {
 
 await fetchData({ ...param.value });
 </script>
+<style scoped>
+/* Thêm style cho modal */
+.custom-modal :deep(.ant-modal-body) {
+  padding: 16px 24px;
+}
+
+.custom-modal :deep(.ant-modal-content) {
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.custom-modal :deep(.ant-modal-header) {
+  flex-shrink: 0;
+}
+
+.custom-modal :deep(.ant-modal-footer) {
+  flex-shrink: 0;
+}
+</style>

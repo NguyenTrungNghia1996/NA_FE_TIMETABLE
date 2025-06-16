@@ -18,10 +18,12 @@
 <script setup>
 const route = useRoute();
 const settingStore = useSettingStore();
+import { useMenu } from "~/composables/useMenu";
+const { visibleMenu } = useMenu();
 const breadcrumbItems = ref([]);
 
 // Lấy menu data từ store
-const menuData = computed(() => settingStore.menuItems);
+const menuData = computed(() => visibleMenu.value);
 
 // Hàm tìm kiếm menu item theo path
 const findMenuItemByPath = (items, path) => {
@@ -84,6 +86,7 @@ watch(() => route.path, updateBreadcrumb, { immediate: true });
 
 // Theo dõi thay đổi menu data (nếu cần)
 watch(() => settingStore.menu, updateBreadcrumb);
+watch(() => visibleMenu.value, updateBreadcrumb);
 </script>
 
 <style>
