@@ -20,11 +20,15 @@
             <div class="flex justify-center">
               <div class="md:flex space-x-2">
                 <a-button type="link" size="small" @click="editItem(record.id)">
-                  <template #icon><EditOutlined /></template>
+                  <template #icon>
+                    <EditOutlined />
+                  </template>
                 </a-button>
                 <a-popconfirm title="Bạn chắc chắn muốn xóa?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
                   <a-button type="link" danger size="small">
-                    <template #icon><DeleteOutlined /></template>
+                    <template #icon>
+                      <DeleteOutlined />
+                    </template>
                   </a-button>
                 </a-popconfirm>
               </div>
@@ -34,17 +38,22 @@
       </a-table>
     </ClientOnly>
 
-    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa Nhóm quyền' : 'Thêm mới Nhóm quyền'" @cancel="handleCancel" :width="600">
-      <a-form ref="formRef" :model="formState" layout="vertical">
-        <a-form-item label="Tên Nhóm quyền" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }" :rules="rules.ten">
-          <a-input v-model:value="formState.ten" placeholder="Nhập tên Nhóm quyền" :maxlength="200" show-count />
-        </a-form-item>
+    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa Nhóm quyền' : 'Thêm mới Nhóm quyền'" @cancel="handleCancel" :width="1000">
+      {{ formState }}
+      <div class="grid grid-cols-2 gap-2">
+        <a-form ref="formRef" :model="formState" layout="vertical">
+          <a-form-item label="Tên Nhóm quyền" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }" :rules="rules.ten">
+            <a-input v-model:value="formState.ten" placeholder="Nhập tên Nhóm quyền" :maxlength="200" show-count />
+          </a-form-item>
 
-        <a-form-item label="Mô tả" name="mota" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
-          <a-textarea v-model:value="formState.mota" :rows="4" placeholder="Nhập mô tả (nếu có)" :maxlength="200" show-count />
-        </a-form-item>
-      </a-form>
+          <a-form-item label="Mô tả" name="mota" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
+            <a-textarea v-model:value="formState.mota" :rows="4" placeholder="Nhập mô tả (nếu có)" :maxlength="200" show-count />
+          </a-form-item>
+        </a-form>
+         <PermissionEditor v-model="formState.permission" />
+      </div>
 
+     
       <template #footer>
         <div class="flex justify-end space-x-2">
           <a-button @click="handleCancel">Hủy</a-button>
@@ -85,7 +94,8 @@ const columns = [
 const formState = reactive({
   id: null,
   ten: '',
-  mota: ''
+  mota: '',
+  permission: []
 });
 
 const rules = reactive({
@@ -129,7 +139,7 @@ const handleSearch = async () => {
 
 const showModal = async () => {
   isEdit.value = false;
-  Object.assign(formState, { id: null, ten: '', mota: '' });
+  Object.assign(formState, { id: null, ten: '', mota: '', permission: [] });
   visible.value = true;
 };
 

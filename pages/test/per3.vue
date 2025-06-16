@@ -1,7 +1,5 @@
 <template>
   <div class="p-4 space-y-8">
-    {{ menuPermissions }}
-
     <a-card title="📤 Dữ liệu Gửi lên Server">
       <a-table :columns="serverColumns" :data-source="permissionList" size="small" bordered :pagination="false" />
       <pre>{{ permissionList }}</pre>
@@ -53,8 +51,6 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
-import { message } from 'ant-design-vue'
 const { RestApi } = useApi()
 
 // Dữ liệu phẳng từ API
@@ -105,12 +101,6 @@ const menuColumns = [
   { title: 'Tên Menu', dataIndex: 'title' },
   { title: 'Key', dataIndex: 'key' },
   { title: 'Quyền', dataIndex: 'permission' },
-]
-
-const permissionOptions = [
-  { label: 'Ẩn', value: 0 },
-  { label: 'Xem', value: 1 },
-  { label: 'Sửa', value: 2 },
 ]
 
 const isTopLevel = (key) => flatMenuData.value.some(m => m.key === key)
