@@ -38,8 +38,8 @@
       </a-table>
     </ClientOnly>
 
-    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa Nhóm quyền' : 'Thêm mới Nhóm quyền'" @cancel="handleCancel" :width="1000">
-      <div class="grid grid-cols-2 gap-2">
+    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa Nhóm quyền' : 'Thêm mới Nhóm quyền'" @cancel="handleCancel" :width="modalWidth">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
         <a-form ref="formRef" :model="formState" layout="vertical">
           <a-form-item label="Tên Nhóm quyền" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }" :rules="rules.ten">
             <a-input v-model:value="formState.ten" placeholder="Nhập tên Nhóm quyền" :maxlength="200" show-count />
@@ -66,7 +66,12 @@
 </template>
 
 <script setup>
+import { useBreakpoints, breakpointsTailwind } from '@vueuse/core';
 const { RestApi } = useApi();
+
+const breakpoints = useBreakpoints(breakpointsTailwind);
+const isMobile = breakpoints.smaller('md');
+const modalWidth = computed(() => (isMobile.value ? '95vw' : 1000));
 const searchText = ref('');
 const loading = ref(false);
 const visible = ref(false);
