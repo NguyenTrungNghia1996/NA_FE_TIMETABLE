@@ -58,6 +58,8 @@ docker-cleanup:
   rules:
     - if: '$CI_COMMIT_BRANCH == "deploy"'
       when: on_success
+  before_script:
+  - git config --global http.postBuffer 524288000
   script:
     - |
       TAG_LATEST="latest"
