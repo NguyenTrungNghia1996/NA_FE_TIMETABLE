@@ -11,7 +11,7 @@
           <span>{{ item.title }}</span>
         </span>
       </a-breadcrumb-item>
-      <span class="ml-4 text-xs text-gray-500">Quyền: {{ permissionLabel }}</span>
+      
     </a-breadcrumb>
   </div>
 </template>
