@@ -39,7 +39,6 @@
     </ClientOnly>
 
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa Nhóm quyền' : 'Thêm mới Nhóm quyền'" @cancel="handleCancel" :width="1000">
-      {{ formState }}
       <div class="grid grid-cols-2 gap-2">
         <a-form ref="formRef" :model="formState" layout="vertical">
           <a-form-item label="Tên Nhóm quyền" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }" :rules="rules.ten">
