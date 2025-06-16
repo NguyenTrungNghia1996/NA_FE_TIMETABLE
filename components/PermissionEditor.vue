@@ -1,6 +1,5 @@
 <template>
-
-  <a-table :columns="menuColumns" :data-source="flatMenuData" size="small" bordered :pagination="false">
+  <a-table :columns="menuColumns" :data-source="flatMenuData" size="small" bordered :pagination="false" :scroll="{ y: '70vh' }">
     <template #bodyCell="{ column, record }">
       <template v-if="column.dataIndex === 'permission' && record.permissionBit !== undefined">
         <a-radio-group size="small" option-type="button" button-style="solid" :value="getPermission(record.key, record.permissionBit)" @change="e => setPermission(record.key, record.permissionBit, e.target.value)">
@@ -79,36 +78,15 @@ function normalizeInputPermissions(menuData, inputPermissions) {
 }
 // Khởi tạo menuPermissions từ dữ liệu server
 function initMenuPermissions(menuData, serverPerms) {
-  // const parentKeys = new Set(menuData.filter(d => d.parent_Id === null).map(d => d.key))
-
-  // // Tạo object permissions từ dữ liệu server
-  // const serverPermsMap = {}
-  // serverPerms.forEach(item => {
-  //   serverPermsMap[item.key] = item.permissionValue
-  // })
-
-  // // Gán giá trị từ server hoặc mặc định là 0
-  // Object.assign(menuPermissions, { menu: serverPermsMap.menu || 0 })
-  // for (const key of parentKeys) {
-  //   menuPermissions[key] = serverPermsMap[key] || 0
-  // }
   const normalizedPermissions = normalizeInputPermissions(menuData, serverPerms)
-
-  // Bước 2: Reset toàn bộ permissions cũ
   Object.keys(menuPermissions).forEach(key => {
     delete menuPermissions[key]
   })
-
-  // Bước 3: Tạo map permissions từ dữ liệu đã lọc
   const serverPermsMap = {}
   normalizedPermissions.forEach(item => {
     serverPermsMap[item.key] = item.permissionValue
   })
-
-  // Bước 4: Chỉ gán giá trị cho các key hợp lệ
   menuPermissions.menu = serverPermsMap.menu || 0
-
-  // Chỉ thêm các key menu cha tồn tại trong data
   const parentKeys = menuData.filter(d => d.parent_Id === null).map(d => d.key)
   parentKeys.forEach(key => {
     menuPermissions[key] = serverPermsMap[key] || 0
@@ -205,3 +183,21 @@ const permissionList = computed(() => {
 // Khởi tạo component
 fetchData()
 </script>
+
+<style scoped>
+.table-container {
+  height: 70vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-container :deep(.ant-table) {
+  flex: 1;
+  overflow: auto;
+}
+
+.table-container :deep(.ant-table-container) {
+  height: 100%;
+}
+</style>

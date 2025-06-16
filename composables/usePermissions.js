@@ -33,7 +33,7 @@ export const usePermissions = () => {
           const perms = data.value.data.permission || [];
           allPerms.push(...perms);
         }
-        console.log("🚀 ~ usePermissions ~ data:", data)
+        // console.log("🚀 ~ usePermissions ~ data:", data)
       } catch (e) {
         console.error("Failed to load permissions", e);
       }
