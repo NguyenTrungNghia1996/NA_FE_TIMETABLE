@@ -40,6 +40,7 @@ const settingStore = useSettingStore();
 definePageMeta({ layout: "auth" });
 const { RestApi } = useApi();
 const userStore = useUserStore();
+const { loadMenu } = useMenu();
 const { rememberMe, saveCredentials, getCredentials, clearCredentials } = useAuth();
 const savedCredentials = getCredentials();
 const form = reactive({
@@ -60,6 +61,7 @@ const handleLogin = async () => {
         saveCredentials(form.username, form.password);
       }
       await userStore.setUser(data.value.data);
+      await loadMenu();
       message.success("Đăng nhập thành công!");
       navigateTo("/dashboard");
     } else {
