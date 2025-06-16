@@ -3,12 +3,23 @@ import { useSettingStore } from "~~/stores/settingStore";
 import { useJwt } from "@vueuse/integrations/useJwt";
 import { useMenu } from "~~/composables/useMenu";
 const DEFAULT_PERMISSIONS = [
-  { key: "menu", permissionValue: 21 },
-  { key: "menu-plvuxq63o0", permissionValue: 0 },
-  { key: "menu-c8u2jgnoto", permissionValue: 1 },
-  { key: "menu-f5fh5fri05", permissionValue: 1 },
+  {
+    key: "menu",
+    permissionValue: 21
+  },
+  {
+    key: "menu-plvuxq63o0",
+    permissionValue: 0
+  },
+  {
+    key: "menu-c8u2jgnoto",
+    permissionValue: 5461
+  },
+  {
+    key: "menu-f5fh5fri05",
+    permissionValue: 85
+  }
 ];
-
 export default defineNuxtRouteMiddleware(async to => {
   // Bỏ qua middleware nếu đang ở trang login
   // if (to.path === "/login" || to.path.startsWith("/test/")) return;

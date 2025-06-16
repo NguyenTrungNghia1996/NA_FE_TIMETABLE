@@ -42,10 +42,22 @@ const { RestApi } = useApi();
 const userStore = useUserStore();
 const { loadMenu } = useMenu();
 const DEFAULT_PERMISSIONS = [
-  { key: "menu", permissionValue: 21 },
-  { key: "menu-plvuxq63o0", permissionValue: 0 },
-  { key: "menu-c8u2jgnoto", permissionValue: 1 },
-  { key: "menu-f5fh5fri05", permissionValue: 1 },
+  {
+    key: "menu",
+    permissionValue: 21
+  },
+  {
+    key: "menu-plvuxq63o0",
+    permissionValue: 0
+  },
+  {
+    key: "menu-c8u2jgnoto",
+    permissionValue: 5461
+  },
+  {
+    key: "menu-f5fh5fri05",
+    permissionValue: 85
+  }
 ];
 const { rememberMe, saveCredentials, getCredentials, clearCredentials } = useAuth();
 const savedCredentials = getCredentials();
