@@ -35,7 +35,10 @@ export const useSettingStore = defineStore(
       menuItems: state => state.menu,
       menuPermissions: state => state.permissions,
       isLoading: state => state.loading.isActive,
-      currentPermission: state => state.current_permission,
+      currentPermission: state => {
+        const PERMISSION_STATE = { NO_ACCESS: 0, VIEW: 1, EDIT: 2 };
+        return state.current_permission === PERMISSION_STATE.EDIT
+      },
     },
     // persist: {
     //   // storage: piniaPluginPersistedstate.localStorage(),

@@ -6,7 +6,7 @@
       <a-button @click="resetForm" class="w-full md:w-auto">
         <span class="md:inline">Đặt lại</span>
       </a-button>
-      <a-button type="primary" @click="showModal" class="w-full md:w-auto">
+      <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">
         <span class="md:inline">Thêm mới</span>
       </a-button>
     </div>
@@ -26,13 +26,13 @@
           <template v-if="column.key === 'action'">
             <div class="flex justify-center">
               <div class="md:flex space-x-2">
-                <a-button type="link" size="small" @click="editItem(record)">
+                <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission">
                   <template #icon>
                     <EditOutlined />
                   </template>
                 </a-button>
                 <a-popconfirm placement="topRight" title="Bạn chắc chắn muốn xóa?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
-                  <a-button type="link" danger size="small">
+                  <a-button type="link" danger size="small" :disabled="!settingStore.currentPermission">
                     <template #icon>
                       <DeleteOutlined />
                     </template>
@@ -68,6 +68,7 @@
 </template>
 
 <script setup>
+const settingStore = useSettingStore();
 const { RestApi } = useApi();
 const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
 const columns = [
