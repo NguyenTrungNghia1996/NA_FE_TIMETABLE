@@ -12,6 +12,7 @@ export const useSettingStore = defineStore(
       },
       menu: [],
       permissions: [],
+      currentPermission: 0,
     }),
     actions: {
       setLoading(value) {
@@ -26,11 +27,15 @@ export const useSettingStore = defineStore(
       setPermissions(value) {
         this.permissions = value;
       },
+      setCurrentPermission(value) {
+        this.currentPermission = value;
+      },
     },
     getters: {
       menuItems: state => state.menu,
       menuPermissions: state => state.permissions,
       isLoading: state => state.loading.isActive,
+      currentPermission: state => state.currentPermission,
     },
     // persist: {
     //   // storage: piniaPluginPersistedstate.localStorage(),

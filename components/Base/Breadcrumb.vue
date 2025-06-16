@@ -35,7 +35,7 @@ const PERMISSION_STATE = {
   EDIT: 2,
 };
 
-// Quyền của route hiện tại
+// Quyền của route hiện tại, lưu cả vào store
 const currentPermission = ref(PERMISSION_STATE.NO_ACCESS);
 const permissionLabel = computed(() => {
   switch (currentPermission.value) {
@@ -89,12 +89,14 @@ const updateBreadcrumb = () => {
   // Tính quyền hiện tại dựa trên menu matched
   if (matchedItems.length) {
     const currentItem = matchedItems[matchedItems.length - 1];
-    const parentKey = matchedItems.length > 1 ? matchedItems[matchedItems.length - 2].key : 'menu';
+    const parentKey =
+      matchedItems.length > 1 ? matchedItems[matchedItems.length - 2].key : 'menu';
     const parentPerm = permissionMap.value[parentKey] ?? 0;
     currentPermission.value = (parentPerm >> currentItem.permissionBit) & 0b11;
   } else {
     currentPermission.value = PERMISSION_STATE.NO_ACCESS;
   }
+  settingStore.setCurrentPermission(currentPermission.value);
 
   // Thêm trang chủ nếu không phải là trang chủ
   if (breadcrumbItems.value.length === 0 || breadcrumbItems.value[0].path !== "/") {
