@@ -11,6 +11,7 @@ export const useSettingStore = defineStore(
         transparent: false,
       },
       menu: [],
+      permissions: [],
     }),
     actions: {
       setLoading(value) {
@@ -22,9 +23,13 @@ export const useSettingStore = defineStore(
       setMenu(value) {
         this.menu = value;
       },
+      setPermissions(value) {
+        this.permissions = value;
+      },
     },
     getters: {
       menuItems: state => state.menu,
+      menuPermissions: state => state.permissions,
       isLoading: state => state.loading.isActive,
     },
     // persist: {
