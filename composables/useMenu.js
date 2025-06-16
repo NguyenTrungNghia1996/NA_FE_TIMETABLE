@@ -1,9 +1,18 @@
 import { useSettingStore } from "~/stores/settingStore";
 import useApi from "~/composables/useApi";
+import { computed } from "vue";
 
 export const useMenu = () => {
   const { RestApi } = useApi();
   const settingStore = useSettingStore();
+
+  const permissionMap = computed(() => {
+    const map = {};
+    for (const { key, permissionValue } of settingStore.menuPermissions) {
+      map[key] = permissionValue;
+    }
+    return map;
+  });
 
   const buildTree = items => {
     const map = new Map();
@@ -42,6 +51,20 @@ export const useMenu = () => {
     return roots;
   };
 
+  const filterMenu = (nodes, parentKey = "menu") => {
+    return nodes
+      .map(node => {
+        const permVal = permissionMap.value[parentKey] ?? 0;
+        const permission = (permVal >> node.permissionBit) & 0b11;
+        const children = node.children ? filterMenu(node.children, node.key) : [];
+        if (permission > 0 || children.length > 0) {
+          return { ...node, children };
+        }
+        return null;
+      })
+      .filter(Boolean);
+  };
+
   const loadMenu = async () => {
     try {
       const { data } = await RestApi.menu.list();
@@ -55,5 +78,7 @@ export const useMenu = () => {
     }
   };
 
-  return { loadMenu };
+  const visibleMenu = computed(() => filterMenu(settingStore.menu));
+
+  return { loadMenu, visibleMenu };
 };

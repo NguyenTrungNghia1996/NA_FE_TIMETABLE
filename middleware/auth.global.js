@@ -2,6 +2,12 @@ import { useUserStore } from "~~/stores/userStore";
 import { useSettingStore } from "~~/stores/settingStore";
 import { useJwt } from "@vueuse/integrations/useJwt";
 import { useMenu } from "~~/composables/useMenu";
+const DEFAULT_PERMISSIONS = [
+  { key: "menu", permissionValue: 21 },
+  { key: "menu-plvuxq63o0", permissionValue: 0 },
+  { key: "menu-c8u2jgnoto", permissionValue: 1 },
+  { key: "menu-f5fh5fri05", permissionValue: 1 },
+];
 
 export default defineNuxtRouteMiddleware(async to => {
   // Bỏ qua middleware nếu đang ở trang login
@@ -21,6 +27,9 @@ export default defineNuxtRouteMiddleware(async to => {
     }
     if (settingStore.menu.length === 0) {
       await loadMenu();
+    }
+    if (settingStore.menuPermissions.length === 0) {
+      settingStore.setPermissions(DEFAULT_PERMISSIONS);
     }
   } catch (error) {
     console.error("JWT validation error:", error);

@@ -41,6 +41,12 @@ definePageMeta({ layout: "auth" });
 const { RestApi } = useApi();
 const userStore = useUserStore();
 const { loadMenu } = useMenu();
+const DEFAULT_PERMISSIONS = [
+  { key: "menu", permissionValue: 21 },
+  { key: "menu-plvuxq63o0", permissionValue: 0 },
+  { key: "menu-c8u2jgnoto", permissionValue: 1 },
+  { key: "menu-f5fh5fri05", permissionValue: 1 },
+];
 const { rememberMe, saveCredentials, getCredentials, clearCredentials } = useAuth();
 const savedCredentials = getCredentials();
 const form = reactive({
@@ -61,6 +67,7 @@ const handleLogin = async () => {
         saveCredentials(form.username, form.password);
       }
       await userStore.setUser(data.value.data);
+      settingStore.setPermissions(DEFAULT_PERMISSIONS);
       await loadMenu();
       message.success("Đăng nhập thành công!");
       navigateTo("/dashboard");
