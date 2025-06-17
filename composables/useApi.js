@@ -34,6 +34,9 @@ let ENDPOINTS = {
   //CLASSROOM
   CLASSROOM: "/api/phonghoc",
   CLASSROOM_DETAIL: "/api/phonghoc/detail",
+  //SCHOOL_PERIOD
+  SCHOOL_PERIOD: "/api/tiethoc",
+  SCHOOL_PERIOD_DETAIL: "/api/tiethoc/detail",
 
   S3: "/api/presigned_url",
 };
@@ -129,6 +132,7 @@ class RestApi {
     this.grade_level = new GradeLevel(this.request);
     this.roles = new Roles(this.request);
     this.classroom = new Classroom(this.request);
+    this.school_period = new SchoolPeriod(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -415,6 +419,26 @@ class Classroom {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.CLASSROOM, data);
+  }
+}
+class SchoolPeriod {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.SCHOOL_PERIOD, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.SCHOOL_PERIOD_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.SCHOOL_PERIOD, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.SCHOOL_PERIOD, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.SCHOOL_PERIOD, data);
   }
 }
 export default () => {
