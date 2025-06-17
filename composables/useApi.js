@@ -37,6 +37,9 @@ let ENDPOINTS = {
   //SCHOOL_PERIOD
   SCHOOL_PERIOD: "/api/tiethoc",
   SCHOOL_PERIOD_DETAIL: "/api/tiethoc/detail",
+  //SCHOOL_DAY
+  SCHOOL_DAY: "/api/ngayhoc",
+  SCHOOL_DAY_DETAIL: "/api/ngayhoc/detail",
 
   S3: "/api/presigned_url",
 };
@@ -132,6 +135,7 @@ class RestApi {
     this.grade_level = new GradeLevel(this.request);
     this.roles = new Roles(this.request);
     this.classroom = new Classroom(this.request);
+    this.school_day = new SchoolDay(this.request);
     this.school_period = new SchoolPeriod(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
@@ -419,6 +423,26 @@ class Classroom {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.CLASSROOM, data);
+  }
+}
+class SchoolDay {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.SCHOOL_DAY, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.SCHOOL_DAY_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.SCHOOL_DAY, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.SCHOOL_DAY, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.SCHOOL_DAY, data);
   }
 }
 class SchoolPeriod {

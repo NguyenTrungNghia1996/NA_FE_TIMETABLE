@@ -9,6 +9,9 @@
     <a-button type="primary" class="font-roboto w-full md:w-auto" @click="() => { navigateTo('/demo/tiethoc') }">
       Demo: SelectSchoolPeriod (Tiết học)
     </a-button>
+    <a-button type="primary" class="font-roboto w-full md:w-auto" @click="() => { navigateTo('/demo/ngayhoc') }">
+      Demo: SelectSchoolDay (Ngày học)
+    </a-button>
     <a-button type="primary" class="font-roboto w-full md:w-auto" @click="() => { navigateTo('/demo/diemtruong') }">
       Demo: SelectSchoolSite (Điểm trường)
     </a-button>
