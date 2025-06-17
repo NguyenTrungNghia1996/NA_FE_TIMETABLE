@@ -102,7 +102,6 @@ const pagination = reactive({
 });
 
 const formState = reactive({
-  id: null,
   ten: '',
   id_ca_hoc: []
 });
@@ -152,7 +151,7 @@ const handleSearch = async () => {
 
 const showModal = () => {
   isEdit.value = false;
-  Object.assign(formState, { id: null, ten: '', id_ca_hoc: [] });
+  Object.assign(formState, { ten: '', id_ca_hoc: [] });
   visible.value = true;
 };
 
@@ -182,7 +181,7 @@ const handleOk = async () => {
     if (isEdit.value) {
       res = await RestApi.school_period.update({ body: { ...formState } });
     } else {
-      if (formState.id !== null) delete formState.id;
+      if (formState.id) delete formState.id;
       res = await RestApi.school_period.create({ body: { ...formState } });
     }
     if (res.data.value?.status === 'success') {
