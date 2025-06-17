@@ -156,14 +156,22 @@ const showModal = () => {
   visible.value = true;
 };
 
-const editItem = (record) => {
+const editItem = async (record) => {
   isEdit.value = true;
-  Object.assign(formState, {
-    id: record.id,
-    ten: record.ten,
-    id_ca_hoc: record.id_ca_hoc || []
-  });
-  visible.value = true;
+  try {
+    const { data } = await RestApi.school_period.detail({ params: { id: record.id } });
+    if (data.value?.status === 'success') {
+      const detail = data.value.data;
+      Object.assign(formState, {
+        id: detail.id,
+        ten: detail.ten,
+        id_ca_hoc: detail.id_Ca_hoc || []
+      });
+      visible.value = true;
+    }
+  } catch (err) {
+    message.error('Không thể lấy dữ liệu chi tiết');
+  }
 };
 
 const handleOk = async () => {
