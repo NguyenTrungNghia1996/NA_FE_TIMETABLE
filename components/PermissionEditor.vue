@@ -1,5 +1,5 @@
 <template>
-  <a-table :columns="menuColumns" :data-source="flatMenuData" size="small" bordered :pagination="false" :scroll="{ y: '70vh' }">
+  <a-table :columns="menuColumns" :data-source="flatMenuData" size="small" bordered :pagination="false" :scroll="{ y: '60vh' }">
     <template #bodyCell="{ column, record }">
       <template v-if="column.dataIndex === 'permission' && record.permissionBit !== undefined">
         <a-radio-group size="small" option-type="button" button-style="solid" :value="getPermission(record.key, record.permissionBit)" @change="e => setPermission(record.key, record.permissionBit, e.target.value)">
