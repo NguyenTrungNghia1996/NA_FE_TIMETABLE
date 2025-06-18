@@ -65,9 +65,7 @@
         <a-form-item label="Đường dẫn" name="url">
           <a-input v-model:value="formState.url" />
         </a-form-item>
-        <a-form-item label="Icon" name="icon">
-          <a-input v-model:value="formState.icon" />
-        </a-form-item>
+        <IconPicker v-model="formState.icon" />
         <!-- <a-form-item label="Menu cha" v-if="!currentParentId">
           <a-tree-select
             v-model:value="formState.parent_Id"
