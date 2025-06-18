@@ -1,24 +1,5 @@
 <template>
   <a-form-item :label="label" :name="name" :rules="rules">
-    <!-- <a-select
-      show-search
-      class="w-full"
-      :value="modelValue"
-      @update:value="val => $emit('update:modelValue', val)"
-      :placeholder="placeholder"
-      allow-clear
-      :options="filteredOptions"
-      :filter-option="false"
-      @search="onSearch"
-    >
-      <template #option="{ value }">
-        <div class="flex items-center gap-2">
-          <Icon :name="value" />
-          <span>{{ value.replace('ant-design:', '') }}</span>
-        </div>
-      </template>
-</a-select> -->
-
     <div class="flex items-center gap-2 w-full">
       <a-select show-search class="flex-1" :value="modelValue" @update:value="val => $emit('update:modelValue', val)" :placeholder="placeholder" allow-clear :options="filteredOptions" :filter-option="false" @search="onSearch">
         <template #option="{ value }">
