@@ -1,25 +1,24 @@
 <template>
-  <div class="p-4" @mouseup="endDrag" @mouseleave="endDrag">
+  <div class="p-4 relative" @mouseup="endDrag" @mouseleave="endDrag">
     <div class="overflow-auto">
       <table class="table-auto border-collapse">
         <thead>
           <tr class="bg-gray-100 text-center">
-            <th class="border px-3 py-2">Tiết / Ngày</th>
+            <th class="border px-3 py-1 w-20">Tiết / Ngày</th>
             <th v-for="ngay in block.ds_Ngay" :key="ngay.id" class="border px-3 py-2">
-              Thứ {{ ngay.id }}
+              {{ weekDays[ngay.id]?.label || `Thứ ${ngay.id}` }}
             </th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="tietIndex in block.ds_Ngay[0].ds_Tiet.length" :key="tietIndex">
-            <td class="border px-2 py-2 text-center font-medium bg-gray-50">
+            <td class="border text-center font-medium bg-gray-50">
               Tiết {{ tietIndex }}
             </td>
             <td v-for="ngay in block.ds_Ngay" :key="ngay.id" @mousedown.left.prevent="startDrag(tietIndex, ngay.id)" @mouseover="dragOver(tietIndex, ngay.id)" @contextmenu.prevent="openContextMenu($event, tietIndex, ngay.id)" :class="[
               'border text-center font-bold transition-colors duration-150 ease-in-out',
-              // isSelected(tietIndex, ngay.id) ? '' : '',
               getCellClass(tietIndex, ngay.id)
-            ]" style="width: 70px; height: 48px; cursor: pointer;">
+            ]" style="width: 70px; height: 25px; cursor: pointer;">
               {{ getDisplay(tietIndex, ngay.id) }}
             </td>
           </tr>
@@ -45,7 +44,20 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+const weekDays = [1, 2, 3, 4, 5, 6, 7, 8].map(i => {
+  if (i >= 1 && i <= 7) {
+    return {
+      id: i,
+      label: `Thứ ${i}`
+    }
+  } else if (i === 8) {
+    return {
+      id: 8,
+      label: 'Chủ nhật'
+    }
+  }
+})
+
 
 const props = defineProps({
   block: {
@@ -84,16 +96,10 @@ function getCellClass(tiet, ngay) {
   const obj = props.block.ds_Ngay[ngay - 1].ds_Tiet[tiet - 1]
   const isSel = isSelected(tiet, ngay)
 
-  // Trường hợp vừa trạng thái true + được chọn
   if (obj.trang_thai && isSel) return 'bg-red-200 text-red-700 border-blue-400 border-2'
-  
-  // Trạng thái true (❌)
   if (obj.trang_thai) return 'bg-red-100 text-red-600'
-
-  // Được chọn (nhưng chưa trạng thái)
   if (isSel) return 'bg-blue-100 text-blue-700 border-blue-400 border-2'
 
-  // Mặc định
   return 'bg-white text-gray-700'
 }
 
@@ -121,6 +127,7 @@ function updateRectangleSelection(endTiet, endNgay) {
   const maxTiet = Math.max(startTiet, endTiet)
   const minNgay = Math.min(startNgay, endNgay)
   const maxNgay = Math.max(startNgay, endNgay)
+
   selected.splice(0)
   selectedMap.clear()
   for (let tiet = minTiet; tiet <= maxTiet; tiet++) {
@@ -132,11 +139,14 @@ function updateRectangleSelection(endTiet, endNgay) {
 }
 
 function openContextMenu(event, tiet, ngay) {
+  const container = event.currentTarget.closest('.p-4')
+  const rect = container.getBoundingClientRect()
+
   contextMenu.visible = true
   contextMenu.tiet = tiet
   contextMenu.ngay = ngay
-  contextMenu.x = event.clientX
-  contextMenu.y = event.clientY
+  contextMenu.x = event.clientX - rect.left
+  contextMenu.y = event.clientY - rect.top
 }
 
 function applyToSelected(value) {

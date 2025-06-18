@@ -34,13 +34,14 @@ let ENDPOINTS = {
   //CLASSROOM
   CLASSROOM: "/api/phonghoc",
   CLASSROOM_DETAIL: "/api/phonghoc/detail",
+  CLASSROOM_BUSY:"api/phonghoc/tietban",
   //SCHOOL_PERIOD
   SCHOOL_PERIOD: "/api/tiethoc",
   SCHOOL_PERIOD_DETAIL: "/api/tiethoc/detail",
   //SCHOOL_DAY
   SCHOOL_DAY: "/api/ngayhoc",
   SCHOOL_DAY_DETAIL: "/api/ngayhoc/detail",
-
+  ///api/phonghoc/tietban
   S3: "/api/presigned_url",
 };
 import { useUserStore } from "~~/stores/userStore";
@@ -423,6 +424,12 @@ class Classroom {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.CLASSROOM, data);
+  }
+  async get_busy(data) {
+    return await this.request.get(ENDPOINTS.CLASSROOM_BUSY, data);
+  }
+  async update_busy(data) {
+    return await this.request.post(ENDPOINTS.CLASSROOM_BUSY, data);
   }
 }
 class SchoolDay {

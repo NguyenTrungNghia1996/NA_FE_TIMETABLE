@@ -18,6 +18,13 @@
           <template v-if="column.key === 'action'">
             <div class="flex justify-center gap-2">
               <div class="hidden md:flex space-x-2">
+                <a-tooltip title="Tiết bận">
+                  <a-button type="link" size="small" @click="editBusy(record)" :disabled="!settingStore.currentPermission">
+                    <template #icon>
+                      <CalendarOutlined />
+                    </template>
+                  </a-button>
+                </a-tooltip>
                 <a-tooltip title="Sửa">
                   <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission">
                     <template #icon>
@@ -82,12 +89,24 @@
         </div>
       </a-form>
     </a-modal>
+    <a-modal v-model:open="busy_modal" title="Chỉnh sửa tiết bận" @cancel="handleBusyCancel" :width="600" :footer="null">
+      <div v-for="(block) in busy_data.ds_Ca" :key="block.id" style="margin-bottom: 2rem;">
+        <Timetable :block="block" />
+      </div>
+      <div class="flex justify-end gap-2 mt-6">
+        <a-button @click="handleBusyCancel">Hủy</a-button>
+        <a-button type="primary" @click="handleBusyOk" :loading="confirmLoading">Cập Nhật</a-button>
+      </div>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
 const settingStore = useSettingStore();
 const { RestApi } = useApi();
+
+const busy_modal = ref(false);
+const busy_data = ref();
 
 const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
 const searchText = ref('');
@@ -126,7 +145,7 @@ const dataSource = ref([]);
 const formState = reactive({
   id: null,
   ten: '',
-  suc_chua: null,
+  suc_chua: 0,
   id_Loai_phong_hoc: null,
   id_Diem_truong: null,
   id_Don_vi: null,
@@ -135,7 +154,7 @@ const formState = reactive({
 
 const rules = {
   ten: [{ required: true, message: 'Nhập tên phòng học', trigger: 'blur' }],
-  suc_chua: [{ required: true, type: 'number', message: 'Nhập sức chứa', trigger: 'change' }],
+  suc_chua: [{ required: true, type: 'number', message: 'Nhập sức chứa', trigger: 'blur' }],
   id_Loai_phong_hoc: [{ required: true, message: 'Chọn loại phòng học', trigger: 'change' }],
   id_Diem_truong: [{ required: true, message: 'Chọn điểm trường', trigger: 'change' }]
 };
@@ -198,15 +217,27 @@ const editItem = async (record) => {
     message.error('Không thể tải dữ liệu phòng học');
   }
 };
-
+const editBusy = async (record) => {
+  try {
+    const { data } = await RestApi.classroom.get_busy({ params: { id: record.id } });
+    if (data.value?.status === 'success') {
+      busy_data.value = data.value.data
+      busy_modal.value = true;
+    }
+  } catch {
+    message.error('Không thể tải dữ liệu phòng học');
+  }
+};
 const handleOk = async () => {
   try {
     await formRef.value.validate();
-    confirmLoading.value = true;;
+    confirmLoading.value = true;
     if (isEdit.value) {
       const { data, error } = await RestApi.classroom.update({ body: { ...formState } })
       if (data.value?.status === 'success') {
         message.success(data.value.message || 'Cập nhật thành công')
+        await fetchData({ ...param.value });
+        visible.value = false
       } else {
         throw new Error(error.value?.data?.message || 'Cập nhật không thành công')
       }
@@ -217,22 +248,43 @@ const handleOk = async () => {
       const { data, error } = await RestApi.classroom.create({ body: { ...formState } })
       if (data.value?.status === 'success') {
         message.success(data.value.message || 'Thêm mới thành công')
+        await fetchData({ ...param.value });
+        visible.value = false
       } else {
         throw new Error(error.value?.data?.message || 'Thêm mới không thành công')
       }
     }
   } catch (error) {
-     message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin')
+    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin')
   } finally {
     confirmLoading.value = false;
   }
 };
-
+const handleBusyOk = async () => {
+  try {
+    confirmLoading.value = true;
+    const { data, error } = await RestApi.classroom.update_busy({ body: busy_data.value });
+    if (data.value?.status === 'success') {
+      message.success(data.value.message || 'Cập nhật thành công')
+      busy_modal.value = false
+    } else {
+      throw new Error(error.value?.data?.message || 'Cập nhật không thành công')
+    }
+  }
+  catch (error) {
+    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin')
+  } finally {
+    confirmLoading.value = false;
+  }
+}
 const handleCancel = () => {
   formRef.value?.resetFields();
   visible.value = false;
 };
-
+const handleBusyCancel = () => {
+  busy_data.value = [];
+  busy_modal.value = false;
+}
 const deleteItem = async (id) => {
   try {
     const { data } = await RestApi.classroom.delete({ params: { id } });
