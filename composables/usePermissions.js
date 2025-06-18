@@ -46,12 +46,14 @@ export const usePermissions = () => {
       key,
       permissionValue,
     }));
-    settingStore.setPermissions(merged);
+    // settingStore.setPermissions(merged);
+    settingStore.setPermissions(DEFAULT_PERMISSIONS);
     return merged;
   };
 
   const setPermissions = perms => {
-    settingStore.setPermissions(perms ||DEFAULT_PERMISSIONS);
+    // settingStore.setPermissions(perms ||DEFAULT_PERMISSIONS);
+    settingStore.setPermissions(DEFAULT_PERMISSIONS);
   };
 
   return { loadPermissions, setPermissions };
