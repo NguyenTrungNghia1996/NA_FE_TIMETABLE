@@ -7,11 +7,13 @@ const props = defineProps({
   menubar: { type: Boolean, default: false },
   plugins: {
     type: Array,
-    default: () => ["advlist", "autolink", "lists", "link", "image", "charmap", "preview", "anchor", "searchreplace", "visualblocks", "code", "fullscreen", "insertdatetime", "media", "table", "code", "help", "wordcount"],
+    default: () => ["advlist", "autolink", "lists", "link", "image", "charmap", "preview", "anchor", "searchreplace", "visualblocks", "code", "fullscreen", "insertdatetime", "media", "table", "code", "help", "wordcount", "emoticons", "autosave", "spellchecker", "hr", "pagebreak", "directionality"],
   },
   toolbar: {
     type: String,
-    default: "undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media | code",
+    default: "undo redo | blocks | bold italic underline strikethrough | \
+alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | \
+link image media emoticons | insertdatetime hr pagebreak | spellchecker code fullscreen help",
   },
 });
 
