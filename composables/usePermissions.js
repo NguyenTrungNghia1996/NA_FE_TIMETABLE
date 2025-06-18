@@ -4,24 +4,26 @@ import useApi from "~/composables/useApi";
 export const usePermissions = () => {
   const { RestApi } = useApi();
   const settingStore = useSettingStore();
-  const DEFAULT_PERMISSIONS = [
-    {
-      key: "menu",
-      permissionValue: 21
-    },
-    {
-      key: "menu-plvuxq63o0",
-      permissionValue: 0
-    },
-    {
-      key: "menu-c8u2jgnoto",
-      permissionValue: 5461
-    },
-    {
-      key: "menu-f5fh5fri05",
-      permissionValue: 85
-    }
-  ];
+  const DEFAULT_PERMISSIONS =
+    [
+      {
+        "key": "menu",
+        "permissionValue": 42
+      },
+      {
+        "key": "menu-plvuxq63o0",
+        "permissionValue": 0
+      },
+      {
+        "key": "menu-c8u2jgnoto",
+        "permissionValue": 699050
+      },
+      {
+        "key": "menu-f5fh5fri05",
+        "permissionValue": 170
+      }
+
+    ];
   const loadPermissions = async roleIds => {
     const ids = Array.isArray(roleIds) ? roleIds : [roleIds];
     const allPerms = [];
