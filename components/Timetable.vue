@@ -57,15 +57,12 @@ const weekDays = [1, 2, 3, 4, 5, 6, 7, 8].map(i => {
     }
   }
 })
-
-
 const props = defineProps({
   block: {
     type: Object,
     required: true,
   },
 })
-
 const selected = reactive([])
 const selectedMap = reactive(new Set())
 const isDragging = ref(false)
