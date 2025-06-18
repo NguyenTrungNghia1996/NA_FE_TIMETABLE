@@ -1,69 +1,43 @@
 <template>
   <div class="p-4" @mouseup="endDrag" @mouseleave="endDrag">
-    <a-card title="Thời khóa biểu" bordered class="shadow-lg">
-      <div class="overflow-auto">
-        <table class="table-auto border-collapse w-full">
-          <thead>
-            <tr class="bg-gray-100 text-center">
-              <th class="border px-3 py-2">Tiết / Ngày</th>
-              <th v-for="ngay in block.ds_Ngay" :key="ngay.id" class="border px-3 py-2">
-                Thứ {{ ngay.id }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="tietIndex in block.ds_Ngay[0].ds_Tiet.length" :key="tietIndex">
-              <td class="border px-2 py-2 text-center font-medium bg-gray-50">
-                Tiết {{ tietIndex }}
-              </td>
-              <td
-                v-for="ngay in block.ds_Ngay"
-                :key="ngay.id"
-                @mousedown.left.prevent="startDrag(tietIndex, ngay.id)"
-                @mouseover="dragOver(tietIndex, ngay.id)"
-                @contextmenu.prevent="openContextMenu($event, tietIndex, ngay.id)"
-                :class="[
-                  'border text-center font-bold select-none transition',
-                  isSelected(tietIndex, ngay.id) ? 'ring-2 ring-blue-400' : '',
-                  getCellClass(tietIndex, ngay.id)
-                ]"
-                style="width: 60px; height: 48px; cursor: pointer;"
-              >
-                {{ getDisplay(tietIndex, ngay.id) }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="mt-4 flex justify-between items-center">
-        <a-button type="primary" :disabled="selected.length === 0" @click="toggleSelectedMany">
-          Chuyển trạng thái {{ selected.length }} ô đã chọn
-        </a-button>
-
-        <div class="text-sm text-gray-500 italic" v-if="selected.length">
-          Đang chọn:
-          <span v-for="(s, idx) in selected" :key="idx">[Thứ {{ s.ngay }}, Tiết {{ s.tiet }}]</span>
-        </div>
-      </div>
-    </a-card>
+    <div class="overflow-auto">
+      <table class="table-auto border-collapse">
+        <thead>
+          <tr class="bg-gray-100 text-center">
+            <th class="border px-3 py-2">Tiết / Ngày</th>
+            <th v-for="ngay in block.ds_Ngay" :key="ngay.id" class="border px-3 py-2">
+              Thứ {{ ngay.id }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="tietIndex in block.ds_Ngay[0].ds_Tiet.length" :key="tietIndex">
+            <td class="border px-2 py-2 text-center font-medium bg-gray-50">
+              Tiết {{ tietIndex }}
+            </td>
+            <td v-for="ngay in block.ds_Ngay" :key="ngay.id" @mousedown.left.prevent="startDrag(tietIndex, ngay.id)" @mouseover="dragOver(tietIndex, ngay.id)" @contextmenu.prevent="openContextMenu($event, tietIndex, ngay.id)" :class="[
+              'border text-center font-bold transition-colors duration-150 ease-in-out',
+              // isSelected(tietIndex, ngay.id) ? '' : '',
+              getCellClass(tietIndex, ngay.id)
+            ]" style="width: 70px; height: 48px; cursor: pointer;">
+              {{ getDisplay(tietIndex, ngay.id) }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- Context menu -->
-    <div
-      v-if="contextMenu.visible"
-      class="absolute bg-white border rounded shadow-lg z-50"
-      :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px', width: '200px' }"
-      @mouseleave="contextMenu.visible = false"
-    >
+    <div v-if="contextMenu.visible" class="absolute bg-white border rounded shadow-lg z-50" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px', width: '200px' }" @mouseleave="contextMenu.visible = false">
       <ul class="divide-y divide-gray-200">
         <li class="px-4 py-2 hover:bg-gray-100 cursor-pointer" @click="applyToSelected(true)">
-          ❌ Đặt tất cả ô đã chọn là <strong>Không được xếp</strong>
+          ❌ <strong>Không được xếp</strong>
         </li>
         <li class="px-4 py-2 hover:bg-gray-100 cursor-pointer" @click="applyToSelected(false)">
-          ✅ Đặt tất cả ô đã chọn là <strong>Xếp được</strong>
+          ✅ <strong>Xếp được</strong>
         </li>
         <li class="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500" @click="clearAll()">
-          🧹 Xóa toàn bộ: Đặt tất cả ô là <strong>Xếp được</strong>
+          🧹 <strong>Xóa toàn bộ</strong>
         </li>
       </ul>
     </div>
@@ -108,7 +82,19 @@ function getDisplay(tiet, ngay) {
 
 function getCellClass(tiet, ngay) {
   const obj = props.block.ds_Ngay[ngay - 1].ds_Tiet[tiet - 1]
-  return obj.trang_thai ? 'bg-red-100 text-red-600' : 'bg-white text-gray-700'
+  const isSel = isSelected(tiet, ngay)
+
+  // Trường hợp vừa trạng thái true + được chọn
+  if (obj.trang_thai && isSel) return 'bg-red-200 text-red-700 border-blue-400 border-2'
+  
+  // Trạng thái true (❌)
+  if (obj.trang_thai) return 'bg-red-100 text-red-600'
+
+  // Được chọn (nhưng chưa trạng thái)
+  if (isSel) return 'bg-blue-100 text-blue-700 border-blue-400 border-2'
+
+  // Mặc định
+  return 'bg-white text-gray-700'
 }
 
 function startDrag(tiet, ngay) {
@@ -143,15 +129,6 @@ function updateRectangleSelection(endTiet, endNgay) {
       selectedMap.add(key(tiet, ngay))
     }
   }
-}
-
-function toggleSelectedMany() {
-  selected.forEach(({ tiet, ngay }) => {
-    const cell = props.block.ds_Ngay[ngay - 1].ds_Tiet[tiet - 1]
-    cell.trang_thai = !cell.trang_thai
-  })
-  selected.splice(0)
-  selectedMap.clear()
 }
 
 function openContextMenu(event, tiet, ngay) {

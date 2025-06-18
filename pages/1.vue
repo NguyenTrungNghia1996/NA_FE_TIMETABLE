@@ -3,7 +3,7 @@
     <h1>📅 Danh sách Thời Khóa Biểu</h1>
 
     <div v-for="(block) in data" :key="block.id" style="margin-bottom: 2rem;">
-      <h2>Thời khóa biểu khối {{ block.id }}</h2>
+
       <Timetable :block="block" />
     </div>
   </div>
