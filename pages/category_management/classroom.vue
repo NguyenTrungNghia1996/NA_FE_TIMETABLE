@@ -49,6 +49,11 @@
                   </a-button>
                   <template #overlay>
                     <a-menu>
+                      <a-menu-item @click="editBusy(record)" :disabled="!settingStore.currentPermission">
+                        <template #icon>
+                          <CalendarOutlined />
+                        </template>Sửa tiết bận
+                      </a-menu-item>
                       <a-menu-item @click="editItem(record)" :disabled="!settingStore.currentPermission">
                         <template #icon>
                           <EditOutlined />
