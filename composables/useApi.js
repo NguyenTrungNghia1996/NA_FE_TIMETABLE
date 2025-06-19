@@ -20,6 +20,9 @@ let ENDPOINTS = {
   CLASSROOM_TYPE_DETAIL: "/api/loaiphonghoc/detail",
   //KNOWLEDGE
   KNOWLEDGE: "/api/khoikienthuc",
+  //SUBJECT
+  SUBJECT: "/api/monhoc",
+  SUBJECT_DETAIL: "/api/monhoc/detail",
   //EXPERTISE
   EXPERTISE: "/api/tochuyenmon",
   //GRADE_LEVEL
@@ -134,6 +137,7 @@ class RestApi {
     this.knowledge = new Knowledge(this.request);
     this.expertise = new Expertise(this.request);
     this.grade_level = new GradeLevel(this.request);
+    this.subject = new Subject(this.request);
     this.roles = new Roles(this.request);
     this.classroom = new Classroom(this.request);
     this.school_day = new SchoolDay(this.request);
@@ -430,6 +434,26 @@ class Classroom {
   }
   async update_busy(data) {
     return await this.request.post(ENDPOINTS.CLASSROOM_BUSY, data);
+  }
+}
+class Subject {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.SUBJECT, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.SUBJECT_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.SUBJECT, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.SUBJECT, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.SUBJECT, data);
   }
 }
 class SchoolDay {
