@@ -36,5 +36,8 @@
     <a-button type="primary" class="font-roboto w-full md:w-auto" @click="() => { navigateTo('/demo/role') }">
       Demo: SelectRole (Nhóm quyền)
     </a-button>
+    <a-button type="primary" class="font-roboto w-full md:w-auto" @click="() => { navigateTo('/demo/monhoc') }">
+      Demo: SelectSubject (Môn học)
+    </a-button>
   </div>
 </template>

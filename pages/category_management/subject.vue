@@ -43,32 +43,36 @@
 
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa môn học' : 'Thêm mới môn học'" @cancel="handleCancel" :width="700">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
-        <a-form-item label="Tên môn học" name="ten">
-          <a-input v-model:value="formState.ten" placeholder="Nhập tên môn học" :maxlength="200" show-count />
-        </a-form-item>
-        <SelectClassroomType v-model="formState.Id_loai_phong_hoc" name="Id_loai_phong_hoc" :rules="rules.Id_loai_phong_hoc" />
-        <SelectKnowledge v-model="formState.Id_khoi_kien_thuc" name="Id_khoi_kien_thuc" />
-        <a-form-item>
-          <a-checkbox v-model:checked="formState.Do_GVCN_phu_trach">Do GVCN phụ trách</a-checkbox>
-        </a-form-item>
-        <a-form-item>
-          <a-checkbox v-model:checked="formState.Khong_can_phong_hoc">Không cần phòng học</a-checkbox>
-        </a-form-item>
-        <a-form-item>
-          <a-checkbox v-model:checked="formState.Hoc_cach_ngay">Học cách ngày</a-checkbox>
-        </a-form-item>
-        <a-form-item>
-          <a-checkbox v-model:checked="formState.Xep_thanh_cap">Xếp thành cặp</a-checkbox>
-        </a-form-item>
-        <a-form-item label="Số tiết tối đa một ca" name="So_tiet_toi_da_mot_ca">
-          <a-input-number v-model:value="formState.So_tiet_toi_da_mot_ca" :min="1" style="width: 100%" />
-        </a-form-item>
-        <a-form-item label="Số tiết tối đa hai ca" name="So_tiet_toi_da_hai_ca">
-          <a-input-number v-model:value="formState.So_tiet_toi_da_hai_ca" :min="1" style="width: 100%" />
-        </a-form-item>
-        <a-form-item>
-          <a-checkbox v-model:checked="formState.La_mon_tu_chon">Là môn tự chọn</a-checkbox>
-        </a-form-item>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <a-form-item label="Tên môn học" name="ten">
+            <a-input v-model:value="formState.ten" placeholder="Nhập tên môn học" :maxlength="200" show-count />
+          </a-form-item>
+          <SelectClassroomType v-model="formState.Id_loai_phong_hoc" name="Id_loai_phong_hoc" :rules="rules.Id_loai_phong_hoc" />
+          <SelectKnowledge v-model="formState.Id_khoi_kien_thuc" name="Id_khoi_kien_thuc" />
+          <a-form-item label="Số tiết tối đa một ca" name="So_tiet_toi_da_mot_ca">
+            <a-input-number v-model:value="formState.So_tiet_toi_da_mot_ca" :min="1" style="width: 100%" />
+          </a-form-item>
+          <a-form-item label="Số tiết tối đa hai ca" name="So_tiet_toi_da_hai_ca">
+            <a-input-number v-model:value="formState.So_tiet_toi_da_hai_ca" :min="1" style="width: 100%" />
+          </a-form-item>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+          <a-form-item>
+            <a-checkbox v-model:checked="formState.Do_GVCN_phu_trach">Do GVCN phụ trách</a-checkbox>
+          </a-form-item>
+          <a-form-item>
+            <a-checkbox v-model:checked="formState.Khong_can_phong_hoc">Không cần phòng học</a-checkbox>
+          </a-form-item>
+          <a-form-item>
+            <a-checkbox v-model:checked="formState.Hoc_cach_ngay">Học cách ngày</a-checkbox>
+          </a-form-item>
+          <a-form-item>
+            <a-checkbox v-model:checked="formState.Xep_thanh_cap">Xếp thành cặp</a-checkbox>
+          </a-form-item>
+          <a-form-item class="md:col-span-2">
+            <a-checkbox v-model:checked="formState.La_mon_tu_chon">Là môn tự chọn</a-checkbox>
+          </a-form-item>
+        </div>
       </a-form>
       <template #footer>
         <div class="flex justify-end space-x-2">
