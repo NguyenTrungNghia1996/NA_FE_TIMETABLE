@@ -4,6 +4,7 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4">
       <a-input-search v-model:value="searchText" placeholder="Tìm kiếm phòng học..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
       <a-button @click="resetSearch" class="w-full md:w-auto">Đặt lại</a-button>
+      <a-button @click="openBusyManager" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Cài đặt tiết bận</a-button>
       <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Thêm mới</a-button>
     </div>
 
@@ -103,14 +104,30 @@
         <a-button type="primary" @click="handleBusyOk" :loading="confirmLoading">Cập Nhật</a-button>
       </div>
     </a-modal>
+    <a-modal v-model:open="busy_manager_modal" title="Cài đặt tiết bận" @cancel="closeBusyManager" :width="800" :footer="null">
+      <a-table :columns="busyColumns" :data-source="dataSource" :pagination="false" bordered size="small" />
+      <div v-if="selectedClassroom && busy_data" class="mt-4">
+        <h3 class="font-medium mb-2">{{ selectedClassroom.ten }}</h3>
+        <div v-for="(block) in busy_data.ds_Ca" :key="block.id" style="margin-bottom: 2rem;">
+          <Timetable :block="block" />
+        </div>
+        <div class="flex justify-end gap-2 mt-6">
+          <a-button @click="closeBusyManager">Hủy</a-button>
+          <a-button type="primary" @click="handleBusyOk" :loading="confirmLoading">Cập Nhật</a-button>
+        </div>
+      </div>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
+import { h } from 'vue'
 const settingStore = useSettingStore();
 const { RestApi } = useApi();
 
 const busy_modal = ref(false);
+const busy_manager_modal = ref(false);
+const selectedClassroom = ref(null);
 const busy_data = ref();
 
 const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
@@ -144,6 +161,22 @@ const columns = [
   { title: 'Điểm trường', dataIndex: 'ten_diem_truong', key: 'ten_diem_truong' },
   { title: 'Bỏ kiểm tra xung đột', key: 'khong_kiem_tra_xung_dot', align: 'center' },
   { title: 'Thao tác', key: 'action', width: 120, align: 'center', fixed: 'right' }
+];
+
+const busyColumns = [
+  {
+    title: 'STT',
+    key: 'stt',
+    width: 60,
+    align: 'center',
+    customRender: ({ index }) => index + 1
+  },
+  {
+    title: 'Tên phòng học',
+    dataIndex: 'ten',
+    key: 'ten',
+    customRender: ({ record }) => h('a', { onClick: () => selectClassroom(record), class: 'text-blue-600 hover:underline' }, record.ten)
+  }
 ];
 
 const dataSource = ref([]);
@@ -199,6 +232,29 @@ const resetSearch = async () => {
   pagination.current = 1;
   param.value.search = '';
   await fetchData({ ...param.value });
+};
+
+const openBusyManager = async () => {
+  await fetchData({ ...param.value });
+  busy_manager_modal.value = true;
+};
+
+const closeBusyManager = () => {
+  busy_manager_modal.value = false;
+  selectedClassroom.value = null;
+  busy_data.value = null;
+};
+
+const selectClassroom = async (record) => {
+  selectedClassroom.value = record;
+  try {
+    const { data } = await RestApi.classroom.get_busy({ params: { id: record.id } });
+    if (data.value?.status === 'success') {
+      busy_data.value = data.value.data;
+    }
+  } catch {
+    message.error('Không thể tải dữ liệu phòng học');
+  }
 };
 
 const showModal = async () => {
