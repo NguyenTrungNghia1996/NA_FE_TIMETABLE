@@ -1,0 +1,282 @@
+<template>
+  <div class="p-2 md:p-4 bg-white min-h-full">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4">
+      <a-input-search v-model:value="searchText" placeholder="Tìm kiếm môn học..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
+      <a-button @click="resetForm" class="w-full md:w-auto">
+        <span class="md:inline">Đặt lại</span>
+      </a-button>
+      <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">
+        <span class="md:inline">Thêm mới</span>
+      </a-button>
+    </div>
+
+    <ClientOnly class="overflow-x-auto">
+      <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: '1000' }" @change="handleTableChange" bordered size="small">
+        <template #bodyCell="{ column, record, index }">
+          <template v-if="column.key === 'stt'">
+            {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
+          </template>
+          <template v-if="column.key === 'bool'">
+            <span>{{ record[column.dataIndex] ? '✔️' : '❌' }}</span>
+          </template>
+          <template v-if="column.key === 'action'">
+            <div class="flex justify-center">
+              <div class="md:flex space-x-2">
+                <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission">
+                  <template #icon>
+                    <EditOutlined />
+                  </template>
+                </a-button>
+                <a-popconfirm placement="topRight" title="Bạn chắc chắn muốn xóa?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
+                  <a-button type="link" danger size="small" :disabled="!settingStore.currentPermission">
+                    <template #icon>
+                      <DeleteOutlined />
+                    </template>
+                  </a-button>
+                </a-popconfirm>
+              </div>
+            </div>
+          </template>
+        </template>
+      </a-table>
+    </ClientOnly>
+
+    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa môn học' : 'Thêm mới môn học'" @cancel="handleCancel" :width="700">
+      <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <a-form-item label="Tên môn học" name="ten">
+            <a-input v-model:value="formState.ten" placeholder="Nhập tên môn học" :maxlength="200" show-count />
+          </a-form-item>
+          <SelectClassroomType v-model="formState.Id_loai_phong_hoc" name="Id_loai_phong_hoc" :rules="rules.Id_loai_phong_hoc" />
+          <SelectKnowledge v-model="formState.Id_khoi_kien_thuc" name="Id_khoi_kien_thuc" />
+          <a-form-item label="Số tiết tối đa một ca" name="So_tiet_toi_da_mot_ca">
+            <a-input-number v-model:value="formState.So_tiet_toi_da_mot_ca" :min="1" style="width: 100%" />
+          </a-form-item>
+          <a-form-item label="Số tiết tối đa hai ca" name="So_tiet_toi_da_hai_ca">
+            <a-input-number v-model:value="formState.So_tiet_toi_da_hai_ca" :min="1" style="width: 100%" />
+          </a-form-item>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+          <a-form-item>
+            <a-checkbox v-model:checked="formState.Do_GVCN_phu_trach">Do GVCN phụ trách</a-checkbox>
+          </a-form-item>
+          <a-form-item>
+            <a-checkbox v-model:checked="formState.Khong_can_phong_hoc">Không cần phòng học</a-checkbox>
+          </a-form-item>
+          <a-form-item>
+            <a-checkbox v-model:checked="formState.Hoc_cach_ngay">Học cách ngày</a-checkbox>
+          </a-form-item>
+          <a-form-item>
+            <a-checkbox v-model:checked="formState.Xep_thanh_cap">Xếp thành cặp</a-checkbox>
+          </a-form-item>
+          <a-form-item class="md:col-span-2">
+            <a-checkbox v-model:checked="formState.La_mon_tu_chon">Là môn tự chọn</a-checkbox>
+          </a-form-item>
+        </div>
+      </a-form>
+      <template #footer>
+        <div class="flex justify-end space-x-2">
+          <a-button @click="handleCancel">Hủy</a-button>
+          <a-button type="primary" @click="handleOk" :loading="confirmLoading">
+            {{ isEdit ? 'Cập nhật' : 'Thêm mới' }}
+          </a-button>
+        </div>
+      </template>
+    </a-modal>
+  </div>
+</template>
+
+<script setup>
+const settingStore = useSettingStore()
+const { RestApi } = useApi()
+
+const searchText = ref('')
+const loading = ref(false)
+const visible = ref(false)
+const confirmLoading = ref(false)
+const isEdit = ref(false)
+const formRef = ref()
+
+const pagination = reactive({
+  current: 1,
+  pageSize: 10,
+  total: 0,
+  showSizeChanger: true,
+  pageSizeOptions: ['1', '10', '20', '50'],
+  showTotal: total => `Tổng ${total} bản ghi`
+})
+
+const columns = [
+  { title: 'STT', key: 'stt', width: 50, align: 'center' },
+  { title: 'Tên môn học', dataIndex: 'ten', key: 'ten', ellipsis: true },
+  { title: 'Loại phòng học', dataIndex: 'ten_loai_phong_hoc', key: 'ten_loai_phong_hoc', ellipsis: true },
+  { title: 'Khối kiến thức', dataIndex: 'ten_khoi_kien_thuc', key: 'ten_khoi_kien_thuc', ellipsis: true },
+  { title: 'Số tiết/ca', dataIndex: 'so_tiet_toi_da_mot_ca', key: 'so_tiet_toi_da_mot_ca', align: 'center' },
+  { title: 'Số tiết/2 ca', dataIndex: 'so_tiet_toi_da_hai_ca', key: 'so_tiet_toi_da_hai_ca', align: 'center' },
+  { title: 'GVCN', dataIndex: 'do_GVCN_phu_trach', key: 'bool', align: 'center' },
+  { title: 'Tự chọn', dataIndex: 'la_mon_tu_chon', key: 'bool', align: 'center' },
+  { title: 'Thao tác', key: 'action', width: 80, align: 'center', fixed: 'right' }
+]
+
+const param = ref({ PageIndex: 1, PageSize: 10, search: '' })
+const dataSource = ref([])
+
+const formState = reactive({
+  ten: '',
+  Id_loai_phong_hoc: undefined,
+  Id_khoi_kien_thuc: undefined,
+  Do_GVCN_phu_trach: false,
+  Khong_can_phong_hoc: false,
+  Hoc_cach_ngay: false,
+  Xep_thanh_cap: false,
+  So_tiet_toi_da_mot_ca: 1,
+  So_tiet_toi_da_hai_ca: 2,
+  La_mon_tu_chon: false
+})
+
+const rules = reactive({
+  ten: [
+    { required: true, message: 'Vui lòng nhập tên môn học', trigger: 'blur' }
+  ],
+  Id_loai_phong_hoc: [
+    { required: true, message: 'Vui lòng chọn loại phòng học', trigger: 'blur' }
+  ],
+  So_tiet_toi_da_mot_ca: [
+    { required: true, message: 'Vui lòng nhập số tiết', trigger: 'blur', type: 'number' }
+  ],
+  So_tiet_toi_da_hai_ca: [
+    { required: true, message: 'Vui lòng nhập số tiết', trigger: 'blur', type: 'number' }
+  ]
+})
+
+const fetchData = async (param) => {
+  try {
+    loading.value = true
+    const { data } = await RestApi.subject.list({ params: param })
+    if (data.value?.status === 'success') {
+      dataSource.value = data.value.data.items || []
+      pagination.total = data.value.data.totalrecord
+    } else {
+      dataSource.value = []
+      pagination.total = 0
+    }
+  } catch (error) {
+    console.error('Error fetching data:', error)
+    message.error('Lỗi khi tải dữ liệu')
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleTableChange = async (pag) => {
+  pagination.current = pag.current
+  pagination.pageSize = pag.pageSize
+  param.value.PageIndex = pag.current
+  param.value.PageSize = pag.pageSize
+  await fetchData({ ...param.value })
+}
+
+const handleSearch = async () => {
+  param.value.search = searchText.value
+  pagination.current = 1
+  await fetchData({ ...param.value })
+}
+
+const showModal = () => {
+  isEdit.value = false
+  Object.assign(formState, {
+    ten: '',
+    Id_loai_phong_hoc: undefined,
+    Id_khoi_kien_thuc: undefined,
+    Do_GVCN_phu_trach: false,
+    Khong_can_phong_hoc: false,
+    Hoc_cach_ngay: false,
+    Xep_thanh_cap: false,
+    So_tiet_toi_da_mot_ca: 1,
+    So_tiet_toi_da_hai_ca: 2,
+    La_mon_tu_chon: false
+  })
+  visible.value = true
+}
+
+const editItem = async (record) => {
+  isEdit.value = true
+  try {
+    const { data } = await RestApi.subject.detail({ params: { Id: record.id } })
+    if (data.value?.status === 'success') {
+      Object.assign(formState, {
+        id: data.value.data.id,
+        ten: data.value.data.ten,
+        Id_loai_phong_hoc: data.value.data.id_loai_phong_hoc,
+        Id_khoi_kien_thuc: data.value.data.id_khoi_kien_thuc,
+        Do_GVCN_phu_trach: data.value.data.do_GVCN_phu_trach,
+        Khong_can_phong_hoc: data.value.data.khong_can_phong_hoc,
+        Hoc_cach_ngay: data.value.data.hoc_cach_ngay,
+        Xep_thanh_cap: data.value.data.xep_thanh_cap,
+        So_tiet_toi_da_mot_ca: data.value.data.so_tiet_toi_da_mot_ca,
+        So_tiet_toi_da_hai_ca: data.value.data.so_tiet_toi_da_hai_ca,
+        La_mon_tu_chon: data.value.data.la_mon_tu_chon
+      })
+      visible.value = true
+    }
+  } catch (err) {
+    message.error('Không thể lấy dữ liệu chi tiết')
+  }
+}
+
+const handleOk = async () => {
+  try {
+    await formRef.value.validate()
+    confirmLoading.value = true
+    const payload = { ...formState }
+    let res
+    if (isEdit.value) {
+      res = await RestApi.subject.update({ body: payload })
+    } else {
+      delete payload.id
+      res = await RestApi.subject.create({ body: payload })
+    }
+    if (res.data.value?.status === 'success') {
+      message.success(res.data.value?.message || 'Thành công')
+      await fetchData({ ...param.value })
+      visible.value = false
+      formRef.value.resetFields()
+    } else {
+      throw new Error(res.error?.value?.data?.message || 'Lỗi không xác định')
+    }
+  } catch (err) {
+    message.error(err.message || 'Lỗi khi lưu thông tin')
+  } finally {
+    confirmLoading.value = false
+  }
+}
+
+const handleCancel = () => {
+  formRef.value.resetFields()
+  visible.value = false
+}
+
+const deleteItem = async (id) => {
+  try {
+    const { data } = await RestApi.subject.delete({ params: { Id: id } })
+    if (data.value?.status === 'success') {
+      message.success(data.value?.message || 'Xóa thành công')
+      await fetchData({ ...param.value })
+    } else {
+      message.error(data.value?.message || 'Không thể xóa')
+    }
+  } catch (err) {
+    message.error('Lỗi khi xóa')
+  }
+}
+
+const resetForm = async () => {
+  if (formRef.value) formRef.value.resetFields()
+  param.value = { PageIndex: 1, PageSize: 10, search: '' }
+  pagination.current = 1
+  pagination.pageSize = 10
+  await fetchData({ ...param.value })
+}
+
+await fetchData({ ...param.value })
+</script>
