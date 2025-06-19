@@ -101,6 +101,7 @@
       </div>
       <div class="flex justify-end gap-2 mt-6">
         <a-button @click="handleBusyCancel">Hủy</a-button>
+        <a-button @click="saveBusy" :loading="confirmLoading">Lưu</a-button>
         <a-button type="primary" @click="handleBusyOk" :loading="confirmLoading">Cập Nhật</a-button>
       </div>
     </a-modal>
@@ -130,6 +131,7 @@
           </div>
           <div class="flex justify-end gap-2 mt-auto pt-2">
             <a-button @click="closeBusyManager">Hủy</a-button>
+            <a-button @click="saveBusy" :loading="confirmLoading">Lưu</a-button>
             <a-button
               type="primary"
               @click="handleBusyOk"
@@ -151,6 +153,7 @@ const settingStore = useSettingStore();
 const { RestApi } = useApi();
 
 const busy_modal = ref(false);
+// ===== Busy manager section start =====
 const busy_manager_modal = ref(false);
 const selectedClassroom = ref(null);
 const busy_data = ref();
@@ -192,6 +195,7 @@ const columns = [
   { title: 'Thao tác', key: 'action', width: 120, align: 'center', fixed: 'right' }
 ];
 
+// ===== Busy manager section start =====
 const busyColumns = [
   {
     title: 'STT',
@@ -206,6 +210,7 @@ const busyColumns = [
     key: 'ten',
     customRender: ({ record }) => h('a', { onClick: () => selectClassroom(record), class: 'text-blue-600 hover:underline' }, record.ten)
   }
+
 ];
 
 const dataSource = ref([]);
@@ -263,6 +268,7 @@ const resetSearch = async () => {
   await fetchData({ ...param.value });
 };
 
+// ===== Busy manager section start =====
 const openBusyManager = async () => {
   await fetchData({ ...param.value });
   busy_manager_modal.value = true;
@@ -350,23 +356,35 @@ const handleOk = async () => {
     confirmLoading.value = false;
   }
 };
-const handleBusyOk = async () => {
+// ===== Busy manager section start =====
+const updateBusy = async () => {
   try {
     confirmLoading.value = true;
     const { data, error } = await RestApi.classroom.update_busy({ body: busy_data.value });
     if (data.value?.status === 'success') {
-      message.success(data.value.message || 'Cập nhật thành công')
-      busy_modal.value = false
-    } else {
-      throw new Error(error.value?.data?.message || 'Cập nhật không thành công')
+      message.success(data.value.message || 'Cập nhật thành công');
+      return true;
     }
-  }
-  catch (error) {
-    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin')
+    throw new Error(error.value?.data?.message || 'Cập nhật không thành công');
+  } catch (error) {
+    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin');
+    return false;
   } finally {
     confirmLoading.value = false;
   }
-}
+};
+
+const handleBusyOk = async () => {
+  if (await updateBusy()) {
+    busy_modal.value = false;
+    busy_manager_modal.value = false;
+  }
+};
+
+const saveBusy = async () => {
+  await updateBusy();
+};
+// ===== Busy manager section end =====
 const handleCancel = () => {
   formRef.value?.resetFields();
   visible.value = false;
