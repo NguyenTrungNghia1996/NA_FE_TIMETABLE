@@ -132,13 +132,6 @@
           <div class="flex justify-end gap-2 mt-auto pt-2">
             <a-button @click="closeBusyManager">Hủy</a-button>
             <a-button @click="saveBusy" :loading="confirmLoading">Lưu</a-button>
-            <a-button
-              type="primary"
-              @click="handleBusyOk"
-              :loading="confirmLoading"
-            >
-              Cập Nhật
-            </a-button>
           </div>
         </div>
       </div>
@@ -160,7 +153,7 @@ const busy_data = ref();
 
 const breakpoints = useBreakpoints(breakpointsTailwind);
 const isMobile = breakpoints.smaller('md');
-const busyModalWidth = computed(() => (isMobile.value ? '95vw' : 800));
+const busyModalWidth = computed(() => (isMobile.value ? '95vw' : 1000));
 
 const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
 const searchText = ref('');
