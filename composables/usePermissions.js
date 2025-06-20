@@ -16,13 +16,12 @@ export const usePermissions = () => {
       },
       {
         "key": "menu-c8u2jgnoto",
-        "permissionValue": 699050
+        "permissionValue": 2796202
       },
       {
         "key": "menu-f5fh5fri05",
         "permissionValue": 170
       }
-
     ];
   const loadPermissions = async roleIds => {
     const ids = Array.isArray(roleIds) ? roleIds : [roleIds];
@@ -35,7 +34,6 @@ export const usePermissions = () => {
           const perms = data.value.data.permission || [];
           allPerms.push(...perms);
         }
-        // console.log("🚀 ~ usePermissions ~ data:", data)
       } catch (e) {
         console.error("Failed to load permissions", e);
       }
@@ -48,13 +46,13 @@ export const usePermissions = () => {
       key,
       permissionValue,
     }));
-    settingStore.setPermissions(merged);
-    // settingStore.setPermissions(DEFAULT_PERMISSIONS);
+    // settingStore.setPermissions(merged);
+    settingStore.setPermissions(DEFAULT_PERMISSIONS);
     return merged;
   };
 
   const setPermissions = perms => {
-    settingStore.setPermissions(perms ||DEFAULT_PERMISSIONS);
+    settingStore.setPermissions(perms || DEFAULT_PERMISSIONS);
     // settingStore.setPermissions(DEFAULT_PERMISSIONS);
   };
 
