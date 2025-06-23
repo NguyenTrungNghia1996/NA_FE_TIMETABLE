@@ -5,6 +5,7 @@
       <a-button @click="resetForm" class="w-full md:w-auto">
         <span class="md:inline">Đặt lại</span>
       </a-button>
+      <a-button @click="openBusyManager" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Cài đặt tiết tránh xếp</a-button>
       <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">
         <span class="md:inline">Thêm mới</span>
       </a-button>
@@ -22,6 +23,11 @@
           <template v-if="column.key === 'action'">
             <div class="flex justify-center">
               <div class="md:flex space-x-2">
+                <a-button type="link" size="small" @click="editBusy(record)" :disabled="!settingStore.currentPermission">
+                  <template #icon>
+                    <CalendarOutlined />
+                  </template>
+                </a-button>
                 <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission">
                   <template #icon>
                     <EditOutlined />
@@ -83,12 +89,51 @@
         </div>
       </template>
     </a-modal>
+    <a-modal v-model:open="busy_modal" title="Cài đặt tiết tránh xếp" @cancel="handleBusyCancel" :width="600" :footer="null">
+      <div v-for="block in busy_data.ds_Ca" :key="block.id" class="mb-8">
+        <Timetable :block="block" />
+      </div>
+      <div class="flex justify-end gap-2 mt-6">
+        <a-button @click="handleBusyCancel">Hủy</a-button>
+        <a-button @click="saveBusy" :loading="confirmLoading">Lưu</a-button>
+        <a-button type="primary" @click="handleBusyOk" :loading="confirmLoading">Cập nhật</a-button>
+      </div>
+    </a-modal>
+    <a-modal
+      v-model:open="busy_manager_modal"
+      title="Cài đặt tiết tránh xếp"
+      @cancel="closeBusyManager"
+      :width="busyModalWidth"
+      :footer="null"
+    >
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <a-table
+          :columns="busyColumns"
+          :data-source="dataSource"
+          :pagination="false"
+          bordered
+          size="small"
+        />
+        <div v-if="selectedSubject && busy_data" class="flex flex-col">
+          <h3 class="font-medium mb-2">{{ selectedSubject.ten }}</h3>
+          <div v-for="block in busy_data.ds_Ca" :key="block.id" class="mb-8">
+            <Timetable :block="block" />
+          </div>
+          <div class="flex justify-end gap-2 mt-auto pt-2">
+            <a-button @click="closeBusyManager">Hủy</a-button>
+            <a-button @click="saveBusy" :loading="confirmLoading">Lưu</a-button>
+          </div>
+        </div>
+      </div>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
 const settingStore = useSettingStore()
 const { RestApi } = useApi()
+import { h, computed } from 'vue'
+import { useBreakpoints, breakpointsTailwind } from '@vueuse/core'
 
 const searchText = ref('')
 const loading = ref(false)
@@ -96,6 +141,14 @@ const visible = ref(false)
 const confirmLoading = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
+const busy_modal = ref(false)
+const busy_data = ref()
+const busy_manager_modal = ref(false)
+const selectedSubject = ref(null)
+
+const breakpoints = useBreakpoints(breakpointsTailwind)
+const isMobile = breakpoints.smaller('md')
+const busyModalWidth = computed(() => (isMobile.value ? '95vw' : 1000))
 
 const pagination = reactive({
   current: 1,
@@ -119,6 +172,22 @@ const columns = [
   { title: 'Xếp thành cặp', dataIndex: 'xep_thanh_cap', key: 'bool', align: 'center' },
   { title: 'Tự chọn', dataIndex: 'la_mon_tu_chon', key: 'bool', align: 'center' },
   { title: 'Thao tác', key: 'action', width: 80, align: 'center', fixed: 'right' }
+]
+
+const busyColumns = [
+  {
+    title: 'STT',
+    key: 'stt',
+    width: 60,
+    align: 'center',
+    customRender: ({ index }) => index + 1
+  },
+  {
+    title: 'Tên môn học',
+    dataIndex: 'ten',
+    key: 'ten',
+    customRender: ({ record }) => h('a', { onClick: () => selectSubject(record), class: 'text-blue-600 hover:underline' }, record.ten)
+  }
 ]
 
 const param = ref({ PageIndex: 1, PageSize: 10, search: '' })
@@ -185,6 +254,29 @@ const handleSearch = async () => {
   await fetchData({ ...param.value })
 }
 
+const openBusyManager = async () => {
+  await fetchData({ ...param.value })
+  busy_manager_modal.value = true
+}
+
+const closeBusyManager = () => {
+  busy_manager_modal.value = false
+  selectedSubject.value = null
+  busy_data.value = null
+}
+
+const selectSubject = async (record) => {
+  selectedSubject.value = record
+  try {
+    const { data } = await RestApi.subject.get_avoid({ params: { Id: record.id } })
+    if (data.value?.status === 'success') {
+      busy_data.value = data.value.data
+    }
+  } catch (err) {
+    message.error('Không thể tải dữ liệu')
+  }
+}
+
 const showModal = () => {
   isEdit.value = false
   Object.assign(formState, {
@@ -227,6 +319,18 @@ const editItem = async (record) => {
   }
 }
 
+const editBusy = async (record) => {
+  try {
+    const { data } = await RestApi.subject.get_avoid({ params: { Id: record.id } })
+    if (data.value?.status === 'success') {
+      busy_data.value = data.value.data
+      busy_modal.value = true
+    }
+  } catch (err) {
+    message.error('Không thể tải dữ liệu')
+  }
+}
+
 const handleOk = async () => {
   try {
     await formRef.value.validate()
@@ -257,6 +361,39 @@ const handleOk = async () => {
 const handleCancel = () => {
   formRef.value.resetFields()
   visible.value = false
+}
+
+const updateBusy = async () => {
+  try {
+    confirmLoading.value = true
+    const { data, error } = await RestApi.subject.update_avoid({ body: busy_data.value })
+    if (data.value?.status === 'success') {
+      message.success(data.value.message || 'Cập nhật thành công')
+      return true
+    }
+    throw new Error(error.value?.data?.message || 'Cập nhật không thành công')
+  } catch (err) {
+    message.error(err.message || 'Đã xảy ra lỗi khi lưu thông tin')
+    return false
+  } finally {
+    confirmLoading.value = false
+  }
+}
+
+const handleBusyOk = async () => {
+  if (await updateBusy()) {
+    busy_modal.value = false
+    busy_manager_modal.value = false
+  }
+}
+
+const saveBusy = async () => {
+  await updateBusy()
+}
+
+const handleBusyCancel = () => {
+  busy_data.value = []
+  busy_modal.value = false
 }
 
 const deleteItem = async (id) => {
