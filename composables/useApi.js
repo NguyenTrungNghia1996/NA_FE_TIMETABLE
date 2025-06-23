@@ -23,6 +23,7 @@ let ENDPOINTS = {
   //SUBJECT
   SUBJECT: "/api/monhoc",
   SUBJECT_DETAIL: "/api/monhoc/detail",
+  SUBJECT_AVOID: "/api/monhoc/tiettranhxep",
   //EXPERTISE
   EXPERTISE: "/api/tochuyenmon",
   //GRADE_LEVEL
@@ -454,6 +455,12 @@ class Subject {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.SUBJECT, data);
+  }
+  async get_avoid(data) {
+    return await this.request.get(ENDPOINTS.SUBJECT_AVOID, data);
+  }
+  async update_avoid(data) {
+    return await this.request.post(ENDPOINTS.SUBJECT_AVOID, data);
   }
 }
 class SchoolDay {
