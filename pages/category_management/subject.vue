@@ -22,6 +22,11 @@
           <template v-if="column.key === 'action'">
             <div class="flex justify-center">
               <div class="md:flex space-x-2">
+                <a-button type="link" size="small" @click="editBusy(record)" :disabled="!settingStore.currentPermission">
+                  <template #icon>
+                    <CalendarOutlined />
+                  </template>
+                </a-button>
                 <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission">
                   <template #icon>
                     <EditOutlined />
@@ -83,6 +88,16 @@
         </div>
       </template>
     </a-modal>
+    <a-modal v-model:open="busy_modal" title="Cài đặt tiết tránh xếp" @cancel="handleBusyCancel" :width="600" :footer="null">
+      <div v-for="block in busy_data.ds_Ca" :key="block.id" class="mb-8">
+        <Timetable :block="block" />
+      </div>
+      <div class="flex justify-end gap-2 mt-6">
+        <a-button @click="handleBusyCancel">Hủy</a-button>
+        <a-button @click="saveBusy" :loading="confirmLoading">Lưu</a-button>
+        <a-button type="primary" @click="handleBusyOk" :loading="confirmLoading">Cập nhật</a-button>
+      </div>
+    </a-modal>
   </div>
 </template>
 
@@ -96,6 +111,8 @@ const visible = ref(false)
 const confirmLoading = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
+const busy_modal = ref(false)
+const busy_data = ref()
 
 const pagination = reactive({
   current: 1,
@@ -227,6 +244,18 @@ const editItem = async (record) => {
   }
 }
 
+const editBusy = async (record) => {
+  try {
+    const { data } = await RestApi.subject.get_avoid({ params: { Id: record.id } })
+    if (data.value?.status === 'success') {
+      busy_data.value = data.value.data
+      busy_modal.value = true
+    }
+  } catch (err) {
+    message.error('Không thể tải dữ liệu')
+  }
+}
+
 const handleOk = async () => {
   try {
     await formRef.value.validate()
@@ -257,6 +286,38 @@ const handleOk = async () => {
 const handleCancel = () => {
   formRef.value.resetFields()
   visible.value = false
+}
+
+const updateBusy = async () => {
+  try {
+    confirmLoading.value = true
+    const { data, error } = await RestApi.subject.update_avoid({ body: busy_data.value })
+    if (data.value?.status === 'success') {
+      message.success(data.value.message || 'Cập nhật thành công')
+      return true
+    }
+    throw new Error(error.value?.data?.message || 'Cập nhật không thành công')
+  } catch (err) {
+    message.error(err.message || 'Đã xảy ra lỗi khi lưu thông tin')
+    return false
+  } finally {
+    confirmLoading.value = false
+  }
+}
+
+const handleBusyOk = async () => {
+  if (await updateBusy()) {
+    busy_modal.value = false
+  }
+}
+
+const saveBusy = async () => {
+  await updateBusy()
+}
+
+const handleBusyCancel = () => {
+  busy_data.value = []
+  busy_modal.value = false
 }
 
 const deleteItem = async (id) => {
