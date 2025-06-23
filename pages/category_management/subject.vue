@@ -48,7 +48,7 @@
             <a-input v-model:value="formState.ten" placeholder="Nhập tên môn học" :maxlength="200" show-count />
           </a-form-item>
           <SelectClassroomType v-model="formState.Id_loai_phong_hoc" name="Id_loai_phong_hoc" :rules="rules.Id_loai_phong_hoc" />
-          <SelectKnowledge v-model="formState.Id_khoi_kien_thuc" name="Id_khoi_kien_thuc" />
+          <SelectKnowledge v-model="formState.Id_khoi_kien_thuc" name="Id_khoi_kien_thuc" :multiple="true" />
           <a-form-item label="Số tiết tối đa một ca" name="So_tiet_toi_da_mot_ca">
             <a-input-number v-model:value="formState.So_tiet_toi_da_mot_ca" :min="1" style="width: 100%" />
           </a-form-item>
@@ -114,6 +114,9 @@ const columns = [
   { title: 'Số tiết/ca', dataIndex: 'so_tiet_toi_da_mot_ca', key: 'so_tiet_toi_da_mot_ca', align: 'center' },
   { title: 'Số tiết/2 ca', dataIndex: 'so_tiet_toi_da_hai_ca', key: 'so_tiet_toi_da_hai_ca', align: 'center' },
   { title: 'GVCN', dataIndex: 'do_GVCN_phu_trach', key: 'bool', align: 'center' },
+  { title: 'Không cần phòng học', dataIndex: 'khong_can_phong_hoc', key: 'bool', align: 'center' },
+  { title: 'Học cách ngày', dataIndex: 'hoc_cach_ngay', key: 'bool', align: 'center' },
+  { title: 'Xếp thành cặp', dataIndex: 'xep_thanh_cap', key: 'bool', align: 'center' },
   { title: 'Tự chọn', dataIndex: 'la_mon_tu_chon', key: 'bool', align: 'center' },
   { title: 'Thao tác', key: 'action', width: 80, align: 'center', fixed: 'right' }
 ]
@@ -124,7 +127,7 @@ const dataSource = ref([])
 const formState = reactive({
   ten: '',
   Id_loai_phong_hoc: undefined,
-  Id_khoi_kien_thuc: undefined,
+  Id_khoi_kien_thuc: [],
   Do_GVCN_phu_trach: false,
   Khong_can_phong_hoc: false,
   Hoc_cach_ngay: false,
@@ -187,7 +190,7 @@ const showModal = () => {
   Object.assign(formState, {
     ten: '',
     Id_loai_phong_hoc: undefined,
-    Id_khoi_kien_thuc: undefined,
+    Id_khoi_kien_thuc: [],
     Do_GVCN_phu_trach: false,
     Khong_can_phong_hoc: false,
     Hoc_cach_ngay: false,
