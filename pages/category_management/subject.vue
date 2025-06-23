@@ -110,7 +110,7 @@ const columns = [
   { title: 'STT', key: 'stt', width: 50, align: 'center' },
   { title: 'Tên môn học', dataIndex: 'ten', key: 'ten', ellipsis: true },
   { title: 'Loại phòng học', dataIndex: 'ten_loai_phong_hoc', key: 'ten_loai_phong_hoc', ellipsis: true },
-  { title: 'Khối kiến thức', dataIndex: 'ten_khoi_kien_thuc', key: 'ten_khoi_kien_thuc', ellipsis: true },
+  // { title: 'Khối kiến thức', dataIndex: 'ten_khoi_kien_thuc', key: 'ten_khoi_kien_thuc', ellipsis: true },
   { title: 'Số tiết/ca', dataIndex: 'so_tiet_toi_da_mot_ca', key: 'so_tiet_toi_da_mot_ca', align: 'center' },
   { title: 'Số tiết/2 ca', dataIndex: 'so_tiet_toi_da_hai_ca', key: 'so_tiet_toi_da_hai_ca', align: 'center' },
   { title: 'GVCN', dataIndex: 'do_GVCN_phu_trach', key: 'bool', align: 'center' },
