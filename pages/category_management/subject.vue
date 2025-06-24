@@ -11,8 +11,8 @@
       </a-button>
     </div>
 
-    <ClientOnly class="overflow-x-auto">
-      <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: '1000' }" @change="handleTableChange" bordered size="small">
+    <ClientOnly>
+      <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: 1500 }" @change="handleTableChange" bordered size="small">
         <template #bodyCell="{ column, record, index }">
           <template v-if="column.key === 'stt'">
             {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
@@ -99,21 +99,9 @@
         <a-button type="primary" @click="handleBusyOk" :loading="confirmLoading">Cập nhật</a-button>
       </div>
     </a-modal>
-    <a-modal
-      v-model:open="busy_manager_modal"
-      title="Cài đặt tiết tránh xếp"
-      @cancel="closeBusyManager"
-      :width="busyModalWidth"
-      :footer="null"
-    >
+    <a-modal v-model:open="busy_manager_modal" title="Cài đặt tiết tránh xếp" @cancel="closeBusyManager" :width="busyModalWidth" :footer="null">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <a-table
-          :columns="busyColumns"
-          :data-source="dataSource"
-          :pagination="false"
-          bordered
-          size="small"
-        />
+        <a-table :columns="busyColumns" :data-source="dataSource" :pagination="false" bordered size="small" />
         <div v-if="selectedSubject && busy_data" class="flex flex-col">
           <h3 class="font-medium mb-2">{{ selectedSubject.ten }}</h3>
           <div v-for="block in busy_data.ds_Ca" :key="block.id" class="mb-8">
@@ -171,7 +159,7 @@ const columns = [
   { title: 'Học cách ngày', dataIndex: 'hoc_cach_ngay', key: 'bool', align: 'center' },
   { title: 'Xếp thành cặp', dataIndex: 'xep_thanh_cap', key: 'bool', align: 'center' },
   { title: 'Tự chọn', dataIndex: 'la_mon_tu_chon', key: 'bool', align: 'center' },
-  { title: 'Thao tác', key: 'action', width: 80, align: 'center', fixed: 'right' }
+  { title: 'Thao tác', key: 'action', width: 100, align: 'center', fixed: 'right' }
 ]
 
 const busyColumns = [
