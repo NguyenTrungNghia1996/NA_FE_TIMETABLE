@@ -67,6 +67,7 @@
 
 <script setup>
 const settingStore = useSettingStore();
+const { loadPermissions } = usePermissions();
 import { useBreakpoints, breakpointsTailwind } from '@vueuse/core';
 const { RestApi } = useApi();
 
@@ -186,6 +187,7 @@ const handleOk = async () => {
   } catch (err) {
     message.error(err.message || 'Lỗi khi lưu thông tin');
   } finally {
+    await loadPermissions()
     confirmLoading.value = false;
   }
 };

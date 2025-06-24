@@ -23,7 +23,7 @@ export default defineNuxtRouteMiddleware(async to => {
       await loadMenu();
     }
     if (settingStore.menuPermissions.length === 0) {
-      await loadPermissions(9)
+      await loadPermissions()
       // setPermissions()
     }
   } catch (error) {

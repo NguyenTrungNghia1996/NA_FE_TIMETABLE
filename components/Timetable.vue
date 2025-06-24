@@ -18,7 +18,7 @@
             <td v-for="ngay in block.ds_Ngay" :key="ngay.id" @mousedown.left.prevent="startDrag(tietIndex, ngay.id)" @mouseover="dragOver(tietIndex, ngay.id)" @contextmenu.prevent="openContextMenu($event, tietIndex, ngay.id)" :class="[
               'border text-center font-bold transition-colors duration-150 ease-in-out',
               getCellClass(tietIndex, ngay.id)
-            ]" style="width: 70px; height: 25px; cursor: pointer;">
+            ]" style="width: 80px; height: 25px; cursor: pointer;">
               {{ getDisplay(tietIndex, ngay.id) }}
             </td>
           </tr>
@@ -44,16 +44,33 @@
 </template>
 
 <script setup>
+const { $dayjs } = useNuxtApp();
+import 'dayjs/locale/vi'
+$dayjs.locale('vi')
 const weekDays = [1, 2, 3, 4, 5, 6, 7, 8].map(i => {
-  if (i >= 1 && i <= 7) {
+  let dayjsDay
+  if (i === 8) {
+    dayjsDay = 0
+  } else {
+    dayjsDay = i - 1
+  }
+
+  const label = $dayjs().day(dayjsDay).format('dddd')
+  if (label === 'Chủ nhật') {
+    return { id: i, label: 'Chủ nhật' }
+  } else {
+    const number = {
+      'hai': '2',
+      'ba': '3',
+      'tư': '4',
+      'năm': '5',
+      'sáu': '6',
+      'bảy': '7'
+    }
+    const key = label.split(' ')[1]
     return {
       id: i,
-      label: `Thứ ${i}`
-    }
-  } else if (i === 8) {
-    return {
-      id: 8,
-      label: 'Chủ nhật'
+      label: `Thứ ${number[key] || '?'}`
     }
   }
 })

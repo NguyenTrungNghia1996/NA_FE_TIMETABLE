@@ -23,33 +23,19 @@ export const usePermissions = () => {
         "permissionValue": 170
       }
     ];
-  const loadPermissions = async roleIds => {
-    const ids = Array.isArray(roleIds) ? roleIds : [roleIds];
-    const allPerms = [];
-    for (const id of ids) {
-      if (!id) continue;
-      try {
-        const { data } = await RestApi.roles.detail({ params: { id: id } });
-        if (data.value?.status === "success") {
-          const perms = data.value.data.permission || [];
-          allPerms.push(...perms);
-        }
-      } catch (e) {
-        console.error("Failed to load permissions", e);
+  const loadPermissions = async () => {
+    try {
+      const { data: res } = await RestApi.user.permission()
+      const permission = res?.value?.data?.permission
+      if (permission) {
+        settingStore.setPermissions(permission)
+      } else {
+        console.warn('Không có dữ liệu permission trả về')
       }
+    } catch (error) {
+      console.error('Lỗi loadPermissions:', error)
     }
-    const map = new Map();
-    for (const { key, permissionValue } of allPerms) {
-      map.set(key, (map.get(key) || 0) | permissionValue);
-    }
-    const merged = Array.from(map).map(([key, permissionValue]) => ({
-      key,
-      permissionValue,
-    }));
-    // settingStore.setPermissions(merged);
-    settingStore.setPermissions(DEFAULT_PERMISSIONS);
-    return merged;
-  };
+  }
 
   const setPermissions = perms => {
     settingStore.setPermissions(perms || DEFAULT_PERMISSIONS);
