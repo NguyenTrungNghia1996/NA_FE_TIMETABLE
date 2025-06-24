@@ -1,5 +1,6 @@
 let ENDPOINTS = {
   LOGIN: "/api/users/login",
+  PERMISSION: "/api/users/permission",
   //SCHOOL_LEVEL
   SCHOOL_LEVEL: "/api/caphoc",
   SCHOOL_LEVEL_DETAIL: "/api/caphoc/detail",
@@ -38,7 +39,7 @@ let ENDPOINTS = {
   //CLASSROOM
   CLASSROOM: "/api/phonghoc",
   CLASSROOM_DETAIL: "/api/phonghoc/detail",
-  CLASSROOM_BUSY:"api/phonghoc/tietban",
+  CLASSROOM_BUSY: "api/phonghoc/tietban",
   //SCHOOL_PERIOD
   SCHOOL_PERIOD: "/api/tiethoc",
   SCHOOL_PERIOD_DETAIL: "/api/tiethoc/detail",
@@ -52,8 +53,8 @@ import { useUserStore } from "~~/stores/userStore";
 class Request {
   constructor() {
     this.handler = {
-      onRequest({ request, options }) {},
-      onRequestError({ request, options, error }) {},
+      onRequest({ request, options }) { },
+      onRequestError({ request, options, error }) { },
       onResponse({ request, response, options }) {
         return response._data;
       },
@@ -209,6 +210,9 @@ class User {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.USER, data);
+  }
+  async permission(data) {
+    return await this.request.get(ENDPOINTS.PERMISSION, data);
   }
 }
 class SchoolLevel {

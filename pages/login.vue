@@ -65,7 +65,7 @@ const handleLogin = async () => {
       await userStore.setUser(data.value.data);
       // settingStore.setPermissions(DEFAULT_PERMISSIONS);
       await loadMenu();
-      await loadPermissions(9);
+      await loadPermissions();
       // setPermissions()
       message.success("Đăng nhập thành công!");
       navigateTo("/dashboard");
