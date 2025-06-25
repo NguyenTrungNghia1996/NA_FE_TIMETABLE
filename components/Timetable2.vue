@@ -1,38 +1,41 @@
 <template>
   <div class="p-4 relative" @mouseup="endDrag" @mouseleave="endDrag">
-    <div class="overflow-auto rounded-lg shadow border border-gray-200">
+    <div class="overflow-auto rounded-lg shadow-sm border">
       <table class="w-full border-collapse">
         <thead>
-          <tr class="bg-gray-50 text-center text-sm font-medium text-gray-600 uppercase tracking-wider">
-            <th class="border p-3 w-20">Tiết / Ngày</th>
-            <th 
-              v-for="ngay in block.ds_Ngay" 
-              :key="ngay.id" 
-              class="border p-3 min-w-[100px]"
+          <tr class="bg-gray-50 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
+            <th class="border p-2 w-20">Tiết / Ngày</th>
+            <th
+              v-for="(col, dayIndex) in timeTable[0]"
+              :key="dayIndex"
+              class="border p-2"
             >
-              {{ weekDays[ngay.id]?.label || `Thứ ${ngay.id}` }}
+              <span class="inline-block min-w-[80px]">{{ getDayLabel(dayIndex) }}</span>
             </th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="tietIndex in block.ds_Ngay[0].ds_Tiet.length" :key="tietIndex">
+          <tr v-for="(row, tietIndex) in timeTable" :key="tietIndex">
             <td class="border text-center text-sm font-medium bg-gray-50 p-2">
-              Tiết {{ tietIndex }}
+              Tiết {{ tietIndex + 1 }}
             </td>
-            <td 
-              v-for="ngay in block.ds_Ngay" 
-              :key="ngay.id" 
-              @mousedown.left.prevent="startDrag(tietIndex, ngay.id)"
-              @mouseover="dragOver(tietIndex, ngay.id)"
-              @contextmenu.prevent="openContextMenu($event, tietIndex, ngay.id)"
+            <td
+              v-for="(cell, ngayIndex) in row"
+              :key="ngayIndex"
+              @mousedown.left.prevent="startDrag(tietIndex, ngayIndex)"
+              @mouseover="dragOver(tietIndex, ngayIndex)"
+              @contextmenu.prevent="openContextMenu($event, tietIndex, ngayIndex)"
               :class="[
-                'border text-center text-sm font-medium transition-colors duration-150',
-                getCellClass(tietIndex, ngay.id)
+                'border text-center text-sm font-medium transition-colors duration-150 ease-in-out relative',
+                getCellClass(tietIndex, ngayIndex)
               ]"
-              style="height: 40px;"
+              style="width: 120px; height: 40px;"
             >
-              <div class="w-full h-full flex items-center justify-center">
-                {{ getDisplay(tietIndex, ngay.id) }}
+              <div
+                :class="getCellInnerClass(tietIndex, ngayIndex)"
+                class="w-full h-full flex items-center justify-center rounded-sm"
+              >
+                {{ getDisplay(tietIndex, ngayIndex) }}
               </div>
             </td>
           </tr>
@@ -40,7 +43,6 @@
       </table>
     </div>
 
-    <!-- Context menu -->
     <div
       v-if="contextMenu.visible"
       class="absolute bg-white border border-gray-200 rounded-md shadow-lg z-50 py-1"
@@ -50,21 +52,21 @@
       <ul class="divide-y divide-gray-100">
         <li 
           class="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-2 text-gray-700"
-          @click="applyToSelected(true)"
+          @click="applyToSelected(false)"
         >
           <span class="text-red-500">✖</span>
           <span class="font-medium">Không được xếp</span>
         </li>
         <li 
           class="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-2 text-gray-700"
-          @click="applyToSelected(false)"
+          @click="applyToSelected(true)"
         >
           <span class="text-green-500">✓</span>
           <span class="font-medium">Xếp được</span>
         </li>
         <li 
           class="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-2 text-red-500"
-          @click="clearAll()"
+          @click="clearAll"
         >
           <span>🗑️</span>
           <span class="font-medium">Xóa toàn bộ</span>
@@ -75,44 +77,19 @@
 </template>
 
 <script setup>
-const { $dayjs } = useNuxtApp();
+import { ref, reactive } from 'vue'
+const { $dayjs } = useNuxtApp()
 import 'dayjs/locale/vi'
 $dayjs.locale('vi')
 
-const weekDays = [1, 2, 3, 4, 5, 6, 7, 8].map(i => {
-  let dayjsDay
-  if (i === 8) {
-    dayjsDay = 0
-  } else {
-    dayjsDay = i - 1
-  }
-
-  const label = $dayjs().day(dayjsDay).format('dddd')
-  if (label === 'Chủ nhật') {
-    return { id: i, label: 'Chủ nhật' }
-  } else {
-    const number = {
-      'hai': '2',
-      'ba': '3',
-      'tư': '4',
-      'năm': '5',
-      'sáu': '6',
-      'bảy': '7'
-    }
-    const key = label.split(' ')[1]
-    return {
-      id: i,
-      label: `Thứ ${number[key] || '?'}`
-    }
-  }
-})
-
 const props = defineProps({
-  block: {
-    type: Object,
-    required: true,
-  },
+  data: {
+    type: Array,
+    required: true
+  }
 })
+
+const timeTable = reactive(props.data)
 
 const selected = reactive([])
 const selectedMap = reactive(new Set())
@@ -124,8 +101,33 @@ const contextMenu = reactive({
   tiet: null,
   ngay: null,
   x: 0,
-  y: 0,
+  y: 0
 })
+
+function getDayLabel(dayIndex) {
+  const dayjsDay = (dayIndex + 1) % 7
+  const label = $dayjs().day(dayjsDay).format('dddd')
+
+  if (label === 'chủ nhật') {
+    return 'Chủ nhật'
+  }
+
+  const map = {
+    'hai': '2',
+    'ba': '3',
+    'tư': '4',
+    'năm': '5',
+    'sáu': '6',
+    'bảy': '7'
+  }
+
+  const parts = label.split(' ')
+  if (parts.length === 2 && map[parts[1]]) {
+    return `Thứ ${map[parts[1]]}`
+  }
+
+  return label.charAt(0).toUpperCase() + label.slice(1)
+}
 
 function key(tiet, ngay) {
   return `${tiet}-${ngay}`
@@ -136,18 +138,33 @@ function isSelected(tiet, ngay) {
 }
 
 function getDisplay(tiet, ngay) {
-  const obj = props.block.ds_Ngay[ngay - 1].ds_Tiet[tiet - 1]
-  return obj.trang_thai ? '❌' : ''
+  return timeTable[tiet][ngay] === false ? '❌' : ''
 }
 
 function getCellClass(tiet, ngay) {
-  const obj = props.block.ds_Ngay[ngay - 1].ds_Tiet[tiet - 1]
-  const isSel = isSelected(tiet, ngay)
+  const value = timeTable[tiet][ngay]
+  if (value === false) {
+    return 'bg-red-50 text-red-600'
+  }
+  return 'bg-white text-gray-700'
+}
 
-  if (obj.trang_thai && isSel) return 'bg-red-100 text-red-700 ring-2 ring-blue-400'
-  if (obj.trang_thai) return 'bg-red-50 text-red-600'
-  if (isSel) return 'bg-blue-50 text-blue-700 ring-2 ring-blue-400'
-  return 'bg-white text-gray-700 hover:bg-gray-50'
+function getCellInnerClass(tiet, ngay) {
+  const isSel = isSelected(tiet, ngay)
+  const value = timeTable[tiet][ngay]
+
+  let classes = ''
+  if (value === false && isSel) {
+    classes += 'ring-2 ring-blue-400 bg-red-100 text-red-700'
+  } else if (value === false) {
+    classes += 'bg-red-50 text-red-600'
+  } else if (isSel) {
+    classes += 'ring-2 ring-blue-400 bg-blue-50 text-blue-700'
+  } else {
+    classes += 'bg-white text-gray-700'
+  }
+
+  return classes
 }
 
 function startDrag(tiet, ngay) {
@@ -174,7 +191,6 @@ function updateRectangleSelection(endTiet, endNgay) {
   const maxTiet = Math.max(startTiet, endTiet)
   const minNgay = Math.min(startNgay, endNgay)
   const maxNgay = Math.max(startNgay, endNgay)
-
   selected.splice(0)
   selectedMap.clear()
   for (let tiet = minTiet; tiet <= maxTiet; tiet++) {
@@ -188,7 +204,6 @@ function updateRectangleSelection(endTiet, endNgay) {
 function openContextMenu(event, tiet, ngay) {
   const container = event.currentTarget.closest('.p-4')
   const rect = container.getBoundingClientRect()
-
   contextMenu.visible = true
   contextMenu.tiet = tiet
   contextMenu.ngay = ngay
@@ -198,15 +213,15 @@ function openContextMenu(event, tiet, ngay) {
 
 function applyToSelected(value) {
   selected.forEach(({ tiet, ngay }) => {
-    props.block.ds_Ngay[ngay - 1].ds_Tiet[tiet - 1].trang_thai = value
+    timeTable[tiet][ngay] = value
   })
   contextMenu.visible = false
 }
 
 function clearAll() {
-  for (const ngay of props.block.ds_Ngay) {
-    for (const tiet of ngay.ds_Tiet) {
-      tiet.trang_thai = false
+  for (let tiet = 0; tiet < timeTable.length; tiet++) {
+    for (let ngay = 0; ngay < timeTable[tiet].length; ngay++) {
+      timeTable[tiet][ngay] = true
     }
   }
   contextMenu.visible = false
