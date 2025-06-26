@@ -1,5 +1,5 @@
 <template>
-  <div class="p-2 md:p-4 bg-white min-h-full grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div class="p-2 md:p-4 bg-white min-h-full grid grid-cols-3 md:grid-cols-4 gap-4">
     <a-card title="Thông tin tiết học cố định">
       <a-form layout="vertical">
         <a-form-item label="Môn học" required>
@@ -26,9 +26,9 @@
         </div>
       </a-form>
     </a-card>
-    <a-card title="Danh sách tiết học cố định">
+    <a-card class="col-span-3" title="Danh sách tiết học cố định">
       <a-table :columns="columns" :data-source="paginatedData" :pagination="false" bordered size="small">
-        <template #bodyCell="{ column, record, index }">
+        <template #bodyCell="{ column, index }">
           <template v-if="column.key === 'stt'">
             {{ index + 1 }}
           </template>
