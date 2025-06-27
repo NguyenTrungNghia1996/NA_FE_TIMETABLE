@@ -95,7 +95,7 @@
         </div>
       </a-form>
     </a-modal>
-    <a-modal v-model:open="busy_modal" title="Chỉnh sửa tiết bận" @cancel="handleBusyCancel" :width="600" :footer="null">
+    <a-modal v-model:open="busy_modal" title="Chỉnh sửa tiết bận" @cancel="handleBusyCancel" :width="800" :footer="null">
       <div v-for="(block) in busy_data.ds_Ca" :key="block.id" style="margin-bottom: 2rem;">
         <Timetable :block="block" />
       </div>
@@ -105,14 +105,15 @@
         <a-button type="primary" @click="handleBusyOk" :loading="confirmLoading">Cập Nhật</a-button>
       </div>
     </a-modal>
-    <a-modal
+    <a-drawer
       v-model:open="busy_manager_modal"
       title="Cài đặt tiết bận"
-      @cancel="closeBusyManager"
-      :width="busyModalWidth"
+      @close="closeBusyManager"
+      height="100vh"
+      placement="bottom"
       :footer="null"
     >
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <a-table
           :columns="busyColumns"
           :data-source="dataSource"
@@ -135,13 +136,12 @@
           </div>
         </div>
       </div>
-    </a-modal>
+    </a-drawer>
   </div>
 </template>
 
 <script setup>
-import { h, computed } from 'vue'
-import { useBreakpoints, breakpointsTailwind } from '@vueuse/core'
+import { h } from 'vue'
 const settingStore = useSettingStore();
 const { RestApi } = useApi();
 
@@ -151,9 +151,6 @@ const busy_manager_modal = ref(false);
 const selectedClassroom = ref(null);
 const busy_data = ref();
 
-const breakpoints = useBreakpoints(breakpointsTailwind);
-const isMobile = breakpoints.smaller('md');
-const busyModalWidth = computed(() => (isMobile.value ? '95vw' : 1000));
 
 const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
 const searchText = ref('');

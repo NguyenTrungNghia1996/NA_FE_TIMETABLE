@@ -417,6 +417,6 @@ const openDrawer = () => {
   statusDrawer.value = true;
 }
 const onCloseDrawer = () => {
-  formRef.value?.reset()
+  fixedLessonRef.value?.reset()
 }
 </script>
