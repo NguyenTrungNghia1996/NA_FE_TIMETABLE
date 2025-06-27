@@ -46,6 +46,9 @@ let ENDPOINTS = {
   //SCHOOL_DAY
   SCHOOL_DAY: "/api/ngayhoc",
   SCHOOL_DAY_DETAIL: "/api/ngayhoc/detail",
+  //FIXED_LESSON
+  FIXED_LESSON: "/api/tietcodinh",
+  FIXED_LESSON_DETAIL: "/api/tietcodinh/detail",
   ///api/phonghoc/tietban
   S3: "/api/presigned_url",
 };
@@ -144,6 +147,7 @@ class RestApi {
     this.classroom = new Classroom(this.request);
     this.school_day = new SchoolDay(this.request);
     this.school_period = new SchoolPeriod(this.request);
+    this.fixed_lesson = new FixedLesson(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -505,6 +509,27 @@ class SchoolPeriod {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.SCHOOL_PERIOD, data);
+  }
+}
+
+class FixedLesson {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.FIXED_LESSON, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.FIXED_LESSON_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.FIXED_LESSON, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.FIXED_LESSON, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.FIXED_LESSON, data);
   }
 }
 export default () => {
