@@ -1,147 +1,199 @@
 <template>
-  <div class="p-2 md:p-4 bg-white min-h-full grid grid-cols-3 md:grid-cols-4 gap-4">
-    <a-card title="Thông tin tiết học cố định">
+  <div class="p-2 md:p-4 bg-white min-h-full grid grid-cols-1 md:grid-cols-4 gap-4">
+    <a-card title="Thông tin tiết học cố định" class="md:col-span-1">
       <a-form layout="vertical">
-        <a-form-item label="Môn học" required>
-          <a-select v-model:value="form.subject" :options="subjectOptions" placeholder="Chọn môn học" />
-        </a-form-item>
-        <a-form-item label="Ngày học" required>
-          <a-select v-model:value="form.day" :options="dayOptions" placeholder="Chọn ngày học" />
-        </a-form-item>
-        <a-form-item label="Ca học" required>
-          <a-select v-model:value="form.shift" :options="shiftOptions" placeholder="Chọn ca học" />
-        </a-form-item>
-        <a-form-item label="Tiết học" required>
-          <a-select v-model:value="form.period" :options="periodOptions" placeholder="Chọn tiết" />
-        </a-form-item>
-        <a-form-item label="Khối lớp" required>
-          <a-select v-model:value="form.grade" :options="gradeOptions" placeholder="Chọn khối lớp" />
-        </a-form-item>
+        <SelectSubject v-model="form.id_mon" />
+        <SelectSchoolDay v-model="form.id_ngay" />
+        <SelectSchoolShift v-model="form.id_ca" />
+        <SelectSchoolPeriod v-model="form.id_tiet" />
+        <SelectGradeLevel v-if="!form.ap_dung_cho_tat_ca_cac_khoi" v-model="form.id_khoi_lop" />
         <a-form-item>
-          <a-checkbox v-model:checked="form.applyAll">Áp dụng cho tất cả các khối</a-checkbox>
+          <a-checkbox v-model:checked="form.ap_dung_cho_tat_ca_cac_khoi">Áp dụng cho tất cả các khối</a-checkbox>
         </a-form-item>
         <div class="flex gap-2 mt-4">
-          <a-button type="primary" @click="save">Lưu</a-button>
+          <a-button type="primary" @click="handleSave" :loading="saving">{{ isEdit ? 'Cập nhật' : 'Lưu' }}</a-button>
           <a-button danger @click="reset">Hủy</a-button>
         </div>
       </a-form>
     </a-card>
-    <a-card class="col-span-3" title="Danh sách tiết học cố định">
-      <a-table :columns="columns" :data-source="paginatedData" :pagination="false" bordered size="small">
-        <template #bodyCell="{ column, index }">
+    <a-card class="md:col-span-3" title="Danh sách tiết học cố định">
+      <ClientOnly class="overflow-x-auto">
+        <a-table
+          :columns="columns"
+          :data-source="lessons"
+          :pagination="pagination"
+          :loading="loading"
+          bordered
+          size="small"
+          @change="handleTableChange"
+          :scroll="{ x: '800' }"
+        >
+          <template #bodyCell="{ column, record, index }">
           <template v-if="column.key === 'stt'">
-            {{ index + 1 }}
+            {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
           </template>
           <template v-if="column.key === 'action'">
             <div class="flex justify-center space-x-2">
-              <a-button type="link" size="small">
+              <a-button type="link" size="small" @click="editItem(record)">
                 <template #icon>
                   <EditOutlined />
                 </template>
               </a-button>
-              <a-button type="link" danger size="small">
-                <template #icon>
-                  <DeleteOutlined />
-                </template>
-              </a-button>
+              <a-popconfirm title="Bạn chắc chắn muốn xóa?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
+                <a-button type="link" danger size="small">
+                  <template #icon>
+                    <DeleteOutlined />
+                  </template>
+                </a-button>
+              </a-popconfirm>
             </div>
           </template>
         </template>
-      </a-table>
-      <div class="flex justify-center mt-4">
-        <a-pagination :total="data.length" :page-size="5" v-model:current="page" />
-      </div>
+        </a-table>
+      </ClientOnly>
     </a-card>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, computed } from 'vue'
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons-vue'
-
-const form = reactive({
-  subject: undefined,
-  day: undefined,
-  shift: undefined,
-  period: undefined,
-  grade: undefined,
-  applyAll: false
-})
-
-const subjectOptions = [
-  { label: 'Toán', value: 'Toán' },
-  { label: 'Văn', value: 'Văn' },
-  { label: 'Tiếng Anh', value: 'Tiếng Anh' }
-]
-
-const dayOptions = [
-  { label: 'Thứ 2', value: 'Thứ 2' },
-  { label: 'Thứ 3', value: 'Thứ 3' },
-  { label: 'Thứ 4', value: 'Thứ 4' },
-  { label: 'Thứ 5', value: 'Thứ 5' },
-  { label: 'Thứ 6', value: 'Thứ 6' },
-  { label: 'Thứ 7', value: 'Thứ 7' }
-]
-
-const shiftOptions = [
-  { label: 'Ca sáng', value: 'Ca sáng' },
-  { label: 'Ca chiều', value: 'Ca chiều' }
-]
-
-const periodOptions = [
-  { label: 'Tiết 1', value: 1 },
-  { label: 'Tiết 2', value: 2 },
-  { label: 'Tiết 3', value: 3 },
-  { label: 'Tiết 4', value: 4 },
-  { label: 'Tiết 5', value: 5 }
-]
-
-const gradeOptions = [
-  { label: 'Khối 7', value: 'Khối 7' },
-  { label: 'Khối 8', value: 'Khối 8' },
-  { label: 'Khối 9', value: 'Khối 9' }
-]
-
-const data = ref([
-  { subject: 'Toán', grade: 'Khối 7', shift: 'Ca sáng', day: 'Thứ 2', period: 1 },
-  { subject: 'Văn', grade: 'Khối 8', shift: 'Ca chiều', day: 'Thứ 3', period: 2 }
-])
-
-const page = ref(1)
-
-const paginatedData = computed(() => data.value.slice((page.value - 1) * 5, page.value * 5))
+const { RestApi } = useApi()
 
 const columns = [
   { title: 'STT', key: 'stt', width: 60, align: 'center' },
-  { title: 'Môn học', dataIndex: 'subject', key: 'subject' },
-  { title: 'Khối', dataIndex: 'grade', key: 'grade', align: 'center' },
-  { title: 'Ca học', dataIndex: 'shift', key: 'shift', align: 'center' },
-  { title: 'Ngày học', dataIndex: 'day', key: 'day', align: 'center' },
-  { title: 'Tiết', dataIndex: 'period', key: 'period', align: 'center' },
-  { title: 'Thao tác', key: 'action', width: 90, align: 'center' }
+  { title: 'Môn học', dataIndex: 'ten_mon_hoc', key: 'ten_mon_hoc' },
+  { title: 'Khối', dataIndex: 'ten_khoi_lop', key: 'ten_khoi_lop', align: 'center' },
+  { title: 'Ca học', dataIndex: 'ten_ca_hoc', key: 'ten_ca_hoc', align: 'center' },
+  { title: 'Ngày học', dataIndex: 'ten_ngay_hoc', key: 'ten_ngay_hoc', align: 'center' },
+  { title: 'Tiết', dataIndex: 'ten_tiet_hoc', key: 'ten_tiet_hoc', align: 'center' },
+  { title: 'Thao tác', key: 'action', width: 90, align: 'center', fixed: 'right' }
 ]
 
-function save() {
-  if (form.subject && form.day && form.shift && form.period && (form.grade || form.applyAll)) {
-    data.value.push({
-      subject: form.subject,
-      day: form.day,
-      shift: form.shift,
-      period: form.period,
-      grade: form.applyAll ? 'Tất cả' : form.grade
+const lessons = ref([])
+const loading = ref(false)
+const saving = ref(false)
+
+const pagination = reactive({
+  current: 1,
+  pageSize: 5,
+  total: 0,
+  showSizeChanger: true,
+  pageSizeOptions: ['5', '10', '20'],
+  showTotal: (total) => `Tổng ${total} bản ghi`
+})
+
+const form = reactive({
+  id: null,
+  id_mon: undefined,
+  id_ngay: undefined,
+  id_ca: undefined,
+  id_tiet: undefined,
+  id_khoi_lop: undefined,
+  ap_dung_cho_tat_ca_cac_khoi: false
+})
+
+const isEdit = ref(false)
+
+const fetchData = async () => {
+  try {
+    loading.value = true
+    const { data } = await RestApi.fixed_lesson.list({
+      params: { pageIndex: pagination.current, pageSize: pagination.pageSize }
     })
-    reset()
+    if (data.value?.status === 'success') {
+      lessons.value = data.value.data.items
+      pagination.total = data.value.data.totalrecord
+    } else {
+      lessons.value = []
+      pagination.total = 0
+    }
+  } catch (error) {
+    console.error('Fetch fixed lessons error:', error)
+    message.error('Không thể tải danh sách tiết cố định')
+  } finally {
+    loading.value = false
   }
 }
 
-function reset() {
-  Object.assign(form, {
-    subject: undefined,
-    day: undefined,
-    shift: undefined,
-    period: undefined,
-    grade: undefined,
-    applyAll: false
-  })
+const handleTableChange = async (pag) => {
+  pagination.current = pag.current
+  pagination.pageSize = pag.pageSize
+  await fetchData()
 }
+
+const handleSave = async () => {
+  try {
+    saving.value = true
+    if (isEdit.value) {
+      const { data, error } = await RestApi.fixed_lesson.update({ body: { ...form } })
+      if (data.value?.status === 'success') {
+        message.success(data.value.message || 'Cập nhật thành công')
+      } else {
+        throw new Error(error.value?.data?.message || 'Cập nhật không thành công')
+      }
+    } else {
+      const payload = { ...form }
+      delete payload.id
+      const { data, error } = await RestApi.fixed_lesson.create({ body: payload })
+      if (data.value?.status === 'success') {
+        message.success(data.value.message || 'Thêm mới thành công')
+      } else {
+        throw new Error(error.value?.data?.message || 'Thêm mới không thành công')
+      }
+    }
+    await fetchData()
+    reset()
+  } catch (err) {
+    message.error(err.message || 'Có lỗi xảy ra')
+  } finally {
+    saving.value = false
+  }
+}
+
+const editItem = async (record) => {
+  try {
+    loading.value = true
+    const { data } = await RestApi.fixed_lesson.detail({ params: { id: record.id } })
+    if (data.value?.status === 'success') {
+      Object.assign(form, data.value.data)
+      isEdit.value = true
+    } else {
+      message.error(data.value?.message || 'Không thể tải chi tiết')
+    }
+  } catch (err) {
+    console.error('Detail error:', err)
+    message.error('Không thể tải chi tiết')
+  } finally {
+    loading.value = false
+  }
+}
+
+const deleteItem = async (id) => {
+  try {
+    const { data, error } = await RestApi.fixed_lesson.delete({ params: { id } })
+    if (data.value?.status === 'success') {
+      message.success(data.value.message || 'Xóa thành công')
+    } else {
+      throw new Error(error.value?.data?.message || 'Xóa không thành công')
+    }
+  } catch (err) {
+    message.error(err.message || 'Có lỗi xảy ra')
+  } finally {
+    await fetchData()
+  }
+}
+
+const reset = () => {
+  Object.assign(form, {
+    id: null,
+    id_mon: undefined,
+    id_ngay: undefined,
+    id_ca: undefined,
+    id_tiet: undefined,
+    id_khoi_lop: undefined,
+    ap_dung_cho_tat_ca_cac_khoi: false
+  })
+  isEdit.value = false
+}
+
+await fetchData()
 </script>
