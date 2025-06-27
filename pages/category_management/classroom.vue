@@ -95,7 +95,7 @@
         </div>
       </a-form>
     </a-modal>
-    <a-modal v-model:open="busy_modal" title="Chỉnh sửa tiết bận" @cancel="handleBusyCancel" :width="600" :footer="null">
+    <a-modal v-model:open="busy_modal" title="Chỉnh sửa tiết bận" @cancel="handleBusyCancel" :width="800" :footer="null">
       <div v-for="(block) in busy_data.ds_Ca" :key="block.id" style="margin-bottom: 2rem;">
         <Timetable :block="block" />
       </div>
@@ -113,7 +113,7 @@
       placement="bottom"
       :footer="null"
     >
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <a-table
           :columns="busyColumns"
           :data-source="dataSource"
