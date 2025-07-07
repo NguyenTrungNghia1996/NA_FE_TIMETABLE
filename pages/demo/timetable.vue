@@ -93,6 +93,41 @@
       </div>
     </a-card>
 
+    <a-card
+      v-for="tName in otherTeachers"
+      :key="tName"
+      class="mt-8"
+    >
+      <template #title>Thời khóa biểu giáo viên {{ tName }}</template>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-center border-collapse table-fixed">
+          <thead>
+            <tr>
+              <th class="border p-2 w-20 h-12">Tiết\\Ngày</th>
+              <th v-for="day in days" :key="day" class="border p-2 w-32 h-12">
+                {{ day }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(row, rIndex) in getTeacherTimetable(tName)" :key="rIndex">
+              <th class="border p-2 w-20 h-12">{{ rIndex + 1 }}</th>
+              <td
+                v-for="(lesson, cIndex) in row"
+                :key="cIndex"
+                class="border p-2 w-32 h-12 select-none whitespace-nowrap"
+              >
+                <template v-if="lesson.class">
+                  <div>{{ lesson.subject }} - {{ lesson.class }}</div>
+                </template>
+                <template v-else>&nbsp;</template>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </a-card>
+
     <div v-if="contextMenu.show" class="fixed bg-white border rounded shadow z-50" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
       <ul>
         <li class="px-4 py-2 hover:bg-gray-100 cursor-pointer" @click="toggleBreak(contextMenu.row, contextMenu.col)">
@@ -230,6 +265,29 @@ const teacherSchedule = computed(() => {
     })
   )
 })
+
+const otherTeachers = computed(() => {
+  const names = new Set<string>()
+  classTimetable.value.forEach(row =>
+    row.forEach(lesson => {
+      if (!lesson.isBreak && lesson.teacher && lesson.teacher !== teacherName) {
+        names.add(lesson.teacher)
+      }
+    })
+  )
+  return Array.from(names)
+})
+
+function getTeacherTimetable(name: string): TeacherSlot[][] {
+  return classTimetable.value.map(row =>
+    row.map(lesson => {
+      if (!lesson.isBreak && lesson.teacher === name) {
+        return { class: lesson.class, subject: lesson.subject }
+      }
+      return { class: '', subject: '' }
+    })
+  )
+}
 
 const selected = ref({ row: null as number | null, col: null as number | null })
 const dragSource = ref({ row: null as number | null, col: null as number | null })
