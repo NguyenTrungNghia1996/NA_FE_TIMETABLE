@@ -23,10 +23,12 @@
                 :class="[
                   { 'bg-blue-100': isSelected(rIndex, cIndex) },
                   { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak },
-                  { 'cursor-move': !lesson.isBreak }
+                  { 'cursor-move': !lesson.isBreak },
+                  { 'bg-green-100': isValidTarget(rIndex, cIndex) }
                 ]"
                 :draggable="!lesson.isBreak"
                 @dragstart="onDragStart(rIndex, cIndex)"
+                @click="startHighlight(rIndex, cIndex)"
                 @dragover.prevent
                 @drop="onDrop(rIndex, cIndex)"
                 @contextmenu.prevent="openMenu($event, rIndex, cIndex)"
@@ -72,13 +74,15 @@
                     'cursor-move':
                       classTimetable[rIndex][cIndex].teacher === teacherName &&
                       !classTimetable[rIndex][cIndex].isBreak
-                  }
+                  },
+                  { 'bg-green-100': isValidTarget(rIndex, cIndex) }
                 ]"
                 :draggable="
                   classTimetable[rIndex][cIndex].teacher === teacherName &&
                   !classTimetable[rIndex][cIndex].isBreak
                 "
                 @dragstart="onDragStart(rIndex, cIndex)"
+                @click="startHighlight(rIndex, cIndex)"
                 @dragover.prevent
                 @drop="onDrop(rIndex, cIndex)"
               >
@@ -303,6 +307,7 @@ function onDragStart(row: number, col: number) {
   const cell = classTimetable.value[row][col]
   if (cell.isBreak) return
   dragSource.value = { row, col }
+  selected.value = { row, col }
 }
 
 function onDrop(row: number, col: number) {
@@ -327,6 +332,7 @@ function onDrop(row: number, col: number) {
 
 function openMenu(event: MouseEvent, row: number, col: number) {
   selected.value = { row, col }
+  dragSource.value = { row, col }
   contextMenu.value = { show: true, x: event.clientX, y: event.clientY, row, col }
 }
 
@@ -358,8 +364,30 @@ function isSelected(row: number, col: number) {
   return selected.value.row === row && selected.value.col === col
 }
 
+function startHighlight(row: number, col: number) {
+  const cell = classTimetable.value[row][col]
+  if (cell.isBreak) return
+  selected.value = { row, col }
+  dragSource.value = { row, col }
+}
+
+function isValidTarget(row: number, col: number) {
+  const src = dragSource.value
+  if (src.row === null) return false
+  if (src.row === row && src.col === col) return false
+  const source = classTimetable.value[src.row][src.col]
+  const target = classTimetable.value[row][col]
+  if (source.isBreak || target.isBreak) return false
+  return (
+    teacherFree(source.teacher, row, col) &&
+    teacherFree(target.teacher, src.row, src.col)
+  )
+}
+
 function closeMenu() {
   contextMenu.value.show = false
+  selected.value = { row: null, col: null }
+  dragSource.value = { row: null, col: null }
 }
 
 onMounted(() => {
