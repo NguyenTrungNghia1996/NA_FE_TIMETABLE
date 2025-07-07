@@ -61,7 +61,26 @@
               <td
                 v-for="(lesson, cIndex) in row"
                 :key="cIndex"
-                class="border p-2 w-32 h-12"
+                class="border p-2 w-32 h-12 select-none whitespace-nowrap"
+                :class="[
+                  {
+                    'cursor-not-allowed':
+                      teacherBusy[rIndex][cIndex].class &&
+                      teacherBusy[rIndex][cIndex].class !== '6A'
+                  },
+                  {
+                    'cursor-move':
+                      classTimetable[rIndex][cIndex].teacher === teacherName &&
+                      !classTimetable[rIndex][cIndex].isBreak
+                  }
+                ]"
+                :draggable="
+                  classTimetable[rIndex][cIndex].teacher === teacherName &&
+                  !classTimetable[rIndex][cIndex].isBreak
+                "
+                @dragstart="onDragStart(rIndex, cIndex)"
+                @dragover.prevent
+                @drop="onDrop(rIndex, cIndex)"
               >
                 <template v-if="lesson.class">
                   <div>{{ lesson.subject }} - {{ lesson.class }}</div>
