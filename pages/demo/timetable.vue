@@ -66,6 +66,9 @@
                 class="border p-2 w-32 h-12 select-none whitespace-nowrap"
                 :class="[
                   {
+                    'bg-blue-100': isSelected(rIndex, cIndex)
+                  },
+                  {
                     'cursor-not-allowed':
                       teacherBusy[rIndex][cIndex].class &&
                       teacherBusy[rIndex][cIndex].class !== '6A'
