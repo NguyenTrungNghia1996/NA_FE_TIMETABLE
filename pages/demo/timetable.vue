@@ -34,9 +34,7 @@
 
     <div class="mt-6">
       <h2 class="text-xl font-bold mb-2">📦 Dữ liệu hiện tại</h2>
-      <pre class="bg-gray-100 p-4 text-xs overflow-auto">{{
-        JSON.stringify(timetables, null, 2)
-      }}</pre>
+      <pre class="bg-gray-100 p-4 text-xs overflow-auto">{{ timetablesJson }}</pre>
     </div>
   </div>
 </template>
@@ -64,10 +62,23 @@ function emptySession(cls) {
   )
 }
 
-// thời khóa biểu các lớp tách thành 2 ca (mặc định trống)
-const timetables = reactive({
-  '6A': { morning: emptySession('6A'), afternoon: emptySession('6A') }
-})
+// dữ liệu thời khóa biểu lưu dưới dạng chuỗi JSON
+const timetablesJson = ref(
+  JSON.stringify({
+    '6A': { morning: emptySession('6A'), afternoon: emptySession('6A') }
+  }, null, 2)
+)
+
+// đối tượng reactive để thao tác trong giao diện
+const timetables = reactive(JSON.parse(timetablesJson.value))
+
+watch(
+  timetables,
+  val => {
+    timetablesJson.value = JSON.stringify(val, null, 2)
+  },
+  { deep: true }
+)
 
 function lesson(subject, teacher, cls) {
   return { subject, teacher, class: cls, isBreak: false }
@@ -157,6 +168,7 @@ const baseTimetable6A = {
 }
 
 timetables['6A'] = JSON.parse(JSON.stringify(baseTimetable6A))
+timetablesJson.value = JSON.stringify(timetables, null, 2)
 </script>
 
 <style scoped>
