@@ -21,16 +21,6 @@
       </ul>
     </div>
 
-    <div class="mt-6">
-      <h2 class="text-xl font-bold mb-2">📚 Danh sách môn học</h2>
-      <ul class="list-disc pl-6 space-y-1">
-        <li v-for="subject in demoSubjects" :key="subject">{{ subject }}</li>
-      </ul>
-      <h2 class="text-xl font-bold mt-4 mb-2">👩‍🏫 Danh sách giáo viên</h2>
-      <ul class="list-disc pl-6 space-y-1">
-        <li v-for="teacher in demoTeachers" :key="teacher">{{ teacher }}</li>
-      </ul>
-    </div>
 
     <div class="mt-6">
       <h2 class="text-xl font-bold mb-2">📦 Dữ liệu hiện tại</h2>
@@ -41,14 +31,6 @@
 
 <script setup>
 
-const demoSubjects = ['Toán', 'Văn', 'Anh', 'Lý', 'Hóa', 'Sinh', 'Sử', 'Địa']
-const demoTeachers = [
-  'GV1. PT Thoản',
-  'GV2. Thầy An',
-  'GV3. Cô Bình',
-  'GV4. Thầy Cường',
-  'GV5. Cô Dung'
-]
 
 // tạo thời khóa biểu trống cho hai ca, mỗi ca 5 tiết
 function emptySession(cls) {
