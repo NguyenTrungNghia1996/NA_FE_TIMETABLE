@@ -19,7 +19,7 @@
               <td
                 v-for="(lesson, cIndex) in row"
                 :key="cIndex"
-                class="border p-2 w-32 h-12 select-none whitespace-nowrap"
+                class="border p-2 w-32 h-12 select-none overflow-hidden"
                 :class="[
                   { 'bg-blue-100': isSelected(rIndex, cIndex) },
                   { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak },
@@ -34,8 +34,9 @@
                 @contextmenu.prevent="openMenu($event, rIndex, cIndex)"
               >
                 <template v-if="lesson.subject">
-                  <div>{{ lesson.subject }} - {{ lesson.class }}</div>
-                  <div class="text-xs">{{ lesson.teacher }}</div>
+                  <div class="line-clamp-1">
+                    {{ lesson.teacher }}
+                  </div>
                 </template>
                 <template v-else-if="lesson.isBreak">Nghỉ</template>
               </td>
