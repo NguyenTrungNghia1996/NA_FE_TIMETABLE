@@ -18,7 +18,7 @@
               <th colspan="6" class="bg-gray-50 text-left px-2">Ca sáng</th>
             </tr>
             <tr
-              v-for="(row, rIndex) in classTimetable.slice(0, 5)"
+              v-for="(row, rIndex) in morningTimetable"
               :key="`morning-${rIndex}`"
             >
               <th class="border p-2 w-20 h-12">{{ rIndex + 1 }}</th>
@@ -56,10 +56,10 @@
               <th colspan="6" class="bg-gray-50 text-left px-2">Ca chiều</th>
             </tr>
             <tr
-              v-for="(row, rIndex) in classTimetable.slice(5)"
+              v-for="(row, rIndex) in afternoonTimetable"
               :key="`afternoon-${rIndex}`"
             >
-              <th class="border p-2 w-20 h-12">{{ rIndex + 6 }}</th>
+              <th class="border p-2 w-20 h-12">{{ rIndex + 1 }}</th>
               <td
                 v-for="(lesson, cIndex) in row"
                 :key="cIndex"
@@ -114,7 +114,13 @@
 
     <div class="mt-6">
       <h2 class="text-xl font-bold mb-2">📦 Dữ liệu hiện tại</h2>
-      <pre class="bg-gray-100 p-4 text-xs overflow-auto">{{ JSON.stringify(classTimetable, null, 2) }}</pre>
+      <pre class="bg-gray-100 p-4 text-xs overflow-auto">{{
+        JSON.stringify(
+          { morning: morningTimetable, afternoon: afternoonTimetable },
+          null,
+          2
+        )
+      }}</pre>
     </div>
   </div>
 </template>
@@ -145,7 +151,7 @@ const teacherName = 'PT Thoản'
 const days = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu']
 
 // lịch cơ bản của giáo viên (không bao gồm lớp 6A)
-const teacherBusy: TeacherSlot[][] = [
+const teacherBusyMorning: TeacherSlot[][] = [
   [
     { class: '', subject: '' },
     { class: '7B', subject: 'AN' },
@@ -209,6 +215,37 @@ const teacherBusy: TeacherSlot[][] = [
     { class: '', subject: '' },
     { class: '7B', subject: 'AN' }
   ],
+]
+
+const teacherBusyAfternoon: TeacherSlot[][] = [
+  [
+    { class: '', subject: '' },
+    { class: '', subject: '' },
+    { class: '8B', subject: 'AN' },
+    { class: '8A', subject: 'AN' },
+    { class: '', subject: '' }
+  ],
+  [
+    { class: '7C', subject: 'AN' },
+    { class: '', subject: '' },
+    { class: '', subject: '' },
+    { class: '6C', subject: 'AN' },
+    { class: '', subject: '' }
+  ],
+  [
+    { class: '', subject: '' },
+    { class: '', subject: '' },
+    { class: '', subject: '' },
+    { class: '', subject: '' },
+    { class: '', subject: '' }
+  ],
+  [
+    { class: '6B', subject: 'AN' },
+    { class: '7A', subject: 'AN' },
+    { class: '', subject: '' },
+    { class: '', subject: '' },
+    { class: '7B', subject: 'AN' }
+  ],
   [
     { class: '', subject: '' },
     { class: '', subject: '' },
@@ -218,8 +255,8 @@ const teacherBusy: TeacherSlot[][] = [
   ]
 ]
 
-// thời khóa biểu lớp 6A (10 tiết - 2 ca, 5 ngày)
-const classTimetable = ref<Lesson[][]>([
+// thời khóa biểu lớp 6A tách thành 2 ca (mỗi ca 5 tiết)
+const morningTimetable = ref<Lesson[][]>([
   [
     { id: 1, subject: 'Toán', class: '6A', teacher: 'Phan Văn Lương', isBreak: false },
     { id: 2, subject: 'Văn', class: '6A', teacher: 'Nguyễn Thị Bình', isBreak: false },
@@ -254,7 +291,10 @@ const classTimetable = ref<Lesson[][]>([
     { id: 23, subject: 'Toán', class: '6A', teacher: 'Phan Văn Lương', isBreak: false },
     { id: 24, subject: 'Công nghệ', class: '6A', teacher: 'Phạm Văn Khang', isBreak: false },
     { id: 25, subject: 'Sử', class: '6A', teacher: 'Lê Văn Quý', isBreak: false }
-  ],
+  ]
+])
+
+const afternoonTimetable = ref<Lesson[][]>([
   [
     { id: 26, subject: 'Văn', class: '6A', teacher: 'Nguyễn Thị Bình', isBreak: false },
     { id: 27, subject: 'Sinh', class: '6A', teacher: 'Nguyễn Thị Minh', isBreak: false },
@@ -292,6 +332,25 @@ const classTimetable = ref<Lesson[][]>([
   ]
 ])
 
+const classTimetable = computed(() => [
+  ...morningTimetable.value,
+  ...afternoonTimetable.value
+])
+
+function getCell(row: number, col: number) {
+  return row < 5
+    ? morningTimetable.value[row][col]
+    : afternoonTimetable.value[row - 5][col]
+}
+
+function setCell(row: number, col: number, lesson: Lesson) {
+  if (row < 5) {
+    morningTimetable.value[row][col] = lesson
+  } else {
+    afternoonTimetable.value[row - 5][col] = lesson
+  }
+}
+
 
 const selected = ref({ row: null as number | null, col: null as number | null })
 const dragSource = ref({ row: null as number | null, col: null as number | null })
@@ -299,12 +358,15 @@ const contextMenu = ref({ show: false, x: 0, y: 0, row: null as number | null, c
 
 function teacherFree(teacher: string, row: number, col: number) {
   if (teacher !== teacherName) return true
-  const slot = teacherBusy[row][col]
+  const slot =
+    row < 5
+      ? teacherBusyMorning[row][col]
+      : teacherBusyAfternoon[row - 5][col]
   return !slot.class || slot.class === '6A'
 }
 
 function onDragStart(row: number, col: number) {
-  const cell = classTimetable.value[row][col]
+  const cell = getCell(row, col)
   if (cell.isBreak) return
   dragSource.value = { row, col }
   selected.value = { row, col }
@@ -314,8 +376,8 @@ function onDrop(row: number, col: number) {
   const src = dragSource.value
   if (src.row === null) return
   if (src.row === row && src.col === col) return
-  const target = classTimetable.value[row][col]
-  const source = classTimetable.value[src.row][src.col]
+  const target = getCell(row, col)
+  const source = getCell(src.row, src.col)
   if (target.isBreak || source.isBreak) {
     dragSource.value = { row: null, col: null }
     return
@@ -325,8 +387,8 @@ function onDrop(row: number, col: number) {
     dragSource.value = { row: null, col: null }
     return
   }
-  classTimetable.value[row][col] = source
-  classTimetable.value[src.row][src.col] = target
+  setCell(row, col, source)
+  setCell(src.row, src.col, target)
   dragSource.value = { row: null, col: null }
 }
 
@@ -337,7 +399,7 @@ function openMenu(event: MouseEvent, row: number, col: number) {
 }
 
 function toggleBreak(row: number, col: number) {
-  const cell = classTimetable.value[row][col]
+  const cell = getCell(row, col)
   if (cell.isBreak) {
     cell.isBreak = false
     if (cell.backup) {
@@ -370,7 +432,7 @@ function isSelected(row: number, col: number) {
 }
 
 function startHighlight(row: number, col: number) {
-  const cell = classTimetable.value[row][col]
+  const cell = getCell(row, col)
   if (cell.isBreak) return
   selected.value = { row, col }
   dragSource.value = { row, col }
@@ -380,8 +442,8 @@ function isValidTarget(row: number, col: number) {
   const src = dragSource.value
   if (src.row === null) return false
   if (src.row === row && src.col === col) return false
-  const source = classTimetable.value[src.row][src.col]
-  const target = classTimetable.value[row][col]
+  const source = getCell(src.row, src.col)
+  const target = getCell(row, col)
   if (source.isBreak || target.isBreak) return false
   return (
     teacherFree(source.teacher, row, col) &&
