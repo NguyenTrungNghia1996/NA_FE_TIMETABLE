@@ -47,28 +47,14 @@
 
 <script setup>
 
-const days = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu']
 const demoSubjects = ['Toán', 'Văn', 'Anh', 'Lý', 'Hóa', 'Sinh', 'Sử', 'Địa']
-const subjectTeacherMap = {
-  Toán: 'GV2',
-  Văn: 'GV3',
-  Anh: 'GV1',
-  Lý: 'GV4',
-  Hóa: 'GV5',
-  Sinh: 'GV3',
-  Sử: 'GV5',
-  Địa: 'GV4'
-}
-const teacherMap = {
-  GV1: 'PT Thoản',
-  GV2: 'Thầy An',
-  GV3: 'Cô Bình',
-  GV4: 'Thầy Cường',
-  GV5: 'Cô Dung'
-}
-const demoTeachers = Object.entries(teacherMap).map(
-  ([id, name]) => `${id}. ${name}`
-)
+const demoTeachers = [
+  'GV1. PT Thoản',
+  'GV2. Thầy An',
+  'GV3. Cô Bình',
+  'GV4. Thầy Cường',
+  'GV5. Cô Dung'
+]
 
 // tạo thời khóa biểu trống cho hai ca, mỗi ca 5 tiết
 function emptySession(cls) {
