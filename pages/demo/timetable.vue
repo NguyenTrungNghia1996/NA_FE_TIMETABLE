@@ -35,6 +35,9 @@
               >
                 <template v-if="lesson.subject">
                   <div class="line-clamp-1">
+                    {{ lesson.subject }} - {{ lesson.class }}
+                  </div>
+                  <div class="text-xs line-clamp-1">
                     {{ lesson.teacher }}
                   </div>
                 </template>
