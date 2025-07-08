@@ -107,33 +107,33 @@ const teacherBusy: TeacherSlot[][] = [
     { class: '7B', subject: 'AN' },
     { class: '7C', subject: 'AN' },
     { class: '8C', subject: 'AN' },
-    { class: '8A', subject: 'AN' }
+    { class: '', subject: '' }
   ],
   [
     { class: '', subject: '' },
     { class: '6B', subject: 'AN' },
     { class: '9C', subject: 'AN' },
-    { class: '6C', subject: 'AN' },
-    { class: '9C', subject: 'CD' }
+    { class: '', subject: '' },
+    { class: '8A', subject: 'AN' }
   ],
   [
-    { class: '', subject: '' },
-    { class: '6A', subject: 'AN' },
-    { class: '9B', subject: 'CD' },
-    { class: '7A', subject: 'AN' },
-    { class: '8B', subject: 'AN' }
-  ],
-  [
-    { class: '', subject: '' },
     { class: '9A', subject: 'AN' },
     { class: '', subject: '' },
-    { class: '', subject: '' },
-    { class: '9A', subject: 'AN' }
+    { class: '7A', subject: 'AN' },
+    { class: '8B', subject: 'AN' },
+    { class: '', subject: '' }
   ],
   [
     { class: '', subject: '' },
     { class: '9B', subject: 'AN' },
     { class: '', subject: '' },
+    { class: '', subject: '' },
+    { class: '9A', subject: 'AN' }
+  ],
+  [
+    { class: '6C', subject: 'AN' },
+    { class: '', subject: '' },
+    { class: '7B', subject: 'AN' },
     { class: '', subject: '' },
     { class: '', subject: '' }
   ]
@@ -142,39 +142,39 @@ const teacherBusy: TeacherSlot[][] = [
 // thời khóa biểu lớp 6A (5 tiết, 5 ngày)
 const classTimetable = ref<Lesson[][]>([
   [
-    { id: 1, subject: 'CC', class: '6A', teacher: 'NTB Thủy', isBreak: false },
-    { id: 2, subject: 'Toán', class: '6A', teacher: 'PT Lương', isBreak: false },
-    { id: 3, subject: 'TD', class: '6A', teacher: 'NT Ngân', isBreak: false },
-    { id: 4, subject: 'Toán', class: '6A', teacher: 'PT Lương', isBreak: false },
-    { id: 5, subject: 'Địa', class: '6A', teacher: 'VT Thu', isBreak: false }
+    { id: 1, subject: 'Toán', class: '6A', teacher: 'Phan Văn Lương', isBreak: false },
+    { id: 2, subject: 'Văn', class: '6A', teacher: 'Nguyễn Thị Bình', isBreak: false },
+    { id: 3, subject: 'Anh', class: '6A', teacher: 'Trần Thu Hà', isBreak: false },
+    { id: 4, subject: 'Lý', class: '6A', teacher: 'Lê Đức Thắng', isBreak: false },
+    { id: 5, subject: 'Âm nhạc', class: '6A', teacher: teacherName, isBreak: false }
   ],
   [
-    { id: 6, subject: 'Văn', class: '6A', teacher: 'NTB Thủy', isBreak: false },
-    { id: 7, subject: 'TN - Hướng nghiệp', class: '6A', teacher: 'NTB Thủy', isBreak: false },
-    { id: 8, subject: 'Sử', class: '6A', teacher: 'BT Cúc', isBreak: false },
-    { id: 9, subject: 'Sử', class: '6A', teacher: 'BT Cúc', isBreak: false },
-    { id: 10, subject: 'Toán', class: '6A', teacher: 'PT Lương', isBreak: false }
+    { id: 6, subject: 'Toán', class: '6A', teacher: 'Phan Văn Lương', isBreak: false },
+    { id: 7, subject: 'Địa', class: '6A', teacher: 'Lê Mai Hoa', isBreak: false },
+    { id: 8, subject: 'Sinh', class: '6A', teacher: 'Nguyễn Thị Minh', isBreak: false },
+    { id: 9, subject: 'Âm nhạc', class: '6A', teacher: teacherName, isBreak: false },
+    { id: 10, subject: 'Sử', class: '6A', teacher: 'Lê Văn Quý', isBreak: false }
   ],
   [
-    { id: 11, subject: 'KHTN (Lý)', class: '6A', teacher: 'TTK Tiên', isBreak: false },
-    { id: 12, subject: 'AN', class: '6A', teacher: teacherName, isBreak: false },
-    { id: 13, subject: 'Sử', class: '6A', teacher: 'BT Cúc', isBreak: false },
-    { id: 14, subject: 'GD Địa phương', class: '6A', teacher: 'NTB Thủy', isBreak: false },
-    { id: 15, subject: 'Toán', class: '6A', teacher: 'PT Lương', isBreak: false }
+    { id: 11, subject: 'Văn', class: '6A', teacher: 'Nguyễn Thị Bình', isBreak: false },
+    { id: 12, subject: 'Toán', class: '6A', teacher: 'Phan Văn Lương', isBreak: false },
+    { id: 13, subject: '', class: '', teacher: '', isBreak: true },
+    { id: 14, subject: 'Công nghệ', class: '6A', teacher: 'Phạm Văn Khang', isBreak: false },
+    { id: 15, subject: 'Anh', class: '6A', teacher: 'Trần Thu Hà', isBreak: false }
   ],
   [
-    { id: 16, subject: 'Tin học', class: '6A', teacher: 'NTB Thủy', isBreak: false },
-    { id: 17, subject: 'Anh', class: '6A', teacher: 'NT Liên', isBreak: false },
-    { id: 18, subject: '', class: '', teacher: '', isBreak: true },
-    { id: 19, subject: 'GD Địa phương', class: '6A', teacher: 'NTB Thủy', isBreak: false },
-    { id: 20, subject: 'KHTN (Sinh)', class: '6A', teacher: 'NTB Thủy', isBreak: false }
+    { id: 16, subject: 'Tin học', class: '6A', teacher: 'Trần Minh Tân', isBreak: false },
+    { id: 17, subject: 'Mỹ thuật', class: '6A', teacher: 'Đỗ Lan Hương', isBreak: false },
+    { id: 18, subject: 'Thể dục', class: '6A', teacher: 'Nguyễn Văn Mạnh', isBreak: false },
+    { id: 19, subject: 'Địa', class: '6A', teacher: 'Lê Mai Hoa', isBreak: false },
+    { id: 20, subject: 'Toán', class: '6A', teacher: 'Phan Văn Lương', isBreak: false }
   ],
   [
-    { id: 21, subject: 'MT', class: '6A', teacher: 'PTK Hoa', isBreak: false },
-    { id: 22, subject: 'CN', class: '6A', teacher: 'NP Thảo', isBreak: false },
-    { id: 23, subject: '', class: '', teacher: '', isBreak: true },
-    { id: 24, subject: '', class: '', teacher: '', isBreak: true },
-    { id: 25, subject: 'Văn', class: '6A', teacher: 'NTB Thủy', isBreak: false }
+    { id: 21, subject: 'Văn', class: '6A', teacher: 'Nguyễn Thị Bình', isBreak: false },
+    { id: 22, subject: 'Âm nhạc', class: '6A', teacher: teacherName, isBreak: false },
+    { id: 23, subject: 'Toán', class: '6A', teacher: 'Phan Văn Lương', isBreak: false },
+    { id: 24, subject: 'Công nghệ', class: '6A', teacher: 'Phạm Văn Khang', isBreak: false },
+    { id: 25, subject: 'Sử', class: '6A', teacher: 'Lê Văn Quý', isBreak: false }
   ]
 ])
 
