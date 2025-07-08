@@ -1,13 +1,14 @@
 <template>
-  <div class="max-w-5xl mx-auto p-6 space-y-8">
-    <h1 class="text-2xl font-bold">Demo xếp thời khóa biểu liên kết</h1>
-    <a-card class="mb-6">
-      <template #title>Thời khóa biểu lớp 6A</template>
-      <a-select
-        v-model:value="selectedTeacher"
-        :options="teacherOptions"
-        class="mb-4 w-48"
-      />
+  <div class="max-w-6xl mx-auto p-6 space-y-4">
+    <h1 class="text-2xl font-bold mb-2">Demo xếp thời khóa biểu liên kết</h1>
+    <a-select
+      v-model:value="selectedTeacher"
+      :options="teacherOptions"
+      class="mb-4 w-48"
+    />
+    <div class="grid gap-6 md:grid-cols-2">
+      <a-card>
+        <template #title>Thời khóa biểu lớp 6A</template>
       <div class="overflow-x-auto">
         <table class="min-w-full text-center border-collapse table-fixed">
           <tbody>
@@ -217,6 +218,7 @@
         </table>
       </div>
     </a-card>
+    </div>
 
     <div v-if="contextMenu.show" class="fixed bg-white border rounded shadow z-50" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
       <ul>
@@ -563,12 +565,22 @@ const dragSource = ref({ cls: '', row: null, col: null })
 const contextMenu = ref({ show: false, x: 0, y: 0, cls: '', row: null, col: null })
 
 function teacherFree(teacher, row, col, cls) {
-  if (teacher !== teacherName) return true
-  const slot =
-    row < 5
-      ? teacherBusyMorning[row][col]
-      : teacherBusyAfternoon[row - 5][col]
-  return !slot.class || slot.class === cls
+  if (teacher === teacherName) {
+    const slot =
+      row < 5
+        ? teacherBusyMorning[row][col]
+        : teacherBusyAfternoon[row - 5][col]
+    if (slot.class && slot.class !== cls) return false
+  }
+  for (const key of Object.keys(timetables)) {
+    if (key === cls) continue
+    const other =
+      row < 5
+        ? timetables[key].morning[row][col]
+        : timetables[key].afternoon[row - 5][col]
+    if (other.teacher === teacher && !other.isBreak) return false
+  }
+  return true
 }
 
 function onDragStart(cls, row, col) {
@@ -593,8 +605,13 @@ function onDrop(cls, row, col) {
     dragSource.value = { cls: '', row: null, col: null }
     return
   }
-  if (!teacherFree(source.teacher, row, col, cls) || !teacherFree(target.teacher, src.row, src.col, src.cls)) {
-    message.error(`Giáo viên ${teacherName} đang bận tiết đó`)
+  if (!teacherFree(source.teacher, row, col, cls)) {
+    message.error(`Giáo viên ${source.teacher} đang bận tiết đó`)
+    dragSource.value = { cls: '', row: null, col: null }
+    return
+  }
+  if (!teacherFree(target.teacher, src.row, src.col, src.cls)) {
+    message.error(`Giáo viên ${target.teacher} đang bận tiết đó`)
     dragSource.value = { cls: '', row: null, col: null }
     return
   }
@@ -615,7 +632,7 @@ function toggleBreak(cls, row, col) {
     cell.isBreak = false
     if (cell.backup) {
       if (!teacherFree(cell.backup.teacher, row, col, cls)) {
-        message.error(`Giáo viên ${teacherName} đang bận tiết đó`)
+        message.error(`Giáo viên ${cell.backup.teacher} đang bận tiết đó`)
         return
       }
       cell.subject = cell.backup.subject
