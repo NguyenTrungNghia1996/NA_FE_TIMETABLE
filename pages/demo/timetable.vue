@@ -13,12 +13,12 @@
         :days="days"
         :selected-teacher="selectedTeacher"
         :teacher-map="teacherMap"
-        :on-drag-start="onDragStart"
-        :on-drop="onDrop"
         :open-menu="openMenu"
-        :start-highlight="startHighlight"
-        :is-selected="isSelected"
-        :is-valid-target="isValidTarget"
+        :get-cell="getCell"
+        :set-cell="setCell"
+        :teacher-free="teacherFree"
+        :selected="selected"
+        :drag-source="dragSource"
       />
       <ClassTimetable
         cls="6B"
@@ -26,12 +26,12 @@
         :days="days"
         :selected-teacher="selectedTeacher"
         :teacher-map="teacherMap"
-        :on-drag-start="onDragStart"
-        :on-drop="onDrop"
         :open-menu="openMenu"
-        :start-highlight="startHighlight"
-        :is-selected="isSelected"
-        :is-valid-target="isValidTarget"
+        :get-cell="getCell"
+        :set-cell="setCell"
+        :teacher-free="teacherFree"
+        :selected="selected"
+        :drag-source="dragSource"
       />
     </div>
 
@@ -384,42 +384,6 @@ function teacherFree(teacher, row, col, cls) {
   return true
 }
 
-function onDragStart(cls, row, col) {
-  const cell = getCell(cls, row, col)
-  if (cell.isBreak || cell.teacher !== selectedTeacher.value) return
-  dragSource.value = { cls, row, col }
-  selected.value = { cls, row, col }
-}
-
-function onDrop(cls, row, col) {
-  const src = dragSource.value
-  if (!src.cls) return
-  if (src.cls === cls && src.row === row && src.col === col) return
-  const target = getCell(cls, row, col)
-  const source = getCell(src.cls, src.row, src.col)
-  if (source.teacher !== selectedTeacher.value) {
-    dragSource.value = { cls: '', row: null, col: null }
-    selected.value = { cls: '', row: null, col: null }
-    return
-  }
-  if (target.isBreak || source.isBreak) {
-    dragSource.value = { cls: '', row: null, col: null }
-    return
-  }
-  if (!teacherFree(source.teacher, row, col, cls)) {
-    message.error(`Giáo viên ${teacherMap[source.teacher] || source.teacher} đang bận tiết đó`)
-    dragSource.value = { cls: '', row: null, col: null }
-    return
-  }
-  if (!teacherFree(target.teacher, src.row, src.col, src.cls)) {
-    message.error(`Giáo viên ${teacherMap[target.teacher] || target.teacher} đang bận tiết đó`)
-    dragSource.value = { cls: '', row: null, col: null }
-    return
-  }
-  setCell(cls, row, col, source)
-  setCell(src.cls, src.row, src.col, target)
-  dragSource.value = { cls: '', row: null, col: null }
-}
 
 function openMenu(event, cls, row, col) {
   selected.value = { cls, row, col }
@@ -477,34 +441,6 @@ function addLesson(cls, row, col) {
   contextMenu.value.show = false
 }
 
-function isSelected(cls, row, col) {
-  return (
-    selected.value.cls === cls &&
-    selected.value.row === row &&
-    selected.value.col === col
-  )
-}
-
-function startHighlight(cls, row, col) {
-  const cell = getCell(cls, row, col)
-  if (cell.isBreak || cell.teacher !== selectedTeacher.value) return
-  selected.value = { cls, row, col }
-  dragSource.value = { cls, row, col }
-}
-
-function isValidTarget(cls, row, col) {
-  const src = dragSource.value
-  if (!src.cls) return false
-  if (src.cls === cls && src.row === row && src.col === col) return false
-  const source = getCell(src.cls, src.row, src.col)
-  if (source.teacher !== selectedTeacher.value) return false
-  const target = getCell(cls, row, col)
-  if (source.isBreak || target.isBreak) return false
-  return (
-    teacherFree(source.teacher, row, col, cls) &&
-    teacherFree(target.teacher, src.row, src.col, src.cls)
-  )
-}
 
 function closeMenu() {
   contextMenu.value.show = false

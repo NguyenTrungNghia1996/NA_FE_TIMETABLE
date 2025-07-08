@@ -107,17 +107,84 @@
 </template>
 
 <script setup>
+
 const props = defineProps({
   cls: String,
   timetable: Object,
   days: Array,
   selectedTeacher: String,
   teacherMap: Object,
-  onDragStart: Function,
-  onDrop: Function,
   openMenu: Function,
-  startHighlight: Function,
-  isSelected: Function,
-  isValidTarget: Function
+  getCell: Function,
+  setCell: Function,
+  teacherFree: Function,
+  selected: Object,
+  dragSource: Object
 })
+
+function isSelected(cls, row, col) {
+  return (
+    props.selected.value.cls === cls &&
+    props.selected.value.row === row &&
+    props.selected.value.col === col
+  )
+}
+
+function startHighlight(cls, row, col) {
+  const cell = props.getCell(cls, row, col)
+  if (cell.isBreak || cell.teacher !== props.selectedTeacher) return
+  props.selected.value = { cls, row, col }
+  props.dragSource.value = { cls, row, col }
+}
+
+function onDragStart(cls, row, col) {
+  const cell = props.getCell(cls, row, col)
+  if (cell.isBreak || cell.teacher !== props.selectedTeacher) return
+  props.dragSource.value = { cls, row, col }
+  props.selected.value = { cls, row, col }
+}
+
+function onDrop(cls, row, col) {
+  const src = props.dragSource.value
+  if (!src.cls) return
+  if (src.cls === cls && src.row === row && src.col === col) return
+  const target = props.getCell(cls, row, col)
+  const source = props.getCell(src.cls, src.row, src.col)
+  if (source.teacher !== props.selectedTeacher) {
+    props.dragSource.value = { cls: '', row: null, col: null }
+    props.selected.value = { cls: '', row: null, col: null }
+    return
+  }
+  if (target.isBreak || source.isBreak) {
+    props.dragSource.value = { cls: '', row: null, col: null }
+    return
+  }
+  if (!props.teacherFree(source.teacher, row, col, cls)) {
+    message.error(`Giáo viên ${props.teacherMap[source.teacher] || source.teacher} đang bận tiết đó`)
+    props.dragSource.value = { cls: '', row: null, col: null }
+    return
+  }
+  if (!props.teacherFree(target.teacher, src.row, src.col, src.cls)) {
+    message.error(`Giáo viên ${props.teacherMap[target.teacher] || target.teacher} đang bận tiết đó`)
+    props.dragSource.value = { cls: '', row: null, col: null }
+    return
+  }
+  props.setCell(cls, row, col, source)
+  props.setCell(src.cls, src.row, src.col, target)
+  props.dragSource.value = { cls: '', row: null, col: null }
+}
+
+function isValidTarget(cls, row, col) {
+  const src = props.dragSource.value
+  if (!src.cls) return false
+  if (src.cls === cls && src.row === row && src.col === col) return false
+  const source = props.getCell(src.cls, src.row, src.col)
+  if (source.teacher !== props.selectedTeacher) return false
+  const target = props.getCell(cls, row, col)
+  if (source.isBreak || target.isBreak) return false
+  return (
+    props.teacherFree(source.teacher, row, col, cls) &&
+    props.teacherFree(target.teacher, src.row, src.col, src.cls)
+  )
+}
 </script>
