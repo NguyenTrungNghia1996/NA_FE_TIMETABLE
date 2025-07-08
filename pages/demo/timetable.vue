@@ -7,217 +7,32 @@
       class="mb-4 w-48"
     />
     <div class="grid gap-6 md:grid-cols-2">
-      <a-card>
-        <template #title>Thời khóa biểu lớp 6A</template>
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-center border-collapse table-fixed">
-          <tbody>
-            <tr>
-              <th colspan="6" class="bg-gray-50 text-left px-2">Ca sáng</th>
-            </tr>
-            <tr>
-              <th class="border p-2 w-20 h-12">Tiết\\Ngày</th>
-              <th
-                v-for="day in days"
-                :key="`morning-${day}`"
-                class="border p-2 w-32 h-12"
-              >
-                {{ day }}
-              </th>
-            </tr>
-            <tr
-              v-for="(row, rIndex) in timetables['6A'].morning"
-              :key="`morning-${rIndex}`"
-            >
-              <th class="border p-2 w-20 h-12">{{ rIndex + 1 }}</th>
-              <td
-                v-for="(lesson, cIndex) in row"
-                :key="cIndex"
-                class="border p-2 w-32 h-12 select-none overflow-hidden"
-                :class="[
-                  !lesson.isBreak && lesson.teacher === selectedTeacher && 'bg-yellow-50',
-                  { 'bg-blue-100': isSelected('6A', rIndex, cIndex) },
-                  { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak },
-                  { 'cursor-move': !lesson.isBreak && lesson.teacher === selectedTeacher },
-                  { 'bg-green-100': isValidTarget('6A', rIndex, cIndex) }
-                ]"
-                :draggable="!lesson.isBreak && lesson.teacher === selectedTeacher"
-                @dragstart="onDragStart('6A', rIndex, cIndex)"
-                @click="startHighlight('6A', rIndex, cIndex)"
-                @dragover.prevent
-                @drop="onDrop('6A', rIndex, cIndex)"
-                @contextmenu.prevent="openMenu($event, '6A', rIndex, cIndex)"
-              >
-                <template v-if="lesson.subject">
-                  <div class="line-clamp-1">
-                    {{ lesson.subject }} - {{ lesson.class }}
-                  </div>
-                  <div class="text-xs line-clamp-1">
-                    {{ teacherMap[lesson.teacher] }}
-                  </div>
-                </template>
-                <template v-else-if="lesson.isBreak">Nghỉ</template>
-              </td>
-            </tr>
-          </tbody>
-          <tbody>
-            <tr>
-              <th colspan="6" class="bg-gray-50 text-left px-2">Ca chiều</th>
-            </tr>
-            <tr>
-              <th class="border p-2 w-20 h-12">Tiết\\Ngày</th>
-              <th
-                v-for="day in days"
-                :key="`afternoon-${day}`"
-                class="border p-2 w-32 h-12"
-              >
-                {{ day }}
-              </th>
-            </tr>
-            <tr
-              v-for="(row, rIndex) in timetables['6A'].afternoon"
-              :key="`afternoon-${rIndex}`"
-            >
-              <th class="border p-2 w-20 h-12">{{ rIndex + 1 }}</th>
-              <td
-                v-for="(lesson, cIndex) in row"
-                :key="cIndex"
-                class="border p-2 w-32 h-12 select-none overflow-hidden"
-                :class="[
-                  !lesson.isBreak && lesson.teacher === selectedTeacher && 'bg-yellow-50',
-                  { 'bg-blue-100': isSelected('6A', rIndex + 5, cIndex) },
-                  { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak },
-                  { 'cursor-move': !lesson.isBreak && lesson.teacher === selectedTeacher },
-                  { 'bg-green-100': isValidTarget('6A', rIndex + 5, cIndex) }
-                ]"
-                :draggable="!lesson.isBreak && lesson.teacher === selectedTeacher"
-                @dragstart="onDragStart('6A', rIndex + 5, cIndex)"
-                @click="startHighlight('6A', rIndex + 5, cIndex)"
-                @dragover.prevent
-                @drop="onDrop('6A', rIndex + 5, cIndex)"
-                @contextmenu.prevent="openMenu($event, '6A', rIndex + 5, cIndex)"
-              >
-                <template v-if="lesson.subject">
-                  <div class="line-clamp-1">
-                    {{ lesson.subject }} - {{ lesson.class }}
-                  </div>
-                  <div class="text-xs line-clamp-1">
-                    {{ teacherMap[lesson.teacher] }}
-                  </div>
-                </template>
-                <template v-else-if="lesson.isBreak">Nghỉ</template>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-  </div>
-    </a-card>
-
-    <a-card class="mb-6">
-      <template #title>Thời khóa biểu lớp 6B</template>
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-center border-collapse table-fixed">
-          <tbody>
-            <tr>
-              <th colspan="6" class="bg-gray-50 text-left px-2">Ca sáng</th>
-            </tr>
-            <tr>
-              <th class="border p-2 w-20 h-12">Tiết\\Ngày</th>
-              <th
-                v-for="day in days"
-                :key="`morning-6B-${day}`"
-                class="border p-2 w-32 h-12"
-              >
-                {{ day }}
-              </th>
-            </tr>
-            <tr
-              v-for="(row, rIndex) in timetables['6B'].morning"
-              :key="`6B-morning-${rIndex}`"
-            >
-              <th class="border p-2 w-20 h-12">{{ rIndex + 1 }}</th>
-              <td
-                v-for="(lesson, cIndex) in row"
-                :key="cIndex"
-                class="border p-2 w-32 h-12 select-none overflow-hidden"
-                :class="[
-                  !lesson.isBreak && lesson.teacher === selectedTeacher && 'bg-yellow-50',
-                  { 'bg-blue-100': isSelected('6B', rIndex, cIndex) },
-                  { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak },
-                  { 'cursor-move': !lesson.isBreak && lesson.teacher === selectedTeacher },
-                  { 'bg-green-100': isValidTarget('6B', rIndex, cIndex) }
-                ]"
-                :draggable="!lesson.isBreak && lesson.teacher === selectedTeacher"
-                @dragstart="onDragStart('6B', rIndex, cIndex)"
-                @click="startHighlight('6B', rIndex, cIndex)"
-                @dragover.prevent
-                @drop="onDrop('6B', rIndex, cIndex)"
-                @contextmenu.prevent="openMenu($event, '6B', rIndex, cIndex)"
-              >
-                <template v-if="lesson.subject">
-                  <div class="line-clamp-1">
-                    {{ lesson.subject }} - {{ lesson.class }}
-                  </div>
-                  <div class="text-xs line-clamp-1">
-                    {{ teacherMap[lesson.teacher] }}
-                  </div>
-                </template>
-                <template v-else-if="lesson.isBreak">Nghỉ</template>
-              </td>
-            </tr>
-          </tbody>
-          <tbody>
-            <tr>
-              <th colspan="6" class="bg-gray-50 text-left px-2">Ca chiều</th>
-            </tr>
-            <tr>
-              <th class="border p-2 w-20 h-12">Tiết\\Ngày</th>
-              <th
-                v-for="day in days"
-                :key="`afternoon-6B-${day}`"
-                class="border p-2 w-32 h-12"
-              >
-                {{ day }}
-              </th>
-            </tr>
-            <tr
-              v-for="(row, rIndex) in timetables['6B'].afternoon"
-              :key="`6B-afternoon-${rIndex}`"
-            >
-              <th class="border p-2 w-20 h-12">{{ rIndex + 1 }}</th>
-              <td
-                v-for="(lesson, cIndex) in row"
-                :key="cIndex"
-                class="border p-2 w-32 h-12 select-none overflow-hidden"
-                :class="[
-                  !lesson.isBreak && lesson.teacher === selectedTeacher && 'bg-yellow-50',
-                  { 'bg-blue-100': isSelected('6B', rIndex + 5, cIndex) },
-                  { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak },
-                  { 'cursor-move': !lesson.isBreak && lesson.teacher === selectedTeacher },
-                  { 'bg-green-100': isValidTarget('6B', rIndex + 5, cIndex) }
-                ]"
-                :draggable="!lesson.isBreak && lesson.teacher === selectedTeacher"
-                @dragstart="onDragStart('6B', rIndex + 5, cIndex)"
-                @click="startHighlight('6B', rIndex + 5, cIndex)"
-                @dragover.prevent
-                @drop="onDrop('6B', rIndex + 5, cIndex)"
-                @contextmenu.prevent="openMenu($event, '6B', rIndex + 5, cIndex)"
-              >
-                <template v-if="lesson.subject">
-                  <div class="line-clamp-1">
-                    {{ lesson.subject }} - {{ lesson.class }}
-                  </div>
-                  <div class="text-xs line-clamp-1">
-                    {{ teacherMap[lesson.teacher] }}
-                  </div>
-                </template>
-                <template v-else-if="lesson.isBreak">Nghỉ</template>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </a-card>
+      <ClassTimetable
+        cls="6A"
+        :timetable="timetables['6A']"
+        :days="days"
+        :selected-teacher="selectedTeacher"
+        :teacher-map="teacherMap"
+        :on-drag-start="onDragStart"
+        :on-drop="onDrop"
+        :open-menu="openMenu"
+        :start-highlight="startHighlight"
+        :is-selected="isSelected"
+        :is-valid-target="isValidTarget"
+      />
+      <ClassTimetable
+        cls="6B"
+        :timetable="timetables['6B']"
+        :days="days"
+        :selected-teacher="selectedTeacher"
+        :teacher-map="teacherMap"
+        :on-drag-start="onDragStart"
+        :on-drop="onDrop"
+        :open-menu="openMenu"
+        :start-highlight="startHighlight"
+        :is-selected="isSelected"
+        :is-valid-target="isValidTarget"
+      />
     </div>
 
     <div v-if="contextMenu.show" class="fixed bg-white border rounded shadow z-50" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
