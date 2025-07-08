@@ -13,7 +13,7 @@
         :days="days"
         :selected-teacher="selectedTeacher"
         :teacher-map="teacherMap"
-        :open-menu="openMenu"
+        :subject-teacher-map="subjectTeacherMap"
         :get-cell="getCell"
         :set-cell="setCell"
         :teacher-free="teacherFree"
@@ -24,27 +24,13 @@
         :days="days"
         :selected-teacher="selectedTeacher"
         :teacher-map="teacherMap"
-        :open-menu="openMenu"
+        :subject-teacher-map="subjectTeacherMap"
         :get-cell="getCell"
         :set-cell="setCell"
         :teacher-free="teacherFree"
       />
     </div>
 
-    <div v-if="contextMenu.show" class="fixed bg-white border rounded shadow z-50" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
-      <ul>
-        <li class="px-4 py-2 hover:bg-gray-100 cursor-pointer" @click="toggleBreak(contextMenu.cls, contextMenu.row, contextMenu.col)">
-          {{ getCell(contextMenu.cls, contextMenu.row, contextMenu.col).isBreak ? 'Bỏ nghỉ' : 'Đặt nghỉ' }}
-        </li>
-        <li
-          v-if="!getCell(contextMenu.cls, contextMenu.row, contextMenu.col).subject && !getCell(contextMenu.cls, contextMenu.row, contextMenu.col).isBreak"
-          class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-          @click="addLesson(contextMenu.cls, contextMenu.row, contextMenu.col)"
-        >
-          Thêm tiết học
-        </li>
-      </ul>
-    </div>
 
     <div class="mt-10 border-t pt-6">
       <h2 class="text-xl font-bold mb-4">📓 Hướng dẫn sử dụng</h2>
@@ -357,8 +343,6 @@ function setCell(cls, row, col, lesson) {
 }
 
 
-const { selected, dragSource } = useDrag()
-const contextMenu = ref({ show: false, x: 0, y: 0, cls: '', row: null, col: null })
 
 function teacherFree(teacher, row, col, cls) {
   if (teacher === mainTeacherId) {
@@ -380,76 +364,6 @@ function teacherFree(teacher, row, col, cls) {
 }
 
 
-function openMenu(event, cls, row, col) {
-  selected.value = { cls, row, col }
-  dragSource.value = { cls, row, col }
-  contextMenu.value = { show: true, x: event.clientX, y: event.clientY, cls, row, col }
-}
-
-function toggleBreak(cls, row, col) {
-  const cell = getCell(cls, row, col)
-  if (cell.isBreak) {
-    cell.isBreak = false
-    if (cell.backup) {
-      if (!teacherFree(cell.backup.teacher, row, col, cls)) {
-        message.error(`Giáo viên ${teacherMap[cell.backup.teacher] || cell.backup.teacher} đang bận tiết đó`)
-        return
-      }
-      cell.subject = cell.backup.subject
-      cell.class = cell.backup.class
-      cell.teacher = cell.backup.teacher
-      cell.backup = undefined
-    }
-  } else {
-    if (cell.subject) {
-      message.error('Không thể đặt nghỉ vì đã có tiết học')
-      contextMenu.value.show = false
-      return
-    }
-    cell.isBreak = true
-    cell.backup = { subject: cell.subject, class: cell.class, teacher: cell.teacher }
-    cell.subject = ''
-    cell.class = ''
-    cell.teacher = ''
-  }
-  contextMenu.value.show = false
-}
-
-function addLesson(cls, row, col) {
-  const hint = Object.keys(subjectTeacherMap).join(', ')
-  const subject = prompt(`Chọn môn học (${hint}):`)
-  if (!subject || !subjectTeacherMap[subject]) {
-    contextMenu.value.show = false
-    return
-  }
-  const teacher = subjectTeacherMap[subject]
-  if (!teacherFree(teacher, row, col, cls)) {
-    message.error(`Giáo viên ${teacherMap[teacher] || teacher} đang bận tiết đó`)
-    contextMenu.value.show = false
-    return
-  }
-  const cell = getCell(cls, row, col)
-  cell.subject = subject
-  cell.teacher = teacher
-  cell.class = cls
-  cell.isBreak = false
-  contextMenu.value.show = false
-}
-
-
-function closeMenu() {
-  contextMenu.value.show = false
-  selected.value = { cls: '', row: null, col: null }
-  dragSource.value = { cls: '', row: null, col: null }
-}
-
-onMounted(() => {
-  window.addEventListener('click', closeMenu)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener('click', closeMenu)
-})
 </script>
 
 <style scoped>

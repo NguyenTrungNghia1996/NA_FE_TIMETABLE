@@ -102,6 +102,34 @@
           </tr>
         </tbody>
       </table>
+      <div
+        v-if="contextMenu.show"
+        class="fixed bg-white border rounded shadow z-50"
+        :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
+      >
+        <ul>
+          <li
+            class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            @click="toggleBreak(contextMenu.row, contextMenu.col)"
+          >
+            {{
+              getCell(cls, contextMenu.row, contextMenu.col).isBreak
+                ? 'Bỏ nghỉ'
+                : 'Đặt nghỉ'
+            }}
+          </li>
+          <li
+            v-if="
+              !getCell(cls, contextMenu.row, contextMenu.col).subject &&
+              !getCell(cls, contextMenu.row, contextMenu.col).isBreak
+            "
+            class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            @click="addLesson(contextMenu.row, contextMenu.col)"
+          >
+            Thêm tiết học
+          </li>
+        </ul>
+      </div>
     </div>
   </a-card>
 </template>
@@ -114,13 +142,14 @@ const props = defineProps({
   days: Array,
   selectedTeacher: String,
   teacherMap: Object,
-  openMenu: Function,
+  subjectTeacherMap: Object,
   getCell: Function,
   setCell: Function,
   teacherFree: Function
 })
 
 const { selected, dragSource } = useDrag()
+const contextMenu = ref({ show: false, x: 0, y: 0, row: null, col: null })
 
 function isSelected(cls, row, col) {
   return (
@@ -187,4 +216,74 @@ function isValidTarget(cls, row, col) {
     props.teacherFree(target.teacher, src.row, src.col, src.cls)
   )
 }
+
+function openMenu(event, cls, row, col) {
+  selected.value = { cls, row, col }
+  dragSource.value = { cls, row, col }
+  contextMenu.value = { show: true, x: event.clientX, y: event.clientY, row, col }
+}
+
+function toggleBreak(row, col) {
+  const cell = props.getCell(props.cls, row, col)
+  if (cell.isBreak) {
+    cell.isBreak = false
+    if (cell.backup) {
+      if (!props.teacherFree(cell.backup.teacher, row, col, props.cls)) {
+        message.error(`Giáo viên ${props.teacherMap[cell.backup.teacher] || cell.backup.teacher} dang bận tiết đó`)
+        return
+      }
+      cell.subject = cell.backup.subject
+      cell.class = cell.backup.class
+      cell.teacher = cell.backup.teacher
+      cell.backup = undefined
+    }
+  } else {
+    if (cell.subject) {
+      message.error('Không thể đặt nghỉ vì đã có tiết học')
+      contextMenu.value.show = false
+      return
+    }
+    cell.isBreak = true
+    cell.backup = { subject: cell.subject, class: cell.class, teacher: cell.teacher }
+    cell.subject = ''
+    cell.class = ''
+    cell.teacher = ''
+  }
+  contextMenu.value.show = false
+}
+
+function addLesson(row, col) {
+  const hint = Object.keys(subjectTeacherMap).join(', ')
+  const subject = prompt(`Chọn môn học (${hint}):`)
+  if (!subject || !subjectTeacherMap[subject]) {
+    contextMenu.value.show = false
+    return
+  }
+  const teacher = subjectTeacherMap[subject]
+  if (!props.teacherFree(teacher, row, col, props.cls)) {
+    message.error(`Giáo viên ${props.teacherMap[teacher] || teacher} dang bận tiết đó`)
+    contextMenu.value.show = false
+    return
+  }
+  const cell = props.getCell(props.cls, row, col)
+  cell.subject = subject
+  cell.teacher = teacher
+  cell.class = props.cls
+  cell.isBreak = false
+  contextMenu.value.show = false
+}
+
+function closeMenu() {
+  contextMenu.value.show = false
+  selected.value = { cls: '', row: null, col: null }
+  dragSource.value = { cls: '', row: null, col: null }
+}
+
+onMounted(() => {
+  window.addEventListener('click', closeMenu)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('click', closeMenu)
+})
 </script>
