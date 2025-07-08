@@ -80,89 +80,79 @@ watch(
   { deep: true }
 )
 
-function lesson(subject, teacher, cls) {
-  return { subject, teacher, class: cls, isBreak: false }
-}
-function empty(cls) {
-  return { subject: '', teacher: '', class: cls, isBreak: false }
-}
-function brk(cls) {
-  return { subject: '', teacher: '', class: cls, isBreak: true }
-}
-
 const baseTimetable6A = {
   morning: [
     [
-      lesson('Anh', 'GV1', '6A'),
-      lesson('Toán', 'GV2', '6A'),
-      lesson('Văn', 'GV3', '6A'),
-      lesson('Lý', 'GV4', '6A'),
-      empty('6A')
+      { subject: 'Anh', teacher: 'GV1', class: '6A', isBreak: false },
+      { subject: 'Toán', teacher: 'GV2', class: '6A', isBreak: false },
+      { subject: 'Văn', teacher: 'GV3', class: '6A', isBreak: false },
+      { subject: 'Lý', teacher: 'GV4', class: '6A', isBreak: false },
+      { subject: '', teacher: '', class: '6A', isBreak: false }
     ],
     [
-      lesson('Hóa', 'GV5', '6A'),
-      lesson('Toán', 'GV2', '6A'),
-      brk('6A'),
-      lesson('Anh', 'GV1', '6A'),
-      lesson('Văn', 'GV3', '6A')
+      { subject: 'Hóa', teacher: 'GV5', class: '6A', isBreak: false },
+      { subject: 'Toán', teacher: 'GV2', class: '6A', isBreak: false },
+      { subject: '', teacher: '', class: '6A', isBreak: true },
+      { subject: 'Anh', teacher: 'GV1', class: '6A', isBreak: false },
+      { subject: 'Văn', teacher: 'GV3', class: '6A', isBreak: false }
     ],
     [
-      lesson('Văn', 'GV3', '6A'),
-      empty('6A'),
-      lesson('Toán', 'GV2', '6A'),
-      lesson('Lý', 'GV4', '6A'),
-      empty('6A')
+      { subject: 'Văn', teacher: 'GV3', class: '6A', isBreak: false },
+      { subject: '', teacher: '', class: '6A', isBreak: false },
+      { subject: 'Toán', teacher: 'GV2', class: '6A', isBreak: false },
+      { subject: 'Lý', teacher: 'GV4', class: '6A', isBreak: false },
+      { subject: '', teacher: '', class: '6A', isBreak: false }
     ],
     [
-      lesson('Anh', 'GV1', '6A'),
-      lesson('Lý', 'GV4', '6A'),
-      lesson('Văn', 'GV3', '6A'),
-      empty('6A'),
-      lesson('Toán', 'GV2', '6A')
+      { subject: 'Anh', teacher: 'GV1', class: '6A', isBreak: false },
+      { subject: 'Lý', teacher: 'GV4', class: '6A', isBreak: false },
+      { subject: 'Văn', teacher: 'GV3', class: '6A', isBreak: false },
+      { subject: '', teacher: '', class: '6A', isBreak: false },
+      { subject: 'Toán', teacher: 'GV2', class: '6A', isBreak: false }
     ],
     [
-      brk('6A'),
-      lesson('Toán', 'GV2', '6A'),
-      lesson('Hóa', 'GV5', '6A'),
-      lesson('Anh', 'GV1', '6A'),
-      lesson('Lý', 'GV4', '6A')
+      { subject: '', teacher: '', class: '6A', isBreak: true },
+      { subject: 'Toán', teacher: 'GV2', class: '6A', isBreak: false },
+      { subject: 'Hóa', teacher: 'GV5', class: '6A', isBreak: false },
+      { subject: 'Anh', teacher: 'GV1', class: '6A', isBreak: false },
+      { subject: 'Lý', teacher: 'GV4', class: '6A', isBreak: false }
     ]
   ],
   afternoon: [
     [
-      brk('6A'),
-      lesson('Anh', 'GV1', '6A'),
-      lesson('Toán', 'GV2', '6A'),
-      lesson('Văn', 'GV3', '6A'),
-      empty('6A')
+      { subject: '', teacher: '', class: '6A', isBreak: true },
+      { subject: 'Anh', teacher: 'GV1', class: '6A', isBreak: false },
+      { subject: 'Toán', teacher: 'GV2', class: '6A', isBreak: false },
+      { subject: 'Văn', teacher: 'GV3', class: '6A', isBreak: false },
+      { subject: '', teacher: '', class: '6A', isBreak: false }
     ],
     [
-      lesson('Toán', 'GV2', '6A'),
-      brk('6A'),
-      lesson('Hóa', 'GV5', '6A'),
-      empty('6A'),
-      lesson('Anh', 'GV1', '6A')
+      { subject: 'Toán', teacher: 'GV2', class: '6A', isBreak: false },
+      { subject: '', teacher: '', class: '6A', isBreak: true },
+      { subject: 'Hóa', teacher: 'GV5', class: '6A', isBreak: false },
+      { subject: '', teacher: '', class: '6A', isBreak: false },
+      { subject: 'Anh', teacher: 'GV1', class: '6A', isBreak: false }
     ],
     [
-      lesson('Văn', 'GV3', '6A'),
-      lesson('Lý', 'GV4', '6A'),
-      brk('6A'),
-      lesson('Toán', 'GV2', '6A'),
-      lesson('Hóa', 'GV5', '6A')
+      { subject: 'Văn', teacher: 'GV3', class: '6A', isBreak: false },
+      { subject: 'Lý', teacher: 'GV4', class: '6A', isBreak: false },
+      { subject: '', teacher: '', class: '6A', isBreak: true },
+      { subject: 'Toán', teacher: 'GV2', class: '6A', isBreak: false },
+      { subject: 'Hóa', teacher: 'GV5', class: '6A', isBreak: false }
     ],
     [
-      empty('6A'),
-      lesson('Lý', 'GV4', '6A'),
-      lesson('Anh', 'GV1', '6A'),
-      lesson('Văn', 'GV3', '6A'),
-      lesson('Lý', 'GV4', '6A')
+      { subject: '', teacher: '', class: '6A', isBreak: false },
+      { subject: 'Lý', teacher: 'GV4', class: '6A', isBreak: false },
+      { subject: 'Anh', teacher: 'GV1', class: '6A', isBreak: false },
+      { subject: 'Văn', teacher: 'GV3', class: '6A', isBreak: false },
+      { subject: 'Lý', teacher: 'GV4', class: '6A', isBreak: false }
     ],
     [
-      lesson('Hóa', 'GV5', '6A'),
-      lesson('Văn', 'GV3', '6A'),
-      lesson('Toán', 'GV2', '6A'),
-      lesson('Lý', 'GV4', '6A'),
-      empty('6A')
+      { subject: 'Hóa', teacher: 'GV5', class: '6A', isBreak: false },
+      { subject: 'Văn', teacher: 'GV3', class: '6A', isBreak: false },
+      { subject: 'Toán', teacher: 'GV2', class: '6A', isBreak: false },
+      { subject: 'Lý', teacher: 'GV4', class: '6A', isBreak: false },
+      { subject: '', teacher: '', class: '6A', isBreak: false }
     ]
   ]
 }
