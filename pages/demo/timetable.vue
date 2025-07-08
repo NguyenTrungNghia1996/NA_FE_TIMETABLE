@@ -5,17 +5,19 @@
       <template #title>Thời khóa biểu lớp 6A</template>
       <div class="overflow-x-auto">
         <table class="min-w-full text-center border-collapse table-fixed">
-          <thead>
-            <tr>
-              <th class="border p-2 w-20 h-12">Tiết\\Ngày</th>
-              <th v-for="day in days" :key="day" class="border p-2 w-32 h-12">
-                {{ day }}
-              </th>
-            </tr>
-          </thead>
           <tbody>
             <tr>
               <th colspan="6" class="bg-gray-50 text-left px-2">Ca sáng</th>
+            </tr>
+            <tr>
+              <th class="border p-2 w-20 h-12">Tiết\\Ngày</th>
+              <th
+                v-for="day in days"
+                :key="`morning-${day}`"
+                class="border p-2 w-32 h-12"
+              >
+                {{ day }}
+              </th>
             </tr>
             <tr
               v-for="(row, rIndex) in morningTimetable"
@@ -54,6 +56,16 @@
           <tbody>
             <tr>
               <th colspan="6" class="bg-gray-50 text-left px-2">Ca chiều</th>
+            </tr>
+            <tr>
+              <th class="border p-2 w-20 h-12">Tiết\\Ngày</th>
+              <th
+                v-for="day in days"
+                :key="`afternoon-${day}`"
+                class="border p-2 w-32 h-12"
+              >
+                {{ day }}
+              </th>
             </tr>
             <tr
               v-for="(row, rIndex) in afternoonTimetable"
