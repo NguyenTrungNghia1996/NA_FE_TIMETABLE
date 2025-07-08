@@ -17,8 +17,6 @@
         :get-cell="getCell"
         :set-cell="setCell"
         :teacher-free="teacherFree"
-        :selected="selected"
-        :drag-source="dragSource"
       />
       <ClassTimetable
         cls="6B"
@@ -30,8 +28,6 @@
         :get-cell="getCell"
         :set-cell="setCell"
         :teacher-free="teacherFree"
-        :selected="selected"
-        :drag-source="dragSource"
       />
     </div>
 
@@ -361,8 +357,7 @@ function setCell(cls, row, col, lesson) {
 }
 
 
-const selected = ref({ cls: '', row: null, col: null })
-const dragSource = ref({ cls: '', row: null, col: null })
+const { selected, dragSource } = useDrag()
 const contextMenu = ref({ show: false, x: 0, y: 0, cls: '', row: null, col: null })
 
 function teacherFree(teacher, row, col, cls) {
