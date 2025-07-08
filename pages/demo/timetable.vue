@@ -239,7 +239,7 @@
       <h2 class="text-xl font-bold mb-4">📓 Hướng dẫn sử dụng</h2>
       <ul class="list-disc pl-6 space-y-2">
         <li>Nhấn chuột phải để đặt hoặc bỏ nghỉ.</li>
-        <li>Nhấn chuột phải ở ô trống để thêm tiết học.</li>
+        <li>Nhấn chuột phải ở ô trống để thêm tiết học (chọn môn, giáo viên tự gán).</li>
         <li>Kéo thả các tiết để hoán đổi vị trí.</li>
         <li>Không thể kéo thả vào tiết nghỉ.</li>
         <li>Không thể đặt nghỉ ở ô đã có tiết học.</li>
@@ -279,6 +279,17 @@ const demoSubjects = [
   'Sử',
   'Địa'
 ]
+// môn học đi kèm giáo viên
+const subjectTeacherMap = {
+  Toán: 'GV2',
+  Văn: 'GV3',
+  Anh: 'GV1',
+  Lý: 'GV4',
+  Hóa: 'GV5',
+  Sinh: 'GV3',
+  Sử: 'GV5',
+  Địa: 'GV4'
+}
 
 const teachers = [
   { id: 'GV1', name: 'PT Thoản' },
@@ -529,16 +540,13 @@ function toggleBreak(cls, row, col) {
 }
 
 function addLesson(cls, row, col) {
-  const subject = prompt('Nhập môn học:')
-  if (!subject) {
+  const hint = Object.keys(subjectTeacherMap).join(', ')
+  const subject = prompt(`Chọn môn học (${hint}):`)
+  if (!subject || !subjectTeacherMap[subject]) {
     contextMenu.value.show = false
     return
   }
-  const teacher = prompt('Nhập mã giáo viên:')
-  if (!teacher || !teacherMap[teacher]) {
-    contextMenu.value.show = false
-    return
-  }
+  const teacher = subjectTeacherMap[subject]
   if (!teacherFree(teacher, row, col, cls)) {
     message.error(`Giáo viên ${teacherMap[teacher] || teacher} đang bận tiết đó`)
     contextMenu.value.show = false
