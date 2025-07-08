@@ -45,95 +45,6 @@
       </div>
     </a-card>
 
-    <a-card>
-      <template #title>Thời khóa biểu giáo viên {{ teacherName }}</template>
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-center border-collapse table-fixed">
-          <thead>
-            <tr>
-              <th class="border p-2 w-20 h-12">Tiết\\Ngày</th>
-              <th v-for="day in days" :key="day" class="border p-2 w-32 h-12">
-                {{ day }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(row, rIndex) in teacherSchedule" :key="rIndex">
-              <th class="border p-2 w-20 h-12">{{ rIndex + 1 }}</th>
-              <td
-                v-for="(lesson, cIndex) in row"
-                :key="cIndex"
-                class="border p-2 w-32 h-12 select-none whitespace-nowrap"
-                :class="[
-                  {
-                    'bg-blue-100': isSelected(rIndex, cIndex)
-                  },
-                  {
-                    'cursor-not-allowed':
-                      teacherBusy[rIndex][cIndex].class &&
-                      teacherBusy[rIndex][cIndex].class !== '6A'
-                  },
-                  {
-                    'cursor-move':
-                      classTimetable[rIndex][cIndex].teacher === teacherName &&
-                      !classTimetable[rIndex][cIndex].isBreak
-                  },
-                  { 'bg-green-100': isValidTarget(rIndex, cIndex) }
-                ]"
-                :draggable="
-                  classTimetable[rIndex][cIndex].teacher === teacherName &&
-                  !classTimetable[rIndex][cIndex].isBreak
-                "
-                @dragstart="onDragStart(rIndex, cIndex)"
-                @click="startHighlight(rIndex, cIndex)"
-                @dragover.prevent
-                @drop="onDrop(rIndex, cIndex)"
-              >
-                <template v-if="lesson.class">
-                  <div>{{ lesson.subject }} - {{ lesson.class }}</div>
-                </template>
-                <template v-else>&nbsp;</template>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </a-card>
-
-    <a-card
-      v-for="tName in otherTeachers"
-      :key="tName"
-      class="mt-8"
-    >
-      <template #title>Thời khóa biểu giáo viên {{ tName }}</template>
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-center border-collapse table-fixed">
-          <thead>
-            <tr>
-              <th class="border p-2 w-20 h-12">Tiết\\Ngày</th>
-              <th v-for="day in days" :key="day" class="border p-2 w-32 h-12">
-                {{ day }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(row, rIndex) in getTeacherTimetable(tName)" :key="rIndex">
-              <th class="border p-2 w-20 h-12">{{ rIndex + 1 }}</th>
-              <td
-                v-for="(lesson, cIndex) in row"
-                :key="cIndex"
-                class="border p-2 w-32 h-12 select-none whitespace-nowrap"
-              >
-                <template v-if="lesson.class">
-                  <div>{{ lesson.subject }} - {{ lesson.class }}</div>
-                </template>
-                <template v-else>&nbsp;</template>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </a-card>
 
     <div v-if="contextMenu.show" class="fixed bg-white border rounded shadow z-50" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
       <ul>
@@ -160,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { message } from 'ant-design-vue'
 
 interface Lesson {
@@ -262,39 +173,6 @@ const classTimetable = ref<Lesson[][]>([
   ]
 ])
 
-const teacherSchedule = computed(() => {
-  return classTimetable.value.map((row, r) =>
-    row.map((lesson, c) => {
-      if (!lesson.isBreak && lesson.teacher === teacherName) {
-        return { class: lesson.class, subject: lesson.subject }
-      }
-      return teacherBusy[r][c]
-    })
-  )
-})
-
-const otherTeachers = computed(() => {
-  const names = new Set<string>()
-  classTimetable.value.forEach(row =>
-    row.forEach(lesson => {
-      if (!lesson.isBreak && lesson.teacher && lesson.teacher !== teacherName) {
-        names.add(lesson.teacher)
-      }
-    })
-  )
-  return Array.from(names)
-})
-
-function getTeacherTimetable(name: string): TeacherSlot[][] {
-  return classTimetable.value.map(row =>
-    row.map(lesson => {
-      if (!lesson.isBreak && lesson.teacher === name) {
-        return { class: lesson.class, subject: lesson.subject }
-      }
-      return { class: '', subject: '' }
-    })
-  )
-}
 
 const selected = ref({ row: null as number | null, col: null as number | null })
 const dragSource = ref({ row: null as number | null, col: null as number | null })
