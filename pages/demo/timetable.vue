@@ -136,10 +136,45 @@ const teacherBusy: TeacherSlot[][] = [
     { class: '7B', subject: 'AN' },
     { class: '', subject: '' },
     { class: '', subject: '' }
+  ],
+  [
+    { class: '', subject: '' },
+    { class: '', subject: '' },
+    { class: '8B', subject: 'AN' },
+    { class: '8A', subject: 'AN' },
+    { class: '', subject: '' }
+  ],
+  [
+    { class: '7C', subject: 'AN' },
+    { class: '', subject: '' },
+    { class: '', subject: '' },
+    { class: '6C', subject: 'AN' },
+    { class: '', subject: '' }
+  ],
+  [
+    { class: '', subject: '' },
+    { class: '', subject: '' },
+    { class: '', subject: '' },
+    { class: '', subject: '' },
+    { class: '', subject: '' }
+  ],
+  [
+    { class: '6B', subject: 'AN' },
+    { class: '7A', subject: 'AN' },
+    { class: '', subject: '' },
+    { class: '', subject: '' },
+    { class: '7B', subject: 'AN' }
+  ],
+  [
+    { class: '', subject: '' },
+    { class: '', subject: '' },
+    { class: '', subject: '' },
+    { class: '', subject: '' },
+    { class: '8A', subject: 'AN' }
   ]
 ]
 
-// thời khóa biểu lớp 6A (5 tiết, 5 ngày)
+// thời khóa biểu lớp 6A (10 tiết - 2 ca, 5 ngày)
 const classTimetable = ref<Lesson[][]>([
   [
     { id: 1, subject: 'Toán', class: '6A', teacher: 'Phan Văn Lương', isBreak: false },
@@ -175,6 +210,41 @@ const classTimetable = ref<Lesson[][]>([
     { id: 23, subject: 'Toán', class: '6A', teacher: 'Phan Văn Lương', isBreak: false },
     { id: 24, subject: 'Công nghệ', class: '6A', teacher: 'Phạm Văn Khang', isBreak: false },
     { id: 25, subject: 'Sử', class: '6A', teacher: 'Lê Văn Quý', isBreak: false }
+  ],
+  [
+    { id: 26, subject: 'Văn', class: '6A', teacher: 'Nguyễn Thị Bình', isBreak: false },
+    { id: 27, subject: 'Sinh', class: '6A', teacher: 'Nguyễn Thị Minh', isBreak: false },
+    { id: 28, subject: 'Toán', class: '6A', teacher: 'Phan Văn Lương', isBreak: false },
+    { id: 29, subject: 'Tin học', class: '6A', teacher: 'Trần Minh Tân', isBreak: false },
+    { id: 30, subject: 'Anh', class: '6A', teacher: 'Trần Thu Hà', isBreak: false }
+  ],
+  [
+    { id: 31, subject: 'Lý', class: '6A', teacher: 'Lê Đức Thắng', isBreak: false },
+    { id: 32, subject: 'Địa', class: '6A', teacher: 'Lê Mai Hoa', isBreak: false },
+    { id: 33, subject: 'Âm nhạc', class: '6A', teacher: teacherName, isBreak: false },
+    { id: 34, subject: 'Văn', class: '6A', teacher: 'Nguyễn Thị Bình', isBreak: false },
+    { id: 35, subject: 'Toán', class: '6A', teacher: 'Phan Văn Lương', isBreak: false }
+  ],
+  [
+    { id: 36, subject: 'Thể dục', class: '6A', teacher: 'Nguyễn Văn Mạnh', isBreak: false },
+    { id: 37, subject: 'Toán', class: '6A', teacher: 'Phan Văn Lương', isBreak: false },
+    { id: 38, subject: '', class: '', teacher: '', isBreak: true },
+    { id: 39, subject: 'Mỹ thuật', class: '6A', teacher: 'Đỗ Lan Hương', isBreak: false },
+    { id: 40, subject: 'Sinh', class: '6A', teacher: 'Nguyễn Thị Minh', isBreak: false }
+  ],
+  [
+    { id: 41, subject: 'Anh', class: '6A', teacher: 'Trần Thu Hà', isBreak: false },
+    { id: 42, subject: 'Văn', class: '6A', teacher: 'Nguyễn Thị Bình', isBreak: false },
+    { id: 43, subject: 'Lý', class: '6A', teacher: 'Lê Đức Thắng', isBreak: false },
+    { id: 44, subject: 'Thể dục', class: '6A', teacher: 'Nguyễn Văn Mạnh', isBreak: false },
+    { id: 45, subject: 'Công nghệ', class: '6A', teacher: 'Phạm Văn Khang', isBreak: false }
+  ],
+  [
+    { id: 46, subject: 'Tin học', class: '6A', teacher: 'Trần Minh Tân', isBreak: false },
+    { id: 47, subject: 'Âm nhạc', class: '6A', teacher: teacherName, isBreak: false },
+    { id: 48, subject: 'Toán', class: '6A', teacher: 'Phan Văn Lương', isBreak: false },
+    { id: 49, subject: 'Địa', class: '6A', teacher: 'Lê Mai Hoa', isBreak: false },
+    { id: 50, subject: 'Văn', class: '6A', teacher: 'Nguyễn Thị Bình', isBreak: false }
   ]
 ])
 
