@@ -27,18 +27,17 @@
               :key="cIndex"
               class="border p-2 w-32 h-12 select-none overflow-hidden"
               :class="[
-                !lesson.isBreak && lesson.teacher === selectedTeacher && 'bg-yellow-50',
-                { 'bg-blue-100': isSelected(cls, rIndex, cIndex) },
+                { 'bg-blue-100': isSelected(rIndex, cIndex) },
                 { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak },
-                { 'cursor-move': !lesson.isBreak && lesson.teacher === selectedTeacher },
-                { 'bg-green-100': isValidTarget(cls, rIndex, cIndex) }
+                { 'cursor-move': !lesson.isBreak },
+                { 'bg-green-100': isValidTarget(rIndex, cIndex) }
               ]"
-              :draggable="!lesson.isBreak && lesson.teacher === selectedTeacher"
-              @dragstart="onDragStart(cls, rIndex, cIndex)"
-              @click="startHighlight(cls, rIndex, cIndex)"
+              :draggable="!lesson.isBreak"
+              @dragstart="onDragStart(rIndex, cIndex)"
+              @click="startHighlight(rIndex, cIndex)"
               @dragover.prevent
-              @drop="onDrop(cls, rIndex, cIndex)"
-              @contextmenu.prevent="openMenu($event, cls, rIndex, cIndex)"
+              @drop="onDrop(rIndex, cIndex)"
+              @contextmenu.prevent="openMenu($event, rIndex, cIndex)"
             >
               <template v-if="lesson.subject">
                 <div class="line-clamp-1">
@@ -76,18 +75,17 @@
               :key="cIndex"
               class="border p-2 w-32 h-12 select-none overflow-hidden"
               :class="[
-                !lesson.isBreak && lesson.teacher === selectedTeacher && 'bg-yellow-50',
-                { 'bg-blue-100': isSelected(cls, rIndex + 5, cIndex) },
+                { 'bg-blue-100': isSelected(rIndex + 5, cIndex) },
                 { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak },
-                { 'cursor-move': !lesson.isBreak && lesson.teacher === selectedTeacher },
-                { 'bg-green-100': isValidTarget(cls, rIndex + 5, cIndex) }
+                { 'cursor-move': !lesson.isBreak },
+                { 'bg-green-100': isValidTarget(rIndex + 5, cIndex) }
               ]"
-              :draggable="!lesson.isBreak && lesson.teacher === selectedTeacher"
-              @dragstart="onDragStart(cls, rIndex + 5, cIndex)"
-              @click="startHighlight(cls, rIndex + 5, cIndex)"
+              :draggable="!lesson.isBreak"
+              @dragstart="onDragStart(rIndex + 5, cIndex)"
+              @click="startHighlight(rIndex + 5, cIndex)"
               @dragover.prevent
-              @drop="onDrop(cls, rIndex + 5, cIndex)"
-              @contextmenu.prevent="openMenu($event, cls, rIndex + 5, cIndex)"
+              @drop="onDrop(rIndex + 5, cIndex)"
+              @contextmenu.prevent="openMenu($event, rIndex + 5, cIndex)"
             >
               <template v-if="lesson.subject">
                 <div class="line-clamp-1">
@@ -113,15 +111,15 @@
             @click="toggleBreak(contextMenu.row, contextMenu.col)"
           >
             {{
-              getCell(cls, contextMenu.row, contextMenu.col).isBreak
+              getCell(contextMenu.row, contextMenu.col).isBreak
                 ? 'Bỏ nghỉ'
                 : 'Đặt nghỉ'
             }}
           </li>
           <li
             v-if="
-              !getCell(cls, contextMenu.row, contextMenu.col).subject &&
-              !getCell(cls, contextMenu.row, contextMenu.col).isBreak
+              !getCell(contextMenu.row, contextMenu.col).subject &&
+              !getCell(contextMenu.row, contextMenu.col).isBreak
             "
             class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
             @click="addLesson(contextMenu.row, contextMenu.col)"
@@ -138,116 +136,101 @@
 
 const props = defineProps({
   cls: String,
-  timetable: Object,
-  timetables: Object
+  timetable: Object
 })
 
-const {
-  days,
-  selectedTeacher,
-  teacherMap,
-  subjectTeacherMap,
-  teacherFree
-} = useTimetable()
+const days = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu']
+const teacherMap = {
+  GV1: 'PT Thoản',
+  GV2: 'Thầy An',
+  GV3: 'Cô Bình',
+  GV4: 'Thầy Cường',
+  GV5: 'Cô Dung'
+}
+const subjectTeacherMap = {
+  Toán: 'GV2',
+  Văn: 'GV3',
+  Anh: 'GV1',
+  Lý: 'GV4',
+  Hóa: 'GV5',
+  Sinh: 'GV3',
+  Sử: 'GV5',
+  Địa: 'GV4'
+}
 
-const { selected, dragSource } = useDrag()
+const selected = ref({ row: null, col: null })
+const dragSource = ref({ row: null, col: null })
 const contextMenu = ref({ show: false, x: 0, y: 0, row: null, col: null })
 
-function isSelected(cls, row, col) {
-  return (
-    selected.value.cls === cls &&
-    selected.value.row === row &&
-    selected.value.col === col
-  )
+function isSelected(row, col) {
+  return selected.value.row === row && selected.value.col === col
 }
 
-function getCell(cls, row, col) {
+function getCell(row, col) {
   return row < 5
-    ? props.timetables[cls].morning[row][col]
-    : props.timetables[cls].afternoon[row - 5][col]
+    ? props.timetable.morning[row][col]
+    : props.timetable.afternoon[row - 5][col]
 }
 
-function setCell(cls, row, col, lesson) {
+function setCell(row, col, lesson) {
   if (row < 5) {
-    props.timetables[cls].morning[row][col] = lesson
+    props.timetable.morning[row][col] = lesson
   } else {
-    props.timetables[cls].afternoon[row - 5][col] = lesson
+    props.timetable.afternoon[row - 5][col] = lesson
   }
 }
 
-function startHighlight(cls, row, col) {
-  const cell = getCell(cls, row, col)
-  if (cell.isBreak || cell.teacher !== selectedTeacher.value) return
-  selected.value = { cls, row, col }
-  dragSource.value = { cls, row, col }
+function startHighlight(row, col) {
+  const cell = getCell(row, col)
+  if (cell.isBreak) return
+  selected.value = { row, col }
+  dragSource.value = { row, col }
 }
 
-function onDragStart(cls, row, col) {
-  const cell = getCell(cls, row, col)
-  if (cell.isBreak || cell.teacher !== selectedTeacher.value) return
-  dragSource.value = { cls, row, col }
-  selected.value = { cls, row, col }
+function onDragStart(row, col) {
+  const cell = getCell(row, col)
+  if (cell.isBreak) return
+  dragSource.value = { row, col }
+  selected.value = { row, col }
 }
 
-function onDrop(cls, row, col) {
+function onDrop(row, col) {
   const src = dragSource.value
-  if (!src.cls) return
-  if (src.cls === cls && src.row === row && src.col === col) return
-  const target = getCell(cls, row, col)
-  const source = getCell(src.cls, src.row, src.col)
-  if (source.teacher !== selectedTeacher.value) {
-    dragSource.value = { cls: '', row: null, col: null }
-    selected.value = { cls: '', row: null, col: null }
-    return
-  }
+  if (src.row === null) return
+  if (src.row === row && src.col === col) return
+  const target = getCell(row, col)
+  const source = getCell(src.row, src.col)
   if (target.isBreak || source.isBreak) {
-    dragSource.value = { cls: '', row: null, col: null }
+    dragSource.value = { row: null, col: null }
     return
   }
-  if (!teacherFree(source.teacher, row, col, cls, props.timetables)) {
-    message.error(`Giáo viên ${teacherMap[source.teacher] || source.teacher} đang bận tiết đó`)
-    dragSource.value = { cls: '', row: null, col: null }
-    return
-  }
-  if (!teacherFree(target.teacher, src.row, src.col, src.cls, props.timetables)) {
-    message.error(`Giáo viên ${teacherMap[target.teacher] || target.teacher} đang bận tiết đó`)
-    dragSource.value = { cls: '', row: null, col: null }
-    return
-  }
-  setCell(cls, row, col, source)
-  setCell(src.cls, src.row, src.col, target)
-  dragSource.value = { cls: '', row: null, col: null }
+  setCell(row, col, source)
+  setCell(src.row, src.col, target)
+  dragSource.value = { row: null, col: null }
+  selected.value = { row: null, col: null }
 }
 
-function isValidTarget(cls, row, col) {
+function isValidTarget(row, col) {
   const src = dragSource.value
-  if (!src.cls) return false
-  if (src.cls === cls && src.row === row && src.col === col) return false
-  const source = getCell(src.cls, src.row, src.col)
-  if (source.teacher !== selectedTeacher.value) return false
-  const target = getCell(cls, row, col)
+  if (src.row === null) return false
+  if (src.row === row && src.col === col) return false
+  const source = getCell(src.row, src.col)
+  const target = getCell(row, col)
   if (source.isBreak || target.isBreak) return false
-  return (
-    teacherFree(source.teacher, row, col, cls, props.timetables) &&
-    teacherFree(target.teacher, src.row, src.col, src.cls, props.timetables)
-  )
+  return true
 }
 
-function openMenu(event, cls, row, col) {
-  selected.value = { cls, row, col }
-  dragSource.value = { cls, row, col }
+function openMenu(event, row, col) {
+  selected.value = { row, col }
+  dragSource.value = { row, col }
   contextMenu.value = { show: true, x: event.clientX, y: event.clientY, row, col }
 }
 
 function toggleBreak(row, col) {
-  const cell = getCell(props.cls, row, col)
+  const cell = getCell(row, col)
   if (cell.isBreak) {
     cell.isBreak = false
     if (cell.backup) {
-      if (!teacherFree(cell.backup.teacher, row, col, props.cls, props.timetables)) {
-        message.error(`Giáo viên ${teacherMap[cell.backup.teacher] || cell.backup.teacher} dang bận tiết đó`)
-        return
-      }
       cell.subject = cell.backup.subject
       cell.class = cell.backup.class
       cell.teacher = cell.backup.teacher
@@ -276,12 +259,7 @@ function addLesson(row, col) {
     return
   }
   const teacher = subjectTeacherMap[subject]
-  if (!teacherFree(teacher, row, col, props.cls, props.timetables)) {
-    message.error(`Giáo viên ${teacherMap[teacher] || teacher} dang bận tiết đó`)
-    contextMenu.value.show = false
-    return
-  }
-  const cell = getCell(props.cls, row, col)
+  const cell = getCell(row, col)
   cell.subject = subject
   cell.teacher = teacher
   cell.class = props.cls
@@ -291,8 +269,8 @@ function addLesson(row, col) {
 
 function closeMenu() {
   contextMenu.value.show = false
-  selected.value = { cls: '', row: null, col: null }
-  dragSource.value = { cls: '', row: null, col: null }
+  selected.value = { row: null, col: null }
+  dragSource.value = { row: null, col: null }
 }
 
 onMounted(() => {

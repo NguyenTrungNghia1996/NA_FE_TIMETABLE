@@ -1,21 +1,15 @@
 <template>
   <div class="max-w-6xl mx-auto p-6 space-y-4">
     <h1 class="text-2xl font-bold mb-2">Demo xếp thời khóa biểu liên kết</h1>
-    <a-select
-      v-model:value="selectedTeacher"
-      :options="teacherOptions"
-      class="mb-4 w-48"
-    />
+    <!-- Bỏ chọn giáo viên -->
     <div class="grid gap-6 md:grid-cols-2">
       <ClassTimetable
         cls="6A"
         :timetable="timetables['6A']"
-        :timetables="timetables"
       />
       <ClassTimetable
         cls="6B"
         :timetable="timetables['6B']"
-        :timetables="timetables"
       />
     </div>
 
@@ -53,18 +47,28 @@
 
 <script setup>
 
-const {
-  days,
-  demoSubjects,
-  demoTeachers,
-  teacherOptions,
-  selectedTeacher,
-  teacherMap,
-  subjectTeacherMap,
-  teacherFree
-} = useTimetable()
-
-const mainTeacherId = 'GV1'
+const days = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu']
+const demoSubjects = ['Toán', 'Văn', 'Anh', 'Lý', 'Hóa', 'Sinh', 'Sử', 'Địa']
+const subjectTeacherMap = {
+  Toán: 'GV2',
+  Văn: 'GV3',
+  Anh: 'GV1',
+  Lý: 'GV4',
+  Hóa: 'GV5',
+  Sinh: 'GV3',
+  Sử: 'GV5',
+  Địa: 'GV4'
+}
+const teacherMap = {
+  GV1: 'PT Thoản',
+  GV2: 'Thầy An',
+  GV3: 'Cô Bình',
+  GV4: 'Thầy Cường',
+  GV5: 'Cô Dung'
+}
+const demoTeachers = Object.entries(teacherMap).map(
+  ([id, name]) => `${id}. ${name}`
+)
 
 // tạo thời khóa biểu trống cho hai ca, mỗi ca 5 tiết
 function emptySession(cls) {
