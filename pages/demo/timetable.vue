@@ -247,6 +247,17 @@
     </div>
 
     <div class="mt-6">
+      <h2 class="text-xl font-bold mb-2">📚 Danh sách môn học</h2>
+      <ul class="list-disc pl-6 space-y-1">
+        <li v-for="subject in demoSubjects" :key="subject">{{ subject }}</li>
+      </ul>
+      <h2 class="text-xl font-bold mt-4 mb-2">👩‍🏫 Danh sách giáo viên</h2>
+      <ul class="list-disc pl-6 space-y-1">
+        <li v-for="teacher in demoTeachers" :key="teacher">{{ teacher }}</li>
+      </ul>
+    </div>
+
+    <div class="mt-6">
       <h2 class="text-xl font-bold mb-2">📦 Dữ liệu hiện tại</h2>
       <pre class="bg-gray-100 p-4 text-xs overflow-auto">{{
         JSON.stringify(timetables, null, 2)
@@ -259,6 +270,23 @@
 
 const teacherName = 'PT Thoản'
 const days = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu']
+const demoSubjects = [
+  'Toán',
+  'Văn',
+  'Anh',
+  'Lý',
+  'Hóa',
+  'Sinh',
+  'Sử',
+  'Địa'
+]
+const demoTeachers = [
+  'PT Thoản',
+  'Thầy An',
+  'Cô Bình',
+  'Thầy Cường',
+  'Cô Dung'
+]
 
 // lịch cơ bản của giáo viên (không bao gồm lớp 6A)
 const teacherBusyMorning = [
