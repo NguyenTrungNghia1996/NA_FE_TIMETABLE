@@ -34,6 +34,7 @@
                 :key="cIndex"
                 class="border p-2 w-32 h-12 select-none overflow-hidden"
                 :class="[
+                  !lesson.isBreak && lesson.teacher === selectedTeacher && 'bg-yellow-50',
                   { 'bg-blue-100': isSelected(rIndex, cIndex) },
                   { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak },
                   { 'cursor-move': !lesson.isBreak && lesson.teacher === selectedTeacher },
@@ -82,6 +83,7 @@
                 :key="cIndex"
                 class="border p-2 w-32 h-12 select-none overflow-hidden"
                 :class="[
+                  !lesson.isBreak && lesson.teacher === selectedTeacher && 'bg-yellow-50',
                   { 'bg-blue-100': isSelected(rIndex + 5, cIndex) },
                   { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak },
                   { 'cursor-move': !lesson.isBreak && lesson.teacher === selectedTeacher },
