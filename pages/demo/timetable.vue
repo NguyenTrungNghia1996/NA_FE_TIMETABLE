@@ -14,7 +14,13 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(row, rIndex) in classTimetable" :key="rIndex">
+            <tr>
+              <th colspan="6" class="bg-gray-50 text-left px-2">Ca sáng</th>
+            </tr>
+            <tr
+              v-for="(row, rIndex) in classTimetable.slice(0, 5)"
+              :key="`morning-${rIndex}`"
+            >
               <th class="border p-2 w-20 h-12">{{ rIndex + 1 }}</th>
               <td
                 v-for="(lesson, cIndex) in row"
@@ -32,6 +38,44 @@
                 @dragover.prevent
                 @drop="onDrop(rIndex, cIndex)"
                 @contextmenu.prevent="openMenu($event, rIndex, cIndex)"
+              >
+                <template v-if="lesson.subject">
+                  <div class="line-clamp-1">
+                    {{ lesson.subject }} - {{ lesson.class }}
+                  </div>
+                  <div class="text-xs line-clamp-1">
+                    {{ lesson.teacher }}
+                  </div>
+                </template>
+                <template v-else-if="lesson.isBreak">Nghỉ</template>
+              </td>
+            </tr>
+          </tbody>
+          <tbody>
+            <tr>
+              <th colspan="6" class="bg-gray-50 text-left px-2">Ca chiều</th>
+            </tr>
+            <tr
+              v-for="(row, rIndex) in classTimetable.slice(5)"
+              :key="`afternoon-${rIndex}`"
+            >
+              <th class="border p-2 w-20 h-12">{{ rIndex + 6 }}</th>
+              <td
+                v-for="(lesson, cIndex) in row"
+                :key="cIndex"
+                class="border p-2 w-32 h-12 select-none overflow-hidden"
+                :class="[
+                  { 'bg-blue-100': isSelected(rIndex + 5, cIndex) },
+                  { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak },
+                  { 'cursor-move': !lesson.isBreak },
+                  { 'bg-green-100': isValidTarget(rIndex + 5, cIndex) }
+                ]"
+                :draggable="!lesson.isBreak"
+                @dragstart="onDragStart(rIndex + 5, cIndex)"
+                @click="startHighlight(rIndex + 5, cIndex)"
+                @dragover.prevent
+                @drop="onDrop(rIndex + 5, cIndex)"
+                @contextmenu.prevent="openMenu($event, rIndex + 5, cIndex)"
               >
                 <template v-if="lesson.subject">
                   <div class="line-clamp-1">
