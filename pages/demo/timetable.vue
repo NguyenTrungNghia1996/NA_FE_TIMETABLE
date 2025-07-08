@@ -426,6 +426,108 @@ const timetables = reactive({
   '6B': { morning: emptySession('6B'), afternoon: emptySession('6B') }
 })
 
+function lesson(subject, teacher, cls) {
+  return { subject, teacher, class: cls, isBreak: false }
+}
+function empty(cls) {
+  return { subject: '', teacher: '', class: cls, isBreak: false }
+}
+function brk(cls) {
+  return { subject: '', teacher: '', class: cls, isBreak: true }
+}
+
+const baseTimetable6A = {
+  morning: [
+    [
+      lesson('Anh', 'GV1', '6A'),
+      lesson('Toán', 'GV2', '6A'),
+      lesson('Văn', 'GV3', '6A'),
+      lesson('Lý', 'GV4', '6A'),
+      empty('6A')
+    ],
+    [
+      lesson('Hóa', 'GV5', '6A'),
+      lesson('Toán', 'GV2', '6A'),
+      brk('6A'),
+      lesson('Anh', 'GV1', '6A'),
+      lesson('Văn', 'GV3', '6A')
+    ],
+    [
+      lesson('Văn', 'GV3', '6A'),
+      empty('6A'),
+      lesson('Toán', 'GV2', '6A'),
+      lesson('Lý', 'GV4', '6A'),
+      empty('6A')
+    ],
+    [
+      lesson('Anh', 'GV1', '6A'),
+      lesson('Lý', 'GV4', '6A'),
+      lesson('Văn', 'GV3', '6A'),
+      empty('6A'),
+      lesson('Toán', 'GV2', '6A')
+    ],
+    [
+      brk('6A'),
+      lesson('Toán', 'GV2', '6A'),
+      lesson('Hóa', 'GV5', '6A'),
+      lesson('Anh', 'GV1', '6A'),
+      lesson('Lý', 'GV4', '6A')
+    ]
+  ],
+  afternoon: [
+    [
+      brk('6A'),
+      lesson('Anh', 'GV1', '6A'),
+      lesson('Toán', 'GV2', '6A'),
+      lesson('Văn', 'GV3', '6A'),
+      empty('6A')
+    ],
+    [
+      lesson('Toán', 'GV2', '6A'),
+      brk('6A'),
+      lesson('Hóa', 'GV5', '6A'),
+      empty('6A'),
+      lesson('Anh', 'GV1', '6A')
+    ],
+    [
+      lesson('Văn', 'GV3', '6A'),
+      lesson('Lý', 'GV4', '6A'),
+      brk('6A'),
+      lesson('Toán', 'GV2', '6A'),
+      lesson('Hóa', 'GV5', '6A')
+    ],
+    [
+      empty('6A'),
+      lesson('Lý', 'GV4', '6A'),
+      lesson('Anh', 'GV1', '6A'),
+      lesson('Văn', 'GV3', '6A'),
+      lesson('Lý', 'GV4', '6A')
+    ],
+    [
+      lesson('Hóa', 'GV5', '6A'),
+      lesson('Văn', 'GV3', '6A'),
+      lesson('Toán', 'GV2', '6A'),
+      lesson('Lý', 'GV4', '6A'),
+      empty('6A')
+    ]
+  ]
+}
+
+function shiftRows(rows, cls) {
+  return rows.map(row =>
+    row.map((_, i) => {
+      const src = row[(i + 1) % row.length]
+      return { ...src, class: cls }
+    })
+  )
+}
+
+timetables['6A'] = JSON.parse(JSON.stringify(baseTimetable6A))
+timetables['6B'] = {
+  morning: shiftRows(baseTimetable6A.morning, '6B'),
+  afternoon: shiftRows(baseTimetable6A.afternoon, '6B')
+}
+
 const selectedTeacher = ref(teachers[0].id)
 const teacherOptions = teachers.map(t => ({ label: `${t.id}. ${t.name}`, value: t.id }))
 
