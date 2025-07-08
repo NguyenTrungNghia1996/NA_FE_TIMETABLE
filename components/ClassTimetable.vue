@@ -139,13 +139,16 @@
 const props = defineProps({
   cls: String,
   timetable: Object,
-  days: Array,
-  selectedTeacher: String,
-  teacherMap: Object,
-  subjectTeacherMap: Object,
-  timetables: Object,
-  teacherFree: Function
+  timetables: Object
 })
+
+const {
+  days,
+  selectedTeacher,
+  teacherMap,
+  subjectTeacherMap,
+  teacherFree
+} = useTimetable()
 
 const { selected, dragSource } = useDrag()
 const contextMenu = ref({ show: false, x: 0, y: 0, row: null, col: null })
@@ -174,14 +177,14 @@ function setCell(cls, row, col, lesson) {
 
 function startHighlight(cls, row, col) {
   const cell = getCell(cls, row, col)
-  if (cell.isBreak || cell.teacher !== props.selectedTeacher) return
+  if (cell.isBreak || cell.teacher !== selectedTeacher.value) return
   selected.value = { cls, row, col }
   dragSource.value = { cls, row, col }
 }
 
 function onDragStart(cls, row, col) {
   const cell = getCell(cls, row, col)
-  if (cell.isBreak || cell.teacher !== props.selectedTeacher) return
+  if (cell.isBreak || cell.teacher !== selectedTeacher.value) return
   dragSource.value = { cls, row, col }
   selected.value = { cls, row, col }
 }
@@ -192,7 +195,7 @@ function onDrop(cls, row, col) {
   if (src.cls === cls && src.row === row && src.col === col) return
   const target = getCell(cls, row, col)
   const source = getCell(src.cls, src.row, src.col)
-  if (source.teacher !== props.selectedTeacher) {
+  if (source.teacher !== selectedTeacher.value) {
     dragSource.value = { cls: '', row: null, col: null }
     selected.value = { cls: '', row: null, col: null }
     return
@@ -201,13 +204,13 @@ function onDrop(cls, row, col) {
     dragSource.value = { cls: '', row: null, col: null }
     return
   }
-  if (!props.teacherFree(source.teacher, row, col, cls)) {
-    message.error(`Giáo viên ${props.teacherMap[source.teacher] || source.teacher} đang bận tiết đó`)
+  if (!teacherFree(source.teacher, row, col, cls, props.timetables)) {
+    message.error(`Giáo viên ${teacherMap[source.teacher] || source.teacher} đang bận tiết đó`)
     dragSource.value = { cls: '', row: null, col: null }
     return
   }
-  if (!props.teacherFree(target.teacher, src.row, src.col, src.cls)) {
-    message.error(`Giáo viên ${props.teacherMap[target.teacher] || target.teacher} đang bận tiết đó`)
+  if (!teacherFree(target.teacher, src.row, src.col, src.cls, props.timetables)) {
+    message.error(`Giáo viên ${teacherMap[target.teacher] || target.teacher} đang bận tiết đó`)
     dragSource.value = { cls: '', row: null, col: null }
     return
   }
@@ -221,12 +224,12 @@ function isValidTarget(cls, row, col) {
   if (!src.cls) return false
   if (src.cls === cls && src.row === row && src.col === col) return false
   const source = getCell(src.cls, src.row, src.col)
-  if (source.teacher !== props.selectedTeacher) return false
+  if (source.teacher !== selectedTeacher.value) return false
   const target = getCell(cls, row, col)
   if (source.isBreak || target.isBreak) return false
   return (
-    props.teacherFree(source.teacher, row, col, cls) &&
-    props.teacherFree(target.teacher, src.row, src.col, src.cls)
+    teacherFree(source.teacher, row, col, cls, props.timetables) &&
+    teacherFree(target.teacher, src.row, src.col, src.cls, props.timetables)
   )
 }
 
@@ -241,8 +244,8 @@ function toggleBreak(row, col) {
   if (cell.isBreak) {
     cell.isBreak = false
     if (cell.backup) {
-      if (!props.teacherFree(cell.backup.teacher, row, col, props.cls)) {
-        message.error(`Giáo viên ${props.teacherMap[cell.backup.teacher] || cell.backup.teacher} dang bận tiết đó`)
+      if (!teacherFree(cell.backup.teacher, row, col, props.cls, props.timetables)) {
+        message.error(`Giáo viên ${teacherMap[cell.backup.teacher] || cell.backup.teacher} dang bận tiết đó`)
         return
       }
       cell.subject = cell.backup.subject
@@ -273,8 +276,8 @@ function addLesson(row, col) {
     return
   }
   const teacher = subjectTeacherMap[subject]
-  if (!props.teacherFree(teacher, row, col, props.cls)) {
-    message.error(`Giáo viên ${props.teacherMap[teacher] || teacher} dang bận tiết đó`)
+  if (!teacherFree(teacher, row, col, props.cls, props.timetables)) {
+    message.error(`Giáo viên ${teacherMap[teacher] || teacher} dang bận tiết đó`)
     contextMenu.value.show = false
     return
   }
