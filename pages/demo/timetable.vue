@@ -60,6 +60,7 @@
         <li>Nhấn chuột phải để đặt hoặc bỏ nghỉ.</li>
         <li>Kéo thả các tiết để hoán đổi vị trí.</li>
         <li>Không thể kéo thả vào tiết nghỉ.</li>
+        <li>Không thể đặt nghỉ ở ô đã có tiết học.</li>
       </ul>
     </div>
 
@@ -232,6 +233,11 @@ function toggleBreak(row: number, col: number) {
       cell.backup = undefined
     }
   } else {
+    if (cell.subject) {
+      message.error('Không thể đặt nghỉ vì đã có tiết học')
+      contextMenu.value.show = false
+      return
+    }
     cell.isBreak = true
     cell.backup = { subject: cell.subject, class: cell.class, teacher: cell.teacher }
     cell.subject = ''
