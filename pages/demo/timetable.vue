@@ -53,7 +53,7 @@
                     {{ lesson.subject }} - {{ lesson.class }}
                   </div>
                   <div class="text-xs line-clamp-1">
-                    {{ lesson.teacher }}
+                    {{ teacherMap[lesson.teacher] }}
                   </div>
                 </template>
                 <template v-else-if="lesson.isBreak">Nghỉ</template>
@@ -102,7 +102,7 @@
                     {{ lesson.subject }} - {{ lesson.class }}
                   </div>
                   <div class="text-xs line-clamp-1">
-                    {{ lesson.teacher }}
+                    {{ teacherMap[lesson.teacher] }}
                   </div>
                 </template>
                 <template v-else-if="lesson.isBreak">Nghỉ</template>
@@ -159,7 +159,7 @@
                     {{ lesson.subject }} - {{ lesson.class }}
                   </div>
                   <div class="text-xs line-clamp-1">
-                    {{ lesson.teacher }}
+                    {{ teacherMap[lesson.teacher] }}
                   </div>
                 </template>
                 <template v-else-if="lesson.isBreak">Nghỉ</template>
@@ -208,7 +208,7 @@
                     {{ lesson.subject }} - {{ lesson.class }}
                   </div>
                   <div class="text-xs line-clamp-1">
-                    {{ lesson.teacher }}
+                    {{ teacherMap[lesson.teacher] }}
                   </div>
                 </template>
                 <template v-else-if="lesson.isBreak">Nghỉ</template>
@@ -268,7 +268,6 @@
 
 <script setup>
 
-const teacherName = 'PT Thoản'
 const days = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu']
 const demoSubjects = [
   'Toán',
@@ -280,13 +279,18 @@ const demoSubjects = [
   'Sử',
   'Địa'
 ]
-const demoTeachers = [
-  'PT Thoản',
-  'Thầy An',
-  'Cô Bình',
-  'Thầy Cường',
-  'Cô Dung'
+
+const teachers = [
+  { id: 'GV1', name: 'PT Thoản' },
+  { id: 'GV2', name: 'Thầy An' },
+  { id: 'GV3', name: 'Cô Bình' },
+  { id: 'GV4', name: 'Thầy Cường' },
+  { id: 'GV5', name: 'Cô Dung' }
 ]
+const teacherMap = Object.fromEntries(teachers.map(t => [t.id, t.name]))
+const demoTeachers = teachers.map(t => `${t.id}. ${t.name}`)
+const mainTeacherId = 'GV1'
+const teacherName = teacherMap[mainTeacherId]
 
 // lịch cơ bản của giáo viên (không bao gồm lớp 6A)
 const teacherBusyMorning = [
@@ -411,37 +415,8 @@ const timetables = reactive({
   '6B': { morning: emptySession('6B'), afternoon: emptySession('6B') }
 })
 
-const allTimetables = computed(() => [
-  ...timetables['6A'].morning,
-  ...timetables['6A'].afternoon,
-  ...timetables['6B'].morning,
-  ...timetables['6B'].afternoon
-])
-
-const teacherNames = computed(() => {
-  const set = new Set()
-  allTimetables.value.forEach(row =>
-    row.forEach(lesson => {
-      if (lesson.teacher) set.add(lesson.teacher)
-    })
-  )
-  return Array.from(set)
-})
-
-const selectedTeacher = ref('')
-
-watchEffect(() => {
-  if (!selectedTeacher.value && teacherNames.value.length) {
-    selectedTeacher.value = teacherNames.value[0]
-  }
-  if (!teacherNames.value.includes(selectedTeacher.value)) {
-    selectedTeacher.value = teacherNames.value[0] || ''
-  }
-})
-
-const teacherOptions = computed(() =>
-  teacherNames.value.map(t => ({ label: t, value: t }))
-)
+const selectedTeacher = ref(teachers[0].id)
+const teacherOptions = teachers.map(t => ({ label: `${t.id}. ${t.name}`, value: t.id }))
 
 function getCell(cls, row, col) {
   return row < 5
@@ -463,7 +438,7 @@ const dragSource = ref({ cls: '', row: null, col: null })
 const contextMenu = ref({ show: false, x: 0, y: 0, cls: '', row: null, col: null })
 
 function teacherFree(teacher, row, col, cls) {
-  if (teacher === teacherName) {
+  if (teacher === mainTeacherId) {
     const slot =
       row < 5
         ? teacherBusyMorning[row][col]
@@ -504,12 +479,12 @@ function onDrop(cls, row, col) {
     return
   }
   if (!teacherFree(source.teacher, row, col, cls)) {
-    message.error(`Giáo viên ${source.teacher} đang bận tiết đó`)
+    message.error(`Giáo viên ${teacherMap[source.teacher] || source.teacher} đang bận tiết đó`)
     dragSource.value = { cls: '', row: null, col: null }
     return
   }
   if (!teacherFree(target.teacher, src.row, src.col, src.cls)) {
-    message.error(`Giáo viên ${target.teacher} đang bận tiết đó`)
+    message.error(`Giáo viên ${teacherMap[target.teacher] || target.teacher} đang bận tiết đó`)
     dragSource.value = { cls: '', row: null, col: null }
     return
   }
@@ -530,7 +505,7 @@ function toggleBreak(cls, row, col) {
     cell.isBreak = false
     if (cell.backup) {
       if (!teacherFree(cell.backup.teacher, row, col, cls)) {
-        message.error(`Giáo viên ${cell.backup.teacher} đang bận tiết đó`)
+        message.error(`Giáo viên ${teacherMap[cell.backup.teacher] || cell.backup.teacher} đang bận tiết đó`)
         return
       }
       cell.subject = cell.backup.subject
@@ -559,13 +534,13 @@ function addLesson(cls, row, col) {
     contextMenu.value.show = false
     return
   }
-  const teacher = prompt('Nhập tên giáo viên:')
-  if (!teacher) {
+  const teacher = prompt('Nhập mã giáo viên:')
+  if (!teacher || !teacherMap[teacher]) {
     contextMenu.value.show = false
     return
   }
   if (!teacherFree(teacher, row, col, cls)) {
-    message.error(`Giáo viên ${teacher} đang bận tiết đó`)
+    message.error(`Giáo viên ${teacherMap[teacher] || teacher} đang bận tiết đó`)
     contextMenu.value.show = false
     return
   }
