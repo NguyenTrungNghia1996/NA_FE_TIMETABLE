@@ -137,33 +137,15 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { message } from 'ant-design-vue'
-
-interface Lesson {
-  id: number
-  subject: string
-  class: string
-  teacher: string
-  isBreak: boolean
-  backup?: {
-    subject: string
-    class: string
-    teacher: string
-  }
-}
-
-interface TeacherSlot {
-  class: string
-  subject: string
-}
 
 const teacherName = 'PT Thoản'
 const days = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu']
 
 // lịch cơ bản của giáo viên (không bao gồm lớp 6A)
-const teacherBusyMorning: TeacherSlot[][] = [
+const teacherBusyMorning = [
   [
     { class: '', subject: '' },
     { class: '7B', subject: 'AN' },
@@ -229,7 +211,7 @@ const teacherBusyMorning: TeacherSlot[][] = [
   ],
 ]
 
-const teacherBusyAfternoon: TeacherSlot[][] = [
+const teacherBusyAfternoon = [
   [
     { class: '', subject: '' },
     { class: '', subject: '' },
@@ -268,7 +250,7 @@ const teacherBusyAfternoon: TeacherSlot[][] = [
 ]
 
 // thời khóa biểu lớp 6A tách thành 2 ca (mỗi ca 5 tiết)
-const morningTimetable = ref<Lesson[][]>([
+const morningTimetable = ref([
   [
     { id: 1, subject: 'Toán', class: '6A', teacher: 'Phan Văn Lương', isBreak: false },
     { id: 2, subject: 'Văn', class: '6A', teacher: 'Nguyễn Thị Bình', isBreak: false },
@@ -306,7 +288,7 @@ const morningTimetable = ref<Lesson[][]>([
   ]
 ])
 
-const afternoonTimetable = ref<Lesson[][]>([
+const afternoonTimetable = ref([
   [
     { id: 26, subject: 'Văn', class: '6A', teacher: 'Nguyễn Thị Bình', isBreak: false },
     { id: 27, subject: 'Sinh', class: '6A', teacher: 'Nguyễn Thị Minh', isBreak: false },
@@ -349,13 +331,13 @@ const classTimetable = computed(() => [
   ...afternoonTimetable.value
 ])
 
-function getCell(row: number, col: number) {
+function getCell(row, col) {
   return row < 5
     ? morningTimetable.value[row][col]
     : afternoonTimetable.value[row - 5][col]
 }
 
-function setCell(row: number, col: number, lesson: Lesson) {
+function setCell(row, col, lesson) {
   if (row < 5) {
     morningTimetable.value[row][col] = lesson
   } else {
@@ -364,11 +346,11 @@ function setCell(row: number, col: number, lesson: Lesson) {
 }
 
 
-const selected = ref({ row: null as number | null, col: null as number | null })
-const dragSource = ref({ row: null as number | null, col: null as number | null })
-const contextMenu = ref({ show: false, x: 0, y: 0, row: null as number | null, col: null as number | null })
+const selected = ref({ row: null, col: null })
+const dragSource = ref({ row: null, col: null })
+const contextMenu = ref({ show: false, x: 0, y: 0, row: null, col: null })
 
-function teacherFree(teacher: string, row: number, col: number) {
+function teacherFree(teacher, row, col) {
   if (teacher !== teacherName) return true
   const slot =
     row < 5
@@ -377,14 +359,14 @@ function teacherFree(teacher: string, row: number, col: number) {
   return !slot.class || slot.class === '6A'
 }
 
-function onDragStart(row: number, col: number) {
+function onDragStart(row, col) {
   const cell = getCell(row, col)
   if (cell.isBreak) return
   dragSource.value = { row, col }
   selected.value = { row, col }
 }
 
-function onDrop(row: number, col: number) {
+function onDrop(row, col) {
   const src = dragSource.value
   if (src.row === null) return
   if (src.row === row && src.col === col) return
@@ -404,13 +386,13 @@ function onDrop(row: number, col: number) {
   dragSource.value = { row: null, col: null }
 }
 
-function openMenu(event: MouseEvent, row: number, col: number) {
+function openMenu(event, row, col) {
   selected.value = { row, col }
   dragSource.value = { row, col }
   contextMenu.value = { show: true, x: event.clientX, y: event.clientY, row, col }
 }
 
-function toggleBreak(row: number, col: number) {
+function toggleBreak(row, col) {
   const cell = getCell(row, col)
   if (cell.isBreak) {
     cell.isBreak = false
@@ -439,18 +421,18 @@ function toggleBreak(row: number, col: number) {
   contextMenu.value.show = false
 }
 
-function isSelected(row: number, col: number) {
+function isSelected(row, col) {
   return selected.value.row === row && selected.value.col === col
 }
 
-function startHighlight(row: number, col: number) {
+function startHighlight(row, col) {
   const cell = getCell(row, col)
   if (cell.isBreak) return
   selected.value = { row, col }
   dragSource.value = { row, col }
 }
 
-function isValidTarget(row: number, col: number) {
+function isValidTarget(row, col) {
   const src = dragSource.value
   if (src.row === null) return false
   if (src.row === row && src.col === col) return false
