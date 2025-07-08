@@ -3,6 +3,11 @@
     <h1 class="text-2xl font-bold">Demo xếp thời khóa biểu liên kết</h1>
     <a-card class="mb-6">
       <template #title>Thời khóa biểu lớp 6A</template>
+      <a-select
+        v-model:value="selectedTeacher"
+        :options="teacherOptions"
+        class="mb-4 w-48"
+      />
       <div class="overflow-x-auto">
         <table class="min-w-full text-center border-collapse table-fixed">
           <tbody>
@@ -31,10 +36,10 @@
                 :class="[
                   { 'bg-blue-100': isSelected(rIndex, cIndex) },
                   { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak },
-                  { 'cursor-move': !lesson.isBreak },
+                  { 'cursor-move': !lesson.isBreak && lesson.teacher === selectedTeacher },
                   { 'bg-green-100': isValidTarget(rIndex, cIndex) }
                 ]"
-                :draggable="!lesson.isBreak"
+                :draggable="!lesson.isBreak && lesson.teacher === selectedTeacher"
                 @dragstart="onDragStart(rIndex, cIndex)"
                 @click="startHighlight(rIndex, cIndex)"
                 @dragover.prevent
@@ -79,10 +84,10 @@
                 :class="[
                   { 'bg-blue-100': isSelected(rIndex + 5, cIndex) },
                   { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak },
-                  { 'cursor-move': !lesson.isBreak },
+                  { 'cursor-move': !lesson.isBreak && lesson.teacher === selectedTeacher },
                   { 'bg-green-100': isValidTarget(rIndex + 5, cIndex) }
                 ]"
-                :draggable="!lesson.isBreak"
+                :draggable="!lesson.isBreak && lesson.teacher === selectedTeacher"
                 @dragstart="onDragStart(rIndex + 5, cIndex)"
                 @click="startHighlight(rIndex + 5, cIndex)"
                 @dragover.prevent
@@ -138,8 +143,6 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { message } from 'ant-design-vue'
 
 const teacherName = 'PT Thoản'
 const days = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu']
@@ -331,6 +334,31 @@ const classTimetable = computed(() => [
   ...afternoonTimetable.value
 ])
 
+const teacherNames = computed(() => {
+  const set = new Set()
+  classTimetable.value.forEach(row =>
+    row.forEach(lesson => {
+      if (lesson.teacher) set.add(lesson.teacher)
+    })
+  )
+  return Array.from(set)
+})
+
+const selectedTeacher = ref('')
+
+watchEffect(() => {
+  if (!selectedTeacher.value && teacherNames.value.length) {
+    selectedTeacher.value = teacherNames.value[0]
+  }
+  if (!teacherNames.value.includes(selectedTeacher.value)) {
+    selectedTeacher.value = teacherNames.value[0] || ''
+  }
+})
+
+const teacherOptions = computed(() =>
+  teacherNames.value.map(t => ({ label: t, value: t }))
+)
+
 function getCell(row, col) {
   return row < 5
     ? morningTimetable.value[row][col]
@@ -361,7 +389,7 @@ function teacherFree(teacher, row, col) {
 
 function onDragStart(row, col) {
   const cell = getCell(row, col)
-  if (cell.isBreak) return
+  if (cell.isBreak || cell.teacher !== selectedTeacher.value) return
   dragSource.value = { row, col }
   selected.value = { row, col }
 }
@@ -372,6 +400,11 @@ function onDrop(row, col) {
   if (src.row === row && src.col === col) return
   const target = getCell(row, col)
   const source = getCell(src.row, src.col)
+  if (source.teacher !== selectedTeacher.value) {
+    dragSource.value = { row: null, col: null }
+    selected.value = { row: null, col: null }
+    return
+  }
   if (target.isBreak || source.isBreak) {
     dragSource.value = { row: null, col: null }
     return
@@ -427,7 +460,7 @@ function isSelected(row, col) {
 
 function startHighlight(row, col) {
   const cell = getCell(row, col)
-  if (cell.isBreak) return
+  if (cell.isBreak || cell.teacher !== selectedTeacher.value) return
   selected.value = { row, col }
   dragSource.value = { row, col }
 }
@@ -437,6 +470,7 @@ function isValidTarget(row, col) {
   if (src.row === null) return false
   if (src.row === row && src.col === col) return false
   const source = getCell(src.row, src.col)
+  if (source.teacher !== selectedTeacher.value) return false
   const target = getCell(row, col)
   if (source.isBreak || target.isBreak) return false
   return (
