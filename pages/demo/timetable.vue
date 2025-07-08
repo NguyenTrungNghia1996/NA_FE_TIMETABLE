@@ -10,23 +10,21 @@
       <ClassTimetable
         cls="6A"
         :timetable="timetables['6A']"
+        :timetables="timetables"
         :days="days"
         :selected-teacher="selectedTeacher"
         :teacher-map="teacherMap"
         :subject-teacher-map="subjectTeacherMap"
-        :get-cell="getCell"
-        :set-cell="setCell"
         :teacher-free="teacherFree"
       />
       <ClassTimetable
         cls="6B"
         :timetable="timetables['6B']"
+        :timetables="timetables"
         :days="days"
         :selected-teacher="selectedTeacher"
         :teacher-map="teacherMap"
         :subject-teacher-map="subjectTeacherMap"
-        :get-cell="getCell"
-        :set-cell="setCell"
         :teacher-free="teacherFree"
       />
     </div>
@@ -327,20 +325,6 @@ timetables['6B'] = {
 
 const selectedTeacher = ref(teachers[0].id)
 const teacherOptions = teachers.map(t => ({ label: `${t.id}. ${t.name}`, value: t.id }))
-
-function getCell(cls, row, col) {
-  return row < 5
-    ? timetables[cls].morning[row][col]
-    : timetables[cls].afternoon[row - 5][col]
-}
-
-function setCell(cls, row, col, lesson) {
-  if (row < 5) {
-    timetables[cls].morning[row][col] = lesson
-  } else {
-    timetables[cls].afternoon[row - 5][col] = lesson
-  }
-}
 
 
 

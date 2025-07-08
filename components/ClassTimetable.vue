@@ -143,8 +143,7 @@ const props = defineProps({
   selectedTeacher: String,
   teacherMap: Object,
   subjectTeacherMap: Object,
-  getCell: Function,
-  setCell: Function,
+  timetables: Object,
   teacherFree: Function
 })
 
@@ -159,15 +158,29 @@ function isSelected(cls, row, col) {
   )
 }
 
+function getCell(cls, row, col) {
+  return row < 5
+    ? props.timetables[cls].morning[row][col]
+    : props.timetables[cls].afternoon[row - 5][col]
+}
+
+function setCell(cls, row, col, lesson) {
+  if (row < 5) {
+    props.timetables[cls].morning[row][col] = lesson
+  } else {
+    props.timetables[cls].afternoon[row - 5][col] = lesson
+  }
+}
+
 function startHighlight(cls, row, col) {
-  const cell = props.getCell(cls, row, col)
+  const cell = getCell(cls, row, col)
   if (cell.isBreak || cell.teacher !== props.selectedTeacher) return
   selected.value = { cls, row, col }
   dragSource.value = { cls, row, col }
 }
 
 function onDragStart(cls, row, col) {
-  const cell = props.getCell(cls, row, col)
+  const cell = getCell(cls, row, col)
   if (cell.isBreak || cell.teacher !== props.selectedTeacher) return
   dragSource.value = { cls, row, col }
   selected.value = { cls, row, col }
@@ -177,8 +190,8 @@ function onDrop(cls, row, col) {
   const src = dragSource.value
   if (!src.cls) return
   if (src.cls === cls && src.row === row && src.col === col) return
-  const target = props.getCell(cls, row, col)
-  const source = props.getCell(src.cls, src.row, src.col)
+  const target = getCell(cls, row, col)
+  const source = getCell(src.cls, src.row, src.col)
   if (source.teacher !== props.selectedTeacher) {
     dragSource.value = { cls: '', row: null, col: null }
     selected.value = { cls: '', row: null, col: null }
@@ -198,8 +211,8 @@ function onDrop(cls, row, col) {
     dragSource.value = { cls: '', row: null, col: null }
     return
   }
-  props.setCell(cls, row, col, source)
-  props.setCell(src.cls, src.row, src.col, target)
+  setCell(cls, row, col, source)
+  setCell(src.cls, src.row, src.col, target)
   dragSource.value = { cls: '', row: null, col: null }
 }
 
@@ -207,9 +220,9 @@ function isValidTarget(cls, row, col) {
   const src = dragSource.value
   if (!src.cls) return false
   if (src.cls === cls && src.row === row && src.col === col) return false
-  const source = props.getCell(src.cls, src.row, src.col)
+  const source = getCell(src.cls, src.row, src.col)
   if (source.teacher !== props.selectedTeacher) return false
-  const target = props.getCell(cls, row, col)
+  const target = getCell(cls, row, col)
   if (source.isBreak || target.isBreak) return false
   return (
     props.teacherFree(source.teacher, row, col, cls) &&
@@ -224,7 +237,7 @@ function openMenu(event, cls, row, col) {
 }
 
 function toggleBreak(row, col) {
-  const cell = props.getCell(props.cls, row, col)
+  const cell = getCell(props.cls, row, col)
   if (cell.isBreak) {
     cell.isBreak = false
     if (cell.backup) {
@@ -265,7 +278,7 @@ function addLesson(row, col) {
     contextMenu.value.show = false
     return
   }
-  const cell = props.getCell(props.cls, row, col)
+  const cell = getCell(props.cls, row, col)
   cell.subject = subject
   cell.teacher = teacher
   cell.class = props.cls
