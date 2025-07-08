@@ -2,14 +2,10 @@
   <div class="max-w-6xl mx-auto p-6 space-y-4">
     <h1 class="text-2xl font-bold mb-2">Demo xếp thời khóa biểu liên kết</h1>
     <!-- Bỏ chọn giáo viên -->
-    <div class="grid gap-6 md:grid-cols-2">
+    <div class="grid gap-6 md:grid-cols-1">
       <ClassTimetable
         cls="6A"
         :timetable="timetables['6A']"
-      />
-      <ClassTimetable
-        cls="6B"
-        :timetable="timetables['6B']"
       />
     </div>
 
@@ -70,8 +66,7 @@ function emptySession(cls) {
 
 // thời khóa biểu các lớp tách thành 2 ca (mặc định trống)
 const timetables = reactive({
-  '6A': { morning: emptySession('6A'), afternoon: emptySession('6A') },
-  '6B': { morning: emptySession('6B'), afternoon: emptySession('6B') }
+  '6A': { morning: emptySession('6A'), afternoon: emptySession('6A') }
 })
 
 function lesson(subject, teacher, cls) {
@@ -161,22 +156,7 @@ const baseTimetable6A = {
   ]
 }
 
-function shiftRows(rows, cls) {
-  return rows.map(row =>
-    row.map((_, i) => {
-      const src = row[(i + 1) % row.length]
-      return { ...src, class: cls }
-    })
-  )
-}
-
 timetables['6A'] = JSON.parse(JSON.stringify(baseTimetable6A))
-timetables['6B'] = {
-  morning: shiftRows(baseTimetable6A.morning, '6B'),
-  afternoon: shiftRows(baseTimetable6A.afternoon, '6B')
-}
-
-
 </script>
 
 <style scoped>
