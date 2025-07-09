@@ -13,7 +13,7 @@
       <h2 class="text-xl font-bold mb-4">📓 Hướng dẫn sử dụng</h2>
       <ul class="list-disc pl-6 space-y-2">
         <li>Nhấn chuột phải để đặt hoặc bỏ nghỉ.</li>
-        <li>Nhấn chuột phải ở ô trống để thêm tiết học (chọn môn, giáo viên tự gán).</li>
+        <li>Nhấn chuột phải ở ô trống để chọn môn học thêm vào.</li>
         <li>Kéo thả các tiết để hoán đổi vị trí.</li>
         <li>Không thể kéo thả vào tiết nghỉ.</li>
         <li>Không thể đặt nghỉ ở ô đã có tiết học.</li>

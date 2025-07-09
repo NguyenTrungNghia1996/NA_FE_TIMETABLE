@@ -70,16 +70,22 @@
                 : 'Đặt nghỉ'
             }}
           </li>
-          <li
+          <template
             v-if="
               !getCell(contextMenu.row, contextMenu.col).subject &&
               !getCell(contextMenu.row, contextMenu.col).isBreak
             "
-            class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-            @click="addLesson(contextMenu.row, contextMenu.col)"
           >
-            Thêm tiết học
-          </li>
+            <li class="px-4 py-2 font-semibold cursor-default">Thêm tiết học</li>
+            <li
+              v-for="(t, subj) in subjectTeacherMap"
+              :key="subj"
+              class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+              @click="addLesson(contextMenu.row, contextMenu.col, subj)"
+            >
+              {{ subj }}
+            </li>
+          </template>
         </ul>
       </div>
     </div>
@@ -211,13 +217,7 @@ function toggleBreak(row, col) {
   contextMenu.value.show = false
 }
 
-function addLesson(row, col) {
-  const hint = Object.keys(subjectTeacherMap).join(', ')
-  const subject = prompt(`Chọn môn học (${hint}):`)
-  if (!subject || !subjectTeacherMap[subject]) {
-    contextMenu.value.show = false
-    return
-  }
+function addLesson(row, col, subject) {
   const teacher = subjectTeacherMap[subject]
   const cell = getCell(row, col)
   cell.subject = subject
