@@ -31,6 +31,28 @@
 
 
 const baseTimetable = {
+  teacherMap: {
+    GV1: 'PT Thoản',
+    GV2: 'Thầy An',
+    GV3: 'Cô Bình',
+    GV4: 'Thầy Cường',
+    GV5: 'Cô Dung'
+  },
+  subjectTeacherMap: {
+    Toán: 'GV2',
+    Văn: 'GV3',
+    Anh: 'GV1',
+    Lý: 'GV4',
+    Hóa: 'GV5',
+    Sinh: 'GV3',
+    Sử: 'GV5',
+    Địa: 'GV4'
+  },
+  sessions: [
+    { key: 'morning', label: 'Ca sáng', offset: 0 },
+    { key: 'afternoon', label: 'Ca chiều', offset: 5 }
+  ],
+  days: ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu'],
   morning: [
     [
       { subject: 'Anh', teacher: 'GV1', isBreak: false },
