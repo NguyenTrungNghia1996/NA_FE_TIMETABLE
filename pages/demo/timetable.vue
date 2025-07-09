@@ -3,12 +3,7 @@
     <h1 class="text-2xl font-bold mb-2">Demo xếp thời khóa biểu liên kết</h1>
     <!-- Bỏ chọn giáo viên -->
     <div class="grid gap-6 md:grid-cols-1">
-      <ClassTimetable
-        :timetable="timetable"
-        :teacher-map="teacherMap"
-        :subject-teacher-map="subjectTeacherMap"
-        :sessions="sessions"
-      />
+      <ClassTimetable :timetable="timetable" />
     </div>
 
 
@@ -34,29 +29,6 @@
 
 <script setup>
 
-const teacherMap = {
-  GV1: 'PT Thoản',
-  GV2: 'Thầy An',
-  GV3: 'Cô Bình',
-  GV4: 'Thầy Cường',
-  GV5: 'Cô Dung',
-}
-
-const subjectTeacherMap = {
-  Toán: 'GV2',
-  Văn: 'GV3',
-  Anh: 'GV1',
-  Lý: 'GV4',
-  Hóa: 'GV5',
-  Sinh: 'GV3',
-  Sử: 'GV5',
-  Địa: 'GV4',
-}
-
-const sessions = [
-  { key: 'morning', label: 'Ca sáng', offset: 0 },
-  { key: 'afternoon', label: 'Ca chiều', offset: 5 },
-]
 
 const baseTimetable = {
   morning: [
