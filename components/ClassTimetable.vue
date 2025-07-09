@@ -46,7 +46,7 @@
                   {{ lesson.subject }}
                 </div>
                 <div class="text-xs line-clamp-1">
-                  {{ teacherMap[lesson.teacher] }}
+                  {{ props.teacherMap[lesson.teacher] }}
                 </div>
               </template>
               <template v-else-if="lesson.isBreak">Nghỉ</template>
@@ -94,12 +94,12 @@
   <a-modal v-model:open="addModal.show" title="Chọn tiết học" @cancel="addModal.show = false">
     <ul>
       <li
-        v-for="(t, subj) in subjectTeacherMap"
+        v-for="(t, subj) in props.subjectTeacherMap"
         :key="subj"
         class="py-1 cursor-pointer hover:text-blue-600"
         @click="addLesson(addModal.row, addModal.col, subj)"
       >
-        {{ subj }} - {{ teacherMap[subjectTeacherMap[subj]] }}
+        {{ subj }} - {{ props.teacherMap[props.subjectTeacherMap[subj]] }}
       </li>
     </ul>
   </a-modal>
@@ -109,6 +109,8 @@
 
 const props = defineProps({
   timetable: Object,
+  teacherMap: Object,
+  subjectTeacherMap: Object,
   title: {
     type: String,
     default: 'Thời khóa biểu'
@@ -116,23 +118,6 @@ const props = defineProps({
 })
 
 const days = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu']
-const teacherMap = {
-  GV1: 'PT Thoản',
-  GV2: 'Thầy An',
-  GV3: 'Cô Bình',
-  GV4: 'Thầy Cường',
-  GV5: 'Cô Dung'
-}
-const subjectTeacherMap = {
-  Toán: 'GV2',
-  Văn: 'GV3',
-  Anh: 'GV1',
-  Lý: 'GV4',
-  Hóa: 'GV5',
-  Sinh: 'GV3',
-  Sử: 'GV5',
-  Địa: 'GV4'
-}
 
 const sessions = [
   { key: 'morning', label: 'Ca sáng', offset: 0 },
@@ -237,7 +222,7 @@ function toggleBreak(row, col) {
 }
 
 function addLesson(row, col, subject) {
-  const teacher = subjectTeacherMap[subject]
+  const teacher = props.subjectTeacherMap[subject]
   const cell = getCell(row, col)
   cell.subject = subject
   cell.teacher = teacher

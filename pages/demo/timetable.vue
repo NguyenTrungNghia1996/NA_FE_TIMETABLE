@@ -5,6 +5,8 @@
     <div class="grid gap-6 md:grid-cols-1">
       <ClassTimetable
         :timetable="timetable"
+        :teacher-map="teacherMap"
+        :subject-teacher-map="subjectTeacherMap"
       />
     </div>
 
@@ -31,6 +33,24 @@
 
 <script setup>
 
+const teacherMap = {
+  GV1: 'PT Thoản',
+  GV2: 'Thầy An',
+  GV3: 'Cô Bình',
+  GV4: 'Thầy Cường',
+  GV5: 'Cô Dung',
+}
+
+const subjectTeacherMap = {
+  Toán: 'GV2',
+  Văn: 'GV3',
+  Anh: 'GV1',
+  Lý: 'GV4',
+  Hóa: 'GV5',
+  Sinh: 'GV3',
+  Sử: 'GV5',
+  Địa: 'GV4',
+}
 
 const baseTimetable = {
   morning: [
