@@ -1,6 +1,6 @@
 <template>
   <a-card class="mb-6">
-    <template #title>Thời khóa biểu lớp 6A</template>
+    <template #title>{{ title }}</template>
     <div class="overflow-x-auto">
       <table class="min-w-full text-center border-collapse table-fixed">
         <tbody>
@@ -135,7 +135,11 @@
 <script setup>
 
 const props = defineProps({
-  timetable: Object
+  timetable: Object,
+  title: {
+    type: String,
+    default: 'Thời khóa biểu'
+  }
 })
 
 const days = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu']

@@ -58,7 +58,7 @@ watch(
   { deep: true }
 )
 
-const baseTimetable6A = {
+const baseTimetable = {
   morning: [
     [
       { subject: 'Anh', teacher: 'GV1', isBreak: false },
@@ -135,8 +135,8 @@ const baseTimetable6A = {
   ]
 }
 
-timetable.morning = JSON.parse(JSON.stringify(baseTimetable6A.morning))
-timetable.afternoon = JSON.parse(JSON.stringify(baseTimetable6A.afternoon))
+timetable.morning = JSON.parse(JSON.stringify(baseTimetable.morning))
+timetable.afternoon = JSON.parse(JSON.stringify(baseTimetable.afternoon))
 timetableJson.value = JSON.stringify(timetable, null, 2)
 </script>
 
