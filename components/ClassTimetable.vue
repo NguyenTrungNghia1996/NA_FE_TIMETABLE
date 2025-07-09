@@ -46,7 +46,7 @@
                   {{ lesson.subject }}
                 </div>
                 <div class="text-xs line-clamp-1">
-                  {{ teacherMap[lesson.teacher] }}
+                  {{ lesson.teacher }}
                 </div>
               </template>
               <template v-else-if="lesson.isBreak">Nghỉ</template>
@@ -96,7 +96,6 @@ const props = defineProps({
   }
 })
 
-const teacherMap = computed(() => props.timetable.teacherMap)
 const sessions = computed(() => props.timetable.sessions)
 const days = computed(() => {
   dayjs.locale('vi')
