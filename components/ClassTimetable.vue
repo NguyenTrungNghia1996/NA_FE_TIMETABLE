@@ -70,6 +70,13 @@
                 : 'Đặt nghỉ'
             }}
           </li>
+          <li
+            v-if="getCell(contextMenu.row, contextMenu.col).subject && !getCell(contextMenu.row, contextMenu.col).isBreak"
+            class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            @click="removeLesson(contextMenu.row, contextMenu.col)"
+          >
+            Xóa tiết
+          </li>
           <template
             v-if="
               !getCell(contextMenu.row, contextMenu.col).subject &&
@@ -223,6 +230,15 @@ function addLesson(row, col, subject) {
   cell.subject = subject
   cell.teacher = teacher
   cell.isBreak = false
+  contextMenu.value.show = false
+}
+
+function removeLesson(row, col) {
+  const cell = getCell(row, col)
+  cell.subject = ''
+  cell.teacher = ''
+  cell.isBreak = false
+  cell.backup = undefined
   contextMenu.value.show = false
 }
 
