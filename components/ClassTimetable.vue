@@ -3,23 +3,25 @@
     <template #title>{{ title }}</template>
     <div class="overflow-x-auto">
       <table class="min-w-full text-center border-collapse table-fixed">
-        <tbody>
+        <tbody v-for="session in sessions" :key="session.key">
           <tr>
-            <th colspan="6" class="bg-gray-50 text-left px-2">Ca sáng</th>
+            <th colspan="6" class="bg-gray-50 text-left px-2">
+              {{ session.label }}
+            </th>
           </tr>
           <tr>
             <th class="border p-2 w-20 h-12">Tiết\\Ngày</th>
             <th
               v-for="day in days"
-              :key="`morning-${day}`"
+              :key="`${session.key}-${day}`"
               class="border p-2 w-32 h-12"
             >
               {{ day }}
             </th>
           </tr>
           <tr
-            v-for="(row, rIndex) in timetable.morning"
-            :key="`morning-${rIndex}`"
+            v-for="(row, rIndex) in timetable[session.key]"
+            :key="`${session.key}-${rIndex}`"
           >
             <th class="border p-2 w-20 h-12">{{ rIndex + 1 }}</th>
             <td
@@ -27,65 +29,17 @@
               :key="cIndex"
               class="border p-2 w-32 h-12 select-none overflow-hidden"
               :class="[
-                { 'bg-blue-100': isSelected(rIndex, cIndex) },
+                { 'bg-blue-100': isSelected(rIndex + session.offset, cIndex) },
                 { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak },
                 { 'cursor-move': !lesson.isBreak },
-                { 'bg-green-100': isValidTarget(rIndex, cIndex) }
+                { 'bg-green-100': isValidTarget(rIndex + session.offset, cIndex) }
               ]"
               :draggable="!lesson.isBreak"
-              @dragstart="onDragStart(rIndex, cIndex)"
-              @click="startHighlight(rIndex, cIndex)"
+              @dragstart="onDragStart(rIndex + session.offset, cIndex)"
+              @click="startHighlight(rIndex + session.offset, cIndex)"
               @dragover.prevent
-              @drop="onDrop(rIndex, cIndex)"
-              @contextmenu.prevent="openMenu($event, rIndex, cIndex)"
-            >
-              <template v-if="lesson.subject">
-                <div class="line-clamp-1">
-                  {{ lesson.subject }}
-                </div>
-                <div class="text-xs line-clamp-1">
-                  {{ teacherMap[lesson.teacher] }}
-                </div>
-              </template>
-              <template v-else-if="lesson.isBreak">Nghỉ</template>
-            </td>
-          </tr>
-        </tbody>
-        <tbody>
-          <tr>
-            <th colspan="6" class="bg-gray-50 text-left px-2">Ca chiều</th>
-          </tr>
-          <tr>
-            <th class="border p-2 w-20 h-12">Tiết\\Ngày</th>
-            <th
-              v-for="day in days"
-              :key="`afternoon-${day}`"
-              class="border p-2 w-32 h-12"
-            >
-              {{ day }}
-            </th>
-          </tr>
-          <tr
-            v-for="(row, rIndex) in timetable.afternoon"
-            :key="`afternoon-${rIndex}`"
-          >
-            <th class="border p-2 w-20 h-12">{{ rIndex + 1 }}</th>
-            <td
-              v-for="(lesson, cIndex) in row"
-              :key="cIndex"
-              class="border p-2 w-32 h-12 select-none overflow-hidden"
-              :class="[
-                { 'bg-blue-100': isSelected(rIndex + 5, cIndex) },
-                { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak },
-                { 'cursor-move': !lesson.isBreak },
-                { 'bg-green-100': isValidTarget(rIndex + 5, cIndex) }
-              ]"
-              :draggable="!lesson.isBreak"
-              @dragstart="onDragStart(rIndex + 5, cIndex)"
-              @click="startHighlight(rIndex + 5, cIndex)"
-              @dragover.prevent
-              @drop="onDrop(rIndex + 5, cIndex)"
-              @contextmenu.prevent="openMenu($event, rIndex + 5, cIndex)"
+              @drop="onDrop(rIndex + session.offset, cIndex)"
+              @contextmenu.prevent="openMenu($event, rIndex + session.offset, cIndex)"
             >
               <template v-if="lesson.subject">
                 <div class="line-clamp-1">
@@ -160,6 +114,11 @@ const subjectTeacherMap = {
   Sử: 'GV5',
   Địa: 'GV4'
 }
+
+const sessions = [
+  { key: 'morning', label: 'Ca sáng', offset: 0 },
+  { key: 'afternoon', label: 'Ca chiều', offset: 5 }
+]
 
 const selected = ref({ row: null, col: null })
 const dragSource = ref({ row: null, col: null })

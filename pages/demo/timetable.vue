@@ -31,33 +31,6 @@
 <script setup>
 
 
-// tạo thời khóa biểu trống cho hai ca, mỗi ca 5 tiết
-function emptySession() {
-  return Array.from({ length: 5 }, () =>
-    Array.from({ length: 5 }, () => ({
-      subject: '',
-      teacher: '',
-      isBreak: false
-    }))
-  )
-}
-
-// dữ liệu thời khóa biểu lưu dưới dạng chuỗi JSON
-const timetableJson = ref(
-  JSON.stringify({ morning: emptySession(), afternoon: emptySession() }, null, 2)
-)
-
-// đối tượng reactive để thao tác trong giao diện
-const timetable = reactive(JSON.parse(timetableJson.value))
-
-watch(
-  timetable,
-  val => {
-    timetableJson.value = JSON.stringify(val, null, 2)
-  },
-  { deep: true }
-)
-
 const baseTimetable = {
   morning: [
     [
@@ -135,9 +108,9 @@ const baseTimetable = {
   ]
 }
 
-timetable.morning = JSON.parse(JSON.stringify(baseTimetable.morning))
-timetable.afternoon = JSON.parse(JSON.stringify(baseTimetable.afternoon))
-timetableJson.value = JSON.stringify(timetable, null, 2)
+const timetable = reactive(JSON.parse(JSON.stringify(baseTimetable)))
+
+const timetableJson = computed(() => JSON.stringify(timetable, null, 2))
 </script>
 
 <style scoped>
