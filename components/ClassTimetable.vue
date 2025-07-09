@@ -77,26 +77,32 @@
           >
             Xóa tiết
           </li>
-          <template
+          <li
             v-if="
               !getCell(contextMenu.row, contextMenu.col).subject &&
               !getCell(contextMenu.row, contextMenu.col).isBreak
             "
+            class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            @click="showAddModal(contextMenu.row, contextMenu.col)"
           >
-            <li class="px-4 py-2 font-semibold cursor-default">Thêm tiết học</li>
-            <li
-              v-for="(t, subj) in subjectTeacherMap"
-              :key="subj"
-              class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-              @click="addLesson(contextMenu.row, contextMenu.col, subj)"
-            >
-              {{ subj }}
-            </li>
-          </template>
+            Thêm tiết học
+          </li>
         </ul>
       </div>
     </div>
   </a-card>
+  <a-modal v-model:open="addModal.show" title="Chọn tiết học" @cancel="addModal.show = false">
+    <ul>
+      <li
+        v-for="(t, subj) in subjectTeacherMap"
+        :key="subj"
+        class="py-1 cursor-pointer hover:text-blue-600"
+        @click="addLesson(addModal.row, addModal.col, subj)"
+      >
+        {{ subj }} - {{ teacherMap[subjectTeacherMap[subj]] }}
+      </li>
+    </ul>
+  </a-modal>
 </template>
 
 <script setup>
@@ -136,6 +142,7 @@ const sessions = [
 const selected = ref({ row: null, col: null })
 const dragSource = ref({ row: null, col: null })
 const contextMenu = ref({ show: false, x: 0, y: 0, row: null, col: null })
+const addModal = ref({ show: false, row: null, col: null })
 
 function isSelected(row, col) {
   return selected.value.row === row && selected.value.col === col
@@ -201,6 +208,11 @@ function openMenu(event, row, col) {
   contextMenu.value = { show: true, x: event.clientX, y: event.clientY, row, col }
 }
 
+function showAddModal(row, col) {
+  addModal.value = { show: true, row, col }
+  contextMenu.value.show = false
+}
+
 function toggleBreak(row, col) {
   const cell = getCell(row, col)
   if (cell.isBreak) {
@@ -231,6 +243,7 @@ function addLesson(row, col, subject) {
   cell.teacher = teacher
   cell.isBreak = false
   contextMenu.value.show = false
+  addModal.value.show = false
 }
 
 function removeLesson(row, col) {
@@ -246,6 +259,7 @@ function closeMenu() {
   contextMenu.value.show = false
   selected.value = { row: null, col: null }
   dragSource.value = { row: null, col: null }
+  addModal.value = { show: false, row: null, col: null }
 }
 
 onMounted(() => {
