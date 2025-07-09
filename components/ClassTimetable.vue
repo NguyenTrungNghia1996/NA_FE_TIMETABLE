@@ -77,35 +77,16 @@
           >
             Xóa tiết
           </li>
-          <li
-            v-if="
-              !getCell(contextMenu.row, contextMenu.col).subject &&
-              !getCell(contextMenu.row, contextMenu.col).isBreak
-            "
-            class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-            @click="showAddModal(contextMenu.row, contextMenu.col)"
-          >
-            Thêm tiết học
-          </li>
         </ul>
       </div>
     </div>
   </a-card>
-  <a-modal v-model:open="addModal.show" title="Chọn tiết học" @cancel="addModal.show = false">
-    <ul>
-      <li
-        v-for="(t, subj) in subjectTeacherMap"
-        :key="subj"
-        class="py-1 cursor-pointer hover:text-blue-600"
-        @click="addLesson(addModal.row, addModal.col, subj)"
-      >
-        {{ subj }} - {{ teacherMap[subjectTeacherMap[subj]] }}
-      </li>
-    </ul>
-  </a-modal>
 </template>
 
 <script setup>
+import dayjs from 'dayjs'
+import 'dayjs/locale/vi'
+import { message } from 'ant-design-vue'
 
 const props = defineProps({
   timetable: Object,
@@ -116,15 +97,16 @@ const props = defineProps({
 })
 
 const teacherMap = computed(() => props.timetable.teacherMap)
-const subjectTeacherMap = computed(() => props.timetable.subjectTeacherMap)
 const sessions = computed(() => props.timetable.sessions)
-const days = computed(() => props.timetable.days)
+const days = computed(() => {
+  dayjs.locale('vi')
+  return Array.from({ length: 5 }, (_, i) => dayjs().day(i + 1).format('dddd'))
+})
 
 
 const selected = ref({ row: null, col: null })
 const dragSource = ref({ row: null, col: null })
 const contextMenu = ref({ show: false, x: 0, y: 0, row: null, col: null })
-const addModal = ref({ show: false, row: null, col: null })
 
 function isSelected(row, col) {
   return selected.value.row === row && selected.value.col === col
@@ -190,11 +172,6 @@ function openMenu(event, row, col) {
   contextMenu.value = { show: true, x: event.clientX, y: event.clientY, row, col }
 }
 
-function showAddModal(row, col) {
-  addModal.value = { show: true, row, col }
-  contextMenu.value.show = false
-}
-
 function toggleBreak(row, col) {
   const cell = getCell(row, col)
   if (cell.isBreak) {
@@ -218,16 +195,6 @@ function toggleBreak(row, col) {
   contextMenu.value.show = false
 }
 
-function addLesson(row, col, subject) {
-  const teacher = subjectTeacherMap.value[subject]
-  const cell = getCell(row, col)
-  cell.subject = subject
-  cell.teacher = teacher
-  cell.isBreak = false
-  contextMenu.value.show = false
-  addModal.value.show = false
-}
-
 function removeLesson(row, col) {
   const cell = getCell(row, col)
   cell.subject = ''
@@ -241,7 +208,6 @@ function closeMenu() {
   contextMenu.value.show = false
   selected.value = { row: null, col: null }
   dragSource.value = { row: null, col: null }
-  addModal.value = { show: false, row: null, col: null }
 }
 
 onMounted(() => {
