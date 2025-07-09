@@ -7,6 +7,7 @@
         :timetable="timetable"
         :teacher-map="teacherMap"
         :subject-teacher-map="subjectTeacherMap"
+        :sessions="sessions"
       />
     </div>
 
@@ -51,6 +52,11 @@ const subjectTeacherMap = {
   Sử: 'GV5',
   Địa: 'GV4',
 }
+
+const sessions = [
+  { key: 'morning', label: 'Ca sáng', offset: 0 },
+  { key: 'afternoon', label: 'Ca chiều', offset: 5 },
+]
 
 const baseTimetable = {
   morning: [

@@ -111,6 +111,7 @@ const props = defineProps({
   timetable: Object,
   teacherMap: Object,
   subjectTeacherMap: Object,
+  sessions: Array,
   title: {
     type: String,
     default: 'Thời khóa biểu'
@@ -119,10 +120,6 @@ const props = defineProps({
 
 const days = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu']
 
-const sessions = [
-  { key: 'morning', label: 'Ca sáng', offset: 0 },
-  { key: 'afternoon', label: 'Ca chiều', offset: 5 }
-]
 
 const selected = ref({ row: null, col: null })
 const dragSource = ref({ row: null, col: null })
