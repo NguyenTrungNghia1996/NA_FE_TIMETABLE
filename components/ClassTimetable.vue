@@ -1,6 +1,6 @@
 <template>
   <a-card class="mb-6">
-    <template #title>Thời khóa biểu lớp {{ cls }}</template>
+    <template #title>Thời khóa biểu lớp 6A</template>
     <div class="overflow-x-auto">
       <table class="min-w-full text-center border-collapse table-fixed">
         <tbody>
@@ -41,7 +41,7 @@
             >
               <template v-if="lesson.subject">
                 <div class="line-clamp-1">
-                  {{ lesson.subject }} - {{ lesson.class }}
+                  {{ lesson.subject }}
                 </div>
                 <div class="text-xs line-clamp-1">
                   {{ teacherMap[lesson.teacher] }}
@@ -89,7 +89,7 @@
             >
               <template v-if="lesson.subject">
                 <div class="line-clamp-1">
-                  {{ lesson.subject }} - {{ lesson.class }}
+                  {{ lesson.subject }}
                 </div>
                 <div class="text-xs line-clamp-1">
                   {{ teacherMap[lesson.teacher] }}
@@ -135,7 +135,6 @@
 <script setup>
 
 const props = defineProps({
-  cls: String,
   timetable: Object
 })
 
@@ -232,7 +231,6 @@ function toggleBreak(row, col) {
     cell.isBreak = false
     if (cell.backup) {
       cell.subject = cell.backup.subject
-      cell.class = cell.backup.class
       cell.teacher = cell.backup.teacher
       cell.backup = undefined
     }
@@ -243,9 +241,8 @@ function toggleBreak(row, col) {
       return
     }
     cell.isBreak = true
-    cell.backup = { subject: cell.subject, class: cell.class, teacher: cell.teacher }
+    cell.backup = { subject: cell.subject, teacher: cell.teacher }
     cell.subject = ''
-    cell.class = ''
     cell.teacher = ''
   }
   contextMenu.value.show = false
@@ -262,7 +259,6 @@ function addLesson(row, col) {
   const cell = getCell(row, col)
   cell.subject = subject
   cell.teacher = teacher
-  cell.class = props.cls
   cell.isBreak = false
   contextMenu.value.show = false
 }
