@@ -20,7 +20,7 @@
             </th>
           </tr>
           <tr
-            v-for="(row, rIndex) in timetable[session.key]"
+            v-for="(row, rIndex) in session.data"
             :key="`${session.key}-${rIndex}`"
           >
             <th class="border p-2 w-20 h-12">{{ rIndex + 1 }}</th>
@@ -89,14 +89,21 @@ import 'dayjs/locale/vi'
 import { message } from 'ant-design-vue'
 
 const props = defineProps({
-  timetable: Object,
+  timetable: Array,
   title: {
     type: String,
     default: 'Thời khóa biểu'
   }
 })
 
-const sessions = computed(() => props.timetable.sessions)
+const sessions = computed(() => {
+  let offset = 0
+  return props.timetable.map(session => {
+    const withOffset = { ...session, offset }
+    offset += session.data.length
+    return withOffset
+  })
+})
 const days = computed(() => {
   dayjs.locale('vi')
   return Array.from({ length: 5 }, (_, i) => dayjs().day(i + 1).format('dddd'))
@@ -112,16 +119,20 @@ function isSelected(row, col) {
 }
 
 function getCell(row, col) {
-  return row < 5
-    ? props.timetable.morning[row][col]
-    : props.timetable.afternoon[row - 5][col]
+  for (const session of sessions.value) {
+    if (row >= session.offset && row < session.offset + session.data.length) {
+      return session.data[row - session.offset][col]
+    }
+  }
+  return null
 }
 
 function setCell(row, col, lesson) {
-  if (row < 5) {
-    props.timetable.morning[row][col] = lesson
-  } else {
-    props.timetable.afternoon[row - 5][col] = lesson
+  for (const session of sessions.value) {
+    if (row >= session.offset && row < session.offset + session.data.length) {
+      session.data[row - session.offset][col] = lesson
+      break
+    }
   }
 }
 
