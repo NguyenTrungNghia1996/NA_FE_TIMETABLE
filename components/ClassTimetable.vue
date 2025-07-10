@@ -186,11 +186,6 @@ function toggleBreak(row, col) {
   const cell = getCell(row, col)
   if (cell.isBreak) {
     cell.isBreak = false
-    if (cell.backup) {
-      cell.subject = cell.backup.subject
-      cell.teacher = cell.backup.teacher
-      cell.backup = undefined
-    }
   } else {
     if (cell.subject) {
       message.error('Không thể đặt nghỉ vì đã có tiết học')
@@ -198,9 +193,6 @@ function toggleBreak(row, col) {
       return
     }
     cell.isBreak = true
-    cell.backup = { subject: cell.subject, teacher: cell.teacher }
-    cell.subject = ''
-    cell.teacher = ''
   }
   contextMenu.value.show = false
 }
@@ -210,7 +202,6 @@ function removeLesson(row, col) {
   cell.subject = ''
   cell.teacher = ''
   cell.isBreak = false
-  cell.backup = undefined
   contextMenu.value.show = false
 }
 
