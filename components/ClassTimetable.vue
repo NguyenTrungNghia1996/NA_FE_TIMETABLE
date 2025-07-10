@@ -104,6 +104,16 @@ const sessions = computed(() => {
     return withOffset
   })
 })
+
+const rowMap = computed(() => {
+  const map = []
+  for (const session of sessions.value) {
+    for (let i = 0; i < session.data.length; i++) {
+      map[session.offset + i] = { session, index: i }
+    }
+  }
+  return map
+})
 const days = computed(() => {
   dayjs.locale('vi')
   return Array.from({ length: 5 }, (_, i) => dayjs().day(i + 1).format('dddd'))
@@ -119,20 +129,15 @@ function isSelected(row, col) {
 }
 
 function getCell(row, col) {
-  for (const session of sessions.value) {
-    if (row >= session.offset && row < session.offset + session.data.length) {
-      return session.data[row - session.offset][col]
-    }
-  }
-  return null
+  const entry = rowMap.value[row]
+  if (!entry) return null
+  return entry.session.data[entry.index][col]
 }
 
 function setCell(row, col, lesson) {
-  for (const session of sessions.value) {
-    if (row >= session.offset && row < session.offset + session.data.length) {
-      session.data[row - session.offset][col] = lesson
-      break
-    }
+  const entry = rowMap.value[row]
+  if (entry) {
+    entry.session.data[entry.index][col] = lesson
   }
 }
 
