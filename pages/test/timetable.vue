@@ -2,7 +2,7 @@
   <div class="max-w-6xl mx-auto p-6 space-y-4">
     <h1 class="text-2xl font-bold mb-2">Demo xếp thời khóa biểu liên kết</h1>
     <div class="grid gap-6 md:grid-cols-1">
-      <ClassTimetable :timetable="timetable" />
+      <ClassTimetable :timetable="timetable" :days="days" />
     </div>
 
 
@@ -27,6 +27,8 @@
 
 <script setup>
 
+const days = ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu']
+
 
 const baseTimetable = [
   {
@@ -36,7 +38,7 @@ const baseTimetable = [
       [
         { subject: 'Anh', teacher: 'PT Thoản', isBreak: false },
         { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
-        { subject: 'Văn', teacher: 'Cô Bình', isBreak: false },
+        { subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
         { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false },
         { subject: '', teacher: '', isBreak: false }
       ],
@@ -45,10 +47,10 @@ const baseTimetable = [
         { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
         { subject: '', teacher: '', isBreak: true },
         { subject: 'Anh', teacher: 'PT Thoản', isBreak: false },
-        { subject: 'Văn', teacher: 'Cô Bình', isBreak: false }
+        { subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false }
       ],
       [
-        { subject: 'Văn', teacher: 'Cô Bình', isBreak: false },
+        { subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
         { subject: '', teacher: '', isBreak: false },
         { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
         { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false },
@@ -57,7 +59,7 @@ const baseTimetable = [
       [
         { subject: 'Anh', teacher: 'PT Thoản', isBreak: false },
         { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false },
-        { subject: 'Văn', teacher: 'Cô Bình', isBreak: false },
+        { subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
         { subject: '', teacher: '', isBreak: false },
         { subject: 'Toán', teacher: 'Thầy An', isBreak: false }
       ],
@@ -78,7 +80,7 @@ const baseTimetable = [
         { subject: '', teacher: '', isBreak: true },
         { subject: 'Anh', teacher: 'PT Thoản', isBreak: false },
         { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
-        { subject: 'Văn', teacher: 'Cô Bình', isBreak: false },
+        { subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
         { subject: '', teacher: '', isBreak: false }
       ],
       [
@@ -89,7 +91,7 @@ const baseTimetable = [
         { subject: 'Anh', teacher: 'PT Thoản', isBreak: false }
       ],
       [
-        { subject: 'Văn', teacher: 'Cô Bình', isBreak: false },
+        { subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
         { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false },
         { subject: '', teacher: '', isBreak: true },
         { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
@@ -99,12 +101,12 @@ const baseTimetable = [
         { subject: '', teacher: '', isBreak: false },
         { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false },
         { subject: 'Anh', teacher: 'PT Thoản', isBreak: false },
-        { subject: 'Văn', teacher: 'Cô Bình', isBreak: false },
+        { subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
         { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false }
       ],
       [
         { subject: 'Hóa', teacher: 'Cô Dung', isBreak: false },
-        { subject: 'Văn', teacher: 'Cô Bình', isBreak: false },
+        { subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
         { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
         { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false },
         { subject: '', teacher: '', isBreak: false }
