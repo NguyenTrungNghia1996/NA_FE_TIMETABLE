@@ -100,7 +100,13 @@
         <a-button type="primary" @click="handleBusyOk" :loading="confirmLoading">Cập nhật</a-button>
       </div>
     </a-modal>
-    <a-modal v-model:open="busy_manager_modal" title="Cài đặt tiết tránh xếp" @cancel="closeBusyManager" :width="busyModalWidth" :footer="null">
+    <a-drawer
+      v-model:open="busy_manager_modal"
+      title="Cài đặt tiết tránh xếp"
+      @close="closeBusyManager"
+      placement="bottom"
+      height="100vh"
+    >
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <a-table :columns="busyColumns" :data-source="dataSource" :pagination="false" bordered size="small" />
         <div v-if="selectedSubject && busy_data" class="flex flex-col">
@@ -114,7 +120,7 @@
           </div>
         </div>
       </div>
-    </a-modal>
+    </a-drawer>
     <a-drawer height="100vh" title="Cài đặt tiết cố định" placement="bottom" v-model:open="statusDrawer" @close="onCloseDrawer">
       <FixedLesson  ref="fixedLessonRef"/>
     </a-drawer>
@@ -124,8 +130,7 @@
 <script setup>
 const settingStore = useSettingStore()
 const { RestApi } = useApi()
-import { h, computed } from 'vue'
-import { useBreakpoints, breakpointsTailwind } from '@vueuse/core'
+import { h } from 'vue'
 
 const searchText = ref('')
 const loading = ref(false)
@@ -138,9 +143,6 @@ const busy_data = ref()
 const busy_manager_modal = ref(false)
 const selectedSubject = ref(null)
 
-const breakpoints = useBreakpoints(breakpointsTailwind)
-const isMobile = breakpoints.smaller('md')
-const busyModalWidth = computed(() => (isMobile.value ? '95vw' : 1000))
 
 const pagination = reactive({
   current: 1,
