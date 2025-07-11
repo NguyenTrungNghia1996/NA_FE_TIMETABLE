@@ -30,7 +30,8 @@
               class="border p-2 w-32 h-12 select-none overflow-hidden"
               :class="[
                 { 'bg-blue-100': isSelected(rIndex + session.offset, cIndex) },
-                { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak || lesson.locked },
+                { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak },
+                { 'cursor-not-allowed': lesson.locked },
                 { 'cursor-move': !lesson.isBreak && !lesson.locked },
                 { 'bg-green-100': isValidTarget(rIndex + session.offset, cIndex) }
               ]"
@@ -49,7 +50,9 @@
                   {{ lesson.teacher }}
                 </div>
               </template>
-              <template v-else-if="lesson.isBreak">Nghỉ</template>
+              <template v-else-if="lesson.isBreak">
+                <span class="text-red-500 font-medium">Nghỉ</span>
+              </template>
             </td>
           </tr>
         </tbody>

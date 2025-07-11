@@ -14,7 +14,7 @@
         <li>Kéo thả các tiết để hoán đổi vị trí.</li>
         <li>Không thể kéo thả vào tiết nghỉ.</li>
         <li>Không thể đặt nghỉ ở ô đã có tiết học.</li>
-        <li>Mỗi ô đều có thuộc tính <code>locked</code>; khi đặt <code>true</code> sẽ không thể kéo thả.</li>
+        <li>Mỗi ô đều có thuộc tính <code>locked</code>; khi đặt <code>true</code> sẽ không thể kéo thả nhưng màu sắc vẫn như bình thường.</li>
       </ul>
     </div>
 
