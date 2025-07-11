@@ -12,8 +12,8 @@
           <tr>
             <th class="border p-2 w-20 h-12">Tiết\\Ngày</th>
             <th
-              v-for="day in days"
-              :key="`${session.key}-${day}`"
+              v-for="(day, dIndex) in session.days"
+              :key="`${session.key}-${dIndex}`"
               class="border p-2 w-32 h-12"
             >
               {{ day }}
@@ -23,7 +23,9 @@
             v-for="(row, rIndex) in session.data"
             :key="`${session.key}-${rIndex}`"
           >
-            <th class="border p-2 w-20 h-12">{{ rIndex + 1 }}</th>
+            <th class="border p-2 w-20 h-12">
+              {{ session.rowNames[rIndex] || rIndex + 1 }}
+            </th>
             <td
               v-for="(lesson, cIndex) in row"
               :key="cIndex"
@@ -89,22 +91,40 @@
 import { message } from 'ant-design-vue'
 
 const props = defineProps({
-  timetable: Array,
+  timetable: {
+    type: Object,
+    required: true
+  },
   title: {
     type: String,
     default: 'Thời khóa biểu'
-  },
-  days: {
-    type: Array,
-    default: () => ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu']
   }
 })
 
 const sessions = computed(() => {
   let offset = 0
-  return props.timetable.map(session => {
-    const withOffset = { ...session, offset }
-    offset += session.data.length
+  if (!props.timetable?.ds_Ca) return []
+  return props.timetable.ds_Ca.map(ca => {
+    const days = ca.ds_Ngay.map(d => d.ten)
+    const numPeriods = ca.ds_Ngay[0]?.ds_Tiet.length || 0
+    const rowNames = ca.ds_Ngay[0]?.ds_Tiet.map(t => t.ten) || []
+    const data = []
+    for (let r = 0; r < numPeriods; r++) {
+      const row = []
+      for (const ngay of ca.ds_Ngay) {
+        row.push(ngay.ds_Tiet[r])
+      }
+      data.push(row)
+    }
+    const withOffset = {
+      key: ca.id,
+      label: `Ca ${ca.id}`,
+      days,
+      rowNames,
+      data,
+      offset
+    }
+    offset += numPeriods
     return withOffset
   })
 })
