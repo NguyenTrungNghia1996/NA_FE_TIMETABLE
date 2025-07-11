@@ -30,7 +30,7 @@
               class="border p-2 w-32 h-12 select-none overflow-hidden"
               :class="[
                 { 'bg-blue-100': isSelected(rIndex + session.offset, cIndex) },
-                { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak },
+                { 'text-red-500 border-black cursor-not-allowed': lesson.isBreak },
                 { 'cursor-move': !lesson.isBreak },
                 { 'bg-green-100': isValidTarget(rIndex + session.offset, cIndex) }
               ]"
@@ -49,7 +49,9 @@
                   {{ lesson.teacher }}
                 </div>
               </template>
-              <template v-else-if="lesson.isBreak">Nghỉ</template>
+              <template v-else-if="lesson.isBreak">
+                <span class="text-red-500 font-medium">Nghỉ</span>
+              </template>
             </td>
           </tr>
         </tbody>
@@ -84,8 +86,6 @@
 </template>
 
 <script setup>
-import dayjs from 'dayjs'
-import 'dayjs/locale/vi'
 import { message } from 'ant-design-vue'
 
 const props = defineProps({
@@ -93,6 +93,10 @@ const props = defineProps({
   title: {
     type: String,
     default: 'Thời khóa biểu'
+  },
+  days: {
+    type: Array,
+    default: () => ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu']
   }
 })
 
@@ -104,11 +108,16 @@ const sessions = computed(() => {
     return withOffset
   })
 })
-const days = computed(() => {
-  dayjs.locale('vi')
-  return Array.from({ length: 5 }, (_, i) => dayjs().day(i + 1).format('dddd'))
-})
 
+const rowMap = computed(() => {
+  const map = []
+  for (const session of sessions.value) {
+    for (let i = 0; i < session.data.length; i++) {
+      map[session.offset + i] = { session, index: i }
+    }
+  }
+  return map
+})
 
 const selected = ref({ row: null, col: null })
 const dragSource = ref({ row: null, col: null })
@@ -119,20 +128,15 @@ function isSelected(row, col) {
 }
 
 function getCell(row, col) {
-  for (const session of sessions.value) {
-    if (row >= session.offset && row < session.offset + session.data.length) {
-      return session.data[row - session.offset][col]
-    }
-  }
-  return null
+  const entry = rowMap.value[row]
+  if (!entry) return null
+  return entry.session.data[entry.index][col]
 }
 
 function setCell(row, col, lesson) {
-  for (const session of sessions.value) {
-    if (row >= session.offset && row < session.offset + session.data.length) {
-      session.data[row - session.offset][col] = lesson
-      break
-    }
+  const entry = rowMap.value[row]
+  if (entry) {
+    entry.session.data[entry.index][col] = lesson
   }
 }
 

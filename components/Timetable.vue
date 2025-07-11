@@ -5,34 +5,34 @@
         <thead>
           <tr class="bg-gray-50 text-center text-sm font-medium text-gray-600 uppercase tracking-wider">
             <th class="border p-3 w-20">Tiết / Ngày</th>
-            <th 
-              v-for="ngay in block.ds_Ngay" 
-              :key="ngay.id" 
+            <th
+              v-for="ngay in block.ds_Ngay"
+              :key="ngay.id"
               class="border p-3 min-w-[100px]"
             >
-              {{ weekDays[ngay.id]?.label || `Thứ ${ngay.id}` }}
+              {{ ngay.ten }}
             </th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr v-for="tietIndex in block.ds_Ngay[0].ds_Tiet.length" :key="tietIndex">
+          <tbody class="bg-white divide-y divide-gray-200">
+          <tr v-for="(tiet, tietIndex) in block.ds_Ngay[0].ds_Tiet" :key="tiet.id">
             <td class="border text-center text-sm font-medium bg-gray-50 p-2">
-              Tiết {{ tietIndex }}
+              {{ tiet.ten }}
             </td>
-            <td 
-              v-for="ngay in block.ds_Ngay" 
-              :key="ngay.id" 
-              @mousedown.left.prevent="startDrag(tietIndex, ngay.id)"
-              @mouseover="dragOver(tietIndex, ngay.id)"
-              @contextmenu.prevent="openContextMenu($event, tietIndex, ngay.id)"
+            <td
+              v-for="ngay in block.ds_Ngay"
+              :key="ngay.id"
+              @mousedown.left.prevent="startDrag(tietIndex + 1, ngay.id)"
+              @mouseover="dragOver(tietIndex + 1, ngay.id)"
+              @contextmenu.prevent="openContextMenu($event, tietIndex + 1, ngay.id)"
               :class="[
                 'border text-center text-sm font-medium transition-colors duration-150',
-                getCellClass(tietIndex, ngay.id)
+                getCellClass(tietIndex + 1, ngay.id)
               ]"
               style="height: 40px;"
             >
               <div class="w-full h-full flex items-center justify-center">
-                {{ getDisplay(tietIndex, ngay.id) }}
+                {{ getDisplay(tietIndex + 1, ngay.id) }}
               </div>
             </td>
           </tr>
@@ -75,37 +75,6 @@
 </template>
 
 <script setup>
-const { $dayjs } = useNuxtApp();
-import 'dayjs/locale/vi'
-$dayjs.locale('vi')
-
-const weekDays = [1, 2, 3, 4, 5, 6, 7, 8].map(i => {
-  let dayjsDay
-  if (i === 8) {
-    dayjsDay = 0
-  } else {
-    dayjsDay = i - 1
-  }
-
-  const label = $dayjs().day(dayjsDay).format('dddd')
-  if (label === 'Chủ nhật') {
-    return { id: i, label: 'Chủ nhật' }
-  } else {
-    const number = {
-      'hai': '2',
-      'ba': '3',
-      'tư': '4',
-      'năm': '5',
-      'sáu': '6',
-      'bảy': '7'
-    }
-    const key = label.split(' ')[1]
-    return {
-      id: i,
-      label: `Thứ ${number[key] || '?'}`
-    }
-  }
-})
 
 const props = defineProps({
   block: {
