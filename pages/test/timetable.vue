@@ -1,9 +1,8 @@
 <template>
   <div class="max-w-6xl mx-auto p-6 space-y-4">
     <h1 class="text-2xl font-bold mb-2">Demo xếp thời khóa biểu liên kết</h1>
-    <div class="grid gap-6 md:grid-cols-2">
-      <ClassTimetable :timetable="timetableA" title="Lớp A" />
-      <ClassTimetable :timetable="timetableB" title="Lớp B" />
+    <div class="grid gap-6 md:grid-cols-1">
+      <ClassTimetable :timetable="timetable" />
     </div>
 
 
@@ -15,7 +14,7 @@
         <li>Kéo thả các tiết để hoán đổi vị trí.</li>
         <li>Không thể kéo thả vào tiết nghỉ.</li>
         <li>Không thể đặt nghỉ ở ô đã có tiết học.</li>
-        <li>Không thể kéo thả nếu giáo viên đã có tiết ở lớp khác.</li>
+        <li>Một số tiết bị khoá sẽ không thể kéo thả.</li>
       </ul>
     </div>
 
@@ -37,14 +36,14 @@ const baseTimetable = [
     data: [
       [
         { subject: 'Anh', teacher: 'PT Thoản', isBreak: false },
-        { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
+        { subject: 'Toán', teacher: 'Thầy An', isBreak: false, locked: true },
         { subject: 'Văn', teacher: 'Cô Bình', isBreak: false },
         { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false },
         { subject: '', teacher: '', isBreak: false }
       ],
       [
         { subject: 'Hóa', teacher: 'Cô Dung', isBreak: false },
-        { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
+        { subject: 'Toán', teacher: 'Thầy An', isBreak: false, locked: true },
         { subject: '', teacher: '', isBreak: true },
         { subject: 'Anh', teacher: 'PT Thoản', isBreak: false },
         { subject: 'Văn', teacher: 'Cô Bình', isBreak: false }
@@ -52,7 +51,7 @@ const baseTimetable = [
       [
         { subject: 'Văn', teacher: 'Cô Bình', isBreak: false },
         { subject: '', teacher: '', isBreak: false },
-        { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
+        { subject: 'Toán', teacher: 'Thầy An', isBreak: false, locked: true },
         { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false },
         { subject: '', teacher: '', isBreak: false }
       ],
@@ -61,11 +60,11 @@ const baseTimetable = [
         { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false },
         { subject: 'Văn', teacher: 'Cô Bình', isBreak: false },
         { subject: '', teacher: '', isBreak: false },
-        { subject: 'Toán', teacher: 'Thầy An', isBreak: false }
+        { subject: 'Toán', teacher: 'Thầy An', isBreak: false, locked: true }
       ],
       [
         { subject: '', teacher: '', isBreak: true },
-        { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
+        { subject: 'Toán', teacher: 'Thầy An', isBreak: false, locked: true },
         { subject: 'Hóa', teacher: 'Cô Dung', isBreak: false },
         { subject: 'Anh', teacher: 'PT Thoản', isBreak: false },
         { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false }
@@ -79,12 +78,12 @@ const baseTimetable = [
       [
         { subject: '', teacher: '', isBreak: true },
         { subject: 'Anh', teacher: 'PT Thoản', isBreak: false },
-        { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
+        { subject: 'Toán', teacher: 'Thầy An', isBreak: false, locked: true },
         { subject: 'Văn', teacher: 'Cô Bình', isBreak: false },
         { subject: '', teacher: '', isBreak: false }
       ],
       [
-        { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
+        { subject: 'Toán', teacher: 'Thầy An', isBreak: false, locked: true },
         { subject: '', teacher: '', isBreak: true },
         { subject: 'Hóa', teacher: 'Cô Dung', isBreak: false },
         { subject: '', teacher: '', isBreak: false },
@@ -94,7 +93,7 @@ const baseTimetable = [
         { subject: 'Văn', teacher: 'Cô Bình', isBreak: false },
         { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false },
         { subject: '', teacher: '', isBreak: true },
-        { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
+        { subject: 'Toán', teacher: 'Thầy An', isBreak: false, locked: true },
         { subject: 'Hóa', teacher: 'Cô Dung', isBreak: false }
       ],
       [
@@ -107,7 +106,7 @@ const baseTimetable = [
       [
         { subject: 'Hóa', teacher: 'Cô Dung', isBreak: false },
         { subject: 'Văn', teacher: 'Cô Bình', isBreak: false },
-        { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
+        { subject: 'Toán', teacher: 'Thầy An', isBreak: false, locked: true },
         { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false },
         { subject: '', teacher: '', isBreak: false }
       ]
@@ -115,13 +114,9 @@ const baseTimetable = [
   }
 ]
 
-const timetableA = reactive(JSON.parse(JSON.stringify(baseTimetable)))
-const timetableB = reactive(JSON.parse(JSON.stringify(baseTimetable)))
+const timetable = reactive(JSON.parse(JSON.stringify(baseTimetable)))
 
-
-const timetableJson = computed(() =>
-  JSON.stringify({ timetableA, timetableB }, null, 2)
-)
+const timetableJson = computed(() => JSON.stringify(timetable, null, 2))
 </script>
 
 <style scoped>

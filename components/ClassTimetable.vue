@@ -30,11 +30,11 @@
               class="border p-2 w-32 h-12 select-none overflow-hidden"
               :class="[
                 { 'bg-blue-100': isSelected(rIndex + session.offset, cIndex) },
-                { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak },
-                { 'cursor-move': !lesson.isBreak },
+                { 'bg-gray-100 text-gray-400 cursor-not-allowed': lesson.isBreak || lesson.locked },
+                { 'cursor-move': !lesson.isBreak && !lesson.locked },
                 { 'bg-green-100': isValidTarget(rIndex + session.offset, cIndex) }
               ]"
-              :draggable="!lesson.isBreak"
+              :draggable="!lesson.isBreak && !lesson.locked"
               @dragstart="onDragStart(rIndex + session.offset, cIndex)"
               @click="startHighlight(rIndex + session.offset, cIndex)"
               @dragover.prevent
@@ -87,7 +87,6 @@
 import dayjs from 'dayjs'
 import 'dayjs/locale/vi'
 import { message } from 'ant-design-vue'
-import { useTimetableStore } from '~/stores/timetableStore'
 
 const props = defineProps({
   timetable: Array,
@@ -120,19 +119,6 @@ const days = computed(() => {
   return Array.from({ length: 5 }, (_, i) => dayjs().day(i + 1).format('dddd'))
 })
 
-const timetableStore = useTimetableStore()
-const storeId = ref(null)
-
-onMounted(() => {
-  storeId.value = timetableStore.register(props.timetable)
-})
-
-onBeforeUnmount(() => {
-  timetableStore.unregister(storeId.value)
-})
-
-
-
 const selected = ref({ row: null, col: null })
 const dragSource = ref({ row: null, col: null })
 const contextMenu = ref({ show: false, x: 0, y: 0, row: null, col: null })
@@ -156,14 +142,14 @@ function setCell(row, col, lesson) {
 
 function startHighlight(row, col) {
   const cell = getCell(row, col)
-  if (cell.isBreak) return
+  if (cell.isBreak || cell.locked) return
   selected.value = { row, col }
   dragSource.value = { row, col }
 }
 
 function onDragStart(row, col) {
   const cell = getCell(row, col)
-  if (cell.isBreak) return
+  if (cell.isBreak || cell.locked) return
   dragSource.value = { row, col }
   selected.value = { row, col }
 }
@@ -174,14 +160,8 @@ function onDrop(row, col) {
   if (src.row === row && src.col === col) return
   const target = getCell(row, col)
   const source = getCell(src.row, src.col)
-  if (target.isBreak || source.isBreak) {
+  if (target.isBreak || source.isBreak || target.locked || source.locked) {
     dragSource.value = { row: null, col: null }
-    return
-  }
-  if (timetableStore.checkTeacherConflict(row, col, source.teacher, storeId.value)) {
-    message.error('Giáo viên đã có tiết ở lớp khác')
-    dragSource.value = { row: null, col: null }
-    selected.value = { row: null, col: null }
     return
   }
   setCell(row, col, source)
@@ -196,9 +176,7 @@ function isValidTarget(row, col) {
   if (src.row === row && src.col === col) return false
   const source = getCell(src.row, src.col)
   const target = getCell(row, col)
-  if (source.isBreak || target.isBreak) return false
-  if (timetableStore.checkTeacherConflict(row, col, source.teacher, storeId.value))
-    return false
+  if (source.isBreak || target.isBreak || source.locked || target.locked) return false
   return true
 }
 
@@ -228,6 +206,7 @@ function removeLesson(row, col) {
   cell.subject = ''
   cell.teacher = ''
   cell.isBreak = false
+  cell.locked = false
   contextMenu.value.show = false
 }
 
