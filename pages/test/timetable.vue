@@ -14,7 +14,6 @@
         <li>Kéo thả các tiết để hoán đổi vị trí.</li>
         <li>Không thể kéo thả vào tiết nghỉ.</li>
         <li>Không thể đặt nghỉ ở ô đã có tiết học.</li>
-        <li>Mỗi ô đều có thuộc tính <code>locked</code>; khi đặt <code>true</code> sẽ không thể kéo thả nhưng màu sắc vẫn như bình thường.</li>
       </ul>
     </div>
 
@@ -37,39 +36,39 @@ const baseTimetable = [
     label: 'Ca sáng',
     data: [
       [
-        { subject: 'Anh', teacher: 'PT Thoản', isBreak: false, locked: false },
-        { subject: 'Toán', teacher: 'Thầy An', isBreak: false, locked: true },
-        { subject: 'Văn', teacher: 'Cô Bình', isBreak: false, locked: false },
-        { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false, locked: false },
-        { subject: '', teacher: '', isBreak: false, locked: false }
+        { subject: 'Anh', teacher: 'PT Thoản', isBreak: false },
+        { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
+        { subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
+        { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false },
+        { subject: '', teacher: '', isBreak: false }
       ],
       [
-        { subject: 'Hóa', teacher: 'Cô Dung', isBreak: false, locked: false },
-        { subject: 'Toán', teacher: 'Thầy An', isBreak: false, locked: true },
-        { subject: '', teacher: '', isBreak: true, locked: false },
-        { subject: 'Anh', teacher: 'PT Thoản', isBreak: false, locked: false },
-        { subject: 'Văn', teacher: 'Cô Bình', isBreak: false, locked: false }
+        { subject: 'Hóa', teacher: 'Cô Dung', isBreak: false },
+        { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
+        { subject: '', teacher: '', isBreak: true },
+        { subject: 'Anh', teacher: 'PT Thoản', isBreak: false },
+        { subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false }
       ],
       [
-        { subject: 'Văn', teacher: 'Cô Bình', isBreak: false, locked: false },
-        { subject: '', teacher: '', isBreak: false, locked: false },
-        { subject: 'Toán', teacher: 'Thầy An', isBreak: false, locked: true },
-        { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false, locked: false },
-        { subject: '', teacher: '', isBreak: false, locked: false }
+        { subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
+        { subject: '', teacher: '', isBreak: false },
+        { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
+        { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false },
+        { subject: '', teacher: '', isBreak: false }
       ],
       [
-        { subject: 'Anh', teacher: 'PT Thoản', isBreak: false, locked: false },
-        { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false, locked: false },
-        { subject: 'Văn', teacher: 'Cô Bình', isBreak: false, locked: false },
-        { subject: '', teacher: '', isBreak: false, locked: false },
-        { subject: 'Toán', teacher: 'Thầy An', isBreak: false, locked: true }
+        { subject: 'Anh', teacher: 'PT Thoản', isBreak: false },
+        { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false },
+        { subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
+        { subject: '', teacher: '', isBreak: false },
+        { subject: 'Toán', teacher: 'Thầy An', isBreak: false }
       ],
       [
-        { subject: '', teacher: '', isBreak: true, locked: false },
-        { subject: 'Toán', teacher: 'Thầy An', isBreak: false, locked: true },
-        { subject: 'Hóa', teacher: 'Cô Dung', isBreak: false, locked: false },
-        { subject: 'Anh', teacher: 'PT Thoản', isBreak: false, locked: false },
-        { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false, locked: false }
+        { subject: '', teacher: '', isBreak: true },
+        { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
+        { subject: 'Hóa', teacher: 'Cô Dung', isBreak: false },
+        { subject: 'Anh', teacher: 'PT Thoản', isBreak: false },
+        { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false }
       ]
     ]
   },
@@ -78,39 +77,39 @@ const baseTimetable = [
     label: 'Ca chiều',
     data: [
       [
-        { subject: '', teacher: '', isBreak: true, locked: false },
-        { subject: 'Anh', teacher: 'PT Thoản', isBreak: false, locked: false },
-        { subject: 'Toán', teacher: 'Thầy An', isBreak: false, locked: true },
-        { subject: 'Văn', teacher: 'Cô Bình', isBreak: false, locked: false },
-        { subject: '', teacher: '', isBreak: false, locked: false }
+        { subject: '', teacher: '', isBreak: true },
+        { subject: 'Anh', teacher: 'PT Thoản', isBreak: false },
+        { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
+        { subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
+        { subject: '', teacher: '', isBreak: false }
       ],
       [
-        { subject: 'Toán', teacher: 'Thầy An', isBreak: false, locked: true },
-        { subject: '', teacher: '', isBreak: true, locked: false },
-        { subject: 'Hóa', teacher: 'Cô Dung', isBreak: false, locked: false },
-        { subject: '', teacher: '', isBreak: false, locked: false },
-        { subject: 'Anh', teacher: 'PT Thoản', isBreak: false, locked: false }
+        { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
+        { subject: '', teacher: '', isBreak: true },
+        { subject: 'Hóa', teacher: 'Cô Dung', isBreak: false },
+        { subject: '', teacher: '', isBreak: false },
+        { subject: 'Anh', teacher: 'PT Thoản', isBreak: false }
       ],
       [
-        { subject: 'Văn', teacher: 'Cô Bình', isBreak: false, locked: false },
-        { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false, locked: false },
-        { subject: '', teacher: '', isBreak: true, locked: false },
-        { subject: 'Toán', teacher: 'Thầy An', isBreak: false, locked: true },
-        { subject: 'Hóa', teacher: 'Cô Dung', isBreak: false, locked: false }
+        { subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
+        { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false },
+        { subject: '', teacher: '', isBreak: true },
+        { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
+        { subject: 'Hóa', teacher: 'Cô Dung', isBreak: false }
       ],
       [
-        { subject: '', teacher: '', isBreak: false, locked: false },
-        { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false, locked: false },
-        { subject: 'Anh', teacher: 'PT Thoản', isBreak: false, locked: false },
-        { subject: 'Văn', teacher: 'Cô Bình', isBreak: false, locked: false },
-        { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false, locked: false }
+        { subject: '', teacher: '', isBreak: false },
+        { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false },
+        { subject: 'Anh', teacher: 'PT Thoản', isBreak: false },
+        { subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
+        { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false }
       ],
       [
-        { subject: 'Hóa', teacher: 'Cô Dung', isBreak: false, locked: false },
-        { subject: 'Văn', teacher: 'Cô Bình', isBreak: false, locked: false },
-        { subject: 'Toán', teacher: 'Thầy An', isBreak: false, locked: true },
-        { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false, locked: false },
-        { subject: '', teacher: '', isBreak: false, locked: false }
+        { subject: 'Hóa', teacher: 'Cô Dung', isBreak: false },
+        { subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
+        { subject: 'Toán', teacher: 'Thầy An', isBreak: false },
+        { subject: 'Lý', teacher: 'Thầy Cường', isBreak: false },
+        { subject: '', teacher: '', isBreak: false }
       ]
     ]
   }

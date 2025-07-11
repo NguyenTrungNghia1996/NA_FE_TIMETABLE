@@ -31,11 +31,10 @@
               :class="[
                 { 'bg-blue-100': isSelected(rIndex + session.offset, cIndex) },
                 { 'text-red-500 cursor-not-allowed': lesson.isBreak },
-                { 'cursor-not-allowed': lesson.locked },
-                { 'cursor-move': !lesson.isBreak && !lesson.locked },
+                { 'cursor-move': !lesson.isBreak },
                 { 'bg-green-100': isValidTarget(rIndex + session.offset, cIndex) }
               ]"
-              :draggable="!lesson.isBreak && !lesson.locked"
+              :draggable="!lesson.isBreak"
               @dragstart="onDragStart(rIndex + session.offset, cIndex)"
               @click="startHighlight(rIndex + session.offset, cIndex)"
               @dragover.prevent
@@ -143,14 +142,14 @@ function setCell(row, col, lesson) {
 
 function startHighlight(row, col) {
   const cell = getCell(row, col)
-  if (cell.isBreak || cell.locked) return
+  if (cell.isBreak) return
   selected.value = { row, col }
   dragSource.value = { row, col }
 }
 
 function onDragStart(row, col) {
   const cell = getCell(row, col)
-  if (cell.isBreak || cell.locked) return
+  if (cell.isBreak) return
   dragSource.value = { row, col }
   selected.value = { row, col }
 }
@@ -161,7 +160,7 @@ function onDrop(row, col) {
   if (src.row === row && src.col === col) return
   const target = getCell(row, col)
   const source = getCell(src.row, src.col)
-  if (target.isBreak || source.isBreak || target.locked || source.locked) {
+  if (target.isBreak || source.isBreak) {
     dragSource.value = { row: null, col: null }
     return
   }
@@ -177,7 +176,7 @@ function isValidTarget(row, col) {
   if (src.row === row && src.col === col) return false
   const source = getCell(src.row, src.col)
   const target = getCell(row, col)
-  if (source.isBreak || target.isBreak || source.locked || target.locked) return false
+  if (source.isBreak || target.isBreak) return false
   return true
 }
 
@@ -207,7 +206,6 @@ function removeLesson(row, col) {
   cell.subject = ''
   cell.teacher = ''
   cell.isBreak = false
-  cell.locked = false
   contextMenu.value.show = false
 }
 
