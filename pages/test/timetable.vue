@@ -2,7 +2,7 @@
   <div class="max-w-6xl mx-auto p-6 space-y-4">
     <h1 class="text-2xl font-bold mb-2">Demo xếp thời khóa biểu liên kết</h1>
     <div class="grid gap-6 md:grid-cols-1">
-      <ClassTimetable :timetable="timetable" />
+      <ClassTimetable :timetable="timetable" :days="days" />
     </div>
 
 
@@ -27,6 +27,8 @@
 </template>
 
 <script setup>
+
+const days = ['Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu']
 
 
 const baseTimetable = [
