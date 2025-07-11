@@ -1,8 +1,17 @@
 <template>
   <div class="max-w-6xl mx-auto p-6 space-y-4">
     <h1 class="text-2xl font-bold mb-2">Demo xếp thời khóa biểu liên kết</h1>
+    <a-select v-model:value="timetableStore.currentClassId" class="mb-4 w-48">
+      <a-select-option
+        v-for="cls in timetableStore.classes"
+        :key="cls.id"
+        :value="cls.id"
+      >
+        {{ cls.name }}
+      </a-select-option>
+    </a-select>
     <div class="grid gap-6 md:grid-cols-1">
-      <ClassTimetable :timetable="timetable" />
+      <ClassTimetable :timetable="timetableStore.currentTimetable" />
     </div>
 
 
@@ -26,135 +35,14 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useTimetableStore } from '~/stores/timetableStore'
 
-const baseTimetable = {
-  ds_Ca: [
-    {
-      id: 1,
-      ds_Ngay: [
-        {
-          id: 1,
-          ten: 'Thứ 2',
-          ds_Tiet: [
-            { id: 1, ten: 'Tiết 1', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 2, ten: 'Tiết 2', subject: 'Hóa', teacher: 'Cô Dung', teacherId: 5, isBreak: false },
-            { id: 3, ten: 'Tiết 3', subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
-            { id: 4, ten: 'Tiết 4', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 5, ten: 'Tiết 5', subject: '', teacher: '', teacherId: null, isBreak: true }
-          ]
-        },
-        {
-          id: 2,
-          ten: 'Thứ 3',
-          ds_Tiet: [
-            { id: 1, ten: 'Tiết 1', subject: 'Toán', teacher: 'Thầy An', teacherId: 3, isBreak: false },
-            { id: 2, ten: 'Tiết 2', subject: 'Toán', teacher: 'Thầy An', teacherId: 3, isBreak: false },
-            { id: 3, ten: 'Tiết 3', subject: '', teacher: '', teacherId: null, isBreak: false },
-            { id: 4, ten: 'Tiết 4', subject: 'Lý', teacher: 'Thầy Cường', teacherId: 4, isBreak: false },
-            { id: 5, ten: 'Tiết 5', subject: 'Toán', teacher: 'Thầy An', teacherId: 3, isBreak: false }
-          ]
-        },
-        {
-          id: 3,
-          ten: 'Thứ 4',
-          ds_Tiet: [
-            { id: 1, ten: 'Tiết 1', subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
-            { id: 2, ten: 'Tiết 2', subject: '', teacher: '', teacherId: null, isBreak: true },
-            { id: 3, ten: 'Tiết 3', subject: 'Toán', teacher: 'Thầy An', teacherId: 3, isBreak: false },
-            { id: 4, ten: 'Tiết 4', subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
-            { id: 5, ten: 'Tiết 5', subject: 'Hóa', teacher: 'Cô Dung', teacherId: 5, isBreak: false }
-          ]
-        },
-        {
-          id: 4,
-          ten: 'Thứ 5',
-          ds_Tiet: [
-            { id: 1, ten: 'Tiết 1', subject: 'Lý', teacher: 'Thầy Cường', teacherId: 4, isBreak: false },
-            { id: 2, ten: 'Tiết 2', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 3, ten: 'Tiết 3', subject: 'Lý', teacher: 'Thầy Cường', teacherId: 4, isBreak: false },
-            { id: 4, ten: 'Tiết 4', subject: '', teacher: '', teacherId: null, isBreak: false },
-            { id: 5, ten: 'Tiết 5', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false }
-          ]
-        },
-        {
-          id: 5,
-          ten: 'Thứ 6',
-          ds_Tiet: [
-            { id: 1, ten: 'Tiết 1', subject: '', teacher: '', teacherId: null, isBreak: false },
-            { id: 2, ten: 'Tiết 2', subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
-            { id: 3, ten: 'Tiết 3', subject: '', teacher: '', teacherId: null, isBreak: false },
-            { id: 4, ten: 'Tiết 4', subject: 'Toán', teacher: 'Thầy An', teacherId: 3, isBreak: false },
-            { id: 5, ten: 'Tiết 5', subject: 'Lý', teacher: 'Thầy Cường', teacherId: 4, isBreak: false }
-          ]
-        }
-      ]
-    },
-    {
-      id: 2,
-      ds_Ngay: [
-        {
-          id: 1,
-          ten: 'Thứ 2',
-          ds_Tiet: [
-            { id: 1, ten: 'Tiết 1', subject: '', teacher: '', teacherId: null, isBreak: true },
-            { id: 2, ten: 'Tiết 2', subject: 'Toán', teacher: 'Thầy An', teacherId: 3, isBreak: false },
-            { id: 3, ten: 'Tiết 3', subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
-            { id: 4, ten: 'Tiết 4', subject: '', teacher: '', teacherId: null, isBreak: false },
-            { id: 5, ten: 'Tiết 5', subject: 'Hóa', teacher: 'Cô Dung', teacherId: 5, isBreak: false }
-          ]
-        },
-        {
-          id: 2,
-          ten: 'Thứ 3',
-          ds_Tiet: [
-            { id: 1, ten: 'Tiết 1', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 2, ten: 'Tiết 2', subject: '', teacher: '', teacherId: null, isBreak: true },
-            { id: 3, ten: 'Tiết 3', subject: 'Lý', teacher: 'Thầy Cường', teacherId: 4, isBreak: false },
-            { id: 4, ten: 'Tiết 4', subject: 'Lý', teacher: 'Thầy Cường', teacherId: 4, isBreak: false },
-            { id: 5, ten: 'Tiết 5', subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false }
-          ]
-        },
-        {
-          id: 3,
-          ten: 'Thứ 4',
-          ds_Tiet: [
-            { id: 1, ten: 'Tiết 1', subject: 'Toán', teacher: 'Thầy An', teacherId: 3, isBreak: false },
-            { id: 2, ten: 'Tiết 2', subject: 'Hóa', teacher: 'Cô Dung', teacherId: 5, isBreak: false },
-            { id: 3, ten: 'Tiết 3', subject: '', teacher: '', teacherId: null, isBreak: true },
-            { id: 4, ten: 'Tiết 4', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 5, ten: 'Tiết 5', subject: 'Toán', teacher: 'Thầy An', teacherId: 3, isBreak: false }
-          ]
-        },
-        {
-          id: 4,
-          ten: 'Thứ 5',
-          ds_Tiet: [
-            { id: 1, ten: 'Tiết 1', subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
-            { id: 2, ten: 'Tiết 2', subject: '', teacher: '', teacherId: null, isBreak: false },
-            { id: 3, ten: 'Tiết 3', subject: 'Toán', teacher: 'Thầy An', teacherId: 3, isBreak: false },
-            { id: 4, ten: 'Tiết 4', subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
-            { id: 5, ten: 'Tiết 5', subject: 'Lý', teacher: 'Thầy Cường', teacherId: 4, isBreak: false }
-          ]
-        },
-        {
-          id: 5,
-          ten: 'Thứ 6',
-          ds_Tiet: [
-            { id: 1, ten: 'Tiết 1', subject: '', teacher: '', teacherId: null, isBreak: false },
-            { id: 2, ten: 'Tiết 2', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 3, ten: 'Tiết 3', subject: 'Hóa', teacher: 'Cô Dung', teacherId: 5, isBreak: false },
-            { id: 4, ten: 'Tiết 4', subject: 'Lý', teacher: 'Thầy Cường', teacherId: 4, isBreak: false },
-            { id: 5, ten: 'Tiết 5', subject: '', teacher: '', teacherId: null, isBreak: false }
-          ]
-        }
-      ]
-    }
-  ]
-}
+const timetableStore = useTimetableStore()
 
-const timetable = reactive(JSON.parse(JSON.stringify(baseTimetable)))
-
-const timetableJson = computed(() => JSON.stringify(timetable, null, 2))
+const timetableJson = computed(() =>
+  JSON.stringify(timetableStore.currentTimetable, null, 2)
+)
 </script>
 
 <style scoped>
