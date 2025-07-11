@@ -37,76 +37,54 @@ const baseTimetable = {
           ten: 'Thứ 2',
           ds_Tiet: [
             { id: 1, ten: 'Tiết 1', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 2, ten: 'Tiết 2', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 3, ten: 'Tiết 3', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
+            { id: 2, ten: 'Tiết 2', subject: 'Hóa', teacher: 'Cô Dung', teacherId: 5, isBreak: false },
+            { id: 3, ten: 'Tiết 3', subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
             { id: 4, ten: 'Tiết 4', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 5, ten: 'Tiết 5', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false }
+            { id: 5, ten: 'Tiết 5', subject: '', teacher: '', teacherId: null, isBreak: true }
           ]
         },
         {
           id: 2,
           ten: 'Thứ 3',
           ds_Tiet: [
-            { id: 1, ten: 'Tiết 1', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 2, ten: 'Tiết 2', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 3, ten: 'Tiết 3', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 4, ten: 'Tiết 4', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 5, ten: 'Tiết 5', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false }
+            { id: 1, ten: 'Tiết 1', subject: 'Toán', teacher: 'Thầy An', teacherId: 3, isBreak: false },
+            { id: 2, ten: 'Tiết 2', subject: 'Toán', teacher: 'Thầy An', teacherId: 3, isBreak: false },
+            { id: 3, ten: 'Tiết 3', subject: '', teacher: '', teacherId: null, isBreak: false },
+            { id: 4, ten: 'Tiết 4', subject: 'Lý', teacher: 'Thầy Cường', teacherId: 4, isBreak: false },
+            { id: 5, ten: 'Tiết 5', subject: 'Toán', teacher: 'Thầy An', teacherId: 3, isBreak: false }
           ]
         },
         {
           id: 3,
           ten: 'Thứ 4',
           ds_Tiet: [
-            { id: 1, ten: 'Tiết 1', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: true },
-            { id: 2, ten: 'Tiết 2', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: true },
-            { id: 3, ten: 'Tiết 3', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: true },
-            { id: 4, ten: 'Tiết 4', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: true },
-            { id: 5, ten: 'Tiết 5', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: true }
+            { id: 1, ten: 'Tiết 1', subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
+            { id: 2, ten: 'Tiết 2', subject: '', teacher: '', teacherId: null, isBreak: true },
+            { id: 3, ten: 'Tiết 3', subject: 'Toán', teacher: 'Thầy An', teacherId: 3, isBreak: false },
+            { id: 4, ten: 'Tiết 4', subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
+            { id: 5, ten: 'Tiết 5', subject: 'Hóa', teacher: 'Cô Dung', teacherId: 5, isBreak: false }
           ]
         },
         {
           id: 4,
           ten: 'Thứ 5',
           ds_Tiet: [
-            { id: 1, ten: 'Tiết 1', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: true },
-            { id: 2, ten: 'Tiết 2', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: true },
-            { id: 3, ten: 'Tiết 3', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: true },
-            { id: 4, ten: 'Tiết 4', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: true },
-            { id: 5, ten: 'Tiết 5', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: true }
+            { id: 1, ten: 'Tiết 1', subject: 'Lý', teacher: 'Thầy Cường', teacherId: 4, isBreak: false },
+            { id: 2, ten: 'Tiết 2', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
+            { id: 3, ten: 'Tiết 3', subject: 'Lý', teacher: 'Thầy Cường', teacherId: 4, isBreak: false },
+            { id: 4, ten: 'Tiết 4', subject: '', teacher: '', teacherId: null, isBreak: false },
+            { id: 5, ten: 'Tiết 5', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false }
           ]
         },
         {
           id: 5,
           ten: 'Thứ 6',
           ds_Tiet: [
-            { id: 1, ten: 'Tiết 1', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: true },
-            { id: 2, ten: 'Tiết 2', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: true },
-            { id: 3, ten: 'Tiết 3', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: true },
-            { id: 4, ten: 'Tiết 4', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: true },
-            { id: 5, ten: 'Tiết 5', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: true }
-          ]
-        },
-        {
-          id: 6,
-          ten: 'Thứ 7',
-          ds_Tiet: [
-            { id: 1, ten: 'Tiết 1', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 2, ten: 'Tiết 2', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 3, ten: 'Tiết 3', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 4, ten: 'Tiết 4', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 5, ten: 'Tiết 5', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false }
-          ]
-        },
-        {
-          id: 7,
-          ten: 'Chủ nhật',
-          ds_Tiet: [
-            { id: 1, ten: 'Tiết 1', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 2, ten: 'Tiết 2', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 3, ten: 'Tiết 3', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 4, ten: 'Tiết 4', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 5, ten: 'Tiết 5', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false }
+            { id: 1, ten: 'Tiết 1', subject: '', teacher: '', teacherId: null, isBreak: false },
+            { id: 2, ten: 'Tiết 2', subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
+            { id: 3, ten: 'Tiết 3', subject: '', teacher: '', teacherId: null, isBreak: false },
+            { id: 4, ten: 'Tiết 4', subject: 'Toán', teacher: 'Thầy An', teacherId: 3, isBreak: false },
+            { id: 5, ten: 'Tiết 5', subject: 'Lý', teacher: 'Thầy Cường', teacherId: 4, isBreak: false }
           ]
         }
       ]
@@ -118,11 +96,55 @@ const baseTimetable = {
           id: 1,
           ten: 'Thứ 2',
           ds_Tiet: [
+            { id: 1, ten: 'Tiết 1', subject: '', teacher: '', teacherId: null, isBreak: true },
+            { id: 2, ten: 'Tiết 2', subject: 'Toán', teacher: 'Thầy An', teacherId: 3, isBreak: false },
+            { id: 3, ten: 'Tiết 3', subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
+            { id: 4, ten: 'Tiết 4', subject: '', teacher: '', teacherId: null, isBreak: false },
+            { id: 5, ten: 'Tiết 5', subject: 'Hóa', teacher: 'Cô Dung', teacherId: 5, isBreak: false }
+          ]
+        },
+        {
+          id: 2,
+          ten: 'Thứ 3',
+          ds_Tiet: [
             { id: 1, ten: 'Tiết 1', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 2, ten: 'Tiết 2', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 3, ten: 'Tiết 3', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
+            { id: 2, ten: 'Tiết 2', subject: '', teacher: '', teacherId: null, isBreak: true },
+            { id: 3, ten: 'Tiết 3', subject: 'Lý', teacher: 'Thầy Cường', teacherId: 4, isBreak: false },
+            { id: 4, ten: 'Tiết 4', subject: 'Lý', teacher: 'Thầy Cường', teacherId: 4, isBreak: false },
+            { id: 5, ten: 'Tiết 5', subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false }
+          ]
+        },
+        {
+          id: 3,
+          ten: 'Thứ 4',
+          ds_Tiet: [
+            { id: 1, ten: 'Tiết 1', subject: 'Toán', teacher: 'Thầy An', teacherId: 3, isBreak: false },
+            { id: 2, ten: 'Tiết 2', subject: 'Hóa', teacher: 'Cô Dung', teacherId: 5, isBreak: false },
+            { id: 3, ten: 'Tiết 3', subject: '', teacher: '', teacherId: null, isBreak: true },
             { id: 4, ten: 'Tiết 4', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
-            { id: 5, ten: 'Tiết 5', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false }
+            { id: 5, ten: 'Tiết 5', subject: 'Toán', teacher: 'Thầy An', teacherId: 3, isBreak: false }
+          ]
+        },
+        {
+          id: 4,
+          ten: 'Thứ 5',
+          ds_Tiet: [
+            { id: 1, ten: 'Tiết 1', subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
+            { id: 2, ten: 'Tiết 2', subject: '', teacher: '', teacherId: null, isBreak: false },
+            { id: 3, ten: 'Tiết 3', subject: 'Toán', teacher: 'Thầy An', teacherId: 3, isBreak: false },
+            { id: 4, ten: 'Tiết 4', subject: 'Văn', teacher: 'Cô Bình', teacherId: 1, isBreak: false },
+            { id: 5, ten: 'Tiết 5', subject: 'Lý', teacher: 'Thầy Cường', teacherId: 4, isBreak: false }
+          ]
+        },
+        {
+          id: 5,
+          ten: 'Thứ 6',
+          ds_Tiet: [
+            { id: 1, ten: 'Tiết 1', subject: '', teacher: '', teacherId: null, isBreak: false },
+            { id: 2, ten: 'Tiết 2', subject: 'Anh', teacher: 'PT Thoản', teacherId: 2, isBreak: false },
+            { id: 3, ten: 'Tiết 3', subject: 'Hóa', teacher: 'Cô Dung', teacherId: 5, isBreak: false },
+            { id: 4, ten: 'Tiết 4', subject: 'Lý', teacher: 'Thầy Cường', teacherId: 4, isBreak: false },
+            { id: 5, ten: 'Tiết 5', subject: '', teacher: '', teacherId: null, isBreak: false }
           ]
         }
       ]
