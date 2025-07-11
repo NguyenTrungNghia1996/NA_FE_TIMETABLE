@@ -89,6 +89,9 @@
 
 <script setup>
 import { message } from 'ant-design-vue'
+import { useTimetableStore } from '~/stores/timetableStore'
+
+const timetableStore = useTimetableStore()
 
 const props = defineProps({
   timetable: {
@@ -160,6 +163,49 @@ function setCell(row, col, lesson) {
   }
 }
 
+function getSlotInfo(row, col) {
+  const entry = rowMap.value[row]
+  if (!entry) return null
+  const lesson = entry.session.data[entry.index][col]
+  return {
+    lesson,
+    caId: entry.session.key,
+    dayId: col + 1,
+    periodId: lesson.id
+  }
+}
+
+function canSwap(srcRow, srcCol, dstRow, dstCol) {
+  const src = getSlotInfo(srcRow, srcCol)
+  const dst = getSlotInfo(dstRow, dstCol)
+  if (!src || !dst) return false
+  if (src.lesson.isBreak || dst.lesson.isBreak) return false
+  const classId = timetableStore.currentClassId
+  if (
+    src.lesson.teacherId &&
+    timetableStore.isTeacherBusy(
+      src.lesson.teacherId,
+      dst.caId,
+      dst.dayId,
+      dst.periodId,
+      classId
+    )
+  )
+    return false
+  if (
+    dst.lesson.teacherId &&
+    timetableStore.isTeacherBusy(
+      dst.lesson.teacherId,
+      src.caId,
+      src.dayId,
+      src.periodId,
+      classId
+    )
+  )
+    return false
+  return true
+}
+
 function startHighlight(row, col) {
   const cell = getCell(row, col)
   if (cell.isBreak) return
@@ -178,12 +224,14 @@ function onDrop(row, col) {
   const src = dragSource.value
   if (src.row === null) return
   if (src.row === row && src.col === col) return
-  const target = getCell(row, col)
-  const source = getCell(src.row, src.col)
-  if (target.isBreak || source.isBreak) {
+  if (!canSwap(src.row, src.col, row, col)) {
+    message.error('Giáo viên đã bận trong tiết này')
     dragSource.value = { row: null, col: null }
+    selected.value = { row: null, col: null }
     return
   }
+  const target = getCell(row, col)
+  const source = getCell(src.row, src.col)
   setCell(row, col, source)
   setCell(src.row, src.col, target)
   dragSource.value = { row: null, col: null }
@@ -194,10 +242,7 @@ function isValidTarget(row, col) {
   const src = dragSource.value
   if (src.row === null) return false
   if (src.row === row && src.col === col) return false
-  const source = getCell(src.row, src.col)
-  const target = getCell(row, col)
-  if (source.isBreak || target.isBreak) return false
-  return true
+  return canSwap(src.row, src.col, row, col)
 }
 
 function openMenu(event, row, col) {
