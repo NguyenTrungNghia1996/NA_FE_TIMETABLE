@@ -1,8 +1,9 @@
 <template>
   <div class="max-w-6xl mx-auto p-6 space-y-4">
     <h1 class="text-2xl font-bold mb-2">Demo xếp thời khóa biểu liên kết</h1>
-    <div class="grid gap-6 md:grid-cols-1">
-      <ClassTimetable :timetable="timetable" />
+    <div class="grid gap-6 md:grid-cols-2">
+      <ClassTimetable :timetable="timetableA" title="Lớp A" />
+      <ClassTimetable :timetable="timetableB" title="Lớp B" />
     </div>
 
 
@@ -14,6 +15,7 @@
         <li>Kéo thả các tiết để hoán đổi vị trí.</li>
         <li>Không thể kéo thả vào tiết nghỉ.</li>
         <li>Không thể đặt nghỉ ở ô đã có tiết học.</li>
+        <li>Không thể kéo thả nếu giáo viên đã có tiết ở lớp khác.</li>
       </ul>
     </div>
 
@@ -113,9 +115,13 @@ const baseTimetable = [
   }
 ]
 
-const timetable = reactive(JSON.parse(JSON.stringify(baseTimetable)))
+const timetableA = reactive(JSON.parse(JSON.stringify(baseTimetable)))
+const timetableB = reactive(JSON.parse(JSON.stringify(baseTimetable)))
 
-const timetableJson = computed(() => JSON.stringify(timetable, null, 2))
+
+const timetableJson = computed(() =>
+  JSON.stringify({ timetableA, timetableB }, null, 2)
+)
 </script>
 
 <style scoped>

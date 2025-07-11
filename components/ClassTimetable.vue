@@ -87,6 +87,7 @@
 import dayjs from 'dayjs'
 import 'dayjs/locale/vi'
 import { message } from 'ant-design-vue'
+import { useTimetableStore } from '~/stores/timetableStore'
 
 const props = defineProps({
   timetable: Array,
@@ -118,6 +119,18 @@ const days = computed(() => {
   dayjs.locale('vi')
   return Array.from({ length: 5 }, (_, i) => dayjs().day(i + 1).format('dddd'))
 })
+
+const timetableStore = useTimetableStore()
+const storeId = ref(null)
+
+onMounted(() => {
+  storeId.value = timetableStore.register(props.timetable)
+})
+
+onBeforeUnmount(() => {
+  timetableStore.unregister(storeId.value)
+})
+
 
 
 const selected = ref({ row: null, col: null })
@@ -165,6 +178,12 @@ function onDrop(row, col) {
     dragSource.value = { row: null, col: null }
     return
   }
+  if (timetableStore.checkTeacherConflict(row, col, source.teacher, storeId.value)) {
+    message.error('Giáo viên đã có tiết ở lớp khác')
+    dragSource.value = { row: null, col: null }
+    selected.value = { row: null, col: null }
+    return
+  }
   setCell(row, col, source)
   setCell(src.row, src.col, target)
   dragSource.value = { row: null, col: null }
@@ -178,6 +197,8 @@ function isValidTarget(row, col) {
   const source = getCell(src.row, src.col)
   const target = getCell(row, col)
   if (source.isBreak || target.isBreak) return false
+  if (timetableStore.checkTeacherConflict(row, col, source.teacher, storeId.value))
+    return false
   return true
 }
 
