@@ -51,7 +51,7 @@
                 </div>
               </template>
               <template v-else-if="lesson.isBreak">
-                <span class="text-red-500 font-medium">Nghỉ</span>
+                <span class="text-white font-medium">Nghỉ</span>
               </template>
             </td>
           </tr>
