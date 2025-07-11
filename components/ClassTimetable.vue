@@ -30,7 +30,7 @@
               class="border p-2 w-32 h-12 select-none overflow-hidden"
               :class="[
                 { 'bg-blue-100': isSelected(rIndex + session.offset, cIndex) },
-                { 'text-red-500 cursor-not-allowed': lesson.isBreak },
+                { 'text-red-500 border-black cursor-not-allowed': lesson.isBreak },
                 { 'cursor-move': !lesson.isBreak },
                 { 'bg-green-100': isValidTarget(rIndex + session.offset, cIndex) }
               ]"
