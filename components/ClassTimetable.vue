@@ -175,6 +175,12 @@ function getSlotInfo(row, col) {
   }
 }
 
+//
+// Kiểm tra điều kiện để có thể hoán đổi hai ô thời khóa biểu.
+//
+// Đây là nơi cần bổ sung các ràng buộc kéo thả bổ sung.
+// Ví dụ: hạn chế theo môn học, theo lớp hoặc bất kỳ quy tắc nào khác.
+// Trả về true nếu cho phép hoán đổi, ngược lại trả về false.
 function canSwap(srcRow, srcCol, dstRow, dstCol) {
   const src = getSlotInfo(srcRow, srcCol)
   const dst = getSlotInfo(dstRow, dstCol)
@@ -206,6 +212,7 @@ function canSwap(srcRow, srcCol, dstRow, dstCol) {
   return true
 }
 
+// Khi người dùng nhấp chuột để bắt đầu kéo
 function startHighlight(row, col) {
   const cell = getCell(row, col)
   if (cell.isBreak) return
@@ -213,6 +220,7 @@ function startHighlight(row, col) {
   dragSource.value = { row, col }
 }
 
+// Bắt đầu sự kiện kéo từ ô hợp lệ
 function onDragStart(row, col) {
   const cell = getCell(row, col)
   if (cell.isBreak) return
@@ -242,9 +250,11 @@ function isValidTarget(row, col) {
   const src = dragSource.value
   if (src.row === null) return false
   if (src.row === row && src.col === col) return false
+  // Kiểm tra xem điểm thả có thỏa mãn các điều kiện trong canSwap hay không
   return canSwap(src.row, src.col, row, col)
 }
 
+// Hiện menu chuột phải để thao tác với ô đang chọn
 function openMenu(event, row, col) {
   selected.value = { row, col }
   dragSource.value = { row, col }
