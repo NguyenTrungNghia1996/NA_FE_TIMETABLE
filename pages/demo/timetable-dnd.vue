@@ -82,35 +82,27 @@
         <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click.stop="changeSubject()">Đổi môn học</li>
       </ul>
     </div>
-    <div
-      v-if="subjectSelect.visible"
-      :style="subjectSelect.style"
-      class="absolute bg-white border rounded shadow p-2 z-50 text-sm space-y-2"
+    <a-modal
+      v-model:open="subjectSelect.visible"
+      title="Chọn môn học"
+      @ok="confirmSubject"
+      @cancel="cancelSubject"
+      :footer="null"
     >
-      <select v-model="subjectSelect.value" class="border p-1 w-full">
-        <option
+      <a-select v-model:value="subjectSelect.value" class="w-full">
+        <a-select-option
           v-for="o in subjectSelect.options"
           :key="o.id + '-' + o.subject"
           :value="o.id + '-' + o.subject"
         >
           {{ o.subject }} - {{ o.name }}
-        </option>
-      </select>
-      <div class="flex justify-end space-x-2">
-        <button
-          class="bg-blue-500 text-white px-2 py-1 text-xs rounded"
-          @click="confirmSubject"
-        >
-          OK
-        </button>
-        <button
-          class="bg-gray-300 px-2 py-1 text-xs rounded"
-          @click="cancelSubject"
-        >
-          Hủy
-        </button>
+        </a-select-option>
+      </a-select>
+      <div class="flex justify-end gap-2 mt-4">
+        <a-button @click="cancelSubject">Hủy</a-button>
+        <a-button type="primary" @click="confirmSubject">OK</a-button>
       </div>
-    </div>
+    </a-modal>
   </div>
 </template>
 
@@ -145,7 +137,6 @@ const contextMenu = reactive({
 
 const subjectSelect = reactive({
   visible: false,
-  style: { top: '0px', left: '0px' },
   options: [],
   value: '',
   ki: 0,
@@ -263,7 +254,6 @@ function changeSubject() {
   subjectSelect.ci = contextMenu.ci
   subjectSelect.di = contextMenu.di
   subjectSelect.ti = contextMenu.ti
-  subjectSelect.style = { top: `${parseInt(contextMenu.style.top) + 20}px`, left: contextMenu.style.left }
   subjectSelect.visible = true
   contextMenu.visible = false
 }
