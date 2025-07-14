@@ -82,6 +82,35 @@
         <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click.stop="changeSubject()">Đổi môn học</li>
       </ul>
     </div>
+    <div
+      v-if="subjectSelect.visible"
+      :style="subjectSelect.style"
+      class="absolute bg-white border rounded shadow p-2 z-50 text-sm space-y-2"
+    >
+      <select v-model="subjectSelect.value" class="border p-1 w-full">
+        <option
+          v-for="o in subjectSelect.options"
+          :key="o.id + '-' + o.subject"
+          :value="o.id + '-' + o.subject"
+        >
+          {{ o.subject }} - {{ o.name }}
+        </option>
+      </select>
+      <div class="flex justify-end space-x-2">
+        <button
+          class="bg-blue-500 text-white px-2 py-1 text-xs rounded"
+          @click="confirmSubject"
+        >
+          OK
+        </button>
+        <button
+          class="bg-gray-300 px-2 py-1 text-xs rounded"
+          @click="cancelSubject"
+        >
+          Hủy
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -112,6 +141,17 @@ const contextMenu = reactive({
     const lesson = classes[this.ki]?.timetable.ds_Ca[this.ci]?.ds_Ngay[this.di]?.ds_Tiet[this.ti]
     return lesson?.isBreak
   }
+})
+
+const subjectSelect = reactive({
+  visible: false,
+  style: { top: '0px', left: '0px' },
+  options: [],
+  value: '',
+  ki: 0,
+  ci: 0,
+  di: 0,
+  ti: 0
 })
 
 function dragStart(e, ki, ci, di, ti) {
@@ -156,6 +196,7 @@ function openMenu(e, ki, ci, di, ti) {
 
 function closeMenu() {
   contextMenu.visible = false
+  subjectSelect.visible = false
 }
 
 function removeLesson() {
@@ -216,20 +257,37 @@ function changeSubject() {
     closeMenu()
     return
   }
-  const input = prompt('Chọn môn học:\n' + options.map((o,i)=>`${i+1}. ${o.subject} - ${o.name}`).join('\n'))
-  const idx = Number(input) - 1
-  if (idx >= 0 && idx < options.length) {
-    const sel = options[idx]
+  subjectSelect.options = options
+  subjectSelect.value = options[0].id + '-' + options[0].subject
+  subjectSelect.ki = contextMenu.ki
+  subjectSelect.ci = contextMenu.ci
+  subjectSelect.di = contextMenu.di
+  subjectSelect.ti = contextMenu.ti
+  subjectSelect.style = { top: `${parseInt(contextMenu.style.top) + 20}px`, left: contextMenu.style.left }
+  subjectSelect.visible = true
+  contextMenu.visible = false
+}
+
+function confirmSubject() {
+  const [idStr, subject] = subjectSelect.value.split('-')
+  const id = Number(idStr)
+  const option = subjectSelect.options.find(o => o.id === id && o.subject === subject)
+  if (option) {
+    const lesson = classes[subjectSelect.ki].timetable.ds_Ca[subjectSelect.ci].ds_Ngay[subjectSelect.di].ds_Tiet[subjectSelect.ti]
     lesson.isBreak = false
-    lesson.subject = sel.subject
-    lesson.teacher = sel.name
-    lesson.teacherId = sel.id
+    lesson.subject = option.subject
+    lesson.teacher = option.name
+    lesson.teacherId = option.id
     teachers.splice(0, teachers.length, ...buildTeacherSchedules())
     if (!teachers.find(t => t.id === selectedTeacherId.value) && teachers.length) {
       selectedTeacherId.value = teachers[0].id
     }
   }
-  closeMenu()
+  subjectSelect.visible = false
+}
+
+function cancelSubject() {
+  subjectSelect.visible = false
 }
 
 function key(ki, ci, di, ti) {
