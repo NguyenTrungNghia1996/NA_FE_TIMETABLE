@@ -79,6 +79,7 @@
         <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click.stop="toggleBreak()">
           {{ contextMenu.isBreak ? 'Bỏ tiết nghỉ' : 'Đặt tiết nghỉ' }}
         </li>
+        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click.stop="changeSubject()">Đổi môn học</li>
       </ul>
     </div>
   </div>
@@ -90,6 +91,7 @@ import timetableData from '~/public/data/timetable.json'
 
 const classes = reactive([])
 const teachers = reactive([])
+const teacherOptions = ref([])
 const selectedClassId = ref(null)
 const selectedTeacherId = ref(null)
 const currentClass = computed(() => classes.find(k => k.id === selectedClassId.value))
@@ -191,6 +193,45 @@ function toggleBreak() {
   closeMenu()
 }
 
+function changeSubject() {
+  const lesson = getLesson(contextMenu)
+  const options = teacherOptions.value.filter(t => {
+    if (t.id === lesson.teacherId) return true
+    for (let k = 0; k < classes.length; k++) {
+      const slot = classes[k].timetable.ds_Ca[contextMenu.ci].ds_Ngay[contextMenu.di].ds_Tiet[contextMenu.ti]
+      if (slot.teacherId === t.id && !(k === contextMenu.ki && slot === lesson)) {
+        return false
+      }
+    }
+    const limit = classes[contextMenu.ki].limits?.[t.subject]
+    if (limit !== undefined) {
+      const count = subjectCount(contextMenu.ki, t.subject)
+      const inc = t.subject === lesson.subject ? 0 : 1
+      if (count + inc > limit) return false
+    }
+    return true
+  })
+  if (!options.length) {
+    alert('Không có môn học phù hợp')
+    closeMenu()
+    return
+  }
+  const input = prompt('Chọn môn học:\n' + options.map((o,i)=>`${i+1}. ${o.subject} - ${o.name}`).join('\n'))
+  const idx = Number(input) - 1
+  if (idx >= 0 && idx < options.length) {
+    const sel = options[idx]
+    lesson.isBreak = false
+    lesson.subject = sel.subject
+    lesson.teacher = sel.name
+    lesson.teacherId = sel.id
+    teachers.splice(0, teachers.length, ...buildTeacherSchedules())
+    if (!teachers.find(t => t.id === selectedTeacherId.value) && teachers.length) {
+      selectedTeacherId.value = teachers[0].id
+    }
+  }
+  closeMenu()
+}
+
 function key(ki, ci, di, ti) {
   return `${ki}-${ci}-${di}-${ti}`
 }
@@ -271,12 +312,30 @@ function cellClass(ki, ci, di, ti) {
 onMounted(() => {
   classes.push(...getData())
   teachers.push(...buildTeacherSchedules())
+  teacherOptions.value = buildTeacherOptions()
   if (classes.length) selectedClassId.value = classes[0].id
   if (teachers.length) selectedTeacherId.value = teachers[0].id
 })
 
 function getData() {
   return timetableData
+}
+
+function buildTeacherOptions() {
+  const map = {}
+  classes.forEach(klass => {
+    klass.timetable.ds_Ca.forEach(ca => {
+      ca.ds_Ngay.forEach(day => {
+        day.ds_Tiet.forEach(t => {
+          if (!t.teacherId) return
+          if (!map[t.teacherId]) {
+            map[t.teacherId] = { id: t.teacherId, name: t.teacher, subject: t.subject }
+          }
+        })
+      })
+    })
+  })
+  return Object.values(map)
 }
 
 function buildTeacherSchedules() {
