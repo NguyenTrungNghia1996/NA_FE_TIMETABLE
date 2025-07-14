@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 space-y-8">
+  <div class="p-4 bg-white space-y-8">
     <div v-for="klass in classes" :key="klass.id" class="space-y-4">
       <h2 class="text-lg font-bold">{{ klass.name }}</h2>
       <div v-for="(ca, caIndex) in klass.timetable.ds_Ca" :key="ca.id" class="space-y-2">
@@ -24,7 +24,10 @@
                   @drop.prevent="drop($event, klassIndex(klass), caIndex, dIndex, tIndex)"
                   :draggable="!day.ds_Tiet[tIndex].isBreak"
               >
-                <span v-if="!day.ds_Tiet[tIndex].isBreak">{{ day.ds_Tiet[tIndex].subject }}</span>
+                <template v-if="!day.ds_Tiet[tIndex].isBreak">
+                  <div>{{ day.ds_Tiet[tIndex].subject }}</div>
+                  <div class="text-xs text-gray-500">{{ day.ds_Tiet[tIndex].teacher }}</div>
+                </template>
                 <span v-else class="text-red-600">Nghỉ</span>
               </td>
             </tr>
