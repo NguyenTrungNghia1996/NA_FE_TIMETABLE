@@ -148,8 +148,18 @@ function removeLesson() {
 
 function toggleBreak() {
   const lesson = getLesson(contextMenu)
-  lesson.isBreak = !lesson.isBreak
+  if (!lesson.isBreak && (lesson.subject || lesson.teacherId)) {
+    alert('Không thể đặt tiết nghỉ vì đã có tiết học')
+    closeMenu()
+    return
+  }
   if (lesson.isBreak) {
+    lesson.isBreak = false
+    lesson.subject = ''
+    lesson.teacher = ''
+    lesson.teacherId = null
+  } else {
+    lesson.isBreak = true
     lesson.subject = ''
     lesson.teacher = ''
     lesson.teacherId = null

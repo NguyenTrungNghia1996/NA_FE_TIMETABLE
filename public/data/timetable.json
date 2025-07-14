@@ -120,9 +120,9 @@
                   "isBreak": false
                 },
                 {
-                  "subject": "Hóa",
-                  "teacher": "Cô Dung",
-                  "teacherId": 5,
+                  "subject": "",
+                  "teacher": "",
+                  "teacherId": null,
                   "id": 3,
                   "ten": "Tiết 3",
                   "isBreak": true
@@ -355,9 +355,9 @@
                   "isBreak": false
                 },
                 {
-                  "subject": "Hóa",
-                  "teacher": "Cô Dung",
-                  "teacherId": 5,
+                  "subject": "",
+                  "teacher": "",
+                  "teacherId": null,
                   "id": 3,
                   "ten": "Tiết 3",
                   "isBreak": true
@@ -598,9 +598,9 @@
                   "isBreak": false
                 },
                 {
-                  "subject": "Văn",
-                  "teacher": "Thầy Khánh",
-                  "teacherId": 6,
+                  "subject": "",
+                  "teacher": "",
+                  "teacherId": null,
                   "id": 3,
                   "ten": "Tiết 3",
                   "isBreak": true
@@ -833,9 +833,9 @@
                   "isBreak": false
                 },
                 {
-                  "subject": "Văn",
-                  "teacher": "Thầy Khánh",
-                  "teacherId": 6,
+                  "subject": "",
+                  "teacher": "",
+                  "teacherId": null,
                   "id": 3,
                   "ten": "Tiết 3",
                   "isBreak": true
@@ -1076,9 +1076,9 @@
                   "isBreak": false
                 },
                 {
-                  "subject": "Anh",
-                  "teacher": "PT Thoản",
-                  "teacherId": 2,
+                  "subject": "",
+                  "teacher": "",
+                  "teacherId": null,
                   "id": 3,
                   "ten": "Tiết 3",
                   "isBreak": true
@@ -1311,9 +1311,9 @@
                   "isBreak": false
                 },
                 {
-                  "subject": "Anh",
-                  "teacher": "PT Thoản",
-                  "teacherId": 2,
+                  "subject": "",
+                  "teacher": "",
+                  "teacherId": null,
                   "id": 3,
                   "ten": "Tiết 3",
                   "isBreak": true
