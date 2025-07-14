@@ -1,8 +1,16 @@
 <template>
   <div class="p-4 bg-white space-y-8" @click="closeMenu">
-    <div v-for="klass in classes" :key="klass.id" class="space-y-4">
-      <h2 class="text-lg font-bold">{{ klass.name }}</h2>
-      <div v-for="(ca, caIndex) in klass.timetable.ds_Ca" :key="ca.id" class="space-y-2">
+    <div class="flex space-x-4">
+      <select v-model="selectedClassId" class="border p-1">
+        <option v-for="k in classes" :key="k.id" :value="k.id">{{ k.name }}</option>
+      </select>
+      <select v-model="selectedTeacherId" class="border p-1">
+        <option v-for="t in teachers" :key="t.id" :value="t.id">{{ t.name }}</option>
+      </select>
+    </div>
+    <div v-if="currentClass" class="space-y-4">
+      <h2 class="text-lg font-bold">{{ currentClass.name }}</h2>
+      <div v-for="(ca, caIndex) in currentClass.timetable.ds_Ca" :key="ca.id" class="space-y-2">
         <h3 class="font-semibold">Ca {{ ca.id }}</h3>
         <table class="min-w-full table-fixed border border-gray-200">
           <thead>
@@ -18,11 +26,11 @@
               <td class="border p-2 text-center">{{ tiet.ten }}</td>
               <td v-for="(day, dIndex) in ca.ds_Ngay" :key="day.id"
                   class="border p-2 text-center relative"
-                  :class="cellClass(klassIndex(klass), caIndex, dIndex, tIndex)"
-                  @dragstart="dragStart($event, klassIndex(klass), caIndex, dIndex, tIndex)"
-                  @dragover.prevent="dragOver($event, klassIndex(klass), caIndex, dIndex, tIndex)"
-                  @drop.prevent="drop($event, klassIndex(klass), caIndex, dIndex, tIndex)"
-                  @contextmenu.prevent="openMenu($event, klassIndex(klass), caIndex, dIndex, tIndex)"
+                  :class="cellClass(currentClassIndex, caIndex, dIndex, tIndex)"
+                  @dragstart="dragStart($event, currentClassIndex, caIndex, dIndex, tIndex)"
+                  @dragover.prevent="dragOver($event, currentClassIndex, caIndex, dIndex, tIndex)"
+                  @drop.prevent="drop($event, currentClassIndex, caIndex, dIndex, tIndex)"
+                  @contextmenu.prevent="openMenu($event, currentClassIndex, caIndex, dIndex, tIndex)"
                   :draggable="!day.ds_Tiet[tIndex].isBreak"
               >
                 <template v-if="!day.ds_Tiet[tIndex].isBreak">
@@ -37,11 +45,11 @@
       </div>
     </div>
 
-    <div class="mt-10 space-y-4">
+    <div v-if="currentTeacher" class="mt-10 space-y-4">
       <h2 class="text-lg font-bold">Bảng lịch giáo viên</h2>
-      <div v-for="teacher in teachers" :key="teacher.id" class="space-y-2">
-        <h3 class="font-semibold">{{ teacher.name }}</h3>
-        <div v-for="(ca, ci) in teacher.ds_Ca" :key="ci" class="space-y-1">
+      <div class="space-y-2">
+        <h3 class="font-semibold">{{ currentTeacher.name }}</h3>
+        <div v-for="(ca, ci) in currentTeacher.ds_Ca" :key="ci" class="space-y-1">
           <h4 class="font-medium">Ca {{ ca.id }}</h4>
           <table class="min-w-full table-fixed border border-gray-200 text-sm">
             <thead>
@@ -77,15 +85,16 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, computed } from 'vue'
 import timetableData from '~/public/data/timetable.json'
 
 const classes = reactive([])
 const teachers = reactive([])
-
-function klassIndex(klass) {
-  return classes.findIndex(k => k.id === klass.id)
-}
+const selectedClassId = ref(null)
+const selectedTeacherId = ref(null)
+const currentClass = computed(() => classes.find(k => k.id === selectedClassId.value))
+const currentClassIndex = computed(() => classes.findIndex(k => k.id === selectedClassId.value))
+const currentTeacher = computed(() => teachers.find(t => t.id === selectedTeacherId.value))
 
 const dragging = ref(null)
 const validCells = reactive(new Set())
@@ -118,12 +127,20 @@ function drop(e, ki, ci, di, ti) {
   if (!validCells.has(destKey)) return
   const src = getLesson(dragging.value)
   const dest = getLesson({ ki, ci, di, ti })
+  if (!canSwap(dragging.value, { ki, ci, di, ti })) {
+    dragging.value = null
+    validCells.clear()
+    return
+  }
   ;[src.subject, dest.subject] = [dest.subject, src.subject]
   ;[src.teacher, dest.teacher] = [dest.teacher, src.teacher]
   ;[src.teacherId, dest.teacherId] = [dest.teacherId, src.teacherId]
   dragging.value = null
   validCells.clear()
   teachers.splice(0, teachers.length, ...buildTeacherSchedules())
+  if (!teachers.find(t => t.id === selectedTeacherId.value) && teachers.length) {
+    selectedTeacherId.value = teachers[0].id
+  }
 }
 
 function openMenu(e, ki, ci, di, ti) {
@@ -143,6 +160,9 @@ function removeLesson() {
   const lesson = getLesson(contextMenu)
   Object.assign(lesson, { subject: '', teacher: '', teacherId: null, isBreak: false })
   teachers.splice(0, teachers.length, ...buildTeacherSchedules())
+  if (!teachers.find(t => t.id === selectedTeacherId.value) && teachers.length) {
+    selectedTeacherId.value = teachers[0].id
+  }
   closeMenu()
 }
 
@@ -165,6 +185,9 @@ function toggleBreak() {
     lesson.teacherId = null
   }
   teachers.splice(0, teachers.length, ...buildTeacherSchedules())
+  if (!teachers.find(t => t.id === selectedTeacherId.value) && teachers.length) {
+    selectedTeacherId.value = teachers[0].id
+  }
   closeMenu()
 }
 
@@ -176,10 +199,40 @@ function getLesson({ ki, ci, di, ti }) {
   return classes[ki].timetable.ds_Ca[ci].ds_Ngay[di].ds_Tiet[ti]
 }
 
+function subjectCount(ki, subject) {
+  let count = 0
+  classes[ki].timetable.ds_Ca.forEach(ca => {
+    ca.ds_Ngay.forEach(day => {
+      day.ds_Tiet.forEach(p => {
+        if (p.subject === subject) count++
+      })
+    })
+  })
+  return count
+}
+
+function canSwap(src, dest) {
+  if (src.ki === dest.ki) return true
+  const srcLesson = getLesson(src)
+  const destLesson = getLesson(dest)
+  const destLimit = classes[dest.ki].limits?.[srcLesson.subject]
+  if (destLimit !== undefined) {
+    const destCount = subjectCount(dest.ki, srcLesson.subject)
+    const inc = destLesson.subject === srcLesson.subject ? 0 : 1
+    if (destCount + inc > destLimit) return false
+  }
+  const srcLimit = classes[src.ki].limits?.[destLesson.subject]
+  if (srcLimit !== undefined) {
+    const srcCount = subjectCount(src.ki, destLesson.subject)
+    const inc = destLesson.subject === srcLesson.subject ? 0 : 1
+    if (srcCount + inc > srcLimit) return false
+  }
+  return true
+}
+
 function highlightValidCells() {
   validCells.clear()
   if (!dragging.value) return
-  const lesson = getLesson(dragging.value)
   for (let k = 0; k < classes.length; k++) {
     for (let c = 0; c < classes[k].timetable.ds_Ca.length; c++) {
       const days = classes[k].timetable.ds_Ca[c].ds_Ngay
@@ -188,16 +241,19 @@ function highlightValidCells() {
         for (let t = 0; t < periods.length; t++) {
           if (periods[t].isBreak) continue
           const other = getLesson({ ki: k, ci: c, di: d, ti: t })
-          if (other.teacherId === lesson.teacherId && !(k === dragging.value.ki && c === dragging.value.ci && d === dragging.value.di && t === dragging.value.ti)) continue
+          const srcLesson = getLesson(dragging.value)
+          if (other.teacherId === srcLesson.teacherId && !(k === dragging.value.ki && c === dragging.value.ci && d === dragging.value.di && t === dragging.value.ti)) continue
           let conflict = false
           for (let ck = 0; ck < classes.length; ck++) {
             const slot = classes[ck].timetable.ds_Ca[c].ds_Ngay[d].ds_Tiet[t]
-            if (slot.teacherId === lesson.teacherId && !(ck === dragging.value.ki && c === dragging.value.ci && d === dragging.value.di && t === dragging.value.ti)) {
+            if (slot.teacherId === srcLesson.teacherId && !(ck === dragging.value.ki && c === dragging.value.ci && d === dragging.value.di && t === dragging.value.ti)) {
               conflict = true
               break
             }
           }
-          if (!conflict) validCells.add(key(k, c, d, t))
+          if (!conflict && canSwap(dragging.value, { ki: k, ci: c, di: d, ti: t })) {
+            validCells.add(key(k, c, d, t))
+          }
         }
       }
     }
@@ -215,6 +271,8 @@ function cellClass(ki, ci, di, ti) {
 onMounted(() => {
   classes.push(...getData())
   teachers.push(...buildTeacherSchedules())
+  if (classes.length) selectedClassId.value = classes[0].id
+  if (teachers.length) selectedTeacherId.value = teachers[0].id
 })
 
 function getData() {
