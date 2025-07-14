@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 bg-white space-y-8">
+  <div class="p-4 bg-white space-y-8" @click="closeMenu">
     <div v-for="klass in classes" :key="klass.id" class="space-y-4">
       <h2 class="text-lg font-bold">{{ klass.name }}</h2>
       <div v-for="(ca, caIndex) in klass.timetable.ds_Ca" :key="ca.id" class="space-y-2">
@@ -17,11 +17,12 @@
             <tr v-for="(tiet, tIndex) in ca.ds_Ngay[0].ds_Tiet" :key="tiet.id">
               <td class="border p-2 text-center">{{ tiet.ten }}</td>
               <td v-for="(day, dIndex) in ca.ds_Ngay" :key="day.id"
-                  class="border p-2 text-center"
+                  class="border p-2 text-center relative"
                   :class="cellClass(klassIndex(klass), caIndex, dIndex, tIndex)"
                   @dragstart="dragStart($event, klassIndex(klass), caIndex, dIndex, tIndex)"
                   @dragover.prevent="dragOver($event, klassIndex(klass), caIndex, dIndex, tIndex)"
                   @drop.prevent="drop($event, klassIndex(klass), caIndex, dIndex, tIndex)"
+                  @contextmenu.prevent="openMenu($event, klassIndex(klass), caIndex, dIndex, tIndex)"
                   :draggable="!day.ds_Tiet[tIndex].isBreak"
               >
                 <template v-if="!day.ds_Tiet[tIndex].isBreak">
@@ -64,6 +65,14 @@
         </div>
       </div>
     </div>
+    <div v-if="contextMenu.visible" :style="contextMenu.style" class="absolute bg-white border rounded shadow z-50 text-sm">
+      <ul>
+        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click.stop="removeLesson()">Xóa tiết học</li>
+        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click.stop="toggleBreak()">
+          {{ contextMenu.isBreak ? 'Bỏ tiết nghỉ' : 'Đặt tiết nghỉ' }}
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
@@ -80,6 +89,19 @@ function klassIndex(klass) {
 
 const dragging = ref(null)
 const validCells = reactive(new Set())
+
+const contextMenu = reactive({
+  visible: false,
+  style: { top: '0px', left: '0px' },
+  ki: 0,
+  ci: 0,
+  di: 0,
+  ti: 0,
+  get isBreak() {
+    const lesson = classes[this.ki]?.timetable.ds_Ca[this.ci]?.ds_Ngay[this.di]?.ds_Tiet[this.ti]
+    return lesson?.isBreak
+  }
+})
 
 function dragStart(e, ki, ci, di, ti) {
   dragging.value = { ki, ci, di, ti }
@@ -102,6 +124,38 @@ function drop(e, ki, ci, di, ti) {
   dragging.value = null
   validCells.clear()
   teachers.splice(0, teachers.length, ...buildTeacherSchedules())
+}
+
+function openMenu(e, ki, ci, di, ti) {
+  contextMenu.visible = true
+  contextMenu.style = { top: `${e.clientY}px`, left: `${e.clientX}px` }
+  contextMenu.ki = ki
+  contextMenu.ci = ci
+  contextMenu.di = di
+  contextMenu.ti = ti
+}
+
+function closeMenu() {
+  contextMenu.visible = false
+}
+
+function removeLesson() {
+  const lesson = getLesson(contextMenu)
+  Object.assign(lesson, { subject: '', teacher: '', teacherId: null, isBreak: false })
+  teachers.splice(0, teachers.length, ...buildTeacherSchedules())
+  closeMenu()
+}
+
+function toggleBreak() {
+  const lesson = getLesson(contextMenu)
+  lesson.isBreak = !lesson.isBreak
+  if (lesson.isBreak) {
+    lesson.subject = ''
+    lesson.teacher = ''
+    lesson.teacherId = null
+  }
+  teachers.splice(0, teachers.length, ...buildTeacherSchedules())
+  closeMenu()
 }
 
 function key(ki, ci, di, ti) {
