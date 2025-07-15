@@ -1,12 +1,16 @@
 <template>
   <div class="p-4 bg-white space-y-8" @click="closeMenu">
     <div class="flex space-x-4">
-      <select v-model="selectedClassId" class="border p-1">
-        <option v-for="k in classes" :key="k.id" :value="k.id">{{ k.name }}</option>
-      </select>
-      <select v-model="selectedTeacherId" class="border p-1">
-        <option v-for="t in teachers" :key="t.id" :value="t.id">{{ t.name }}</option>
-      </select>
+      <a-select v-model:value="selectedClassId" class="w-40">
+        <a-select-option v-for="k in classes" :key="k.id" :value="k.id">
+          {{ k.name }}
+        </a-select-option>
+      </a-select>
+      <a-select v-model:value="selectedTeacherId" class="w-40">
+        <a-select-option v-for="t in teachers" :key="t.id" :value="t.id">
+          {{ t.name }}
+        </a-select-option>
+      </a-select>
     </div>
     <div v-if="currentClass" class="space-y-4">
       <h2 class="text-lg font-bold">{{ currentClass.name }}</h2>
