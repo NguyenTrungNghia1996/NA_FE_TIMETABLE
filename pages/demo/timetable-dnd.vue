@@ -64,11 +64,7 @@
                 <td class="border p-1 text-center w-32 h-20">Tiết {{ ti + 1 }}</td>
                 <td v-for="(day, di) in ca.ds_Ngay" :key="di" class="border p-1 text-center w-32 h-20 overflow-hidden"
                     :class="teacherCellClass(currentTeacher.id, ci, di, ti, day.ds_Tiet[ti].className)"
-                    @dragstart="dragStartTeacher($event, ci, di, ti)"
-                    @dragover.prevent="dragOverTeacher($event, ci, di, ti, day.ds_Tiet[ti].className)"
-                    @drop.prevent="dropTeacher($event, ci, di, ti, day.ds_Tiet[ti].className)"
-                    :draggable="!!day.ds_Tiet[ti].className"
-                    @click="day.ds_Tiet[ti].className && selectTeacherLesson(currentTeacher.id)">
+                    @click="teacherCellClick(ci, di, ti, day.ds_Tiet[ti].className, currentTeacher.id)">
                   <span v-if="day.ds_Tiet[ti].className" class="line-clamp-2 block">
                     {{ day.ds_Tiet[ti].className }} - {{ day.ds_Tiet[ti].subject }}
                   </span>
@@ -157,8 +153,27 @@ function selectTeacherLesson(id) {
   highlightedTeacherId.value = id
 }
 
+function teacherCellClick(ci, di, ti, className, teacherId) {
+  highlightedTeacherId.value = teacherId
+  if (!className) {
+    dragging.value = null
+    validCells.clear()
+    return
+  }
+  const ki = classes.findIndex(c => c.name === className)
+  if (ki === -1) {
+    dragging.value = null
+    validCells.clear()
+    return
+  }
+  dragging.value = { ki, ci, di, ti }
+  highlightValidCells()
+}
+
 function dragStart(e, ki, ci, di, ti) {
   dragging.value = { ki, ci, di, ti }
+  const lesson = classes[ki].timetable.ds_Ca[ci].ds_Ngay[di].ds_Tiet[ti]
+  highlightedTeacherId.value = lesson.teacherId
   highlightValidCells()
 }
 
@@ -188,26 +203,6 @@ function drop(e, ki, ci, di, ti) {
   }
 }
 
-function dragStartTeacher(e, ci, di, ti) {
-  if (!currentTeacher.value) return
-  const slot = currentTeacher.value.ds_Ca[ci].ds_Ngay[di].ds_Tiet[ti]
-  if (!slot.className) return
-  const ki = classes.findIndex(c => c.name === slot.className)
-  if (ki === -1) return
-  dragStart(e, ki, ci, di, ti)
-}
-
-function dragOverTeacher(e, ci, di, ti, className) {
-  const ki = className ? classes.findIndex(c => c.name === className) : dragging.value?.ki
-  if (ki === -1 || ki === undefined) return dragOver(e, -1, ci, di, ti)
-  dragOver(e, ki, ci, di, ti)
-}
-
-function dropTeacher(e, ci, di, ti, className) {
-  const ki = className ? classes.findIndex(c => c.name === className) : dragging.value?.ki
-  if (ki === -1 || ki === undefined) return
-  drop(e, ki, ci, di, ti)
-}
 
 function openMenu(e, ki, ci, di, ti) {
   contextMenu.visible = true
