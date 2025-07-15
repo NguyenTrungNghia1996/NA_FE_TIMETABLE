@@ -210,7 +210,18 @@ function dragOver(e, ki, ci, di, ti) {
 function drop(e, ki, ci, di, ti) {
   if (!dragging.value) return
   const destKey = key(ki, ci, di, ti)
-  if (!validCells.has(destKey)) return
+  if (!validCells.has(destKey)) {
+    const srcLesson = getLesson(dragging.value)
+    const conflict = findConflictClass(srcLesson.teacherId, ci, di, ti, dragging.value)
+    if (conflict) {
+      alert(`Trùng tiết với lớp ${conflict}`)
+    } else {
+      alert('Không thể di chuyển tiết học vào ô này')
+    }
+    dragging.value = null
+    validCells.clear()
+    return
+  }
   const src = getLesson(dragging.value)
   const dest = getLesson({ ki, ci, di, ti })
   if (!canSwap(dragging.value, { ki, ci, di, ti })) {
@@ -354,6 +365,16 @@ function subjectCount(ki, subject) {
   return count
 }
 
+function findConflictClass(teacherId, ci, di, ti, src) {
+  for (let k = 0; k < classes.length; k++) {
+    const slot = classes[k].timetable.ds_Ca[ci].ds_Ngay[di].ds_Tiet[ti]
+    if (slot.teacherId === teacherId && !(src && k === src.ki && ci === src.ci && di === src.di && ti === src.ti)) {
+      return classes[k].name
+    }
+  }
+  return null
+}
+
 function canSwap(src, dest) {
   if (src.ki === dest.ki) return true
   const srcLesson = getLesson(src)
@@ -386,14 +407,7 @@ function highlightValidCells() {
           const other = getLesson({ ki: k, ci: c, di: d, ti: t })
           const srcLesson = getLesson(dragging.value)
           if (other.teacherId === srcLesson.teacherId && !(k === dragging.value.ki && c === dragging.value.ci && d === dragging.value.di && t === dragging.value.ti)) continue
-          let conflict = false
-          for (let ck = 0; ck < classes.length; ck++) {
-            const slot = classes[ck].timetable.ds_Ca[c].ds_Ngay[d].ds_Tiet[t]
-            if (slot.teacherId === srcLesson.teacherId && !(ck === dragging.value.ki && c === dragging.value.ci && d === dragging.value.di && t === dragging.value.ti)) {
-              conflict = true
-              break
-            }
-          }
+          const conflict = findConflictClass(srcLesson.teacherId, c, d, t, dragging.value)
           if (!conflict && canSwap(dragging.value, { ki: k, ci: c, di: d, ti: t })) {
             validCells.add(key(k, c, d, t))
           }
