@@ -63,7 +63,11 @@
               <tr v-for="(tiet, ti) in ca.ds_Ngay[0].ds_Tiet" :key="ti">
                 <td class="border p-1 text-center w-32 h-20">Tiết {{ ti + 1 }}</td>
                 <td v-for="(day, di) in ca.ds_Ngay" :key="di" class="border p-1 text-center w-32 h-20 overflow-hidden"
-                    :class="teacherCellClass(currentTeacher.id, !!day.ds_Tiet[ti].className)"
+                    :class="teacherCellClass(currentTeacher.id, ci, di, ti, day.ds_Tiet[ti].className)"
+                    @dragstart="dragStartTeacher($event, ci, di, ti)"
+                    @dragover.prevent="dragOverTeacher($event, ci, di, ti, day.ds_Tiet[ti].className)"
+                    @drop.prevent="dropTeacher($event, ci, di, ti, day.ds_Tiet[ti].className)"
+                    :draggable="!!day.ds_Tiet[ti].className"
                     @click="day.ds_Tiet[ti].className && selectTeacherLesson(currentTeacher.id)">
                   <span v-if="day.ds_Tiet[ti].className" class="line-clamp-2 block">
                     {{ day.ds_Tiet[ti].className }} - {{ day.ds_Tiet[ti].subject }}
@@ -182,6 +186,27 @@ function drop(e, ki, ci, di, ti) {
   if (!teachers.find(t => t.id === selectedTeacherId.value) && teachers.length) {
     selectedTeacherId.value = teachers[0].id
   }
+}
+
+function dragStartTeacher(e, ci, di, ti) {
+  if (!currentTeacher.value) return
+  const slot = currentTeacher.value.ds_Ca[ci].ds_Ngay[di].ds_Tiet[ti]
+  if (!slot.className) return
+  const ki = classes.findIndex(c => c.name === slot.className)
+  if (ki === -1) return
+  dragStart(e, ki, ci, di, ti)
+}
+
+function dragOverTeacher(e, ci, di, ti, className) {
+  const ki = className ? classes.findIndex(c => c.name === className) : dragging.value?.ki
+  if (ki === -1 || ki === undefined) return dragOver(e, -1, ci, di, ti)
+  dragOver(e, ki, ci, di, ti)
+}
+
+function dropTeacher(e, ci, di, ti, className) {
+  const ki = className ? classes.findIndex(c => c.name === className) : dragging.value?.ki
+  if (ki === -1 || ki === undefined) return
+  drop(e, ki, ci, di, ti)
 }
 
 function openMenu(e, ki, ci, di, ti) {
@@ -368,8 +393,16 @@ function cellClass(ki, ci, di, ti) {
   return base.join(' ')
 }
 
-function teacherCellClass(id, hasClass) {
-  return highlightedTeacherId.value === id && hasClass ? 'bg-yellow-100' : ''
+function teacherCellClass(id, ci, di, ti, className) {
+  const classesIndex = className ? classes.findIndex(c => c.name === className) : -1
+  const base = []
+  if (classesIndex >= 0 && validCells.has(key(classesIndex, ci, di, ti))) {
+    base.push('bg-green-50')
+  }
+  if (highlightedTeacherId.value === id && className) {
+    base.push('bg-yellow-100')
+  }
+  return base.join(' ')
 }
 
 onMounted(() => {
