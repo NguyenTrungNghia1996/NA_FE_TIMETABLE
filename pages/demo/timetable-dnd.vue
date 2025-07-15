@@ -120,7 +120,7 @@
 
 <script setup>
 import { reactive, ref, onMounted, computed } from 'vue'
-import { Modal } from 'ant-design-vue'
+import { notification } from 'ant-design-vue'
 import timetableData from '~/public/data/timetable.json'
 
 const classes = reactive([])
@@ -177,7 +177,7 @@ const subjectSelect = reactive({
 })
 
 function showWarning(content) {
-  Modal.warning({ title: 'Thông báo', content })
+  notification.warning({ message: 'Thông báo', description: content })
 }
 
 function selectTeacherLesson(id) {
