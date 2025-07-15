@@ -15,7 +15,7 @@
         <table class="min-w-full table-fixed border border-gray-200">
           <thead>
             <tr>
-              <th class="border p-2">Tiết / Ngày</th>
+              <th class="border p-2 w-32">Tiết / Ngày</th>
               <th v-for="day in ca.ds_Ngay" :key="day.id" class="border p-2">
                 {{ day.ten }}
               </th>
@@ -23,7 +23,7 @@
           </thead>
           <tbody>
             <tr v-for="(tiet, tIndex) in ca.ds_Ngay[0].ds_Tiet" :key="tiet.id">
-              <td class="border p-2 text-center">{{ tiet.ten }}</td>
+              <td class="border p-2 text-center w-32 h-20">{{ tiet.ten }}</td>
               <td v-for="(day, dIndex) in ca.ds_Ngay" :key="day.id"
                   class="border p-2 text-center relative w-32 h-20 overflow-hidden"
                   :class="cellClass(currentClassIndex, caIndex, dIndex, tIndex)"
@@ -54,7 +54,7 @@
           <table class="min-w-full table-fixed border border-gray-200 text-sm">
             <thead>
               <tr>
-                <th class="border p-1">Tiết / Ngày</th>
+                <th class="border p-1 w-32">Tiết / Ngày</th>
                 <th v-for="day in ca.ds_Ngay" :key="day.id" class="border p-1">{{ day.ten }}</th>
               </tr>
             </thead>
