@@ -120,7 +120,7 @@
       </div>
 
       <!-- Teacher timetable section -->
-      <div v-if="currentTeacher" class="bg-white rounded-lg shadow overflow-hidden border border-black">
+      <div v-if="currentTeacher" class="bg-white rounded-lg shadow overflow-hidden">
         <div class="p-4 border-b border-black">
           <h2 class="text-xl font-bold text-gray-800">Lịch dạy - {{ currentTeacher.name }}</h2>
         </div>
