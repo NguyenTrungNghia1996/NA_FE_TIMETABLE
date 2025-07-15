@@ -1,21 +1,30 @@
 <template>
   <div class="p-4 bg-white space-y-8" @click="closeMenu">
     <div class="flex space-x-4">
-      <select v-model="selectedClassId" class="border p-1">
-        <option v-for="k in classes" :key="k.id" :value="k.id">{{ k.name }}</option>
-      </select>
-      <select v-model="selectedTeacherId" class="border p-1">
-        <option v-for="t in teachers" :key="t.id" :value="t.id">{{ t.name }}</option>
-      </select>
+      <a-select v-model:value="selectedClassId" class="w-40" id="class-select">
+        <a-select-option v-for="k in classes" :key="k.id" :value="k.id">
+          {{ k.name }}
+        </a-select-option>
+      </a-select>
+      <a-select v-model:value="selectedTeacherId" class="w-40" id="teacher-select">
+        <a-select-option v-for="t in teachers" :key="t.id" :value="t.id">
+          {{ t.name }}
+        </a-select-option>
+      </a-select>
     </div>
     <div v-if="currentClass" class="space-y-4">
       <h2 class="text-lg font-bold">{{ currentClass.name }}</h2>
+      <div class="flex flex-wrap gap-2 text-sm">
+        <span v-for="stat in subjectStats" :key="stat.subject">
+          {{ stat.subject }}: {{ stat.count }}/{{ stat.max }}
+        </span>
+      </div>
       <div v-for="(ca, caIndex) in currentClass.timetable.ds_Ca" :key="ca.id" class="space-y-2">
         <h3 class="font-semibold">Ca {{ ca.id }}</h3>
         <table class="min-w-full table-fixed border border-gray-200">
           <thead>
             <tr>
-              <th class="border p-2">Tiết / Ngày</th>
+              <th class="border p-2 w-32">Tiết / Ngày</th>
               <th v-for="day in ca.ds_Ngay" :key="day.id" class="border p-2">
                 {{ day.ten }}
               </th>
@@ -23,19 +32,20 @@
           </thead>
           <tbody>
             <tr v-for="(tiet, tIndex) in ca.ds_Ngay[0].ds_Tiet" :key="tiet.id">
-              <td class="border p-2 text-center">{{ tiet.ten }}</td>
+              <td class="border p-2 text-center w-32 h-20">{{ tiet.ten }}</td>
               <td v-for="(day, dIndex) in ca.ds_Ngay" :key="day.id"
-                  class="border p-2 text-center relative"
+                  class="border p-2 text-center relative w-32 h-20 overflow-hidden"
                   :class="cellClass(currentClassIndex, caIndex, dIndex, tIndex)"
                   @dragstart="dragStart($event, currentClassIndex, caIndex, dIndex, tIndex)"
                   @dragover.prevent="dragOver($event, currentClassIndex, caIndex, dIndex, tIndex)"
                   @drop.prevent="drop($event, currentClassIndex, caIndex, dIndex, tIndex)"
                   @contextmenu.prevent="openMenu($event, currentClassIndex, caIndex, dIndex, tIndex)"
+                  @click="day.ds_Tiet[tIndex].teacherId && selectTeacherLesson(day.ds_Tiet[tIndex].teacherId)"
                   :draggable="!day.ds_Tiet[tIndex].isBreak"
               >
                 <template v-if="!day.ds_Tiet[tIndex].isBreak">
-                  <div>{{ day.ds_Tiet[tIndex].subject }}</div>
-                  <div class="text-xs text-gray-500">{{ day.ds_Tiet[tIndex].teacher }}</div>
+                  <div class="line-clamp-1">{{ day.ds_Tiet[tIndex].subject }}</div>
+                  <div class="text-xs text-gray-500 line-clamp-1">{{ day.ds_Tiet[tIndex].teacher }}</div>
                 </template>
                 <span v-else class="text-red-600">Nghỉ</span>
               </td>
@@ -54,15 +64,17 @@
           <table class="min-w-full table-fixed border border-gray-200 text-sm">
             <thead>
               <tr>
-                <th class="border p-1">Tiết / Ngày</th>
+                <th class="border p-1 w-32">Tiết / Ngày</th>
                 <th v-for="day in ca.ds_Ngay" :key="day.id" class="border p-1">{{ day.ten }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(tiet, ti) in ca.ds_Ngay[0].ds_Tiet" :key="ti">
-                <td class="border p-1 text-center">Tiết {{ ti + 1 }}</td>
-                <td v-for="(day, di) in ca.ds_Ngay" :key="di" class="border p-1 text-center">
-                  <span v-if="day.ds_Tiet[ti].className">
+                <td class="border p-1 text-center w-32 h-20">Tiết {{ ti + 1 }}</td>
+                <td v-for="(day, di) in ca.ds_Ngay" :key="di" class="border p-1 text-center w-32 h-20 overflow-hidden"
+                    :class="teacherCellClass(currentTeacher.id, ci, di, ti, day.ds_Tiet[ti].className)"
+                    @click="teacherCellClick(ci, di, ti, day.ds_Tiet[ti].className, currentTeacher.id)">
+                  <span v-if="day.ds_Tiet[ti].className" class="line-clamp-2 block">
                     {{ day.ds_Tiet[ti].className }} - {{ day.ds_Tiet[ti].subject }}
                   </span>
                   <span v-else>-</span>
@@ -108,6 +120,7 @@
 
 <script setup>
 import { reactive, ref, onMounted, computed } from 'vue'
+import { notification } from 'ant-design-vue'
 import timetableData from '~/public/data/timetable.json'
 
 const classes = reactive([])
@@ -119,8 +132,26 @@ const currentClass = computed(() => classes.find(k => k.id === selectedClassId.v
 const currentClassIndex = computed(() => classes.findIndex(k => k.id === selectedClassId.value))
 const currentTeacher = computed(() => teachers.find(t => t.id === selectedTeacherId.value))
 
+const subjectStats = computed(() => {
+  const klass = currentClass.value
+  if (!klass) return []
+  const counts = {}
+  klass.timetable.ds_Ca.forEach(ca => {
+    ca.ds_Ngay.forEach(day => {
+      day.ds_Tiet.forEach(t => {
+        if (!t.isBreak && t.subject) {
+          counts[t.subject] = (counts[t.subject] || 0) + 1
+        }
+      })
+    })
+  })
+  const limits = klass.limits || {}
+  return Object.keys(limits).map(sub => ({ subject: sub, max: limits[sub], count: counts[sub] || 0 }))
+})
+
 const dragging = ref(null)
 const validCells = reactive(new Set())
+const highlightedTeacherId = ref(null)
 
 const contextMenu = reactive({
   visible: false,
@@ -145,8 +176,35 @@ const subjectSelect = reactive({
   ti: 0
 })
 
+function showWarning(content) {
+  notification.warning({ message: 'Thông báo', description: content })
+}
+
+function selectTeacherLesson(id) {
+  highlightedTeacherId.value = id
+}
+
+function teacherCellClick(ci, di, ti, className, teacherId) {
+  highlightedTeacherId.value = teacherId
+  if (!className) {
+    dragging.value = null
+    validCells.clear()
+    return
+  }
+  const ki = classes.findIndex(c => c.name === className)
+  if (ki === -1) {
+    dragging.value = null
+    validCells.clear()
+    return
+  }
+  dragging.value = { ki, ci, di, ti }
+  highlightValidCells()
+}
+
 function dragStart(e, ki, ci, di, ti) {
   dragging.value = { ki, ci, di, ti }
+  const lesson = classes[ki].timetable.ds_Ca[ci].ds_Ngay[di].ds_Tiet[ti]
+  highlightedTeacherId.value = lesson.teacherId
   highlightValidCells()
 }
 
@@ -157,7 +215,18 @@ function dragOver(e, ki, ci, di, ti) {
 function drop(e, ki, ci, di, ti) {
   if (!dragging.value) return
   const destKey = key(ki, ci, di, ti)
-  if (!validCells.has(destKey)) return
+  if (!validCells.has(destKey)) {
+    const srcLesson = getLesson(dragging.value)
+    const conflict = findConflictClass(srcLesson.teacherId, ci, di, ti, dragging.value)
+    if (conflict) {
+      showWarning(`Trùng tiết với lớp ${conflict}`)
+    } else {
+      showWarning('Không thể di chuyển tiết học vào ô này')
+    }
+    dragging.value = null
+    validCells.clear()
+    return
+  }
   const src = getLesson(dragging.value)
   const dest = getLesson({ ki, ci, di, ti })
   if (!canSwap(dragging.value, { ki, ci, di, ti })) {
@@ -175,6 +244,7 @@ function drop(e, ki, ci, di, ti) {
     selectedTeacherId.value = teachers[0].id
   }
 }
+
 
 function openMenu(e, ki, ci, di, ti) {
   contextMenu.visible = true
@@ -203,7 +273,7 @@ function removeLesson() {
 function toggleBreak() {
   const lesson = getLesson(contextMenu)
   if (!lesson.isBreak && (lesson.subject || lesson.teacherId)) {
-    alert('Không thể đặt tiết nghỉ vì đã có tiết học')
+    showWarning('Không thể đặt tiết nghỉ vì đã có tiết học')
     closeMenu()
     return
   }
@@ -244,7 +314,7 @@ function changeSubject() {
     return true
   })
   if (!options.length) {
-    alert('Không có môn học phù hợp')
+    showWarning('Không có môn học phù hợp')
     closeMenu()
     return
   }
@@ -300,6 +370,16 @@ function subjectCount(ki, subject) {
   return count
 }
 
+function findConflictClass(teacherId, ci, di, ti, src) {
+  for (let k = 0; k < classes.length; k++) {
+    const slot = classes[k].timetable.ds_Ca[ci].ds_Ngay[di].ds_Tiet[ti]
+    if (slot.teacherId === teacherId && !(src && k === src.ki && ci === src.ci && di === src.di && ti === src.ti)) {
+      return classes[k].name
+    }
+  }
+  return null
+}
+
 function canSwap(src, dest) {
   if (src.ki === dest.ki) return true
   const srcLesson = getLesson(src)
@@ -332,14 +412,7 @@ function highlightValidCells() {
           const other = getLesson({ ki: k, ci: c, di: d, ti: t })
           const srcLesson = getLesson(dragging.value)
           if (other.teacherId === srcLesson.teacherId && !(k === dragging.value.ki && c === dragging.value.ci && d === dragging.value.di && t === dragging.value.ti)) continue
-          let conflict = false
-          for (let ck = 0; ck < classes.length; ck++) {
-            const slot = classes[ck].timetable.ds_Ca[c].ds_Ngay[d].ds_Tiet[t]
-            if (slot.teacherId === srcLesson.teacherId && !(ck === dragging.value.ki && c === dragging.value.ci && d === dragging.value.di && t === dragging.value.ti)) {
-              conflict = true
-              break
-            }
-          }
+          const conflict = findConflictClass(srcLesson.teacherId, c, d, t, dragging.value)
           if (!conflict && canSwap(dragging.value, { ki: k, ci: c, di: d, ti: t })) {
             validCells.add(key(k, c, d, t))
           }
@@ -354,6 +427,21 @@ function cellClass(ki, ci, di, ti) {
   const lesson = classes[ki].timetable.ds_Ca[ci].ds_Ngay[di].ds_Tiet[ti]
   if (lesson.isBreak) base.push('bg-gray-100 text-red-600 border-black')
   if (validCells.has(key(ki, ci, di, ti))) base.push('bg-green-50')
+  if (highlightedTeacherId.value && lesson.teacherId === highlightedTeacherId.value) {
+    base.push('bg-yellow-100')
+  }
+  return base.join(' ')
+}
+
+function teacherCellClass(id, ci, di, ti, className) {
+  const classesIndex = className ? classes.findIndex(c => c.name === className) : -1
+  const base = []
+  if (classesIndex >= 0 && validCells.has(key(classesIndex, ci, di, ti))) {
+    base.push('bg-green-50')
+  }
+  if (highlightedTeacherId.value === id && className) {
+    base.push('bg-yellow-100')
+  }
   return base.join(' ')
 }
 
