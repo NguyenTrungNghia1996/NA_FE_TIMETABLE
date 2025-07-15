@@ -120,6 +120,7 @@
 
 <script setup>
 import { reactive, ref, onMounted, computed } from 'vue'
+import { Modal } from 'ant-design-vue'
 import timetableData from '~/public/data/timetable.json'
 
 const classes = reactive([])
@@ -175,6 +176,10 @@ const subjectSelect = reactive({
   ti: 0
 })
 
+function showWarning(content) {
+  Modal.warning({ title: 'Thông báo', content })
+}
+
 function selectTeacherLesson(id) {
   highlightedTeacherId.value = id
 }
@@ -214,9 +219,9 @@ function drop(e, ki, ci, di, ti) {
     const srcLesson = getLesson(dragging.value)
     const conflict = findConflictClass(srcLesson.teacherId, ci, di, ti, dragging.value)
     if (conflict) {
-      alert(`Trùng tiết với lớp ${conflict}`)
+      showWarning(`Trùng tiết với lớp ${conflict}`)
     } else {
-      alert('Không thể di chuyển tiết học vào ô này')
+      showWarning('Không thể di chuyển tiết học vào ô này')
     }
     dragging.value = null
     validCells.clear()
@@ -268,7 +273,7 @@ function removeLesson() {
 function toggleBreak() {
   const lesson = getLesson(contextMenu)
   if (!lesson.isBreak && (lesson.subject || lesson.teacherId)) {
-    alert('Không thể đặt tiết nghỉ vì đã có tiết học')
+    showWarning('Không thể đặt tiết nghỉ vì đã có tiết học')
     closeMenu()
     return
   }
@@ -309,7 +314,7 @@ function changeSubject() {
     return true
   })
   if (!options.length) {
-    alert('Không có môn học phù hợp')
+    showWarning('Không có môn học phù hợp')
     closeMenu()
     return
   }
