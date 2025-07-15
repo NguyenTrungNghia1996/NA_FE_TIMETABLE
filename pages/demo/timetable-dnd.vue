@@ -10,6 +10,11 @@
     </div>
     <div v-if="currentClass" class="space-y-4">
       <h2 class="text-lg font-bold">{{ currentClass.name }}</h2>
+      <div class="flex flex-wrap gap-2 text-sm">
+        <span v-for="stat in subjectStats" :key="stat.subject">
+          {{ stat.subject }}: {{ stat.count }}/{{ stat.max }}
+        </span>
+      </div>
       <div v-for="(ca, caIndex) in currentClass.timetable.ds_Ca" :key="ca.id" class="space-y-2">
         <h3 class="font-semibold">Ca {{ ca.id }}</h3>
         <table class="min-w-full table-fixed border border-gray-200">
@@ -121,6 +126,23 @@ const selectedTeacherId = ref(null)
 const currentClass = computed(() => classes.find(k => k.id === selectedClassId.value))
 const currentClassIndex = computed(() => classes.findIndex(k => k.id === selectedClassId.value))
 const currentTeacher = computed(() => teachers.find(t => t.id === selectedTeacherId.value))
+
+const subjectStats = computed(() => {
+  const klass = currentClass.value
+  if (!klass) return []
+  const counts = {}
+  klass.timetable.ds_Ca.forEach(ca => {
+    ca.ds_Ngay.forEach(day => {
+      day.ds_Tiet.forEach(t => {
+        if (!t.isBreak && t.subject) {
+          counts[t.subject] = (counts[t.subject] || 0) + 1
+        }
+      })
+    })
+  })
+  const limits = klass.limits || {}
+  return Object.keys(limits).map(sub => ({ subject: sub, max: limits[sub], count: counts[sub] || 0 }))
+})
 
 const dragging = ref(null)
 const validCells = reactive(new Set())
