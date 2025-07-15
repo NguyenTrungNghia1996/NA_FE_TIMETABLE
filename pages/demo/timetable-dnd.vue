@@ -31,6 +31,7 @@
                   @dragover.prevent="dragOver($event, currentClassIndex, caIndex, dIndex, tIndex)"
                   @drop.prevent="drop($event, currentClassIndex, caIndex, dIndex, tIndex)"
                   @contextmenu.prevent="openMenu($event, currentClassIndex, caIndex, dIndex, tIndex)"
+                  @click="day.ds_Tiet[tIndex].teacherId && selectTeacherLesson(day.ds_Tiet[tIndex].teacherId)"
                   :draggable="!day.ds_Tiet[tIndex].isBreak"
               >
                 <template v-if="!day.ds_Tiet[tIndex].isBreak">
@@ -61,7 +62,9 @@
             <tbody>
               <tr v-for="(tiet, ti) in ca.ds_Ngay[0].ds_Tiet" :key="ti">
                 <td class="border p-1 text-center w-32 h-20">Tiết {{ ti + 1 }}</td>
-                <td v-for="(day, di) in ca.ds_Ngay" :key="di" class="border p-1 text-center w-32 h-20 overflow-hidden">
+                <td v-for="(day, di) in ca.ds_Ngay" :key="di" class="border p-1 text-center w-32 h-20 overflow-hidden"
+                    :class="teacherCellClass(currentTeacher.id, !!day.ds_Tiet[ti].className)"
+                    @click="day.ds_Tiet[ti].className && selectTeacherLesson(currentTeacher.id)">
                   <span v-if="day.ds_Tiet[ti].className" class="line-clamp-2 block">
                     {{ day.ds_Tiet[ti].className }} - {{ day.ds_Tiet[ti].subject }}
                   </span>
@@ -121,6 +124,7 @@ const currentTeacher = computed(() => teachers.find(t => t.id === selectedTeache
 
 const dragging = ref(null)
 const validCells = reactive(new Set())
+const highlightedTeacherId = ref(null)
 
 const contextMenu = reactive({
   visible: false,
@@ -144,6 +148,10 @@ const subjectSelect = reactive({
   di: 0,
   ti: 0
 })
+
+function selectTeacherLesson(id) {
+  highlightedTeacherId.value = id
+}
 
 function dragStart(e, ki, ci, di, ti) {
   dragging.value = { ki, ci, di, ti }
@@ -354,7 +362,14 @@ function cellClass(ki, ci, di, ti) {
   const lesson = classes[ki].timetable.ds_Ca[ci].ds_Ngay[di].ds_Tiet[ti]
   if (lesson.isBreak) base.push('bg-gray-100 text-red-600 border-black')
   if (validCells.has(key(ki, ci, di, ti))) base.push('bg-green-50')
+  if (highlightedTeacherId.value && lesson.teacherId === highlightedTeacherId.value) {
+    base.push('bg-yellow-100')
+  }
   return base.join(' ')
+}
+
+function teacherCellClass(id, hasClass) {
+  return highlightedTeacherId.value === id && hasClass ? 'bg-yellow-100' : ''
 }
 
 onMounted(() => {
