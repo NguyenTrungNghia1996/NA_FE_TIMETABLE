@@ -25,7 +25,7 @@
             <tr v-for="(tiet, tIndex) in ca.ds_Ngay[0].ds_Tiet" :key="tiet.id">
               <td class="border p-2 text-center">{{ tiet.ten }}</td>
               <td v-for="(day, dIndex) in ca.ds_Ngay" :key="day.id"
-                  class="border p-2 text-center relative"
+                  class="border p-2 text-center relative w-32 h-20 overflow-hidden"
                   :class="cellClass(currentClassIndex, caIndex, dIndex, tIndex)"
                   @dragstart="dragStart($event, currentClassIndex, caIndex, dIndex, tIndex)"
                   @dragover.prevent="dragOver($event, currentClassIndex, caIndex, dIndex, tIndex)"
@@ -34,8 +34,8 @@
                   :draggable="!day.ds_Tiet[tIndex].isBreak"
               >
                 <template v-if="!day.ds_Tiet[tIndex].isBreak">
-                  <div>{{ day.ds_Tiet[tIndex].subject }}</div>
-                  <div class="text-xs text-gray-500">{{ day.ds_Tiet[tIndex].teacher }}</div>
+                  <div class="line-clamp-1">{{ day.ds_Tiet[tIndex].subject }}</div>
+                  <div class="text-xs text-gray-500 line-clamp-1">{{ day.ds_Tiet[tIndex].teacher }}</div>
                 </template>
                 <span v-else class="text-red-600">Nghỉ</span>
               </td>
@@ -60,9 +60,9 @@
             </thead>
             <tbody>
               <tr v-for="(tiet, ti) in ca.ds_Ngay[0].ds_Tiet" :key="ti">
-                <td class="border p-1 text-center">Tiết {{ ti + 1 }}</td>
-                <td v-for="(day, di) in ca.ds_Ngay" :key="di" class="border p-1 text-center">
-                  <span v-if="day.ds_Tiet[ti].className">
+                <td class="border p-1 text-center w-32 h-20">Tiết {{ ti + 1 }}</td>
+                <td v-for="(day, di) in ca.ds_Ngay" :key="di" class="border p-1 text-center w-32 h-20 overflow-hidden">
+                  <span v-if="day.ds_Tiet[ti].className" class="line-clamp-2 block">
                     {{ day.ds_Tiet[ti].className }} - {{ day.ds_Tiet[ti].subject }}
                   </span>
                   <span v-else>-</span>
