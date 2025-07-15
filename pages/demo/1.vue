@@ -93,7 +93,7 @@
                   <td 
                     v-for="(day, dIndex) in ca.ds_Ngay" 
                     :key="day.id" 
-                    class="p-2 border border-black text-center h-20 overflow-hidden transition-colors"
+                    class="p-2 border border-black text-center h-20 overflow-hidden transition-colors duration-150 ease-in-out"
                     :class="cellClass(currentClassIndex, caIndex, dIndex, tIndex)"
                     @dragstart="dragStart($event, currentClassIndex, caIndex, dIndex, tIndex)"
                     @dragenter.prevent="dragEnter($event, currentClassIndex, caIndex, dIndex, tIndex)"
@@ -366,7 +366,9 @@ function dragStart(e, ki, ci, di, ti) {
 }
 
 function dragOver(e, ki, ci, di, ti) {
-  e.dataTransfer.dropEffect = validCells.has(key(ki, ci, di, ti)) ? "move" : "none";
+  const isValid = validCells.has(key(ki, ci, di, ti));
+  e.dataTransfer.dropEffect = isValid ? "move" : "none";
+  e.preventDefault();
 }
 
 function dragEnter(e, ki, ci, di, ti) {
@@ -632,33 +634,66 @@ function canSwap(src, dest) {
 function highlightValidCells() {
   validCells.clear();
   if (!dragging.value) return;
-  
+
+  const srcLesson = getLesson(dragging.value);
+  if (!srcLesson.teacherId) return; // Không có giáo viên thì không highlight
+
   for (let k = 0; k < classes.length; k++) {
     for (let c = 0; c < classes[k].timetable.ds_Ca.length; c++) {
       const days = classes[k].timetable.ds_Ca[c].ds_Ngay;
       for (let d = 0; d < days.length; d++) {
         const periods = days[d].ds_Tiet;
         for (let t = 0; t < periods.length; t++) {
-          if (periods[t].isBreak) continue;
-          
-          const other = getLesson({ ki: k, ci: c, di: d, ti: t });
-          const srcLesson = getLesson(dragging.value);
-          
-          // Skip if teacher is already teaching at this time
-          if (other.teacherId === srcLesson.teacherId && 
-              !(k === dragging.value.ki && c === dragging.value.ci && d === dragging.value.di && t === dragging.value.ti)) {
+          // Bỏ qua nếu là tiết nghỉ hoặc chính ô đang kéo
+          if (periods[t].isBreak || 
+              (k === dragging.value.ki && c === dragging.value.ci && 
+               d === dragging.value.di && t === dragging.value.ti)) {
             continue;
           }
+
+          const targetLesson = getLesson({ ki: k, ci: c, di: d, ti: t });
           
-          // Check for conflicts and limits
-          const conflict = findConflictClass(srcLesson.teacherId, c, d, t, dragging.value);
-          if (!conflict && canSwap(dragging.value, { ki: k, ci: c, di: d, ti: t })) {
+          // Kiểm tra giáo viên có trùng tiết không
+          const teacherConflict = findTeacherConflict(srcLesson.teacherId, c, d, t, dragging.value);
+          
+          // Kiểm tra giới hạn môn học
+          const subjectLimitValid = checkSubjectLimit(k, srcLesson.subject, targetLesson.subject);
+          
+          // Kiểm tra có thể swap (nếu khác lớp)
+          const canPerformSwap = (k === dragging.value.ki) || 
+                               (checkSubjectLimit(dragging.value.ki, targetLesson.subject, srcLesson.subject) &&
+                                !findTeacherConflict(targetLesson.teacherId, dragging.value.ci, 
+                                                   dragging.value.di, dragging.value.ti, null));
+
+          if (!teacherConflict && subjectLimitValid && canPerformSwap) {
             validCells.add(key(k, c, d, t));
           }
         }
       }
     }
   }
+}
+
+function findTeacherConflict(teacherId, ci, di, ti, exclude) {
+  for (let k = 0; k < classes.length; k++) {
+    const slot = classes[k].timetable.ds_Ca[ci].ds_Ngay[di].ds_Tiet[ti];
+    if (slot.teacherId === teacherId && 
+        !(exclude && k === exclude.ki && ci === exclude.ci && di === exclude.di && ti === exclude.ti)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function checkSubjectLimit(classIndex, newSubject, oldSubject) {
+  const klass = classes[classIndex];
+  const limit = klass.limits?.[newSubject];
+  if (limit === undefined) return true; // Không có giới hạn
+  
+  const currentCount = subjectCount(classIndex, newSubject);
+  const willDecrease = (newSubject === oldSubject) ? 0 : 1;
+  
+  return currentCount + willDecrease <= limit;
 }
 
 // Cell styling functions
@@ -674,9 +709,15 @@ function cellClass(ki, ci, di, ti) {
   } else {
     classList.push('bg-gray-50 hover:bg-gray-100');
   }
+  
   // Highlight teacher's lessons
   if (highlightedTeacherId.value && lesson.teacherId === highlightedTeacherId.value) {
     classList.push('bg-yellow-50');
+  }
+  
+  // Highlight valid drop targets
+  if (dragging.value && validCells.has(key(ki, ci, di, ti))) {
+    classList.push('ring-2 ring-blue-500 bg-blue-50');
   }
   
   return classList.join(' ');
@@ -775,3 +816,17 @@ function buildTeacherSchedules() {
   return Object.values(result);
 }
 </script>
+
+<style>
+.ring-2 {
+  box-shadow: 0 0 0 2px;
+}
+.bg-blue-50 {
+  background-color: #eff6ff;
+}
+.transition-colors {
+  transition-property: background-color, box-shadow;
+  transition-duration: 150ms;
+  transition-timing-function: ease-in-out;
+}
+</style>
