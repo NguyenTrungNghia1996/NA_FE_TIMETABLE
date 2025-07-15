@@ -215,20 +215,25 @@ function dragOver(e, ki, ci, di, ti) {
 function drop(e, ki, ci, di, ti) {
   if (!dragging.value) return
   const destKey = key(ki, ci, di, ti)
+  const destLesson = getLesson({ ki, ci, di, ti })
   if (!validCells.has(destKey)) {
-    const srcLesson = getLesson(dragging.value)
-    const conflict = findConflictClass(srcLesson.teacherId, ci, di, ti, dragging.value)
-    if (conflict) {
-      showWarning(`Trùng tiết với lớp ${conflict}`)
+    if (destLesson.isBreak) {
+      showWarning('Không thể di chuyển vào tiết nghỉ')
     } else {
-      showWarning('Không thể di chuyển tiết học vào ô này')
+      const srcLesson = getLesson(dragging.value)
+      const conflict = findConflictClass(srcLesson.teacherId, ci, di, ti, dragging.value)
+      if (conflict) {
+        showWarning(`Trùng tiết với lớp ${conflict}`)
+      } else {
+        showWarning('Không thể di chuyển tiết học vào ô này')
+      }
     }
     dragging.value = null
     validCells.clear()
     return
   }
   const src = getLesson(dragging.value)
-  const dest = getLesson({ ki, ci, di, ti })
+  const dest = destLesson
   if (!canSwap(dragging.value, { ki, ci, di, ti })) {
     dragging.value = null
     validCells.clear()
