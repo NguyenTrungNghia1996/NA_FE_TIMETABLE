@@ -1,10 +1,10 @@
 <template>
-  <div v-if="klass" class="space-y-4" @click="closeMenu">
-    <h2 class="text-lg font-bold">{{ klass.name }}</h2>
+  <div v-if="classData" class="space-y-4" @click="closeMenu">
+    <h2 class="text-lg font-bold">{{ classData.name }}</h2>
     <div class="flex flex-wrap gap-2 text-sm">
       <span v-for="stat in stats" :key="stat.subject"> {{ stat.subject }}: {{ stat.count }}/{{ stat.max }} </span>
     </div>
-    <div v-for="(ca, caIndex) in klass.timetable.ds_Ca" :key="ca.id" class="space-y-2">
+    <div v-for="(ca, caIndex) in classData.timetable.ds_Ca" :key="ca.id" class="space-y-2">
       <h3 class="font-semibold">Ca {{ ca.id }}</h3>
       <table class="min-w-full table-fixed border border-gray-200">
         <thead>
@@ -70,14 +70,14 @@ import { useTimetableStore } from '~/stores/timetableStore'
 import { useTimetableDnD } from '~/composables/useTimetableDnD'
 
 const props = defineProps({
-  klass: Object
+  class: Object
 })
 
 const timetable = useTimetableStore()
 const { classes } = storeToRefs(timetable)
 
-const ki = computed(() => classes.value.findIndex(c => c.id === props.klass?.id))
-const klass = computed(() => props.klass)
+const ki = computed(() => classes.value.findIndex(c => c.id === props.class?.id))
+const classData = computed(() => props.class)
 
 const {
   selectTeacherLesson,
@@ -99,10 +99,10 @@ const {
 } = useTimetableDnD()
 
 const stats = computed(() => {
-  const klassVal = props.klass
-  if (!klassVal) return []
+  const classVal = props.class
+  if (!classVal) return []
   const counts = {}
-  klassVal.timetable.ds_Ca.forEach(ca => {
+  classVal.timetable.ds_Ca.forEach(ca => {
     ca.ds_Ngay.forEach(day => {
       day.ds_Tiet.forEach(t => {
         if (!t.isBreak && t.subject) {
@@ -111,7 +111,7 @@ const stats = computed(() => {
       })
     })
   })
-  const limits = klassVal.limits || {}
+  const limits = classVal.limits || {}
   return Object.keys(limits).map(sub => ({ subject: sub, max: limits[sub], count: counts[sub] || 0 }))
 })
 </script>

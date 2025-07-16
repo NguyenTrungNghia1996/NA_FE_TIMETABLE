@@ -7,7 +7,7 @@
         </a-select-option>
       </a-select>
     </div>
-    <ClassTimetable :klass="currentClass" />
+    <ClassTimetable :class="currentClass" />
   </div>
 </template>
 
