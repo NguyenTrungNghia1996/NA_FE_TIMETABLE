@@ -24,4 +24,9 @@ export default defineNuxtConfig({
       baseURL: process.env.NUXT_PUBLIC_BASE_URL || "https://api-test-tkb.nguyenanh-est.com",
     },
   },
+  vite: {
+    build: {
+      sourcemap: false
+    }
+  }
 });
