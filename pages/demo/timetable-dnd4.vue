@@ -18,15 +18,26 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useTimetableStore } from '~/stores/timetableStore'
 import ClassTimetable from '~/components/ClassTimetable.vue'
 import TeacherTimetable from '~/components/TeacherTimetable.vue'
 
 const timetable = useTimetableStore()
-const { classes, teachers, selectedClassId, selectedTeacherId, currentClass, currentClassIndex, currentTeacher } = storeToRefs(timetable)
+const {
+  classes,
+  teachers,
+  selectedClassId,
+  selectedTeacherId,
+  currentClass,
+  currentClassIndex,
+  currentTeacher
+} = storeToRefs(timetable)
 
-timetable.init()
+onMounted(() => {
+  timetable.init()
+})
 </script>
 
 <style scoped></style>
