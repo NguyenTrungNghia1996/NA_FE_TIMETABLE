@@ -6,6 +6,7 @@ export const useTimetableStore = defineStore('timetable', {
     classes: [],
     teachers: [],
     teacherOptions: [],
+    teacherInfo: [],
     selectedClassId: null,
     selectedTeacherId: null
   }),
@@ -14,14 +15,21 @@ export const useTimetableStore = defineStore('timetable', {
   },
   actions: {
     async init() {
-      const data = await $fetch('/data/timetable.json')
-      this.classes = data
+      const [classData, teacherData] = await Promise.all([
+        $fetch('/data/timetable.json'),
+        $fetch('/data/teachers.json')
+      ])
+      this.classes = classData
+      this.teacherInfo = teacherData
       this.teachers = this.buildTeacherSchedules()
       this.teacherOptions = this.buildTeacherOptions()
       if (this.classes.length) this.selectedClassId = this.classes[0].id
       if (this.teachers.length) this.selectedTeacherId = this.teachers[0].id
     },
     buildTeacherOptions() {
+      if (this.teacherInfo.length) {
+        return this.teacherInfo.map(t => ({ id: t.id, name: t.name, subject: t.subject }))
+      }
       const map = {}
       this.classes.forEach(klass => {
         klass.timetable.ds_Ca.forEach(ca => {
