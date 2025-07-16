@@ -70,14 +70,14 @@ import { useTimetableStore } from '~/stores/timetableStore'
 import { useTimetableDnD } from '~/composables/useTimetableDnD'
 
 const props = defineProps({
-  class: Object
+  klass: Object
 })
 
 const timetable = useTimetableStore()
 const { classes } = storeToRefs(timetable)
 
-const ki = computed(() => classes.value.findIndex(c => c.id === props.class?.id))
-const classData = computed(() => props.class)
+const ki = computed(() => classes.value.findIndex(c => c.id === props.klass?.id))
+const classData = computed(() => props.klass)
 
 const {
   selectTeacherLesson,
@@ -99,7 +99,7 @@ const {
 } = useTimetableDnD()
 
 const stats = computed(() => {
-  const classVal = props.class
+  const classVal = props.klass
   if (!classVal) return []
   const counts = {}
   classVal.timetable.ds_Ca.forEach(ca => {

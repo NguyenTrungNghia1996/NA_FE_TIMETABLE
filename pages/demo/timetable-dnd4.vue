@@ -7,7 +7,7 @@
         </a-select-option>
       </a-select>
     </div>
-    <ClassTimetable v-bind="{ class: currentClass }" />
+    <ClassTimetable :klass="currentClass" />
   </div>
 </template>
 
