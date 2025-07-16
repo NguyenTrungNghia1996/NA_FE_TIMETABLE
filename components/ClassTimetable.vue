@@ -1,10 +1,10 @@
 <template>
-  <div v-if="klass" class="space-y-4" @click="closeMenu">
-    <h2 class="text-lg font-bold">{{ klass.name }}</h2>
+  <div v-if="classData" class="space-y-4" @click="closeMenu">
+    <h2 class="text-lg font-bold">{{ classData.name }}</h2>
     <div class="flex flex-wrap gap-2 text-sm">
       <span v-for="stat in stats" :key="stat.subject"> {{ stat.subject }}: {{ stat.count }}/{{ stat.max }} </span>
     </div>
-    <div v-for="(ca, caIndex) in klass.timetable.ds_Ca" :key="ca.id" class="space-y-2">
+    <div v-for="(ca, caIndex) in classData.timetable.ds_Ca" :key="ca.id" class="space-y-2">
       <h3 class="font-semibold">Ca {{ ca.id }}</h3>
       <table class="min-w-full table-fixed border border-gray-200">
         <thead>
@@ -65,12 +65,19 @@
 
 <script setup>
 import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useTimetableStore } from '~/stores/timetableStore'
 import { useTimetableDnD } from '~/composables/useTimetableDnD'
 
 const props = defineProps({
-  klass: Object,
-  ki: Number
+  klass: Object
 })
+
+const timetable = useTimetableStore()
+const { classes } = storeToRefs(timetable)
+
+const ki = computed(() => classes.value.findIndex(c => c.id === props.klass?.id))
+const classData = computed(() => props.klass)
 
 const {
   selectTeacherLesson,
@@ -92,10 +99,10 @@ const {
 } = useTimetableDnD()
 
 const stats = computed(() => {
-  const klass = props.klass
-  if (!klass) return []
+  const classVal = props.klass
+  if (!classVal) return []
   const counts = {}
-  klass.timetable.ds_Ca.forEach(ca => {
+  classVal.timetable.ds_Ca.forEach(ca => {
     ca.ds_Ngay.forEach(day => {
       day.ds_Tiet.forEach(t => {
         if (!t.isBreak && t.subject) {
@@ -104,7 +111,7 @@ const stats = computed(() => {
       })
     })
   })
-  const limits = klass.limits || {}
+  const limits = classVal.limits || {}
   return Object.keys(limits).map(sub => ({ subject: sub, max: limits[sub], count: counts[sub] || 0 }))
 })
 </script>
