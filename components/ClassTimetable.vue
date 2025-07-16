@@ -65,12 +65,19 @@
 
 <script setup>
 import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useTimetableStore } from '~/stores/timetableStore'
 import { useTimetableDnD } from '~/composables/useTimetableDnD'
 
 const props = defineProps({
-  klass: Object,
-  ki: Number
+  class: Object
 })
+
+const timetable = useTimetableStore()
+const { classes } = storeToRefs(timetable)
+
+const ki = computed(() => classes.value.findIndex(c => c.id === props.class?.id))
+const klass = computed(() => props.class)
 
 const {
   selectTeacherLesson,
@@ -92,10 +99,10 @@ const {
 } = useTimetableDnD()
 
 const stats = computed(() => {
-  const klass = props.klass
-  if (!klass) return []
+  const klassVal = props.class
+  if (!klassVal) return []
   const counts = {}
-  klass.timetable.ds_Ca.forEach(ca => {
+  klassVal.timetable.ds_Ca.forEach(ca => {
     ca.ds_Ngay.forEach(day => {
       day.ds_Tiet.forEach(t => {
         if (!t.isBreak && t.subject) {
@@ -104,7 +111,7 @@ const stats = computed(() => {
       })
     })
   })
-  const limits = klass.limits || {}
+  const limits = klassVal.limits || {}
   return Object.keys(limits).map(sub => ({ subject: sub, max: limits[sub], count: counts[sub] || 0 }))
 })
 </script>

@@ -6,14 +6,8 @@
           {{ k.name }}
         </a-select-option>
       </a-select>
-      <a-select v-model:value="selectedTeacherId" class="w-40" id="teacher-select">
-        <a-select-option v-for="t in teachers" :key="t.id" :value="t.id">
-          {{ t.name }}
-        </a-select-option>
-      </a-select>
     </div>
-    <ClassTimetable :klass="currentClass" :ki="currentClassIndex" />
-    <TeacherTimetable :teacher="currentTeacher" />
+    <ClassTimetable :class="currentClass" />
   </div>
 </template>
 
@@ -22,17 +16,12 @@
 // import { storeToRefs } from 'pinia'
 // import { useTimetableStore } from '~/stores/timetableStore'
 // import ClassTimetable from '~/components/ClassTimetable.vue'
-// import TeacherTimetable from '~/components/TeacherTimetable.vue'
 
 const timetable = useTimetableStore()
 const {
   classes,
-  teachers,
   selectedClassId,
-  selectedTeacherId,
-  currentClass,
-  currentClassIndex,
-  currentTeacher
+  currentClass
 } = storeToRefs(timetable)
 
 onMounted(async () => {
