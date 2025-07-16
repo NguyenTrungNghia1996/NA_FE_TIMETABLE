@@ -209,6 +209,12 @@ export const useTimetableDnD = () => {
       }
       return true
     })
+    options.sort((a, b) => {
+      const aSame = a.subject === lesson.subject
+      const bSame = b.subject === lesson.subject
+      if (aSame === bSame) return 0
+      return aSame ? -1 : 1
+    })
     if (!options.length) {
       showWarning('Không có môn học phù hợp')
       closeMenu()
