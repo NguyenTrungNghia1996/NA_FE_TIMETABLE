@@ -10,9 +10,7 @@ export const useTimetableStore = defineStore('timetable', {
     selectedTeacherId: null
   }),
   getters: {
-    currentClass: state => state.classes.find(c => c.id === state.selectedClassId),
-    currentClassIndex: state => state.classes.findIndex(c => c.id === state.selectedClassId),
-    currentTeacher: state => state.teachers.find(t => t.id === state.selectedTeacherId)
+    currentClass: state => state.classes.find(c => c.id === state.selectedClassId)
   },
   actions: {
     async init() {
