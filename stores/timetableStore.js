@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import timetableData from '~/public/data/timetable.json'
+import { $fetch } from 'ofetch'
 
 export const useTimetableStore = defineStore('timetable', {
   state: () => ({
@@ -15,8 +15,9 @@ export const useTimetableStore = defineStore('timetable', {
     currentTeacher: state => state.teachers.find(t => t.id === state.selectedTeacherId)
   },
   actions: {
-    init() {
-      this.classes = timetableData
+    async init() {
+      const data = await $fetch('/data/timetable.json')
+      this.classes = data
       this.teachers = this.buildTeacherSchedules()
       this.teacherOptions = this.buildTeacherOptions()
       if (this.classes.length) this.selectedClassId = this.classes[0].id

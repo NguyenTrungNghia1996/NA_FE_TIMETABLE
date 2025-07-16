@@ -35,8 +35,8 @@ const {
   currentTeacher
 } = storeToRefs(timetable)
 
-onMounted(() => {
-  timetable.init()
+onMounted(async () => {
+  await timetable.init()
 })
 </script>
 
