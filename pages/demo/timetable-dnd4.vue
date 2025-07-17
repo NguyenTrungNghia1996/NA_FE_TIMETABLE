@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 bg-white space-y-8">
+  <div class="p-4 bg-white space-y-2">
     <div class="flex space-x-4">
       <a-select v-model:value="selectedClassId" class="w-40" id="class-select">
         <a-select-option v-for="k in classes" :key="k.id" :value="k.id">

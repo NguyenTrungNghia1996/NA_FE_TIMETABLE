@@ -1,5 +1,5 @@
 <template>
-  <div v-if="classData" class="space-y-6 relative" @click="closeMenu">
+  <div v-if="classData" class="space-y-2 relative" @click="closeMenu">
     <h2 class="text-xl font-semibold text-gray-800">{{ classData.name }}</h2>
     <div class="flex flex-wrap gap-2 text-sm text-gray-600">
       <span
@@ -16,7 +16,7 @@
       class="space-y-3"
     >
       <h3 class="text-base font-medium text-gray-700">Ca {{ ca.id }}</h3>
-      <div class="overflow-auto rounded-lg shadow-sm border border-gray-200">
+      <div class="overflow-auto shadow-lg border border-gray-200">
         <table class="min-w-full table-fixed">
           <thead>
             <tr class="bg-gray-50 text-center text-xs font-semibold text-gray-500 uppercase">
@@ -26,11 +26,11 @@
           </thead>
           <tbody>
             <tr v-for="(tiet, tIndex) in ca.ds_Ngay[0].ds_Tiet" :key="tiet.id">
-              <td class="border bg-gray-50 text-center w-32 h-20 p-2">{{ tiet.ten }}</td>
+              <td class="border bg-gray-50 text-center w-32 h-10 p-2">{{ tiet.ten }}</td>
               <td
                 v-for="(day, dIndex) in ca.ds_Ngay"
                 :key="day.id"
-                class="border relative w-32 h-20 p-2 text-center overflow-hidden transition-colors"
+                class="border relative w-32 h-10 p-2 text-center overflow-hidden transition-colors"
                 :class="cellClass(ki, caIndex, dIndex, tIndex)"
                 @dragstart="dragStart($event, ki, caIndex, dIndex, tIndex)"
                 @dragenter.prevent="dragEnter($event, ki, caIndex, dIndex, tIndex)"
