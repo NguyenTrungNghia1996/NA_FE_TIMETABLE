@@ -40,6 +40,11 @@
                 @contextmenu.prevent="openMenu($event, ki, caIndex, dIndex, tIndex)"
                 @click="day.ds_Tiet[tIndex].teacherId && selectTeacherLesson(day.ds_Tiet[tIndex].teacherId)"
                 :draggable="!day.ds_Tiet[tIndex].isBreak"
+                :data-ki="ki"
+                :data-ci="caIndex"
+                :data-di="dIndex"
+                :data-ti="tIndex"
+                @touchstart.prevent="touchStart($event, ki, caIndex, dIndex, tIndex)"
               >
                 <template v-if="!day.ds_Tiet[tIndex].isBreak">
                   <div class="line-clamp-1">{{ day.ds_Tiet[tIndex].subject }}</div>
@@ -98,6 +103,7 @@ const classData = computed(() => props.klass)
 const {
   selectTeacherLesson,
   dragStart,
+  touchStart,
   dragEnter,
   dragOver,
   drop,

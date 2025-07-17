@@ -70,6 +70,54 @@ export const useTimetableDnD = () => {
     highlightValidCells()
   }
 
+  let touchMoveHandler
+  let touchEndHandler
+
+  function touchStart(e, ki, ci, di, ti) {
+    dragStart(e, ki, ci, di, ti)
+    touchMoveHandler = evt => touchMove(evt)
+    touchEndHandler = evt => touchEnd(evt)
+    document.addEventListener('touchmove', touchMoveHandler, { passive: false })
+    document.addEventListener('touchend', touchEndHandler)
+  }
+
+  function touchMove(e) {
+    const touch = e.touches[0]
+    if (!touch) return
+    const el = document.elementFromPoint(touch.clientX, touch.clientY)
+    const cell = el && el.closest('td[data-ki]')
+    if (cell) {
+      const ki = Number(cell.dataset.ki)
+      const ci = Number(cell.dataset.ci)
+      const di = Number(cell.dataset.di)
+      const ti = Number(cell.dataset.ti)
+      dragEnter(e, ki, ci, di, ti)
+      dragOver(e, ki, ci, di, ti)
+    }
+    e.preventDefault()
+  }
+
+  function touchEnd(e) {
+    document.removeEventListener('touchmove', touchMoveHandler)
+    document.removeEventListener('touchend', touchEndHandler)
+    const touch = e.changedTouches[0]
+    if (!touch) {
+      dragEnd()
+      return
+    }
+    const el = document.elementFromPoint(touch.clientX, touch.clientY)
+    const cell = el && el.closest('td[data-ki]')
+    if (cell) {
+      const ki = Number(cell.dataset.ki)
+      const ci = Number(cell.dataset.ci)
+      const di = Number(cell.dataset.di)
+      const ti = Number(cell.dataset.ti)
+      drop(e, ki, ci, di, ti)
+    } else {
+      dragEnd()
+    }
+  }
+
   function dragOver(e, ki, ci, di, ti) {
     e.dataTransfer.dropEffect = validCells.has(key(ki, ci, di, ti)) ? 'move' : 'none'
   }
@@ -356,6 +404,9 @@ export const useTimetableDnD = () => {
     selectTeacherLesson,
     teacherCellClick,
     dragStart,
+    touchStart,
+    touchMove,
+    touchEnd,
     dragEnter,
     dragOver,
     drop,
