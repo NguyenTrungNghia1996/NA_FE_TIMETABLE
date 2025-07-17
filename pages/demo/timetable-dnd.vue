@@ -70,7 +70,7 @@
         </div>
       </div>
     </div>
-    <div v-if="contextMenu.visible" :style="contextMenu.style" class="absolute bg-white border rounded shadow z-50 text-sm">
+    <div v-if="contextMenu.visible" :style="contextMenu.style" class="fixed bg-white border rounded shadow z-50 text-sm">
       <ul>
         <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click.stop="removeLesson()">Xóa tiết học</li>
         <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click.stop="toggleBreak()">
