@@ -61,6 +61,7 @@
       v-if="contextMenu.visible"
       :style="contextMenu.style"
       class="fixed bg-white border border-gray-200 rounded-md shadow-lg z-50 text-sm"
+      ref="menuRef"
     >
       <ul>
         <li class="px-4 py-2 hover:bg-gray-50 cursor-pointer" @click.stop="removeLesson()">Xóa tiết học</li>
@@ -85,7 +86,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, onBeforeUnmount } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useTimetableStore } from '~/stores/timetableStore'
 import { useTimetableDnD } from '~/composables/useTimetableDnD'
@@ -100,7 +101,7 @@ const { classes } = storeToRefs(timetable)
 const ki = computed(() => classes.value.findIndex(c => c.id === props.klass?.id))
 const classData = computed(() => props.klass)
 
-const {
+const { 
   selectTeacherLesson,
   dragStart,
   touchStart,
@@ -120,8 +121,25 @@ const {
   subjectSelect
 } = useTimetableDnD()
 
+const menuRef = ref(null)
+
 const lastTap = ref(0)
 const lastCell = ref('')
+
+function handleDocumentClick(e) {
+  if (!contextMenu.visible) return
+  if (menuRef.value && !menuRef.value.contains(e.target)) {
+    closeMenu()
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleDocumentClick)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleDocumentClick)
+})
 
 function handleTouchStart(e, ki, ci, di, ti) {
   const now = Date.now()
