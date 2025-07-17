@@ -44,7 +44,7 @@
                 :data-ci="caIndex"
                 :data-di="dIndex"
                 :data-ti="tIndex"
-                @touchstart.prevent="touchStart($event, ki, caIndex, dIndex, tIndex)"
+                @touchstart.prevent="handleTouchStart($event, ki, caIndex, dIndex, tIndex)"
               >
                 <template v-if="!day.ds_Tiet[tIndex].isBreak">
                   <div class="line-clamp-1">{{ day.ds_Tiet[tIndex].subject }}</div>
@@ -85,7 +85,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useTimetableStore } from '~/stores/timetableStore'
 import { useTimetableDnD } from '~/composables/useTimetableDnD'
@@ -119,6 +119,26 @@ const {
   contextMenu,
   subjectSelect
 } = useTimetableDnD()
+
+const lastTap = ref(0)
+const lastCell = ref('')
+
+function handleTouchStart(e, ki, ci, di, ti) {
+  const now = Date.now()
+  const key = `${ki}-${ci}-${di}-${ti}`
+  if (now - lastTap.value < 300 && lastCell.value === key) {
+    lastTap.value = 0
+    lastCell.value = ''
+    const touch = e.touches[0]
+    if (touch) {
+      openMenu({ clientX: touch.clientX, clientY: touch.clientY }, ki, ci, di, ti)
+    }
+  } else {
+    lastTap.value = now
+    lastCell.value = key
+    touchStart(e, ki, ci, di, ti)
+  }
+}
 
 const stats = computed(() => {
   const classVal = props.klass

@@ -119,7 +119,10 @@ export const useTimetableDnD = () => {
   }
 
   function dragOver(e, ki, ci, di, ti) {
-    e.dataTransfer.dropEffect = validCells.has(key(ki, ci, di, ti)) ? 'move' : 'none'
+    // e.dataTransfer.dropEffect = validCells.has(key(ki, ci, di, ti)) ? 'move' : 'none'
+     if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = validCells.has(key(ki, ci, di, ti)) ? 'move' : 'none'
+    }
   }
 
   function dragEnter(e, ki, ci, di, ti) {
