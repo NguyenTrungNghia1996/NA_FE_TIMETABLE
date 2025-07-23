@@ -1,10 +1,26 @@
 <template>
   <div class="p-2 md:p-4 bg-white min-h-full space-y-4">
     <h1 class="text-xl font-bold text-blue-700 uppercase">DANH SÁCH MÔN HỌC CỦA KHỐI</h1>
-    <a-form layout="inline" class="flex flex-wrap gap-2">
-      <SelectGradeLevel v-model="filters.grade" :rules="[{ required: true, message: 'Bắt buộc' }]" />
-      <SelectExpertise v-model="filters.major" label="Ban học" :rules="[{ required: true, message: 'Bắt buộc' }]" />
-      <SelectSchoolShift v-model="filters.shift" :rules="[{ required: true, message: 'Bắt buộc' }]" />
+    <a-form
+      layout="inline"
+      class="grid grid-cols-1 md:grid-cols-3 gap-2 items-end"
+    >
+      <SelectGradeLevel
+        v-model="filters.grade"
+        :rules="[{ required: true, message: 'Bắt buộc' }]"
+        class="w-full"
+      />
+      <SelectExpertise
+        v-model="filters.major"
+        label="Ban học"
+        :rules="[{ required: true, message: 'Bắt buộc' }]"
+        class="w-full"
+      />
+      <SelectSchoolShift
+        v-model="filters.shift"
+        :rules="[{ required: true, message: 'Bắt buộc' }]"
+        class="w-full"
+      />
     </a-form>
 
     <div class="flex gap-6">
