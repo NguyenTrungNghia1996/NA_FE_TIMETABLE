@@ -2,8 +2,9 @@
   <div class="p-2 md:p-4 bg-white min-h-full space-y-4">
     <h1 class="text-xl font-bold text-blue-700 uppercase">DANH SÁCH MÔN HỌC CỦA KHỐI</h1>
     <a-form
-      layout="inline"
-      class="grid grid-cols-1 md:grid-cols-3 gap-2 items-end"
+      :model="filters"
+      layout="vertical"
+      class="grid grid-cols-3 gap-2"
     >
       <SelectGradeLevel
         v-model="filters.grade"
