@@ -24,10 +24,15 @@
       />
     </a-form>
 
-    <div class="flex gap-6">
-      <div>Tổng cộng: <span class="font-semibold">{{ summary.total }}</span> tiết/tuần</div>
-      <div>Ca sáng: <span class="font-semibold">{{ summary.morning }}</span> tiết/tuần</div>
-      <div>Ca chiều: <span class="font-semibold">{{ summary.afternoon }}</span> tiết/tuần</div>
+    <div class="flex gap-2 mt-4">
+      <a-button
+        type="primary"
+        class="bg-green-600 border-green-600 hover:border-green-600 hover:bg-green-600/80"
+        @click="handleAvoid"
+      >
+        Tiết tránh xếp
+      </a-button>
+      <a-button type="primary" @click="handleUpdate">Cập nhật</a-button>
     </div>
 
     <ClientOnly>
@@ -40,6 +45,25 @@
         :pagination="false"
         :scroll="{ x: 'max-content' }"
       >
+        <template #title>
+          <div class="flex gap-6">
+            <div>
+              Tổng cộng:
+              <span class="font-semibold">{{ summary.total }}</span>
+              tiết/tuần
+            </div>
+            <div>
+              Ca sáng:
+              <span class="font-semibold">{{ summary.morning }}</span>
+              tiết/tuần
+            </div>
+            <div>
+              Ca chiều:
+              <span class="font-semibold">{{ summary.afternoon }}</span>
+              tiết/tuần
+            </div>
+          </div>
+        </template>
         <template #bodyCell="{ column, record, index }">
           <template v-if="column.key === 'stt'">{{ index + 1 }}</template>
 
@@ -86,10 +110,6 @@
       </a-table>
     </ClientOnly>
 
-    <div class="flex justify-end gap-2 mt-4">
-      <a-button type="primary" class="bg-green-600 border-green-600 hover:border-green-600 hover:bg-green-600/80" @click="handleAvoid">Tiết tránh xếp</a-button>
-      <a-button type="primary" @click="handleUpdate">Cập nhật</a-button>
-    </div>
   </div>
 </template>
 
