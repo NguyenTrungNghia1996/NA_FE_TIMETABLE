@@ -14,23 +14,54 @@
     </div>
 
     <ClientOnly>
-      <a-table :columns="columns" :data-source="subjects" bordered size="small" :pagination="false" :scroll="{ x: 'max-content' }">
+      <a-table
+        row-key="id"
+        :columns="columns"
+        :data-source="subjects"
+        bordered
+        size="small"
+        :pagination="false"
+        :scroll="{ x: 'max-content' }"
+      >
         <template #bodyCell="{ column, record, index }">
           <template v-if="column.key === 'stt'">{{ index + 1 }}</template>
-          <template v-if="column.key === 'morning'">
-            <div v-if="record.selected" class="flex items-center space-x-2">
-              <a-input-number v-model:value="record.morning.period" :min="0" />
-              <a-input-number v-model:value="record.morning.group" :min="0" />
-            </div>
-            <template v-else>{{ record.morning.period }} / {{ record.morning.group }}</template>
+
+          <template v-if="column.key === 'morningPeriod'">
+            <a-input-number
+              v-if="record.selected"
+              v-model:value="record.morning.period"
+              :min="0"
+            />
+            <template v-else>{{ record.morning.period }}</template>
           </template>
-          <template v-if="column.key === 'afternoon'">
-            <div v-if="record.selected" class="flex items-center space-x-2">
-              <a-input-number v-model:value="record.afternoon.period" :min="0" />
-              <a-input-number v-model:value="record.afternoon.group" :min="0" />
-            </div>
-            <template v-else>{{ record.afternoon.period }} / {{ record.afternoon.group }}</template>
+
+          <template v-if="column.key === 'morningGroup'">
+            <a-input-number
+              v-if="record.selected"
+              v-model:value="record.morning.group"
+              :min="0"
+            />
+            <template v-else>{{ record.morning.group }}</template>
           </template>
+
+          <template v-if="column.key === 'afternoonPeriod'">
+            <a-input-number
+              v-if="record.selected"
+              v-model:value="record.afternoon.period"
+              :min="0"
+            />
+            <template v-else>{{ record.afternoon.period }}</template>
+          </template>
+
+          <template v-if="column.key === 'afternoonGroup'">
+            <a-input-number
+              v-if="record.selected"
+              v-model:value="record.afternoon.group"
+              :min="0"
+            />
+            <template v-else>{{ record.afternoon.group }}</template>
+          </template>
+
           <template v-if="column.key === 'choose'">
             <a-switch v-model:checked="record.selected" />
           </template>
@@ -65,13 +96,35 @@ const subjects = ref([
   }
 ])
 
+watch(
+  subjects,
+  (val) => {
+    summary.total = val.reduce((s, r) => s + (r.weekly || 0), 0)
+    summary.morning = val.reduce((s, r) => s + (r.morning.period || 0), 0)
+    summary.afternoon = val.reduce((s, r) => s + (r.afternoon.period || 0), 0)
+  },
+  { deep: true, immediate: true }
+)
+
 const columns = [
   { title: 'STT', key: 'stt', width: 60, align: 'center' },
   { title: 'Tên môn học', dataIndex: 'name', key: 'name' },
   { title: 'Số tiết/tuần', dataIndex: 'weekly', key: 'weekly', align: 'center' },
-  { title: 'Ca sáng', key: 'morning', align: 'center' },
-  { title: 'Ca chiều', key: 'afternoon', align: 'center' },
-  { title: 'Chọn', key: 'choose', align: 'center' }
+  {
+    title: 'Ca sáng',
+    children: [
+      { title: 'Số tiết', key: 'morningPeriod', align: 'center', width: 100 },
+      { title: 'Số nhóm', key: 'morningGroup', align: 'center', width: 100 }
+    ]
+  },
+  {
+    title: 'Ca chiều',
+    children: [
+      { title: 'Số tiết', key: 'afternoonPeriod', align: 'center', width: 100 },
+      { title: 'Số nhóm', key: 'afternoonGroup', align: 'center', width: 100 }
+    ]
+  },
+  { title: 'Chọn', key: 'choose', align: 'center', width: 80 }
 ]
 
 const handleAvoid = () => {
