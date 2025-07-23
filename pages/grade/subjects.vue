@@ -37,6 +37,17 @@
 
     <ClientOnly>
       <a-table
+        row-key="index"
+        :columns="summaryColumns"
+        :data-source="summaryData"
+        bordered
+        size="small"
+        :pagination="false"
+        title="TỔNG SỐ TIẾT HỌC"
+        class="mb-4"
+      />
+
+      <a-table
         row-key="id"
         :columns="columns"
         :data-source="subjects"
@@ -45,25 +56,6 @@
         :pagination="false"
         :scroll="{ x: 'max-content' }"
       >
-        <template #title>
-          <div class="flex gap-6">
-            <div>
-              Tổng cộng:
-              <span class="font-semibold">{{ summary.total }}</span>
-              tiết/tuần
-            </div>
-            <div>
-              Ca sáng:
-              <span class="font-semibold">{{ summary.morning }}</span>
-              tiết/tuần
-            </div>
-            <div>
-              Ca chiều:
-              <span class="font-semibold">{{ summary.afternoon }}</span>
-              tiết/tuần
-            </div>
-          </div>
-        </template>
         <template #bodyCell="{ column, record, index }">
           <template v-if="column.key === 'stt'">{{ index + 1 }}</template>
 
@@ -121,6 +113,13 @@ const filters = reactive({
 })
 
 const summary = reactive({ total: 0, morning: 0, afternoon: 0 })
+const summaryData = ref([{ total: 29, morning: 18, afternoon: 11 }])
+
+const summaryColumns = [
+  { title: 'Tổng số tiết/tuần', dataIndex: 'total', key: 'total', align: 'center' },
+  { title: 'Ca sáng', dataIndex: 'morning', key: 'morning', align: 'center' },
+  { title: 'Ca chiều', dataIndex: 'afternoon', key: 'afternoon', align: 'center' }
+]
 
 const subjects = ref([
   {
@@ -139,6 +138,13 @@ watch(
     summary.total = val.reduce((s, r) => s + (r.weekly || 0), 0)
     summary.morning = val.reduce((s, r) => s + (r.morning.period || 0), 0)
     summary.afternoon = val.reduce((s, r) => s + (r.afternoon.period || 0), 0)
+    summaryData.value = [
+      {
+        total: summary.total,
+        morning: summary.morning,
+        afternoon: summary.afternoon
+      }
+    ]
   },
   { deep: true, immediate: true }
 )
