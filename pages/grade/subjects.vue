@@ -31,7 +31,7 @@
           </template>
 
           <template v-if="column.key === 'afternoonPeriod'">
-            <a-input-number v-if="record.selected" v-model:value="record.afternoon.period" :min="0" size="small"/>
+            <a-input-number v-if="record.selected" v-model:value="record.afternoon.period" :min="0" size="small" />
             <template v-else>{{ record.afternoon.period }}</template>
           </template>
 
@@ -41,7 +41,7 @@
           </template>
 
           <template v-if="column.key === 'choose'">
-            <a-switch v-model:checked="record.selected" size="small"/>
+            <a-switch v-model:checked="record.selected" size="small" />
           </template>
         </template>
       </a-table>
@@ -80,6 +80,14 @@ const subjects = ref([
   {
     id: 1,
     name: 'Toán',
+    weekly: 4,
+    morning: { period: 2, group: 1 },
+    afternoon: { period: 2, group: 1 },
+    selected: true
+  },
+  {
+    id: 2,
+    name: 'Văn',
     weekly: 4,
     morning: { period: 2, group: 1 },
     afternoon: { period: 2, group: 1 },
