@@ -1,102 +1,47 @@
 <template>
   <div class="p-2 md:p-4 bg-white min-h-full space-y-4">
     <h1 class="text-xl font-bold text-blue-700 uppercase">DANH SÁCH MÔN HỌC CỦA KHỐI</h1>
-    <a-form
-      :model="filters"
-      layout="vertical"
-      class="grid grid-cols-3 gap-2"
-    >
-      <SelectGradeLevel
-        v-model="filters.grade"
-        :rules="[{ required: true, message: 'Bắt buộc' }]"
-        class="w-full"
-      />
-      <SelectExpertise
-        v-model="filters.major"
-        label="Ban học"
-        :rules="[{ required: true, message: 'Bắt buộc' }]"
-        class="w-full"
-      />
-      <SelectSchoolShift
-        v-model="filters.shift"
-        :rules="[{ required: true, message: 'Bắt buộc' }]"
-        class="w-full"
-      />
-    </a-form>
-
-    <div class="flex gap-2 mt-4">
-      <a-button
-        type="primary"
-        class="bg-green-600 border-green-600 hover:border-green-600 hover:bg-green-600/80"
-        @click="handleAvoid"
-      >
+    <div class="flex justify-end space-x-1.5">
+      <a-button type="primary" class="bg-green-600 border-green-600 hover:border-green-600 hover:bg-green-600/80" @click="handleAvoid">
         Tiết tránh xếp
       </a-button>
       <a-button type="primary" @click="handleUpdate">Cập nhật</a-button>
     </div>
-
     <ClientOnly>
-      <a-table
-        row-key="index"
-        :columns="summaryColumns"
-        :data-source="summaryData"
-        bordered
-        size="small"
-        :pagination="false"
-        title="TỔNG SỐ TIẾT HỌC"
-        class="mb-4"
-      />
-
-      <a-table
-        row-key="id"
-        :columns="columns"
-        :data-source="subjects"
-        bordered
-        size="small"
-        :pagination="false"
-        :scroll="{ x: 'max-content' }"
-      >
+      <a-table row-key="index" :columns="summaryColumns" :data-source="summaryData" bordered size="small" :pagination="false" class="flex justify-center" />
+    </ClientOnly>
+    <a-form :model="filters" layout="vertical" :rules="rules" class="grid grid-cols-3 gap-2">
+      <SelectGradeLevel v-model="filters.grade" name="grade" :rules="rules.grade" class="w-full" />
+      <SelectExpertise v-model="filters.major" name="major" :rules="rules.major" class="w-full" />
+      <SelectSchoolShift v-model="filters.shift" name="shift" :rules="rules.shift" class="w-full" />
+    </a-form>
+    <ClientOnly>
+      <a-table row-key="id" :columns="columns" :data-source="subjects" bordered size="small" :pagination="false" :scroll="{ x: 'max-content' }">
         <template #bodyCell="{ column, record, index }">
           <template v-if="column.key === 'stt'">{{ index + 1 }}</template>
 
           <template v-if="column.key === 'morningPeriod'">
-            <a-input-number
-              v-if="record.selected"
-              v-model:value="record.morning.period"
-              :min="0"
-            />
+            <a-input-number v-if="record.selected" v-model:value="record.morning.period" :min="0" size="small" />
             <template v-else>{{ record.morning.period }}</template>
           </template>
 
           <template v-if="column.key === 'morningGroup'">
-            <a-input-number
-              v-if="record.selected"
-              v-model:value="record.morning.group"
-              :min="0"
-            />
+            <a-input-number v-if="record.selected" v-model:value="record.morning.group" :min="0" size="small" />
             <template v-else>{{ record.morning.group }}</template>
           </template>
 
           <template v-if="column.key === 'afternoonPeriod'">
-            <a-input-number
-              v-if="record.selected"
-              v-model:value="record.afternoon.period"
-              :min="0"
-            />
+            <a-input-number v-if="record.selected" v-model:value="record.afternoon.period" :min="0" size="small"/>
             <template v-else>{{ record.afternoon.period }}</template>
           </template>
 
           <template v-if="column.key === 'afternoonGroup'">
-            <a-input-number
-              v-if="record.selected"
-              v-model:value="record.afternoon.group"
-              :min="0"
-            />
+            <a-input-number v-if="record.selected" v-model:value="record.afternoon.group" :min="0" size="small" />
             <template v-else>{{ record.afternoon.group }}</template>
           </template>
 
           <template v-if="column.key === 'choose'">
-            <a-switch v-model:checked="record.selected" />
+            <a-switch v-model:checked="record.selected" size="small"/>
           </template>
         </template>
       </a-table>
@@ -111,7 +56,17 @@ const filters = reactive({
   major: undefined,
   shift: undefined
 })
-
+const rules = {
+  grade: [
+    { required: true, message: 'Bắt buộc', trigger: 'blur' }
+  ],
+  major: [
+    { required: true, message: 'Bắt buộc', trigger: 'blur' }
+  ],
+  shift: [
+    { required: true, message: 'Bắt buộc', trigger: 'blur' }
+  ],
+}
 const summary = reactive({ total: 0, morning: 0, afternoon: 0 })
 const summaryData = ref([{ total: 29, morning: 18, afternoon: 11 }])
 
@@ -179,5 +134,4 @@ const handleUpdate = () => {
 }
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
