@@ -30,9 +30,12 @@ const loading = ref(false);
 const fetchClassrooms = async (search = "") => {
   loading.value = true;
   try {
-    const { data } = await RestApi.classroom.list({
-      params: { search, id_Loai_phong_hoc: props.idLoaiPhonghoc },
-    });
+    const params = {};
+    if (search) params.search = search;
+    if (props.idLoaiPhonghoc) params.id_Loai_phong_hoc = props.idLoaiPhonghoc;
+    const { data } = await RestApi.classroom.list(
+      Object.keys(params).length ? { params } : {},
+    );
     if (data.value?.data?.items) {
       options.value = data.value.data.items.map(item => ({
         label: item.ten,
