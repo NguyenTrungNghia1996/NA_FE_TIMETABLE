@@ -62,6 +62,7 @@
           <a-form-item label="Số tiết tối đa hai ca" name="So_tiet_toi_da_hai_ca">
             <a-input-number v-model:value="formState.So_tiet_toi_da_hai_ca" :min="1" style="width: 100%" />
           </a-form-item>
+          <SelectClassroom v-model="formState.id_phong" name="classroomByType" :idLoaiPhonghoc="formState.Id_loai_phong_hoc" />
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
           <a-form-item>
@@ -197,7 +198,8 @@ const formState = reactive({
   Xep_thanh_cap: false,
   So_tiet_toi_da_mot_ca: 1,
   So_tiet_toi_da_hai_ca: 2,
-  La_mon_tu_chon: false
+  La_mon_tu_chon: false,
+  id_phong:[]
 })
 
 const rules = reactive({
