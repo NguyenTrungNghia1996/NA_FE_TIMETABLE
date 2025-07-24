@@ -33,7 +33,6 @@
 
     <!-- Filter Section -->
     <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-      {{ filters }}
       <h2 class="text-lg font-semibold text-gray-700 mb-3">LỌC THÔNG TIN</h2>
       <a-form :model="filters" layout="vertical" :rules="rules" class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <SelectGradeLevel v-model="filters.grade" name="grade" :rules="rules.grade" placeholder="Chọn khối lớp" />
