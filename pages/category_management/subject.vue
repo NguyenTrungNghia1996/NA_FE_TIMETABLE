@@ -62,7 +62,13 @@
           <a-form-item label="Số tiết tối đa hai ca" name="So_tiet_toi_da_hai_ca">
             <a-input-number v-model:value="formState.So_tiet_toi_da_hai_ca" :min="1" style="width: 100%" />
           </a-form-item>
-          <SelectClassroom v-model="formState.id_phong" name="classroomByType" :idLoaiPhonghoc="formState.Id_loai_phong_hoc" :multiple="true" />
+          <SelectClassroom
+            v-if="formState.Id_loai_phong_hoc"
+            v-model="formState.id_phong"
+            name="classroomByType"
+            :idLoaiPhonghoc="formState.Id_loai_phong_hoc"
+            :multiple="true"
+          />
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
           <a-form-item>
@@ -131,7 +137,7 @@
 <script setup>
 const settingStore = useSettingStore()
 const { RestApi } = useApi()
-import { h } from 'vue'
+import { h, watch } from 'vue'
 
 const searchText = ref('')
 const loading = ref(false)
@@ -216,6 +222,13 @@ const rules = reactive({
     { required: true, message: 'Vui lòng nhập số tiết', trigger: 'blur', type: 'number' }
   ]
 })
+
+watch(
+  () => formState.Id_loai_phong_hoc,
+  () => {
+    formState.id_phong = []
+  }
+)
 
 const fetchData = async (param) => {
   try {
