@@ -3,34 +3,22 @@
     <div class="overflow-auto rounded-lg shadow border border-gray-200">
       <table class="w-full border-collapse">
         <thead>
-          <tr class="bg-gray-50 text-center text-sm font-medium text-gray-600 uppercase tracking-wider">
+          <tr class="bg-gray-50 text-center text-sm font-medium text-gray-600 tracking-wider">
             <th class="border p-3 w-20">Tiết / Ngày</th>
-            <th
-              v-for="ngay in block.ds_Ngay"
-              :key="ngay.id"
-              class="border p-3 min-w-[100px]"
-            >
-              {{ ngay.ten }}
+            <th v-for="ngay in block.ds_Ngay" :key="ngay.id" class="border p-3 min-w-[100px]">
+              {{ getDayName(ngay.id - 1) }}
             </th>
           </tr>
         </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="bg-white divide-y divide-gray-200">
           <tr v-for="(tiet, tietIndex) in block.ds_Ngay[0].ds_Tiet" :key="tiet.id">
             <td class="border text-center text-sm font-medium bg-gray-50 p-2">
-              {{ tiet.ten }}
+              Tiết {{ tietIndex + 1 }}
             </td>
-            <td
-              v-for="ngay in block.ds_Ngay"
-              :key="ngay.id"
-              @mousedown.left.prevent="startDrag(tietIndex + 1, ngay.id)"
-              @mouseover="dragOver(tietIndex + 1, ngay.id)"
-              @contextmenu.prevent="openContextMenu($event, tietIndex + 1, ngay.id)"
-              :class="[
-                'border text-center text-sm font-medium transition-colors duration-150',
-                getCellClass(tietIndex + 1, ngay.id)
-              ]"
-              style="height: 40px;"
-            >
+            <td v-for="ngay in block.ds_Ngay" :key="ngay.id" @mousedown.left.prevent="startDrag(tietIndex + 1, ngay.id)" @mouseover="dragOver(tietIndex + 1, ngay.id)" @contextmenu.prevent="openContextMenu($event, tietIndex + 1, ngay.id)" :class="[
+              'border text-center text-sm font-medium transition-colors duration-150',
+              getCellClass(tietIndex + 1, ngay.id)
+            ]" style="height: 40px;">
               <div class="w-full h-full flex items-center justify-center">
                 {{ getDisplay(tietIndex + 1, ngay.id) }}
               </div>
@@ -41,31 +29,17 @@
     </div>
 
     <!-- Context menu -->
-    <div
-      v-if="contextMenu.visible"
-      class="absolute bg-white border border-gray-200 rounded-md shadow-lg z-50 py-1"
-      :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px', width: '220px' }"
-      @mouseleave="contextMenu.visible = false"
-    >
+    <div v-if="contextMenu.visible" class="absolute bg-white border border-gray-200 rounded-md shadow-lg z-50 py-1" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px', width: '220px' }" @mouseleave="contextMenu.visible = false">
       <ul class="divide-y divide-gray-100">
-        <li 
-          class="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-2 text-gray-700"
-          @click="applyToSelected(true)"
-        >
+        <li class="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-2 text-gray-700" @click="applyToSelected(true)">
           <span class="text-red-500">✖</span>
           <span class="font-medium">Không được xếp</span>
         </li>
-        <li 
-          class="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-2 text-gray-700"
-          @click="applyToSelected(false)"
-        >
+        <li class="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-2 text-gray-700" @click="applyToSelected(false)">
           <span class="text-green-500">✓</span>
           <span class="font-medium">Xếp được</span>
         </li>
-        <li 
-          class="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-2 text-red-500"
-          @click="clearAll()"
-        >
+        <li class="px-4 py-2 hover:bg-gray-50 cursor-pointer flex items-center gap-2 text-red-500" @click="clearAll()">
           <span>🗑️</span>
           <span class="font-medium">Xóa toàn bộ</span>
         </li>
@@ -75,7 +49,10 @@
 </template>
 
 <script setup>
-
+const daysVi = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật']
+function getDayName(index) {
+  return daysVi[index]
+}
 const props = defineProps({
   block: {
     type: Object,
