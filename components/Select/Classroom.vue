@@ -32,7 +32,7 @@ const fetchClassrooms = async (search = "") => {
   try {
     const params = {};
     if (search) params.search = search;
-    if (props.idLoaiPhonghoc) params.id_Loai_phong_hoc = props.idLoaiPhonghoc;
+    if (props.idLoaiPhonghoc) params.idLoaiPhonghoc = props.idLoaiPhonghoc;
     const { data } = await RestApi.classroom.list(
       Object.keys(params).length ? { params } : {},
     );
