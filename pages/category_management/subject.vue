@@ -238,8 +238,10 @@ const rules = reactive({
 
 watch(
   () => formState.Id_loai_phong_hoc,
-  () => {
-    formState.id_phong = []
+  (val, oldVal) => {
+    if (oldVal !== undefined && val !== oldVal) {
+      formState.id_phong = []
+    }
   }
 )
 
@@ -335,7 +337,8 @@ const editItem = async (record) => {
         Xep_thanh_cap: data.value.data.xep_thanh_cap,
         So_tiet_toi_da_mot_ca: data.value.data.so_tiet_toi_da_mot_ca,
         So_tiet_toi_da_hai_ca: data.value.data.so_tiet_toi_da_hai_ca,
-        La_mon_tu_chon: data.value.data.la_mon_tu_chon
+        La_mon_tu_chon: data.value.data.la_mon_tu_chon,
+        id_phong: data.value.data.id_phong
       })
       visible.value = true
     }
