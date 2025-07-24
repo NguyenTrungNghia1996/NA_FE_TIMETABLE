@@ -51,6 +51,14 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa môn học' : 'Thêm mới môn học'" @cancel="handleCancel" :width="700">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <a-form-item label="Mã môn học" name="ma">
+            <a-input
+              v-model:value="formState.ma"
+              placeholder="Nhập mã môn học"
+              :maxlength="20"
+              show-count
+            />
+          </a-form-item>
           <a-form-item label="Tên môn học" name="ten">
             <a-input v-model:value="formState.ten" placeholder="Nhập tên môn học" :maxlength="200" show-count />
           </a-form-item>
@@ -195,6 +203,7 @@ const param = ref({ PageIndex: 1, PageSize: 10, search: '' })
 const dataSource = ref([])
 
 const formState = reactive({
+  ma: '',
   ten: '',
   Id_loai_phong_hoc: undefined,
   Id_khoi_kien_thuc: [],
@@ -205,10 +214,14 @@ const formState = reactive({
   So_tiet_toi_da_mot_ca: 1,
   So_tiet_toi_da_hai_ca: 2,
   La_mon_tu_chon: false,
-  id_phong:[]
+  id_phong: []
 })
 
 const rules = reactive({
+  ma: [
+    { required: true, message: 'Vui lòng nhập mã môn học', trigger: 'blur' },
+    { max: 20, message: 'Mã môn học tối đa 20 ký tự', trigger: 'blur' }
+  ],
   ten: [
     { required: true, message: 'Vui lòng nhập tên môn học', trigger: 'blur' }
   ],
@@ -289,6 +302,7 @@ const selectSubject = async (record) => {
 const showModal = () => {
   isEdit.value = false
   Object.assign(formState, {
+    ma: '',
     ten: '',
     Id_loai_phong_hoc: undefined,
     Id_khoi_kien_thuc: [],
@@ -298,7 +312,8 @@ const showModal = () => {
     Xep_thanh_cap: false,
     So_tiet_toi_da_mot_ca: 1,
     So_tiet_toi_da_hai_ca: 2,
-    La_mon_tu_chon: false
+    La_mon_tu_chon: false,
+    id_phong: []
   })
   visible.value = true
 }
@@ -310,6 +325,7 @@ const editItem = async (record) => {
     if (data.value?.status === 'success') {
       Object.assign(formState, {
         id: data.value.data.id,
+        ma: data.value.data.ma,
         ten: data.value.data.ten,
         Id_loai_phong_hoc: data.value.data.id_loai_phong_hoc,
         Id_khoi_kien_thuc: data.value.data.id_khoi_kien_thuc,
