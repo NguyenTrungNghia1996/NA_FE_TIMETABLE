@@ -53,6 +53,8 @@ let ENDPOINTS = {
   FIXED_LESSON: "/api/tietcodinh",
   FIXED_LESSON_DETAIL: "/api/tietcodinh/detail",
   ///api/phonghoc/tietban
+
+  SUBJECT_GRADE_LEVEL: "/api/monhoc/monkhoilop",
   S3: "/api/presigned_url",
 };
 import { useUserStore } from "~~/stores/userStore";
@@ -152,6 +154,7 @@ class RestApi {
     this.school_day = new SchoolDay(this.request);
     this.school_period = new SchoolPeriod(this.request);
     this.fixed_lesson = new FixedLesson(this.request);
+    this.subject_grade_level = new SubjectGradeLevel(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -263,7 +266,6 @@ class SchoolShift {
     return await this.request.delete(ENDPOINTS.SCHOOL_SHIFT, data);
   }
 }
-
 class SchoolShip {
   constructor() {
     this.request = new Request();
@@ -536,7 +538,6 @@ class SchoolPeriod {
     return await this.request.delete(ENDPOINTS.SCHOOL_PERIOD, data);
   }
 }
-
 class FixedLesson {
   constructor() {
     this.request = new Request();
@@ -555,6 +556,27 @@ class FixedLesson {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.FIXED_LESSON, data);
+  }
+}
+
+class SubjectGradeLevel{
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.SUBJECT_GRADE_LEVEL, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.SUBJECT_GRADE_LEVEL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.SUBJECT_GRADE_LEVEL, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.SUBJECT_GRADE_LEVEL, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.SUBJECT_GRADE_LEVEL, data);
   }
 }
 export default () => {
