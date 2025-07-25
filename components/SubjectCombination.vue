@@ -2,33 +2,23 @@
   <div class="p-4">
     <div class="grid grid-cols-3 gap-4">
       <div class="w-full">
-        <a-form layout="vertical">
-          <a-form-item label="Khối lớp" class="mb-3">
-            <a-select class="w-full h-8" :options="gradeOptions" />
-          </a-form-item>
-          <a-form-item label="Ban học" class="mb-3">
-            <a-select class="w-full h-8" :options="banOptions" />
-          </a-form-item>
-          <a-form-item label="Tên tổ hợp" class="mb-3">
-            <a-input class="w-full h-8" />
+        <a-form layout="vertical" :model="form" :rules="rules">
+          <SelectGradeLevel v-model="form.grade" class="mb-3" name="grade" label="Khối lớp" />
+          <SelectSchoolship v-model="form.major" class="mb-3" name="major" label="Ban học" />
+          <a-form-item label="Tên tổ hợp" name="name" class="mb-3" :rules="rules.name">
+            <a-input v-model:value="form.name" class="w-full h-8" />
           </a-form-item>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <a-form-item label="Môn 1">
-              <a-select class="w-full h-8" :options="subjectOptions" />
-            </a-form-item>
-            <a-form-item label="Môn 2">
-              <a-select class="w-full h-8" :options="subjectOptions" />
-            </a-form-item>
-            <a-form-item label="Môn 3">
-              <a-select class="w-full h-8" :options="subjectOptions" />
-            </a-form-item>
+            <SelectSubject v-model="form.subject1" label="Môn 1" name="subject1" />
+            <SelectSubject v-model="form.subject2" label="Môn 2" name="subject2" />
+            <SelectSubject v-model="form.subject3" label="Môn 3" name="subject3" />
           </div>
           <div class="grid grid-cols-2">
-            <a-form-item label="Số tiết 1 ca">
-              <a-input-number class="w-full h-8" :min="0" />
+            <a-form-item label="Số tiết tối đa một ca học" name="maxPeriod" :rules="rules.maxPeriod">
+              <a-input-number v-model:value="form.maxPeriod" class="w-full h-8" :min="0" />
             </a-form-item>
             <a-form-item label="Số tiết 2 ca">
-              <a-input-number class="w-full h-8" :min="0" />
+              <a-input-number v-model:value="form.period2" class="w-full h-8" :min="0" />
             </a-form-item>
           </div>
           <div class="flex flex-wrap gap-2 mt-4">
@@ -61,24 +51,21 @@
 </template>
 
 <script setup>
-const gradeOptions = [
-  { label: 'Khối 10', value: 10 },
-  { label: 'Khối 11', value: 11 },
-  { label: 'Khối 12', value: 12 }
-]
+const form = reactive({
+  grade: undefined,
+  major: undefined,
+  name: '',
+  subject1: undefined,
+  subject2: undefined,
+  subject3: undefined,
+  maxPeriod: undefined,
+  period2: undefined,
+})
 
-const banOptions = [
-  { label: 'Ban A', value: 'A' },
-  { label: 'Ban B', value: 'B' },
-  { label: 'Ban C', value: 'C' }
-]
-
-const subjectOptions = [
-  { label: 'Toán', value: 'toan' },
-  { label: 'Lý', value: 'ly' },
-  { label: 'Hóa', value: 'hoa' },
-  { label: 'Anh', value: 'anh' }
-]
+const rules = {
+  name: [{ required: true, message: 'Vui lòng nhập tên tổ hợp' }],
+  maxPeriod: [{ required: true, message: 'Vui lòng nhập số tiết tối đa' }],
+}
 
 const columns = [
   { title: 'STT', key: 'stt', width: 60, align: 'center' },
