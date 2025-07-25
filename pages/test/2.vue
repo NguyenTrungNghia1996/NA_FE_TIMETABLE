@@ -41,41 +41,28 @@
       <ClientOnly>
         <a-table row-key="id" :columns="columns" :data-source="subjects" bordered size="middle" :pagination="false" :scroll="{ x: 'max-content' }" class="custom-table">
           <template #bodyCell="{ column, record, index }">
-            <!-- STT Column -->
             <template v-if="column.key === 'stt'">
               <span class="font-medium">{{ index + 1 }}</span>
             </template>
-
-            <!-- Weekly Hours Column -->
             <template v-if="column.key === 'weekly'">
               <span>{{ record.weekly }}</span>
             </template>
-
-            <!-- Morning Period Column -->
             <template v-if="column.key === 'morningPeriod'">
               <a-input-number v-if="record.editable" v-model:value="record.morning.period" :min="0" size="small" class="w-full" />
               <span v-else>{{ record.morning.period || '-' }}</span>
             </template>
-
-            <!-- Morning Group Column -->
             <template v-if="column.key === 'morningGroup'">
               <a-input-number v-if="record.editable" v-model:value="record.morning.group" :min="0" size="small" class="w-full" />
               <span v-else>{{ record.morning.group || '-' }}</span>
             </template>
-
-            <!-- Afternoon Period Column -->
             <template v-if="column.key === 'afternoonPeriod'">
               <a-input-number v-if="record.editable" v-model:value="record.afternoon.period" :min="0" size="small" class="w-full" />
               <span v-else>{{ record.afternoon.period || '-' }}</span>
             </template>
-
-            <!-- Afternoon Group Column -->
             <template v-if="column.key === 'afternoonGroup'">
               <a-input-number v-if="record.editable" v-model:value="record.afternoon.group" :min="0" size="small" class="w-full" />
               <span v-else>{{ record.afternoon.group || '-' }}</span>
             </template>
-
-            <!-- Action Column -->
             <template v-if="column.key === 'action'">
               <div class="flex justify-center space-x-2">
                 <a-switch v-model:checked="record.editable" size="small" @change="onEditableChange(record)" />
@@ -89,6 +76,7 @@
 </template>
 
 <script setup>
+const { RestApi } = useApi();
 const filters = reactive({
   grade: undefined,
   major: undefined,
@@ -206,39 +194,48 @@ const handleAvoid = () => {
 const handleUpdate = () => {
   // TODO: Implement update logic
   console.log('Cập nhật clicked');
+  const test = convertToApi()
+  const { data } = RestApi.subject_grade_level.create({ body: test })
+  console.log(data);
 };
 
 const convertFromApi = (data) => {
-  return data.ds_mon.map(mon => ({
-    id: mon.id_mon,
-    name: mon.ten_mon,
-    weekly: (mon.ds_Ca[0]?.so_tiet || 0) + (mon.ds_Ca[1]?.so_tiet || 0),
-    morning: {
-      period: mon.ds_Ca.find(c => c.id === 1)?.so_tiet || 0,
-      group: mon.ds_Ca.find(c => c.id === 1)?.so_nhom || 0,
-    },
-    afternoon: {
-      period: mon.ds_Ca.find(c => c.id === 2)?.so_tiet || 0,
-      group: mon.ds_Ca.find(c => c.id === 2)?.so_nhom || 0,
-    },
-    editable: mon.trang_thai
-  }));
+  const list = data.ds_Mon || data.ds_mon || [];
+  return list.map(mon => {
+    const findById = (arr, id) => arr.find(c => (c.id ?? c.id_ca) === id) || {};
+    return {
+      id: mon.id_mon,
+      name: mon.ten_mon,
+      weekly: (mon.ds_Ca[0]?.so_tiet || 0) + (mon.ds_Ca[1]?.so_tiet || 0),
+      morning: {
+        period: findById(mon.ds_Ca, 1).so_tiet || 0,
+        group: findById(mon.ds_Ca, 1).so_nhom || 0,
+      },
+      afternoon: {
+        period: findById(mon.ds_Ca, 2).so_tiet || 0,
+        group: findById(mon.ds_Ca, 2).so_nhom || 0,
+      },
+      editable: mon.trang_thai,
+    };
+  });
 };
 const convertToApi = () => {
   return {
     id_khoi: filters.grade,
     id_ban: filters.major,
-    ds_mon: subjects.value.map(mon => ({
-      id_mon: mon.id,
+    ds_Mon: subjects.value.map(mon => ({
+      id_Mon: mon.id,
       ten_mon: mon.name,
       ds_Ca: [
         {
-          id: 1,
+          id_ca: 1,
+          ten_ca: "Ca sáng",
           so_tiet: mon.morning.period,
           so_nhom: mon.morning.group,
         },
         {
-          id: 2,
+          id_ca: 2,
+          ten_ca: "Ca chiều",
           so_tiet: mon.afternoon.period,
           so_nhom: mon.afternoon.group,
         },
@@ -248,47 +245,30 @@ const convertToApi = () => {
   };
 };
 
-const dataFromApi = {
-  "id_khoi": 1,
-  "id_ban": 1,
-  "ds_mon": [
-    {
-      "id_mon": 1,
-      "ten_mon": "Môn toán",
-      "ds_Ca": [
-        {
-          "id": 1,
-          "so_tiet": 2,
-          "so_nhom": 1
-        },
-        {
-          "id": 2,
-          "so_tiet": 2,
-          "so_nhom": 2
-        }
-      ],
-      "trang_thai": true
-    },
-    {
-      "id_mon": 2,
-      "ten_mon": "Môn văn",
-      "ds_Ca": [
-        {
-          "id": 1,
-          "so_tiet": 2,
-          "so_nhom": 1
-        },
-        {
-          "id": 2,
-          "so_tiet": 2,
-          "so_nhom": 2
-        }
-      ],
-      "trang_thai": true
-    },
-  ]
+const fetchSubjects = async () => {
+  try {
+    const { data } = await RestApi.subject_grade_level.list({
+      params: { idKhoi: filters.grade, idBan: filters.major }
+    })
+    if (data.value?.status === 'success' && data.value.data.length) {
+      subjects.value = convertFromApi(data.value.data[0]);
+    } else {
+      subjects.value = []
+    }
+  } catch (e) {
+    console.error('Failed to fetch subjects', e);
+  }
 };
-subjects.value = convertFromApi(dataFromApi);
+
+watch(
+  () => [filters.grade, filters.major],
+  async ([grade, major]) => {
+    if (grade !== undefined && major !== undefined) {
+      await fetchSubjects();
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>
