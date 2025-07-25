@@ -1,7 +1,7 @@
 <template>
-  <div class="p-4" style="font-family: Arial, sans-serif;">
-    <div class="flex flex-col lg:flex-row lg:space-x-5">
-      <div class="w-full lg:w-1/3">
+  <div class="p-4">
+    <div class="grid grid-cols-3 gap-4">
+      <div class="w-full">
         <a-form layout="vertical">
           <a-form-item label="Khối lớp" class="mb-3">
             <a-select class="w-full h-8" :options="gradeOptions" />
@@ -23,7 +23,7 @@
               <a-select class="w-full h-8" :options="subjectOptions" />
             </a-form-item>
           </div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+          <div class="grid grid-cols-2">
             <a-form-item label="Số tiết 1 ca">
               <a-input-number class="w-full h-8" :min="0" />
             </a-form-item>
@@ -37,9 +37,9 @@
           </div>
         </a-form>
       </div>
-      <div class="w-full lg:w-2/3 mt-4 lg:mt-0">
-        <a-table :columns="columns" :data-source="data" bordered size="small" :pagination="pagination" :scroll="{ x: 'max-content' }">
-          <template #bodyCell="{ column, record, index }">
+      <div class="w-full col-span-2">
+        <a-table :columns="columns" :data-source="data" bordered size="small" :pagination="pagination" :scroll="{ x: 'max-content' }" class="w-full">
+          <template #bodyCell="{ column, index }">
             <template v-if="column.key === 'stt'">
               {{ index + 1 }}
             </template>
@@ -61,9 +61,6 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons-vue'
-
 const gradeOptions = [
   { label: 'Khối 10', value: 10 },
   { label: 'Khối 11', value: 11 },
