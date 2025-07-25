@@ -39,7 +39,7 @@
         <SelectSchoolShift v-model="filters.shift" name="shift" :rules="rules.shift" placeholder="Chọn ca học" />
       </a-form>
       <ClientOnly>
-        <a-table row-key="id" :columns="columns" :data-source="subjects" bordered size="middle" :pagination="false" :scroll="{ x: 'max-content' }" class="custom-table">
+        <a-table row-key="id" :columns="displayColumns" :data-source="subjects" bordered size="middle" :pagination="false" :scroll="{ x: 'max-content' }" class="custom-table">
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'stt'">
               <span class="font-medium">{{ index + 1 }}</span>
@@ -97,7 +97,7 @@ const summary = reactive({
 
 const subjects = ref([]);
 
-const columns = [
+const baseColumns = [
   {
     title: 'STT',
     key: 'stt',
@@ -162,16 +162,38 @@ const columns = [
   }
 ];
 
-// Watch for changes in subjects to update summary
+const displayColumns = computed(() => {
+  const id = Number(filters.shift);
+  if (id === 1) {
+    return baseColumns.filter(col => col.title !== 'Ca chiều');
+  }
+  if (id === 2) {
+    return baseColumns.filter(col => col.title !== 'Ca sáng');
+  }
+  return baseColumns;
+});
+
+// Update summary whenever data or selected shift changes
 watch(
-  subjects,
-  (val) => {
-    val.forEach((r) => {
-      r.weekly = (r.morning.period || 0) + (r.afternoon.period || 0);
-    });
-    summary.total = val.reduce((s, r) => s + ((r.morning.period || 0) + (r.afternoon.period || 0)), 0);
-    summary.morning = val.reduce((s, r) => s + (r.morning.period || 0), 0);
-    summary.afternoon = val.reduce((s, r) => s + (r.afternoon.period || 0), 0);
+  [subjects, () => filters.shift],
+  () => {
+    const shift = Number(filters.shift);
+    if (shift === 1) {
+      subjects.value.forEach(r => { r.weekly = r.morning.period || 0; });
+      summary.total = subjects.value.reduce((s, r) => s + (r.morning.period || 0), 0);
+      summary.morning = summary.total;
+      summary.afternoon = 0;
+    } else if (shift === 2) {
+      subjects.value.forEach(r => { r.weekly = r.afternoon.period || 0; });
+      summary.total = subjects.value.reduce((s, r) => s + (r.afternoon.period || 0), 0);
+      summary.morning = 0;
+      summary.afternoon = summary.total;
+    } else {
+      subjects.value.forEach(r => { r.weekly = (r.morning.period || 0) + (r.afternoon.period || 0); });
+      summary.total = subjects.value.reduce((s, r) => s + ((r.morning.period || 0) + (r.afternoon.period || 0)), 0);
+      summary.morning = subjects.value.reduce((s, r) => s + (r.morning.period || 0), 0);
+      summary.afternoon = subjects.value.reduce((s, r) => s + (r.afternoon.period || 0), 0);
+    }
   },
   { deep: true, immediate: true }
 );
