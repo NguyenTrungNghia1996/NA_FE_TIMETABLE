@@ -51,8 +51,9 @@ const fetchSubject = async (search = '') => {
         props.modelValue === null ||
         props.modelValue === undefined
       ) {
-        const first = options.value[0]
-        if (first) emit('update:modelValue', first.value)
+        // const first = options.value[0]
+        // if (first) emit('update:modelValue', first.value)
+        emit('update:modelValue', props.modelValue)
       }
     }
   } catch (error) {
