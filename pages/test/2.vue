@@ -33,13 +33,13 @@
     <!-- Subjects Table -->
     <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
       <h2 class="text-lg font-semibold text-gray-700 mb-3">DANH SÁCH MÔN HỌC</h2>
-      <a-form :model="filters" layout="vertical" :rules="rules" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <a-form ref="filterForm" :model="filters" layout="vertical" :rules="rules" class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <SelectGradeLevel v-model="filters.grade" name="grade" :rules="rules.grade" placeholder="Chọn khối lớp" />
         <SelectSchoolship v-model="filters.major" name="major" :rules="rules.major" placeholder="Chọn ban học" />
-        <SelectSchoolShift v-model="filters.shift" name="shift" :rules="rules.shift" placeholder="Chọn ca học" />
+        <SelectSchoolShift v-model="filters.shift" name="shift" placeholder="Chọn ca học" />
       </a-form>
       <ClientOnly>
-        <a-table row-key="id" :columns="columns" :data-source="subjects" bordered size="middle" :pagination="false" :scroll="{ x: 'max-content' }" class="custom-table">
+        <a-table row-key="id" :columns="displayColumns" :data-source="subjects" bordered size="middle" :pagination="false" :scroll="{ x: 'max-content' }" class="custom-table">
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'stt'">
               <span class="font-medium">{{ index + 1 }}</span>
@@ -77,6 +77,7 @@
 
 <script setup>
 const { RestApi } = useApi();
+const filterForm = ref();
 const filters = reactive({
   grade: undefined,
   major: undefined,
@@ -86,7 +87,6 @@ const filters = reactive({
 const rules = {
   grade: [{ required: true, message: 'Vui lòng chọn khối lớp' }],
   major: [{ required: true, message: 'Vui lòng chọn ban học' }],
-  shift: [{ required: true, message: 'Vui lòng chọn ca học' }],
 };
 
 const summary = reactive({
@@ -97,7 +97,7 @@ const summary = reactive({
 
 const subjects = ref([]);
 
-const columns = [
+const baseColumns = [
   {
     title: 'STT',
     key: 'stt',
@@ -162,16 +162,27 @@ const columns = [
   }
 ];
 
-// Watch for changes in subjects to update summary
+const displayColumns = computed(() => {
+  const id = Number(filters.shift);
+  if (id === 1) {
+    return baseColumns.filter(col => col.title !== 'Ca chiều');
+  }
+  if (id === 2) {
+    return baseColumns.filter(col => col.title !== 'Ca sáng');
+  }
+  return baseColumns;
+});
+
+// Keep summary totals regardless of selected shift
 watch(
   subjects,
   (val) => {
     val.forEach((r) => {
       r.weekly = (r.morning.period || 0) + (r.afternoon.period || 0);
     });
-    summary.total = val.reduce((s, r) => s + ((r.morning.period || 0) + (r.afternoon.period || 0)), 0);
     summary.morning = val.reduce((s, r) => s + (r.morning.period || 0), 0);
     summary.afternoon = val.reduce((s, r) => s + (r.afternoon.period || 0), 0);
+    summary.total = summary.morning + summary.afternoon;
   },
   { deep: true, immediate: true }
 );
@@ -191,12 +202,19 @@ const handleAvoid = () => {
   console.log('Tiết tránh xếp clicked');
 };
 
-const handleUpdate = () => {
-  // TODO: Implement update logic
-  console.log('Cập nhật clicked');
-  const test = convertToApi()
-  const { data } = RestApi.subject_grade_level.create({ body: test })
-  console.log(data);
+const handleUpdate = async () => {
+  try {
+    await filterForm.value.validate();
+    const payload = convertToApi();
+    const { data, error } = await RestApi.subject_grade_level.create({ body: payload });
+    if (data.value?.status === 'success') {
+      message.success(data.value.message || 'Cập nhật thành công');
+    } else {
+      throw new Error(error.value?.data?.message || 'Cập nhật không thành công');
+    }
+  } catch (err) {
+    message.error(err.message || err.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật');
+  }
 };
 
 const convertFromApi = (data) => {
