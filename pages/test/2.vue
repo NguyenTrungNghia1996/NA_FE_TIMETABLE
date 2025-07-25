@@ -207,6 +207,7 @@ const handleAvoid = () => {
 const handleUpdate = () => {
   // TODO: Implement update logic
   console.log('Cập nhật clicked');
+  console.log(subjects.value);
 };
 
 const convertFromApi = (data) => {
@@ -258,7 +259,6 @@ const fetchSubjects = async () => {
     const { data } = await RestApi.subject_grade_level.list({
       params: { idKhoi: filters.grade, idBan: filters.major }
     })
-    console.log("🚀 ~ fetchSubjects ~ data:", data)
     if (data.value?.status === 'success' && data.value.data.length) {
       subjects.value = convertFromApi(data.value.data[0]);
     } else {
