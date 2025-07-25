@@ -194,7 +194,9 @@ const handleAvoid = () => {
 const handleUpdate = () => {
   // TODO: Implement update logic
   console.log('Cập nhật clicked');
-  console.log(subjects.value);
+  const test = convertToApi()
+  const { data } = RestApi.subject_grade_level.create({ body: test })
+  console.log(data);
 };
 
 const convertFromApi = (data) => {
@@ -221,17 +223,19 @@ const convertToApi = () => {
   return {
     id_khoi: filters.grade,
     id_ban: filters.major,
-    ds_mon: subjects.value.map(mon => ({
-      id_mon: mon.id,
+    ds_Mon: subjects.value.map(mon => ({
+      id_Mon: mon.id,
       ten_mon: mon.name,
       ds_Ca: [
         {
-          id: 1,
+          id_ca: 1,
+          ten_ca: "Ca sáng",
           so_tiet: mon.morning.period,
           so_nhom: mon.morning.group,
         },
         {
-          id: 2,
+          id_ca: 2,
+          ten_ca: "Ca chiều",
           so_tiet: mon.afternoon.period,
           so_nhom: mon.afternoon.group,
         },
