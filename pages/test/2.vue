@@ -89,6 +89,7 @@
 </template>
 
 <script setup>
+const { RestApi } = useApi();
 const filters = reactive({
   grade: undefined,
   major: undefined,
@@ -254,9 +255,10 @@ const convertToApi = () => {
 
 const fetchSubjects = async () => {
   try {
-    const { data } = await useFetch('/api/monhoc/monkhoilop', {
+    const { data } = await RestApi.subject_grade_level.list({
       params: { idKhoi: filters.grade, idBan: filters.major }
-    });
+    })
+    console.log("🚀 ~ fetchSubjects ~ data:", data)
     if (data.value?.status === 'success' && data.value.data.length) {
       subjects.value = convertFromApi(data.value.data[0]);
     } else {
