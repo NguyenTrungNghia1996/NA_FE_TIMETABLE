@@ -41,41 +41,28 @@
       <ClientOnly>
         <a-table row-key="id" :columns="columns" :data-source="subjects" bordered size="middle" :pagination="false" :scroll="{ x: 'max-content' }" class="custom-table">
           <template #bodyCell="{ column, record, index }">
-            <!-- STT Column -->
             <template v-if="column.key === 'stt'">
               <span class="font-medium">{{ index + 1 }}</span>
             </template>
-
-            <!-- Weekly Hours Column -->
             <template v-if="column.key === 'weekly'">
               <span>{{ record.weekly }}</span>
             </template>
-
-            <!-- Morning Period Column -->
             <template v-if="column.key === 'morningPeriod'">
               <a-input-number v-if="record.editable" v-model:value="record.morning.period" :min="0" size="small" class="w-full" />
               <span v-else>{{ record.morning.period || '-' }}</span>
             </template>
-
-            <!-- Morning Group Column -->
             <template v-if="column.key === 'morningGroup'">
               <a-input-number v-if="record.editable" v-model:value="record.morning.group" :min="0" size="small" class="w-full" />
               <span v-else>{{ record.morning.group || '-' }}</span>
             </template>
-
-            <!-- Afternoon Period Column -->
             <template v-if="column.key === 'afternoonPeriod'">
               <a-input-number v-if="record.editable" v-model:value="record.afternoon.period" :min="0" size="small" class="w-full" />
               <span v-else>{{ record.afternoon.period || '-' }}</span>
             </template>
-
-            <!-- Afternoon Group Column -->
             <template v-if="column.key === 'afternoonGroup'">
               <a-input-number v-if="record.editable" v-model:value="record.afternoon.group" :min="0" size="small" class="w-full" />
               <span v-else>{{ record.afternoon.group || '-' }}</span>
             </template>
-
-            <!-- Action Column -->
             <template v-if="column.key === 'action'">
               <div class="flex justify-center space-x-2">
                 <a-switch v-model:checked="record.editable" size="small" @change="onEditableChange(record)" />
