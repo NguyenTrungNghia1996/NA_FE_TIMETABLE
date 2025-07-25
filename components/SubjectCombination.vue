@@ -218,7 +218,9 @@ const reset = () => {
   })
   isEdit.value = false
 }
-
+defineExpose({
+  reset
+})
 onMounted(fetchData)
 </script>
 

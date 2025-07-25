@@ -7,6 +7,7 @@
       </a-button>
       <a-button @click="openBusyManager" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Cài đặt tiết tránh xếp</a-button>
       <a-button @click="openDrawer" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Cài đặt tiết cố định</a-button>
+      <a-button @click="SubjectCombinationDrawer = true">Tổ hợp môn</a-button>
       <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">
         <span class="md:inline">Thêm mới</span>
       </a-button>
@@ -52,12 +53,7 @@
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <a-form-item label="Mã môn học" name="ma">
-            <a-input
-              v-model:value="formState.ma"
-              placeholder="Nhập mã môn học"
-              :maxlength="20"
-              show-count
-            />
+            <a-input v-model:value="formState.ma" placeholder="Nhập mã môn học" :maxlength="20" show-count />
           </a-form-item>
           <a-form-item label="Tên môn học" name="ten">
             <a-input v-model:value="formState.ten" placeholder="Nhập tên môn học" :maxlength="200" show-count />
@@ -70,13 +66,7 @@
           <a-form-item label="Số tiết tối đa hai ca" name="So_tiet_toi_da_hai_ca">
             <a-input-number v-model:value="formState.So_tiet_toi_da_hai_ca" :min="1" style="width: 100%" />
           </a-form-item>
-          <SelectClassroom
-            v-if="formState.Id_loai_phong_hoc"
-            v-model="formState.id_phong"
-            name="classroomByType"
-            :idLoaiPhonghoc="formState.Id_loai_phong_hoc"
-            :multiple="true"
-          />
+          <SelectClassroom v-if="formState.Id_loai_phong_hoc" v-model="formState.id_phong" name="classroomByType" :idLoaiPhonghoc="formState.Id_loai_phong_hoc" :multiple="true" />
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
           <a-form-item>
@@ -115,13 +105,7 @@
         <a-button type="primary" @click="handleBusyOk" :loading="confirmLoading">Cập nhật</a-button>
       </div>
     </a-modal>
-    <a-drawer
-      v-model:open="busy_manager_modal"
-      title="Cài đặt tiết tránh xếp"
-      @close="closeBusyManager"
-      placement="bottom"
-      height="100vh"
-    >
+    <a-drawer v-model:open="busy_manager_modal" title="Cài đặt tiết tránh xếp" @close="closeBusyManager" placement="bottom" height="100vh">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <a-table :columns="busyColumns" :data-source="dataSource" :pagination="false" bordered size="small" />
         <div v-if="selectedSubject && busy_data" class="flex flex-col">
@@ -137,7 +121,10 @@
       </div>
     </a-drawer>
     <a-drawer height="100vh" title="Cài đặt tiết cố định" placement="bottom" v-model:open="statusDrawer" @close="onCloseDrawer">
-      <FixedLesson  ref="fixedLessonRef"/>
+      <FixedLesson ref="fixedLessonRef" />
+    </a-drawer>
+    <a-drawer v-model:open="SubjectCombinationDrawer" title="Tổ Hợp môn" @close="onCloseSubjectCombinationDrawer" :footer="null" height="100vh" placement="bottom">
+      <SubjectCombination ref="subjectCombinationRef" />
     </a-drawer>
   </div>
 </template>
@@ -145,7 +132,6 @@
 <script setup>
 const settingStore = useSettingStore()
 const { RestApi } = useApi()
-import { h, watch, nextTick } from 'vue'
 
 const searchText = ref('')
 const loading = ref(false)
@@ -455,5 +441,11 @@ const openDrawer = () => {
 }
 const onCloseDrawer = () => {
   fixedLessonRef.value?.reset()
+}
+
+const subjectCombinationRef = ref()
+const SubjectCombinationDrawer = ref(false)
+const onCloseSubjectCombinationDrawer = () => {
+  subjectCombinationRef.value?.reset()
 }
 </script>
