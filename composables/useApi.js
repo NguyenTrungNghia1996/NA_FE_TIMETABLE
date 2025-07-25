@@ -46,6 +46,9 @@ let ENDPOINTS = {
   //SCHOOL_DAY
   SCHOOL_DAY: "/api/ngayhoc",
   SCHOOL_DAY_DETAIL: "/api/ngayhoc/detail",
+  //SCHOOL_SHIP
+  SCHOOL_SHIP: "/api/banhoc",
+  SCHOOL_SHIP_DETAIL: "/api/banhoc/detail",
   //FIXED_LESSON
   FIXED_LESSON: "/api/tietcodinh",
   FIXED_LESSON_DETAIL: "/api/tietcodinh/detail",
@@ -135,6 +138,7 @@ class RestApi {
     this.user = new User(this.request);
     this.school_level = new SchoolLevel(this.request);
     this.school_shift = new SchoolShift(this.request);
+    this.school_ship = new SchoolShip(this.request);
     this.unit = new Unit(this.request);
     this.school_site = new SchoolSite(this.request);
     this.classroom_type = new ClassroomType(this.request);
@@ -257,6 +261,27 @@ class SchoolShift {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.SCHOOL_SHIFT, data);
+  }
+}
+
+class SchoolShip {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.SCHOOL_SHIP, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.SCHOOL_SHIP_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.SCHOOL_SHIP, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.SCHOOL_SHIP, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.SCHOOL_SHIP, data);
   }
 }
 class Unit {

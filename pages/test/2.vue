@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 bg-white min-h-screen space-y-6">
+  <div class="p-4 bg-white min-h-screen space-y-2">
     <!-- Header Section -->
     <div class="flex justify-end">
       <div class="flex space-x-3">
@@ -30,20 +30,14 @@
         </div>
       </div>
     </div>
-
-    <!-- Filter Section -->
-    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-      <h2 class="text-lg font-semibold text-gray-700 mb-3">LỌC THÔNG TIN</h2>
-      <a-form :model="filters" layout="vertical" :rules="rules" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <SelectGradeLevel v-model="filters.grade" name="grade" :rules="rules.grade" placeholder="Chọn khối lớp" />
-        <SelectExpertise v-model="filters.major" name="major" :rules="rules.major" placeholder="Chọn ban học" />
-        <SelectSchoolShift v-model="filters.shift" name="shift" :rules="rules.shift" placeholder="Chọn ca học" />
-      </a-form>
-    </div>
-
     <!-- Subjects Table -->
     <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
       <h2 class="text-lg font-semibold text-gray-700 mb-3">DANH SÁCH MÔN HỌC</h2>
+      <a-form :model="filters" layout="vertical" :rules="rules" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <SelectGradeLevel v-model="filters.grade" name="grade" :rules="rules.grade" placeholder="Chọn khối lớp" />
+        <SelectSchoolship v-model="filters.major" name="major" :rules="rules.major" placeholder="Chọn ban học" />
+        <SelectSchoolShift v-model="filters.shift" name="shift" :rules="rules.shift" placeholder="Chọn ca học" />
+      </a-form>
       <ClientOnly>
         <a-table row-key="id" :columns="columns" :data-source="subjects" bordered size="middle" :pagination="false" :scroll="{ x: 'max-content' }" class="custom-table">
           <template #bodyCell="{ column, record, index }">
