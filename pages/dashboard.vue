@@ -93,6 +93,17 @@
       class="font-roboto w-full md:w-auto"
       @click="
         () => {
+          navigateTo('/demo/banhoc');
+        }
+      "
+    >
+      Demo: SelectSchoolship (Ban học)
+    </a-button>
+    <a-button
+      type="primary"
+      class="font-roboto w-full md:w-auto"
+      @click="
+        () => {
           navigateTo('/demo/nguoidung');
         }
       "
