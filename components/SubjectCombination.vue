@@ -14,7 +14,7 @@
             <SelectSubject v-model="form.subject3" label="Môn 3" name="subject3" />
           </div>
           <div class="grid grid-cols-2">
-            <a-form-item label="Số tiết tối đa một ca học" name="maxPeriod" :rules="rules.maxPeriod">
+            <a-form-item label="Số tiết 1 ca" name="maxPeriod" :rules="rules.maxPeriod">
               <a-input-number v-model:value="form.maxPeriod" class="w-full h-8" :min="0" />
             </a-form-item>
             <a-form-item label="Số tiết 2 ca">
@@ -88,14 +88,14 @@ const rules = {
 
 const columns = [
   { title: 'STT', key: 'stt', width: 60, align: 'center' },
-  { title: 'Khối lớp', dataIndex: 'khoi', key: 'khoi', align: 'center' },
-  { title: 'Ban học', dataIndex: 'ban', key: 'ban', align: 'center' },
+  { title: 'Khối lớp', dataIndex: 'ten_khoi', key: 'ten_khoi', align: 'center' },
+  { title: 'Ban học', dataIndex: 'ten_ban', key: 'ten_ban', align: 'center' },
   { title: 'Tên tổ hợp', dataIndex: 'ten', key: 'ten' },
-  { title: 'Môn 1', dataIndex: 'mon1', key: 'mon1' },
-  { title: 'Môn 2', dataIndex: 'mon2', key: 'mon2' },
-  { title: 'Môn 3', dataIndex: 'mon3', key: 'mon3' },
-  { title: 'Số tiết 1 ca', dataIndex: 'soTiet1', key: 'soTiet1', align: 'center' },
-  { title: 'Số tiết 2 ca', dataIndex: 'soTiet2', key: 'soTiet2', align: 'center' },
+  { title: 'Môn 1', dataIndex: 'ten_mon_hoc_1', key: 'ten_mon_hoc_1' },
+  { title: 'Môn 2', dataIndex: 'ten_mon_hoc_2', key: 'ten_mon_hoc_2' },
+  { title: 'Môn 3', dataIndex: 'ten_mon_hoc_3', key: 'ten_mon_hoc_3' },
+  { title: 'Số tiết 1 ca', dataIndex: 'so_tiet_toi_da_1_ca', key: 'so_tiet_toi_da_1_ca', align: 'center' },
+  { title: 'Số tiết 2 ca', dataIndex: 'so_tiet_toi_da_2_ca', key: 'so_tiet_toi_da_2_ca', align: 'center' },
   { title: 'Thao tác', key: 'action', width: 100, align: 'center' }
 ]
 
