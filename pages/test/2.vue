@@ -177,22 +177,23 @@ const displayColumns = computed(() => {
 watch(
   [subjects, () => filters.shift],
   () => {
+    subjects.value.forEach(r => {
+      r.weekly = (r.morning.period || 0) + (r.afternoon.period || 0);
+    });
+    const totalMorning = subjects.value.reduce((s, r) => s + (r.morning.period || 0), 0);
+    const totalAfternoon = subjects.value.reduce((s, r) => s + (r.afternoon.period || 0), 0);
+    summary.total = totalMorning + totalAfternoon;
+
     const shift = Number(filters.shift);
     if (shift === 1) {
-      subjects.value.forEach(r => { r.weekly = r.morning.period || 0; });
-      summary.total = subjects.value.reduce((s, r) => s + (r.morning.period || 0), 0);
-      summary.morning = summary.total;
+      summary.morning = totalMorning;
       summary.afternoon = 0;
     } else if (shift === 2) {
-      subjects.value.forEach(r => { r.weekly = r.afternoon.period || 0; });
-      summary.total = subjects.value.reduce((s, r) => s + (r.afternoon.period || 0), 0);
       summary.morning = 0;
-      summary.afternoon = summary.total;
+      summary.afternoon = totalAfternoon;
     } else {
-      subjects.value.forEach(r => { r.weekly = (r.morning.period || 0) + (r.afternoon.period || 0); });
-      summary.total = subjects.value.reduce((s, r) => s + ((r.morning.period || 0) + (r.afternoon.period || 0)), 0);
-      summary.morning = subjects.value.reduce((s, r) => s + (r.morning.period || 0), 0);
-      summary.afternoon = subjects.value.reduce((s, r) => s + (r.afternoon.period || 0), 0);
+      summary.morning = totalMorning;
+      summary.afternoon = totalAfternoon;
     }
   },
   { deep: true, immediate: true }
