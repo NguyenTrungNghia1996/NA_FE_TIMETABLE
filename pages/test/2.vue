@@ -209,20 +209,24 @@ const handleUpdate = () => {
 };
 
 const convertFromApi = (data) => {
-  return data.ds_mon.map(mon => ({
-    id: mon.id_mon,
-    name: mon.ten_mon,
-    weekly: (mon.ds_Ca[0]?.so_tiet || 0) + (mon.ds_Ca[1]?.so_tiet || 0),
-    morning: {
-      period: mon.ds_Ca.find(c => c.id === 1)?.so_tiet || 0,
-      group: mon.ds_Ca.find(c => c.id === 1)?.so_nhom || 0,
-    },
-    afternoon: {
-      period: mon.ds_Ca.find(c => c.id === 2)?.so_tiet || 0,
-      group: mon.ds_Ca.find(c => c.id === 2)?.so_nhom || 0,
-    },
-    editable: mon.trang_thai
-  }));
+  const list = data.ds_Mon || data.ds_mon || [];
+  return list.map(mon => {
+    const findById = (arr, id) => arr.find(c => (c.id ?? c.id_ca) === id) || {};
+    return {
+      id: mon.id_mon,
+      name: mon.ten_mon,
+      weekly: (mon.ds_Ca[0]?.so_tiet || 0) + (mon.ds_Ca[1]?.so_tiet || 0),
+      morning: {
+        period: findById(mon.ds_Ca, 1).so_tiet || 0,
+        group: findById(mon.ds_Ca, 1).so_nhom || 0,
+      },
+      afternoon: {
+        period: findById(mon.ds_Ca, 2).so_tiet || 0,
+        group: findById(mon.ds_Ca, 2).so_nhom || 0,
+      },
+      editable: mon.trang_thai,
+    };
+  });
 };
 const convertToApi = () => {
   return {
@@ -248,47 +252,30 @@ const convertToApi = () => {
   };
 };
 
-const dataFromApi = {
-  "id_khoi": 1,
-  "id_ban": 1,
-  "ds_mon": [
-    {
-      "id_mon": 1,
-      "ten_mon": "Môn toán",
-      "ds_Ca": [
-        {
-          "id": 1,
-          "so_tiet": 2,
-          "so_nhom": 1
-        },
-        {
-          "id": 2,
-          "so_tiet": 2,
-          "so_nhom": 2
-        }
-      ],
-      "trang_thai": true
-    },
-    {
-      "id_mon": 2,
-      "ten_mon": "Môn văn",
-      "ds_Ca": [
-        {
-          "id": 1,
-          "so_tiet": 2,
-          "so_nhom": 1
-        },
-        {
-          "id": 2,
-          "so_tiet": 2,
-          "so_nhom": 2
-        }
-      ],
-      "trang_thai": true
-    },
-  ]
+const fetchSubjects = async () => {
+  try {
+    const { data } = await useFetch('/api/monhoc/monkhoilop', {
+      params: { idKhoi: filters.grade, idBan: filters.major }
+    });
+    if (data.value?.status === 'success' && data.value.data.length) {
+      subjects.value = convertFromApi(data.value.data[0]);
+    } else {
+      subjects.value = []
+    }
+  } catch (e) {
+    console.error('Failed to fetch subjects', e);
+  }
 };
-subjects.value = convertFromApi(dataFromApi);
+
+watch(
+  () => [filters.grade, filters.major],
+  async ([grade, major]) => {
+    if (grade !== undefined && major !== undefined) {
+      await fetchSubjects();
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <style scoped>
