@@ -1,7 +1,7 @@
 <template>
   <div class="p-4" style="font-family: Arial, sans-serif;">
     <div class="flex flex-col lg:flex-row lg:space-x-5">
-      <div class="w-full lg:w-2/5">
+      <div class="w-full lg:w-1/3">
         <a-form layout="vertical">
           <a-form-item label="Khối lớp" class="mb-3">
             <a-select class="w-full h-8" :options="gradeOptions" />
@@ -37,7 +37,7 @@
           </div>
         </a-form>
       </div>
-      <div class="w-full lg:w-3/5 mt-4 lg:mt-0">
+      <div class="w-full lg:w-2/3 mt-4 lg:mt-0">
         <a-table :columns="columns" :data-source="data" bordered size="small" :pagination="pagination" :scroll="{ x: 'max-content' }">
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'stt'">
