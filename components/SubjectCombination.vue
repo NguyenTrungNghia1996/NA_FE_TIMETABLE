@@ -2,33 +2,23 @@
   <div class="p-4">
     <div class="grid grid-cols-3 gap-4">
       <div class="w-full">
-        <a-form layout="vertical">
-          <a-form-item label="Khối lớp" class="mb-3">
-            <a-select class="w-full h-8" :options="gradeOptions" />
-          </a-form-item>
-          <a-form-item label="Ban học" class="mb-3">
-            <a-select class="w-full h-8" :options="banOptions" />
-          </a-form-item>
-          <a-form-item label="Tên tổ hợp" class="mb-3">
-            <a-input class="w-full h-8" />
+        <a-form layout="vertical" :model="form" :rules="rules">
+          <SelectGradeLevel v-model="form.grade" class="mb-3" name="grade" :rules="rules.grade" label="Khối lớp" />
+          <SelectSchoolship v-model="form.major" class="mb-3" name="major" :rules="rules.major" label="Ban học" />
+          <a-form-item label="Tên tổ hợp" name="name" class="mb-3" :rules="rules.name">
+            <a-input v-model:value="form.name" class="w-full h-8" />
           </a-form-item>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <a-form-item label="Môn 1">
-              <a-select class="w-full h-8" :options="subjectOptions" />
-            </a-form-item>
-            <a-form-item label="Môn 2">
-              <a-select class="w-full h-8" :options="subjectOptions" />
-            </a-form-item>
-            <a-form-item label="Môn 3">
-              <a-select class="w-full h-8" :options="subjectOptions" />
-            </a-form-item>
+            <SelectSubject v-model="form.subject1" label="Môn 1" :rules="rules.subject1" name="subject1" />
+            <SelectSubject v-model="form.subject2" label="Môn 2" :rules="rules.subject2" name="subject2" />
+            <SelectSubject v-model="form.subject3" label="Môn 3" name="subject3" />
           </div>
           <div class="grid grid-cols-2">
-            <a-form-item label="Số tiết 1 ca">
-              <a-input-number class="w-full h-8" :min="0" />
+            <a-form-item label="Số tiết tối đa một ca học" name="maxPeriod" :rules="rules.maxPeriod">
+              <a-input-number v-model:value="form.maxPeriod" class="w-full h-8" :min="0" />
             </a-form-item>
             <a-form-item label="Số tiết 2 ca">
-              <a-input-number class="w-full h-8" :min="0" />
+              <a-input-number v-model:value="form.period2" class="w-full h-8" :min="0" />
             </a-form-item>
           </div>
           <div class="flex flex-wrap gap-2 mt-4">
@@ -46,10 +36,14 @@
             <template v-else-if="column.key === 'action'">
               <div class="flex justify-center space-x-2">
                 <a-button type="link" size="small">
-                  <template #icon><EditOutlined /></template>
+                  <template #icon>
+                    <EditOutlined />
+                  </template>
                 </a-button>
                 <a-button type="link" danger size="small">
-                  <template #icon><DeleteOutlined /></template>
+                  <template #icon>
+                    <DeleteOutlined />
+                  </template>
                 </a-button>
               </div>
             </template>
@@ -61,24 +55,25 @@
 </template>
 
 <script setup>
-const gradeOptions = [
-  { label: 'Khối 10', value: 10 },
-  { label: 'Khối 11', value: 11 },
-  { label: 'Khối 12', value: 12 }
-]
+const form = reactive({
+  grade: undefined,
+  major: undefined,
+  name: '',
+  subject1: undefined,
+  subject2: undefined,
+  subject3: undefined,
+  maxPeriod: undefined,
+  period2: undefined,
+})
 
-const banOptions = [
-  { label: 'Ban A', value: 'A' },
-  { label: 'Ban B', value: 'B' },
-  { label: 'Ban C', value: 'C' }
-]
-
-const subjectOptions = [
-  { label: 'Toán', value: 'toan' },
-  { label: 'Lý', value: 'ly' },
-  { label: 'Hóa', value: 'hoa' },
-  { label: 'Anh', value: 'anh' }
-]
+const rules = {
+  name: [{ required: true, message: 'Vui lòng nhập tên tổ hợp' }],
+  maxPeriod: [{ required: true, message: 'Vui lòng nhập số tiết tối đa' }],
+  grade: [{ required: true, message: 'Vui lòng chọn khối lớp' }],
+  major: [{ required: true, message: 'Vui lòng chọn ban học' }],
+  subject1: [{ required: true, message: 'Vui lòng chọn môn học' }],
+  subject2: [{ required: true, message: 'Vui lòng chọn môn học' }],
+}
 
 const columns = [
   { title: 'STT', key: 'stt', width: 60, align: 'center' },
@@ -98,7 +93,14 @@ const data = ref([
   { khoi: '11', ban: 'B', ten: 'Tổ hợp B', mon1: 'Toán', mon2: 'Hóa', mon3: 'Anh', soTiet1: 2, soTiet2: 3 }
 ])
 
-const pagination = { position: ['bottomCenter'], pageSize: 5 }
+const pagination = reactive({
+  current: 1,
+  pageSize: 10,
+  total: 0,
+  showSizeChanger: true,
+  pageSizeOptions: ['1', '10', '20', '50'],
+  showTotal: (total) => `Tổng ${total} bản ghi`
+})
 </script>
 
 <style scoped></style>
