@@ -173,28 +173,16 @@ const displayColumns = computed(() => {
   return baseColumns;
 });
 
-// Update summary whenever data or selected shift changes
+// Keep summary totals regardless of selected shift
 watch(
-  [subjects, () => filters.shift],
-  () => {
-    subjects.value.forEach(r => {
+  subjects,
+  (val) => {
+    val.forEach((r) => {
       r.weekly = (r.morning.period || 0) + (r.afternoon.period || 0);
     });
-    const totalMorning = subjects.value.reduce((s, r) => s + (r.morning.period || 0), 0);
-    const totalAfternoon = subjects.value.reduce((s, r) => s + (r.afternoon.period || 0), 0);
-    summary.total = totalMorning + totalAfternoon;
-
-    const shift = Number(filters.shift);
-    if (shift === 1) {
-      summary.morning = totalMorning;
-      summary.afternoon = 0;
-    } else if (shift === 2) {
-      summary.morning = 0;
-      summary.afternoon = totalAfternoon;
-    } else {
-      summary.morning = totalMorning;
-      summary.afternoon = totalAfternoon;
-    }
+    summary.morning = val.reduce((s, r) => s + (r.morning.period || 0), 0);
+    summary.afternoon = val.reduce((s, r) => s + (r.afternoon.period || 0), 0);
+    summary.total = summary.morning + summary.afternoon;
   },
   { deep: true, immediate: true }
 );
