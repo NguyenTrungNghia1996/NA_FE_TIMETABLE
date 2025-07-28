@@ -9,7 +9,7 @@
 
     <!-- Bảng dữ liệu -->
     <ClientOnly>
-      <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: 800 }" @change="handleTableChange" bordered size="middle">
+      <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: 800 }" @change="handleTableChange" bordered size="small">
         <template #bodyCell="{ column, record }">
           <!-- Cột thao tác -->
           <template v-if="column.key === 'action'">

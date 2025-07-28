@@ -10,7 +10,7 @@
 
     <!-- Bảng dữ liệu -->
     <ClientOnly>
-      <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" @change="handleTableChange" bordered size="middle" :scroll="{ x: 1000 }">
+      <a-table size="small" :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" @change="handleTableChange" bordered :scroll="{ x: 1000 }">
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'khong_kiem_tra_xung_dot'">
             {{ record.khong_kiem_tra_xung_dot ? '✔️' : '❌' }}
