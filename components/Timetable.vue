@@ -1,6 +1,6 @@
 <template>
   <div class="p-4 relative" @mouseup="endDrag" @mouseleave="endDrag">
-    <div class="overflow-auto rounded-lg shadow border border-gray-200">
+    <div class="overflow-auto shadow border border-gray-200">
       <table class="w-full border-collapse">
         <thead>
           <tr class="bg-gray-50 text-center text-sm font-medium text-gray-600 tracking-wider">
