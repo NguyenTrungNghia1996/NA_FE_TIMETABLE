@@ -57,6 +57,8 @@ let ENDPOINTS = {
   SUBJECT_GRADE_LEVEL: "/api/monhoc/monkhoilop",
 
   SUBJECT_COMBINATION: "/api/tohopmon",
+
+  TEACHER : "/api/giaovien",
   S3: "/api/presigned_url",
 };
 import { useUserStore } from "~~/stores/userStore";
@@ -158,6 +160,7 @@ class RestApi {
     this.fixed_lesson = new FixedLesson(this.request);
     this.subject_grade_level = new SubjectGradeLevel(this.request);
     this.subject_combination = new SubjectCombination(this.request);
+    this.teacher = new Teacher(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -595,6 +598,23 @@ class SubjectCombination {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.SUBJECT_COMBINATION, data);
+  }
+}
+class Teacher{
+   constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.TEACHER, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.TEACHER, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.TEACHER, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.TEACHER, data);
   }
 }
 export default () => {
