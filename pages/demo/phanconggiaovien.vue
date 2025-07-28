@@ -3,9 +3,9 @@
     <h1 class="text-2xl font-bold">Demo: TeacherAssignment (Phân công giáo viên)</h1>
 
     <ClientOnly>
-      <a-button type="primary" @click="drawerOpen = true">Mở Drawer</a-button>
+      <a-button type="primary" @click="drawerAssignmentOpen = true">Phân công chuyên môn</a-button>
       <a-drawer
-        v-model:open="drawerOpen"
+        v-model:open="drawerAssignmentOpen"
         title="Phân công giáo viên"
         :footer="null"
         height="100vh"
@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-const drawerOpen = ref(false)
+const drawerAssignmentOpen = ref(false)
 const assignmentRef = ref()
 
 const closeDrawer = () => {
