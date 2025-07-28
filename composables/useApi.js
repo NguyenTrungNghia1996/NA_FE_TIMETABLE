@@ -61,6 +61,7 @@ let ENDPOINTS = {
   TEACHER: "/api/giaovien",
   TEACHER_DETAIL: "/api/giaovien/detail",
   TEACHER_AVOID: "/api/giaovien/tiettranhxep",
+  TEACHER_SUBJECT: "/api/giaovien/giaovienmonhoc",
   
   S3: "/api/presigned_url",
 };
@@ -624,6 +625,12 @@ class Teacher{
   }
   async update_avoid(data) {
     return await this.request.post(ENDPOINTS.TEACHER_AVOID, data);
+  }
+  async get_subjects(data) {
+    return await this.request.get(ENDPOINTS.TEACHER_SUBJECT, data);
+  }
+  async update_subjects(data) {
+    return await this.request.post(ENDPOINTS.TEACHER_SUBJECT, data);
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.TEACHER, data);
