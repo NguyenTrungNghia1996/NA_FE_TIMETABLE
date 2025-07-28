@@ -20,6 +20,7 @@ const { RestApi } = useApi();
 
 const teachers = ref([]);
 const loading = ref(false);
+const selectedTeacher = ref(null);
 const columns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
   { title: "Mã giáo viên", key: "code" },
@@ -64,7 +65,7 @@ async function handleTableChange(pag) {
   await fetchTeachers();
 }
 async function selectTeacher(record) {
-  // TODO: handle teacher selection
+  selectedTeacher.value = record;
 }
 const onRow = record => {
   return {
@@ -77,6 +78,16 @@ const onRow = record => {
   };
 };
 
+const reset = () => {
+  selectedTeacher.value = null;
+  teachers.value = [];
+  pagination.current = 1;
+  pagination.total = 0;
+};
+
+defineExpose({
+  reset,
+});
 
 onMounted(fetchTeachers);
 </script>

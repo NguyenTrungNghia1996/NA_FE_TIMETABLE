@@ -12,7 +12,7 @@
         placement="bottom"
         @close="closeDrawer"
       >
-        <TeacherAssignment />
+        <TeacherAssignment ref="assignmentRef" />
       </a-drawer>
     </ClientOnly>
   </div>
@@ -20,8 +20,10 @@
 
 <script setup>
 const drawerOpen = ref(false)
+const assignmentRef = ref()
 
 const closeDrawer = () => {
   drawerOpen.value = false
+  assignmentRef.value?.reset()
 }
 </script>
