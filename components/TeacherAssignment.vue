@@ -20,11 +20,6 @@ const { RestApi } = useApi();
 
 const teachers = ref([]);
 const loading = ref(false);
-const selectedId = ref(null);
-const schedule = ref();
-const onlyOneShift = ref(false);
-const maxPeriod = ref(0);
-const teaching_session = ref(null);
 const columns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
   { title: "Mã giáo viên", key: "code" },
@@ -70,19 +65,6 @@ async function handleTableChange(pag) {
 }
 async function selectTeacher(record) {
   // TODO: handle teacher selection
-  // if (!record) return;
-  // selectedId.value = record.id;
-  // try {
-  //   const { data } = await RestApi.teacher.get_avoid({ params: { Id: record.id } });
-  //   if (data.value?.status === "success") {
-  //     schedule.value = data.value.data;
-  //     onlyOneShift.value = !!data.value.data.chi_day_mot_buoi;
-  //     maxPeriod.value = data.value.data.so_tiet_toi_da || 0;
-  //     teaching_session.value = data.value.data.id_buoi_day || 0;
-  //   }
-  // } catch (err) {
-  //   console.error("Fetch teacher detail error", err);
-  // }
 }
 const onRow = record => {
   return {
@@ -95,17 +77,6 @@ const onRow = record => {
   };
 };
 
-const reset = () => {
-  selectedId.value = null;
-  schedule.value = undefined;
-  onlyOneShift.value = false;
-  maxPeriod.value = 0;
-  teaching_session.value = null;
-};
-
-defineExpose({
-  reset,
-});
 
 onMounted(fetchTeachers);
 </script>
