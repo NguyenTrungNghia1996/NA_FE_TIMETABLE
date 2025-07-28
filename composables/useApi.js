@@ -58,7 +58,9 @@ let ENDPOINTS = {
 
   SUBJECT_COMBINATION: "/api/tohopmon",
 
-  TEACHER : "/api/giaovien",
+  TEACHER: "/api/giaovien",
+  TEACHER_DETAIL: "/api/giaovien/detail",
+  
   S3: "/api/presigned_url",
 };
 import { useUserStore } from "~~/stores/userStore";
@@ -606,6 +608,9 @@ class Teacher{
   }
   async list(data) {
     return await this.request.get(ENDPOINTS.TEACHER, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.TEACHER_DETAIL, data);
   }
   async create(data) {
     return await this.request.post(ENDPOINTS.TEACHER, data);
