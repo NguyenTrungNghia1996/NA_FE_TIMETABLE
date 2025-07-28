@@ -33,7 +33,11 @@
         <span>Số tiết tối đa/ngày:</span>
         <a-input-number v-model:value="maxPeriod" :min="1" />
       </div>
-      <Timetable2 v-if="schedule.length" :data="schedule" class="mb-4" />
+      <div v-if="schedule" class="space-y-4">
+        <div v-for="block in schedule.ds_Ca" :key="block.id">
+          <Timetable :block="block" />
+        </div>
+      </div>
       <div class="text-right">
         <a-button type="primary" :loading="saving" @click="handleSave">Lưu</a-button>
       </div>
@@ -44,13 +48,13 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
-import Timetable2 from './Timetable2.vue'
+import Timetable from './Timetable.vue'
 const { RestApi } = useApi()
 
 const teachers = ref([])
 const loading = ref(false)
 const selectedId = ref(null)
-const schedule = ref([])
+const schedule = ref()
 const onlyOneShift = ref(false)
 const maxPeriod = ref(10)
 const saving = ref(false)
@@ -97,11 +101,12 @@ async function selectTeacher(record) {
   if (!record) return
   selectedId.value = record.id
   try {
-    const { data } = await RestApi.teacher.detail({ params: { id: record.id } })
-    const info = data.value?.data || {}
-    schedule.value = info.ds_tiet_tranh_xep || []
-    onlyOneShift.value = !!info.chi_day_1_buoi
-    maxPeriod.value = info.so_tiet_toi_da || 10
+    const { data } = await RestApi.teacher.get_avoid({ params: { Id: record.id } })
+    if (data.value?.status === 'success') {
+      schedule.value = data.value.data
+      onlyOneShift.value = !!data.value.data.chi_day_mot_buoi
+      maxPeriod.value = data.value.data.so_tiet_toi_da || 0
+    }
   } catch (err) {
     console.error('Fetch teacher detail error', err)
   }
@@ -111,14 +116,13 @@ async function handleSave() {
   if (!selectedId.value) return
   try {
     saving.value = true
-    await RestApi.teacher.update({
-      body: {
-        id: selectedId.value,
-        ds_tiet_tranh_xep: schedule.value,
-        chi_day_1_buoi: onlyOneShift.value,
-        so_tiet_toi_da: maxPeriod.value
-      }
-    })
+    const payload = {
+      id_giao_vien: selectedId.value,
+      chi_day_mot_buoi: onlyOneShift.value,
+      so_tiet_toi_da: maxPeriod.value,
+      ds_Ca: schedule.value?.ds_Ca || []
+    }
+    await RestApi.teacher.update_avoid({ body: payload })
     message.success('Cập nhật thành công')
   } catch (err) {
     console.error('Update teacher error', err)
