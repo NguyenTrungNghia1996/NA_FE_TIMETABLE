@@ -14,7 +14,11 @@
       </a-table>
     </a-card>
 
-    <a-card title="CÁC TIẾT HỌC TRÁNH XẾP" class="md:col-span-1">
+    <a-card
+      v-if="selectedId"
+      title="CÁC TIẾT HỌC TRÁNH XẾP"
+      class="md:col-span-1"
+    >
       <div class="grid grid-cols-2 gap-2">
         <div class="flex items-center">
           <a-checkbox v-model:checked="onlyOneShift">Chỉ dạy 1 buổi/ngày</a-checkbox>
