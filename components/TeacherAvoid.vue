@@ -1,16 +1,7 @@
 <template>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <a-card title="DANH SÁCH GIÁO VIÊN" class="md:col-span-1">
-      <a-table
-        :columns="columns"
-        :data-source="teachers"
-        :loading="loading"
-        :pagination="pagination"
-        size="small"
-        row-key="id"
-        @change="handleTableChange"
-        @rowClick="selectTeacher"
-      >
+      <a-table :columns="columns" :data-source="teachers" :loading="loading" :pagination="pagination" size="small" row-key="id" @change="handleTableChange" :customRow="onRow">
         <template #bodyCell="{ column, record, index }">
           <template v-if="column.key === 'stt'">
             {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
@@ -18,9 +9,7 @@
           <template v-if="column.key === 'code'">
             {{ record.ma_giao_vien }}
           </template>
-          <template v-if="column.key === 'name'">
-            {{ record.ho_va_ho_dem }} {{ record.ten }}
-          </template>
+          <template v-if="column.key === 'name'"> {{ record.ho_va_ho_dem }} {{ record.ten }} </template>
         </template>
       </a-table>
     </a-card>
@@ -46,58 +35,57 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { message } from 'ant-design-vue'
-import Timetable from './Timetable.vue'
-const { RestApi } = useApi()
+const { RestApi } = useApi();
 
-const teachers = ref([])
-const loading = ref(false)
-const selectedId = ref(null)
-const schedule = ref()
-const onlyOneShift = ref(false)
-const maxPeriod = ref(10)
-const saving = ref(false)
+const teachers = ref([]);
+const loading = ref(false);
+const selectedId = ref(null);
+const schedule = ref();
+const onlyOneShift = ref(false);
+const maxPeriod = ref(10);
+const saving = ref(false);
 
 const columns = [
-  { title: 'STT', key: 'stt', width: 60, align: 'center' },
-  { title: 'Mã giáo viên', key: 'code' },
-  { title: 'Họ và tên', key: 'name' }
-]
+  { title: "STT", key: "stt", width: 60, align: "center" },
+  { title: "Mã giáo viên", key: "code" },
+  { title: "Họ và tên", key: "name" },
+];
 
 const pagination = reactive({
   current: 1,
   pageSize: 10,
   total: 0,
   showSizeChanger: true,
-  pageSizeOptions: ['10', '20', '50'],
-  showTotal: total => `Tổng ${total} bản ghi`
-})
+  pageSizeOptions: ["10", "20", "50"],
+  showTotal: total => `Tổng ${total} bản ghi`,
+});
 
 async function fetchTeachers() {
   try {
-    loading.value = true
+    loading.value = true;
     const { data } = await RestApi.teacher.list({
       params: {
         PageIndex: pagination.current,
-        PageSize: pagination.pageSize
-      }
-    })
-    if (data.value?.status === 'success') {
-      teachers.value = data.value.data.items || []
-      pagination.total = data.value.data.totalrecord
+        PageSize: pagination.pageSize,
+      },
+    });
+    if (data.value?.status === "success") {
+      teachers.value = data.value.data.items || [];
+      pagination.total = data.value.data.totalrecord;
     } else {
-      teachers.value = []
-      pagination.total = 0
+      teachers.value = [];
+      pagination.total = 0;
     }
   } catch (err) {
-    console.error('Fetch teachers error', err)
+    console.error("Fetch teachers error", err);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 async function selectTeacher(record) {
+  console.log("🚀 ~ selectTeacher ~ record:", record);
+
   if (!record) return
   selectedId.value = record.id
   try {
@@ -113,33 +101,43 @@ async function selectTeacher(record) {
 }
 
 async function handleSave() {
-  if (!selectedId.value) return
+  if (!selectedId.value) return;
   try {
-    saving.value = true
+    saving.value = true;
     const payload = {
       id_giao_vien: selectedId.value,
       chi_day_mot_buoi: onlyOneShift.value,
       so_tiet_toi_da: maxPeriod.value,
-      ds_Ca: schedule.value?.ds_Ca || []
-    }
-    await RestApi.teacher.update_avoid({ body: payload })
-    message.success('Cập nhật thành công')
+      ds_Ca: schedule.value?.ds_Ca || [],
+    };
+    await RestApi.teacher.update_avoid({ body: payload });
+    message.success("Cập nhật thành công");
   } catch (err) {
-    console.error('Update teacher error', err)
-    message.error('Lỗi cập nhật')
+    console.error("Update teacher error", err);
+    message.error("Lỗi cập nhật");
   } finally {
-    saving.value = false
+    saving.value = false;
   }
 }
 
 async function handleTableChange(pag) {
-  pagination.current = pag.current
-  pagination.pageSize = pag.pageSize
-  await fetchTeachers()
+  pagination.current = pag.current;
+  pagination.pageSize = pag.pageSize;
+  await fetchTeachers();
 }
 
-onMounted(fetchTeachers)
+const onRow = (record) => {
+  return {
+    onClick: () => {
+      selectTeacher(record)
+    },
+    style: {
+      cursor: 'pointer'
+    }
+  }
+}
+
+onMounted(fetchTeachers);
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
