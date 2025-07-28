@@ -28,7 +28,7 @@
           <a-input-number v-model:value="maxPeriod" :min="1" />
         </div>
       </div>
-      <div v-if="schedule" class="space-y-4">
+      <div v-if="schedule && !onlyOneShift" class="space-y-4">
         <div v-for="block in schedule.ds_Ca" :key="block.id">
           <Timetable :block="block" />
         </div>
@@ -42,6 +42,7 @@
 </template>
 
 <script setup>
+import { message } from 'ant-design-vue'
 const { RestApi } = useApi();
 
 const teachers = ref([]);
@@ -109,22 +110,27 @@ async function selectTeacher(record) {
 }
 
 async function handleSave() {
-  if (!selectedId.value) return;
+  if (!selectedId.value) return
   try {
-    saving.value = true;
+    saving.value = true
     const payload = {
       id_giao_vien: selectedId.value,
       chi_day_mot_buoi: onlyOneShift.value,
       so_tiet_toi_da: maxPeriod.value,
       id_buoi_day: teaching_session.value,
       ds_Ca: schedule.value?.ds_Ca || [],
-    };
-    await RestApi.teacher.update_avoid({ body: payload });
+    }
+    const { data, error } = await RestApi.teacher.update_avoid({ body: payload })
+    if (data.value?.status === 'success') {
+      message.success(data.value.message || 'Cập nhật thành công')
+    } else {
+      throw new Error(error.value?.data?.message || data.value?.message || 'Cập nhật không thành công')
+    }
   } catch (err) {
-    console.error("Update teacher error", err);
-    message.error("Lỗi cập nhật");
+    console.error('Update teacher error', err)
+    message.error(err.message || 'Lỗi cập nhật')
   } finally {
-    saving.value = false;
+    saving.value = false
   }
 }
 
