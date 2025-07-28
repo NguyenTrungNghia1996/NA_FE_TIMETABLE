@@ -120,9 +120,6 @@ const onRow = record => {
 const reset = () => {
   selectedTeacher.value = null;
   subjects.value = [];
-  teachers.value = [];
-  pagination.current = 1;
-  pagination.total = 0;
 };
 
 async function handleSave() {
