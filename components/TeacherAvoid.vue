@@ -33,7 +33,7 @@
           <Timetable :block="block" />
         </div>
       </div>
-      <div class="flex justify-end gap-2">
+      <div class="flex justify-end gap-2 mt-2">
         <a-button type="primary" :loading="saving" @click="handleSave">Lưu</a-button>
         <a-button danger @click="reset">Hủy</a-button>
       </div>
