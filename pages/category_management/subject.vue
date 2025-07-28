@@ -7,7 +7,7 @@
       </a-button>
       <a-button @click="openBusyManager" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Cài đặt tiết tránh xếp</a-button>
       <a-button @click="openDrawer" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Cài đặt tiết cố định</a-button>
-      <a-button @click="SubjectCombinationDrawer = true">Tổ hợp môn</a-button>
+      <a-button @click="SubjectCombinationDrawer = true" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Tổ hợp môn</a-button>
       <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">
         <span class="md:inline">Thêm mới</span>
       </a-button>

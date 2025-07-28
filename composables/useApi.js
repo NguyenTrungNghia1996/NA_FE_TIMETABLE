@@ -57,6 +57,12 @@ let ENDPOINTS = {
   SUBJECT_GRADE_LEVEL: "/api/monhoc/monkhoilop",
 
   SUBJECT_COMBINATION: "/api/tohopmon",
+
+  TEACHER: "/api/giaovien",
+  TEACHER_DETAIL: "/api/giaovien/detail",
+  TEACHER_AVOID: "/api/giaovien/tiettranhxep",
+  TEACHER_SUBJECT: "/api/giaovien/giaovienmonhoc",
+  
   S3: "/api/presigned_url",
 };
 import { useUserStore } from "~~/stores/userStore";
@@ -158,6 +164,7 @@ class RestApi {
     this.fixed_lesson = new FixedLesson(this.request);
     this.subject_grade_level = new SubjectGradeLevel(this.request);
     this.subject_combination = new SubjectCombination(this.request);
+    this.teacher = new Teacher(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -595,6 +602,38 @@ class SubjectCombination {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.SUBJECT_COMBINATION, data);
+  }
+}
+class Teacher{
+   constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.TEACHER, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.TEACHER_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.TEACHER, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.TEACHER, data);
+  }
+  async get_avoid(data) {
+    return await this.request.get(ENDPOINTS.TEACHER_AVOID, data);
+  }
+  async update_avoid(data) {
+    return await this.request.post(ENDPOINTS.TEACHER_AVOID, data);
+  }
+  async get_subjects(data) {
+    return await this.request.get(ENDPOINTS.TEACHER_SUBJECT, data);
+  }
+  async update_subjects(data) {
+    return await this.request.post(ENDPOINTS.TEACHER_SUBJECT, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.TEACHER, data);
   }
 }
 export default () => {
