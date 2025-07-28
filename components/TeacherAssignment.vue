@@ -148,8 +148,14 @@ async function handleSave() {
   }
 }
 
+
+const refresh = async () => {
+  await fetchTeachers();
+};
+
 defineExpose({
   reset,
+  refresh,
 });
 
 onMounted(fetchTeachers);

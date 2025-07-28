@@ -157,8 +157,13 @@ const reset = () => {
   teaching_session.value = null;
 };
 
+const refresh = async () => {
+  await fetchTeachers();
+};
+
 defineExpose({
   reset,
+  refresh,
 });
 
 onMounted(fetchTeachers);
