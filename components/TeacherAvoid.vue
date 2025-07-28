@@ -42,7 +42,6 @@
 </template>
 
 <script setup>
-import { message } from 'ant-design-vue'
 const { RestApi } = useApi();
 
 const teachers = ref([]);
@@ -97,7 +96,6 @@ async function selectTeacher(record) {
   selectedId.value = record.id;
   try {
     const { data } = await RestApi.teacher.get_avoid({ params: { Id: record.id } });
-    console.log("🚀 ~ selectTeacher ~ data:", data);
     if (data.value?.status === "success") {
       schedule.value = data.value.data;
       onlyOneShift.value = !!data.value.data.chi_day_mot_buoi;
