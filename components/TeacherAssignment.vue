@@ -16,8 +16,15 @@
   </div>
 </template>
 <script setup>
+const { RestApi } = useApi();
+
 const teachers = ref([]);
 const loading = ref(false);
+const selectedId = ref(null);
+const schedule = ref();
+const onlyOneShift = ref(false);
+const maxPeriod = ref(0);
+const teaching_session = ref(null);
 const columns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
   { title: "Mã giáo viên", key: "code" },
@@ -62,7 +69,7 @@ async function handleTableChange(pag) {
   await fetchTeachers();
 }
 async function selectTeacher(record) {
-  console.log("🚀 ~ selectTeacher ~ record:", record)
+  // TODO: handle teacher selection
   // if (!record) return;
   // selectedId.value = record.id;
   // try {
