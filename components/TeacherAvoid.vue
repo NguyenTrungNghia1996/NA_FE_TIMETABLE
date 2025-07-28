@@ -15,12 +15,14 @@
     </a-card>
 
     <a-card title="CÁC TIẾT HỌC TRÁNH XẾP" class="md:col-span-1">
-      <div class="mb-4 flex items-center gap-2">
-        <a-checkbox v-model:checked="onlyOneShift">Chỉ dạy 1 buổi/ngày</a-checkbox>
-      </div>
-      <div class="mb-4 flex items-center gap-2">
-        <span>Số tiết tối đa/ngày:</span>
-        <a-input-number v-model:value="maxPeriod" :min="1" />
+      <div class="grid grid-cols-2 gap-2">
+        <div class="flex items-center">
+          <a-checkbox v-model:checked="onlyOneShift">Chỉ dạy 1 buổi/ngày</a-checkbox>
+        </div>
+        <div class="flex items-center gap-5">
+          <span>Số tiết tối đa/ngày:</span>
+          <a-input-number v-model:value="maxPeriod" :min="1" />
+        </div>
       </div>
       <div v-if="schedule" class="space-y-4">
         <div v-for="block in schedule.ds_Ca" :key="block.id">
@@ -42,7 +44,8 @@ const loading = ref(false);
 const selectedId = ref(null);
 const schedule = ref();
 const onlyOneShift = ref(false);
-const maxPeriod = ref(10);
+const maxPeriod = ref(0);
+const teaching_session = ref(null);
 const saving = ref(false);
 
 const columns = [
@@ -84,19 +87,19 @@ async function fetchTeachers() {
 }
 
 async function selectTeacher(record) {
-  console.log("🚀 ~ selectTeacher ~ record:", record);
-
-  if (!record) return
-  selectedId.value = record.id
+  if (!record) return;
+  selectedId.value = record.id;
   try {
-    const { data } = await RestApi.teacher.get_avoid({ params: { Id: record.id } })
-    if (data.value?.status === 'success') {
-      schedule.value = data.value.data
-      onlyOneShift.value = !!data.value.data.chi_day_mot_buoi
-      maxPeriod.value = data.value.data.so_tiet_toi_da || 0
+    const { data } = await RestApi.teacher.get_avoid({ params: { Id: record.id } });
+    console.log("🚀 ~ selectTeacher ~ data:", data);
+    if (data.value?.status === "success") {
+      schedule.value = data.value.data;
+      onlyOneShift.value = !!data.value.data.chi_day_mot_buoi;
+      maxPeriod.value = data.value.data.so_tiet_toi_da || 0;
+      teaching_session.value = data.value.data.id_buoi_day || 0;
     }
   } catch (err) {
-    console.error('Fetch teacher detail error', err)
+    console.error("Fetch teacher detail error", err);
   }
 }
 
@@ -108,10 +111,10 @@ async function handleSave() {
       id_giao_vien: selectedId.value,
       chi_day_mot_buoi: onlyOneShift.value,
       so_tiet_toi_da: maxPeriod.value,
+      id_buoi_day: teaching_session.value,
       ds_Ca: schedule.value?.ds_Ca || [],
     };
     await RestApi.teacher.update_avoid({ body: payload });
-    message.success("Cập nhật thành công");
   } catch (err) {
     console.error("Update teacher error", err);
     message.error("Lỗi cập nhật");
@@ -126,16 +129,16 @@ async function handleTableChange(pag) {
   await fetchTeachers();
 }
 
-const onRow = (record) => {
+const onRow = record => {
   return {
     onClick: () => {
-      selectTeacher(record)
+      selectTeacher(record);
     },
     style: {
-      cursor: 'pointer'
-    }
-  }
-}
+      cursor: "pointer",
+    },
+  };
+};
 
 onMounted(fetchTeachers);
 </script>
