@@ -52,8 +52,8 @@
         <a-form-item label="Tên" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
           <a-input v-model:value="formState.ten" placeholder="Nhập tên" :maxlength="200" show-count />
         </a-form-item>
-        <SelectExpertise v-model="formState.id_to_chuyen_mon" name="id_to_chuyen_mon" />
-        <SelectSchoolSite v-model="formState.id_diem_truong" name="id_diem_truong" :multiple="true" />
+        <SelectExpertise v-model="formState.id_to_chuyen_mon" name="id_to_chuyen_mon" :rules="rules.id_to_chuyen_mon" />
+        <SelectSchoolSite v-model="formState.id_diem_truong" name="id_diem_truong" :multiple="true" :rules="rules.id_diem_truong" />
       </a-form>
 
       <template #footer>
