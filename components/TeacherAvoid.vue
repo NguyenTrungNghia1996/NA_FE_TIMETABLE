@@ -29,8 +29,9 @@
           <Timetable :block="block" />
         </div>
       </div>
-      <div class="text-right">
+      <div class="flex justify-end gap-2">
         <a-button type="primary" :loading="saving" @click="handleSave">Lưu</a-button>
+        <a-button danger @click="reset">Hủy</a-button>
       </div>
     </a-card>
   </div>
@@ -139,6 +140,18 @@ const onRow = record => {
     },
   };
 };
+
+const reset = () => {
+  selectedId.value = null;
+  schedule.value = undefined;
+  onlyOneShift.value = false;
+  maxPeriod.value = 0;
+  teaching_session.value = null;
+};
+
+defineExpose({
+  reset,
+});
 
 onMounted(fetchTeachers);
 </script>
