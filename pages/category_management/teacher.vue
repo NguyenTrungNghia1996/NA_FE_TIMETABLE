@@ -5,6 +5,9 @@
       <a-button @click="resetForm" class="w-full md:w-auto">
         <span class="md:inline">Đặt lại</span>
       </a-button>
+      <a-button type="primary" @click="drawerAvoidOpen = true" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">
+        <span class="md:inline">Tiết tránh xếp</span>
+      </a-button>
       <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">
         <span class="md:inline">Thêm mới</span>
       </a-button>
@@ -54,31 +57,34 @@
         <div class="flex justify-end space-x-2">
           <a-button @click="handleCancel">Hủy</a-button>
           <a-button type="primary" @click="handleOk" :loading="confirmLoading">
-            {{ isEdit ? 'Cập nhật' : 'Thêm mới' }}
+            {{ isEdit ? "Cập nhật" : "Thêm mới" }}
           </a-button>
         </div>
       </template>
     </a-modal>
+    <a-drawer v-model:open="drawerAvoidOpen" title="Thiết lập tiết tránh xếp của giáo viên" :footer="null" height="100vh" placement="bottom" @close="closeTeacherAvoid">
+      <TeacherAvoid ref="avoidRef" />
+    </a-drawer>
   </div>
 </template>
 
 <script setup>
 const settingStore = useSettingStore();
 const { RestApi } = useApi();
-const param = ref({ PageIndex: 1, PageSize: 10, search: '' });
+const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
 
 const columns = [
-  { title: 'STT', key: 'stt', width: 50, align: 'center' },
-  { title: 'Mã giáo viên', dataIndex: 'ma_giao_vien', key: 'ma_giao_vien', ellipsis: true },
-  { title: 'Họ và Họ đệm', dataIndex: 'ho_va_ho_dem', key: 'ho_va_ho_dem', ellipsis: true },
-  { title: 'Tên', dataIndex: 'ten', key: 'ten', ellipsis: true },
-  { title: 'Tổ chuyên môn', dataIndex: 'ten_to_chuyen_mon', key: 'ten_to_chuyen_mon', ellipsis: true },
-  { title: 'Thao tác', key: 'action', width: 80, align: 'center', fixed: 'right' }
+  { title: "STT", key: "stt", width: 50, align: "center" },
+  { title: "Mã giáo viên", dataIndex: "ma_giao_vien", key: "ma_giao_vien", ellipsis: true },
+  { title: "Họ và Họ đệm", dataIndex: "ho_va_ho_dem", key: "ho_va_ho_dem", ellipsis: true },
+  { title: "Tên", dataIndex: "ten", key: "ten", ellipsis: true },
+  { title: "Tổ chuyên môn", dataIndex: "ten_to_chuyen_mon", key: "ten_to_chuyen_mon", ellipsis: true },
+  { title: "Thao tác", key: "action", width: 80, align: "center", fixed: "right" },
 ];
 
 const dataSource = ref([]);
 const loading = ref(false);
-const searchText = ref('');
+const searchText = ref("");
 const visible = ref(false);
 const confirmLoading = ref(false);
 const isEdit = ref(false);
@@ -89,40 +95,36 @@ const pagination = reactive({
   pageSize: 10,
   total: 0,
   showSizeChanger: true,
-  pageSizeOptions: ['1', '10', '20', '50'],
-  showTotal: (total) => `Tổng ${total} bản ghi`
+  pageSizeOptions: ["1", "10", "20", "50"],
+  showTotal: total => `Tổng ${total} bản ghi`,
 });
 
 const formState = reactive({
   id: null,
-  ho_va_ho_dem: '',
-  ten: '',
+  ho_va_ho_dem: "",
+  ten: "",
   id_to_chuyen_mon: undefined,
-  id_diem_truong: []
+  id_diem_truong: [],
 });
 
 const rules = reactive({
   ho_va_ho_dem: [
-    { required: true, message: 'Vui lòng nhập họ và họ đệm', trigger: 'blur' },
-    { max: 200, message: 'Tối đa 200 ký tự', trigger: 'blur' }
+    { required: true, message: "Vui lòng nhập họ và họ đệm", trigger: "blur" },
+    { max: 200, message: "Tối đa 200 ký tự", trigger: "blur" },
   ],
   ten: [
-    { required: true, message: 'Vui lòng nhập tên', trigger: 'blur' },
-    { max: 200, message: 'Tối đa 200 ký tự', trigger: 'blur' }
+    { required: true, message: "Vui lòng nhập tên", trigger: "blur" },
+    { max: 200, message: "Tối đa 200 ký tự", trigger: "blur" },
   ],
-  id_to_chuyen_mon: [
-    { required: true, message: 'Vui lòng chọn tổ chuyên môn', trigger: 'change' }
-  ],
-  id_diem_truong: [
-    { required: true, message: 'Vui lòng chọn điểm trường', trigger: 'change' }
-  ]
+  id_to_chuyen_mon: [{ required: true, message: "Vui lòng chọn tổ chuyên môn", trigger: "change" }],
+  id_diem_truong: [{ required: true, message: "Vui lòng chọn điểm trường", trigger: "change" }],
 });
 
-const fetchData = async (param) => {
+const fetchData = async param => {
   try {
     loading.value = true;
     const { data } = await RestApi.teacher.list({ params: param });
-    if (data.value?.status === 'success') {
+    if (data.value?.status === "success") {
       dataSource.value = data.value.data.items || [];
       pagination.total = data.value.data.totalrecord;
     } else {
@@ -130,14 +132,14 @@ const fetchData = async (param) => {
       pagination.total = 0;
     }
   } catch (error) {
-    console.error('Error fetching data:', error);
-    message.error('Lỗi khi tải dữ liệu');
+    console.error("Error fetching data:", error);
+    message.error("Lỗi khi tải dữ liệu");
   } finally {
     loading.value = false;
   }
 };
 
-const handleTableChange = async (pag) => {
+const handleTableChange = async pag => {
   pagination.current = pag.current;
   pagination.pageSize = pag.pageSize;
   param.value.PageIndex = pag.current;
@@ -153,26 +155,26 @@ const handleSearch = async () => {
 
 const showModal = () => {
   isEdit.value = false;
-  Object.assign(formState, { id: null, ho_va_ho_dem: '', ten: '', id_to_chuyen_mon: undefined, id_diem_truong: [] });
+  Object.assign(formState, { id: null, ho_va_ho_dem: "", ten: "", id_to_chuyen_mon: undefined, id_diem_truong: [] });
   visible.value = true;
 };
 
-const editItem = async (id) => {
+const editItem = async id => {
   isEdit.value = true;
   try {
     const { data } = await RestApi.teacher.detail({ params: { Id: id } });
-    if (data.value?.status === 'success') {
+    if (data.value?.status === "success") {
       Object.assign(formState, {
         id: data.value.data.id,
         ho_va_ho_dem: data.value.data.ho_va_ho_dem,
         ten: data.value.data.ten,
         id_to_chuyen_mon: data.value.data.id_to_chuyen_mon,
-        id_diem_truong: data.value.data.id_diem_truong
+        id_diem_truong: data.value.data.id_diem_truong,
       });
       visible.value = true;
     }
   } catch (err) {
-    message.error('Không thể lấy dữ liệu chi tiết');
+    message.error("Không thể lấy dữ liệu chi tiết");
   }
 };
 
@@ -188,16 +190,16 @@ const handleOk = async () => {
       delete payload.id;
       res = await RestApi.teacher.create({ body: payload });
     }
-    if (res.data.value?.status === 'success') {
-      message.success(res.data.value?.message || 'Thành công');
+    if (res.data.value?.status === "success") {
+      message.success(res.data.value?.message || "Thành công");
       await fetchData({ ...param.value });
       visible.value = false;
       formRef.value.resetFields();
     } else {
-      throw new Error(res.error?.value?.data?.message || 'Lỗi không xác định');
+      throw new Error(res.error?.value?.data?.message || "Lỗi không xác định");
     }
   } catch (err) {
-    message.error(err.message || 'Lỗi khi lưu thông tin');
+    message.error(err.message || "Lỗi khi lưu thông tin");
   } finally {
     confirmLoading.value = false;
   }
@@ -208,17 +210,17 @@ const handleCancel = () => {
   visible.value = false;
 };
 
-const deleteItem = async (id) => {
+const deleteItem = async id => {
   try {
     const { data } = await RestApi.teacher.delete({ params: { Id: id } });
-    if (data.value?.status === 'success') {
-      message.success(data.value?.message || 'Xóa thành công');
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Xóa thành công");
     } else {
-      message.error(data.value?.message || 'Có lỗi xảy ra');
+      message.error(data.value?.message || "Có lỗi xảy ra");
     }
   } catch (error) {
-    console.error('Error deleting data:', error);
-    message.error('Có lỗi xảy ra khi xóa dữ liệu');
+    console.error("Error deleting data:", error);
+    message.error("Có lỗi xảy ra khi xóa dữ liệu");
   } finally {
     await fetchData({ ...param.value });
   }
@@ -230,11 +232,17 @@ const resetForm = async () => {
   }
   param.value.PageIndex = 1;
   param.value.PageSize = 10;
-  param.value.search = '';
+  param.value.search = "";
   pagination.current = 1;
   pagination.pageSize = 10;
   await fetchData({ ...param.value });
 };
 
 await fetchData({ ...param.value });
+
+const drawerAvoidOpen = ref(false);
+const avoidRef = ref(null);
+const closeTeacherAvoid = () => {
+  avoidRef.value?.reset();
+};
 </script>
