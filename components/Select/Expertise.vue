@@ -54,7 +54,8 @@ const fetchExpertise = async (search = '') => {
         props.modelValue === undefined
       ) {
         // const first = options.value[0]
-        if (first) emit('update:modelValue', props.modelValue)
+        // if (first) 
+        emit('update:modelValue', props.modelValue)
       }
     }
   } catch (error) {
