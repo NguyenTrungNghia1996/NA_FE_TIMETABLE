@@ -8,14 +8,22 @@
       height="100vh"
       placement="bottom"
     >
-      <TeacherAvoid />
+      <TeacherAvoid ref="avoidRef" />
     </a-drawer>
   </div>
 </template>
 
 <script setup>
+import { ref, watch } from 'vue'
 import TeacherAvoid from '~/components/TeacherAvoid.vue'
 const drawerOpen = ref(false)
+const avoidRef = ref(null)
+
+watch(drawerOpen, open => {
+  if (!open) {
+    avoidRef.value?.reset()
+  }
+})
 </script>
 
 <style scoped></style>
