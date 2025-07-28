@@ -22,8 +22,14 @@
 const drawerAssignmentOpen = ref(false)
 const assignmentRef = ref()
 
+watch(drawerAssignmentOpen, val => {
+  if (val) {
+    assignmentRef.value?.refresh()
+  }
+})
+
 const closeDrawer = () => {
-  drawerOpen.value = false
+  drawerAssignmentOpen.value = false
   assignmentRef.value?.reset()
 }
 </script>

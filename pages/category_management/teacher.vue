@@ -252,8 +252,20 @@ const closeTeacherAvoid = () => {
   avoidRef.value?.reset();
 };
 
+watch(drawerAvoidOpen, val => {
+  if (val) {
+    avoidRef.value?.refresh();
+  }
+});
+
 const drawerAssignmentOpen = ref(false)
 const assignmentRef = ref()
+
+watch(drawerAssignmentOpen, val => {
+  if (val) {
+    assignmentRef.value?.refresh()
+  }
+})
 
 const closeAssignmentDrawer = () => {
   // drawerOpen.value = false
