@@ -14,7 +14,11 @@
       </a-table>
     </a-card>
 
-    <a-card title="CÁC TIẾT HỌC TRÁNH XẾP" class="md:col-span-1">
+    <a-card
+      v-if="selectedId"
+      title="CÁC TIẾT HỌC TRÁNH XẾP"
+      class="md:col-span-1"
+    >
       <div class="grid grid-cols-2 gap-2">
         <div class="flex items-center">
           <a-checkbox v-model:checked="onlyOneShift">Chỉ dạy 1 buổi/ngày</a-checkbox>
@@ -24,19 +28,21 @@
           <a-input-number v-model:value="maxPeriod" :min="1" />
         </div>
       </div>
-      <div v-if="schedule" class="space-y-4">
+      <div v-if="schedule && !onlyOneShift" class="space-y-4">
         <div v-for="block in schedule.ds_Ca" :key="block.id">
           <Timetable :block="block" />
         </div>
       </div>
-      <div class="text-right">
+      <div class="flex justify-end gap-2 mt-2">
         <a-button type="primary" :loading="saving" @click="handleSave">Lưu</a-button>
+        <a-button danger @click="reset">Hủy</a-button>
       </div>
     </a-card>
   </div>
 </template>
 
 <script setup>
+import { message } from 'ant-design-vue'
 const { RestApi } = useApi();
 
 const teachers = ref([]);
@@ -104,22 +110,27 @@ async function selectTeacher(record) {
 }
 
 async function handleSave() {
-  if (!selectedId.value) return;
+  if (!selectedId.value) return
   try {
-    saving.value = true;
+    saving.value = true
     const payload = {
       id_giao_vien: selectedId.value,
       chi_day_mot_buoi: onlyOneShift.value,
       so_tiet_toi_da: maxPeriod.value,
       id_buoi_day: teaching_session.value,
       ds_Ca: schedule.value?.ds_Ca || [],
-    };
-    await RestApi.teacher.update_avoid({ body: payload });
+    }
+    const { data, error } = await RestApi.teacher.update_avoid({ body: payload })
+    if (data.value?.status === 'success') {
+      message.success(data.value.message || 'Cập nhật thành công')
+    } else {
+      throw new Error(error.value?.data?.message || data.value?.message || 'Cập nhật không thành công')
+    }
   } catch (err) {
-    console.error("Update teacher error", err);
-    message.error("Lỗi cập nhật");
+    console.error('Update teacher error', err)
+    message.error(err.message || 'Lỗi cập nhật')
   } finally {
-    saving.value = false;
+    saving.value = false
   }
 }
 
@@ -139,6 +150,18 @@ const onRow = record => {
     },
   };
 };
+
+const reset = () => {
+  selectedId.value = null;
+  schedule.value = undefined;
+  onlyOneShift.value = false;
+  maxPeriod.value = 0;
+  teaching_session.value = null;
+};
+
+defineExpose({
+  reset,
+});
 
 onMounted(fetchTeachers);
 </script>
