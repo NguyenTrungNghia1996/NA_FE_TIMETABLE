@@ -47,7 +47,7 @@
           <a-input v-model:value="formState.ten" placeholder="Nhập tên" :maxlength="200" show-count />
         </a-form-item>
         <SelectExpertise v-model="formState.id_to_chuyen_mon" name="id_to_chuyen_mon" />
-        <SelectSchoolSite v-model="formState.diem_truong" name="diem_truong" />
+        <SelectSchoolSite v-model="formState.id_diem_truong" name="id_diem_truong" :multiple="true" />
       </a-form>
 
       <template #footer>
@@ -98,7 +98,7 @@ const formState = reactive({
   ho_va_ho_dem: '',
   ten: '',
   id_to_chuyen_mon: undefined,
-  diem_truong: undefined
+  id_diem_truong: []
 });
 
 const rules = reactive({
@@ -113,7 +113,7 @@ const rules = reactive({
   id_to_chuyen_mon: [
     { required: true, message: 'Vui lòng chọn tổ chuyên môn', trigger: 'change' }
   ],
-  diem_truong: [
+  id_diem_truong: [
     { required: true, message: 'Vui lòng chọn điểm trường', trigger: 'change' }
   ]
 });
@@ -153,7 +153,7 @@ const handleSearch = async () => {
 
 const showModal = () => {
   isEdit.value = false;
-  Object.assign(formState, { id: null, ho_va_ho_dem: '', ten: '', id_to_chuyen_mon: undefined, diem_truong: undefined });
+  Object.assign(formState, { id: null, ho_va_ho_dem: '', ten: '', id_to_chuyen_mon: undefined, id_diem_truong: [] });
   visible.value = true;
 };
 
@@ -167,7 +167,7 @@ const editItem = async (id) => {
         ho_va_ho_dem: data.value.data.ho_va_ho_dem,
         ten: data.value.data.ten,
         id_to_chuyen_mon: data.value.data.id_to_chuyen_mon,
-        diem_truong: data.value.data.id_don_vi
+        id_diem_truong: data.value.data.id_diem_truong
       });
       visible.value = true;
     }
