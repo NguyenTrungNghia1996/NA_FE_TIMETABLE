@@ -62,6 +62,10 @@ let ENDPOINTS = {
   TEACHER_DETAIL: "/api/giaovien/detail",
   TEACHER_AVOID: "/api/giaovien/tiettranhxep",
   TEACHER_SUBJECT: "/api/giaovien/giaovienmonhoc",
+
+  // CLASS
+  CLASS: "/api/lophoc",
+  CLASS_DETAIL: "/api/lophoc/detail",
   
   S3: "/api/presigned_url",
 };
@@ -165,6 +169,7 @@ class RestApi {
     this.subject_grade_level = new SubjectGradeLevel(this.request);
     this.subject_combination = new SubjectCombination(this.request);
     this.teacher = new Teacher(this.request);
+    this.class = new Class(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -634,6 +639,27 @@ class Teacher{
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.TEACHER, data);
+  }
+}
+
+class Class {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.CLASS, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.CLASS_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.CLASS, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.CLASS, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.CLASS, data);
   }
 }
 export default () => {
