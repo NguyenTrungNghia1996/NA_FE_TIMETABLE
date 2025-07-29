@@ -62,7 +62,10 @@ let ENDPOINTS = {
   TEACHER_DETAIL: "/api/giaovien/detail",
   TEACHER_AVOID: "/api/giaovien/tiettranhxep",
   TEACHER_SUBJECT: "/api/giaovien/giaovienmonhoc",
-  CLASS :"/api/lophoc",
+  // CLASS
+  CLASS: "/api/lophoc",
+  CLASS_DETAIL: "/api/lophoc/detail",
+  
   S3: "/api/presigned_url",
 };
 import { useUserStore } from "~~/stores/userStore";
@@ -638,9 +641,15 @@ class Teacher{
   }
 }
 
-class Class{
-   async list(data) {
+class Class {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
     return await this.request.get(ENDPOINTS.CLASS, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.CLASS_DETAIL, data);
   }
   async create(data) {
     return await this.request.post(ENDPOINTS.CLASS, data);
