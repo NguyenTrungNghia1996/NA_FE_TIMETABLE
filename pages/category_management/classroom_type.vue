@@ -249,11 +249,7 @@ const handleCancel = () => {
 
 const deleteItem = async id => {
   try {
-    // const { data } = await useFetch(`/api/loaiphonghoc/${id}`, {
-    //   method: 'delete'
-    // })
     const { data } = await RestApi.classroom_type.delete({ params: { id: id } });
-
     if (data.value?.status === "success") {
       message.success("Xóa loại phòng học thành công");
       fetchData();
