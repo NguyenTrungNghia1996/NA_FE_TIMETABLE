@@ -62,7 +62,6 @@ let ENDPOINTS = {
   TEACHER_DETAIL: "/api/giaovien/detail",
   TEACHER_AVOID: "/api/giaovien/tiettranhxep",
   TEACHER_SUBJECT: "/api/giaovien/giaovienmonhoc",
-
   // CLASS
   CLASS: "/api/lophoc",
   CLASS_DETAIL: "/api/lophoc/detail",
