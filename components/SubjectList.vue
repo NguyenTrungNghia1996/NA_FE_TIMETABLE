@@ -60,6 +60,7 @@ const subjects = ref([])
 const columns = [
   { title: 'STT', key: 'stt', width: 60, align: 'center' },
   { title: 'Tên môn học', dataIndex: 'ten_mon', key: 'name' },
+   { title: 'Số tiết', key: 'period', align: 'center' },
   {
     title: 'Tổng số tiết',
     children: [
@@ -67,7 +68,7 @@ const columns = [
       { title: 'Phòng chuyên dụng', key: 'spec', align: 'center' },
     ],
   },
-  { title: 'Số tiết', key: 'period', align: 'center' },
+ 
 ]
 
 async function fetchSubjects(id) {

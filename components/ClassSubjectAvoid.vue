@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
     <a-card title="DANH SÁCH LỚP" class="md:col-span-1">
       <ClassList ref="classRef" @select="handleSelectClass" />
     </a-card>
