@@ -65,6 +65,7 @@ let ENDPOINTS = {
   // CLASS
   CLASS: "/api/lophoc",
   CLASS_DETAIL: "/api/lophoc/detail",
+  CLASS_BREAK: "/api/lophoc/tietnghi",
   
   S3: "/api/presigned_url",
 };
@@ -659,6 +660,12 @@ class Class {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.CLASS, data);
+  }
+  async get_break(data) {
+    return await this.request.get(ENDPOINTS.CLASS_BREAK, data);
+  }
+  async update_break(data) {
+    return await this.request.post(ENDPOINTS.CLASS_BREAK, data);
   }
 }
 export default () => {
