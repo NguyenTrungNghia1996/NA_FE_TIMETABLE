@@ -25,6 +25,7 @@ let ENDPOINTS = {
   SUBJECT: "/api/monhoc",
   SUBJECT_DETAIL: "/api/monhoc/detail",
   SUBJECT_AVOID: "/api/monhoc/tiettranhxep",
+  SUBJECT_CLASS: "/api/monhoc/monlop",
   //EXPERTISE
   EXPERTISE: "/api/tochuyenmon",
   //GRADE_LEVEL
@@ -513,6 +514,9 @@ class Subject {
   }
   async update_avoid(data) {
     return await this.request.post(ENDPOINTS.SUBJECT_AVOID, data);
+  }
+  async get_by_class(data) {
+    return await this.request.get(ENDPOINTS.SUBJECT_CLASS, data);
   }
 }
 class SchoolDay {
