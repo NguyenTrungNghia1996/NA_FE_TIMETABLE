@@ -65,7 +65,10 @@ let ENDPOINTS = {
   // CLASS
   CLASS: "/api/lophoc",
   CLASS_DETAIL: "/api/lophoc/detail",
-  
+  CLASS_BREAK: "/api/lophoc/tietnghi",
+  CLASS_SUBJECT: "/api/lopmon",
+  CLASS_SUBJECT_AVOID: "/api/lopmon/tiettranhxep",
+
   S3: "/api/presigned_url",
 };
 import { useUserStore } from "~~/stores/userStore";
@@ -659,6 +662,21 @@ class Class {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.CLASS, data);
+  }
+  async get_break(data) {
+    return await this.request.get(ENDPOINTS.CLASS_BREAK, data);
+  }
+  async update_break(data) {
+    return await this.request.post(ENDPOINTS.CLASS_BREAK, data);
+  }
+  async get_subjects(data) {
+    return await this.request.get(ENDPOINTS.CLASS_SUBJECT, data);
+  }
+  async get_subject_avoid(data) {
+    return await this.request.get(ENDPOINTS.CLASS_SUBJECT_AVOID, data);
+  }
+  async update_subject_avoid(data) {
+    return await this.request.post(ENDPOINTS.CLASS_SUBJECT_AVOID, data);
   }
 }
 export default () => {
