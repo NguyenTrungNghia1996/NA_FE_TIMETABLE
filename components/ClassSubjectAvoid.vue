@@ -39,7 +39,7 @@ const handleSelectClass = record => {
   selectedClassId.value = record.id;
 };
 const handleSubjectClass = record => {
-  selectedSubjectId.value = record.id_mon;
+  selectedSubjectId.value = record.id;
 };
 
 watch(

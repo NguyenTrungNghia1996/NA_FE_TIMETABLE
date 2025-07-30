@@ -4,7 +4,7 @@
     :data-source="subjects"
     :pagination="false"
     size="small"
-    row-key="id_mon"
+    row-key="id"
     :customRow="onRow"
   >
     <template #bodyCell="{ column, record, index }">
@@ -12,24 +12,13 @@
         {{ index + 1 }}
       </template>
       <template v-else-if="column.key === 'trad'">
-        {{
-          (record.so_tiet_ca_sang_truyen_thong || 0) +
-            (record.so_tiet_ca_chieu_truyen_thong || 0)
-        }}
+        {{ record.so_tiet_phong_truyen_thong }}
       </template>
       <template v-else-if="column.key === 'spec'">
-        {{
-          (record.so_tiet_ca_sang_phong_chuyen_dung || 0) +
-            (record.so_tiet_ca_chieu_phong_chuyen_dung || 0)
-        }}
+        {{ record.so_tiet_phong_chuyen_dung }}
       </template>
       <template v-else-if="column.key === 'period'">
-        {{
-          (record.so_tiet_ca_sang_truyen_thong || 0) +
-            (record.so_tiet_ca_chieu_truyen_thong || 0) +
-            (record.so_tiet_ca_sang_phong_chuyen_dung || 0) +
-            (record.so_tiet_ca_chieu_phong_chuyen_dung || 0)
-        }}
+        {{ record.tong_so_tiet }}
       </template>
     </template>
   </a-table>
@@ -59,7 +48,7 @@ const subjects = ref([])
 // )
 const columns = [
   { title: 'STT', key: 'stt', width: 60, align: 'center' },
-  { title: 'Tên môn học', dataIndex: 'ten_mon', key: 'name' },
+  { title: 'Tên môn học', dataIndex: 'ten', key: 'name' },
    { title: 'Số tiết', key: 'period', align: 'center' },
   {
     title: 'Tổng số tiết',
@@ -73,9 +62,9 @@ const columns = [
 
 async function fetchSubjects(id) {
   try {
-    const { data } = await RestApi.class.get_subjects({ params: { idLop: id } })
+    const { data } = await RestApi.subject.get_by_class({ params: { idLop: id } })
     if (data.value?.status === 'success') {
-      subjects.value = data.value.data?.ds_mon || []
+      subjects.value = data.value.data?.items || []
     } else {
       subjects.value = []
     }
