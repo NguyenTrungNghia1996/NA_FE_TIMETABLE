@@ -4,6 +4,7 @@
       <a-input-search v-model:value="searchText" placeholder="Tìm kiếm lớp học..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
       <a-button @click="resetForm" class="w-full md:w-auto">Đặt lại</a-button>
       <a-button type="primary" @click="drawerBreakOpen = true" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Tiết nghỉ</a-button>
+      <a-button type="primary" @click="drawerAvoidOpen = true" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Tiết tránh xếp của cặp Lớp - Môn học</a-button>
       <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Thêm mới</a-button>
     </div>
 
@@ -66,6 +67,18 @@
     >
       <ClassBreak ref="breakRef" />
     </a-drawer>
+    <a-drawer
+      v-model:open="drawerAvoidOpen"
+      title="Thiết lập tiết tránh xếp của cặp Lớp - Môn học"
+      :footer="null"
+      height="100vh"
+      placement="bottom"
+      @close="closeSubjectAvoid"
+    >
+      <ClientOnly>
+        <ClassSubjectAvoid ref="avoidRef" />
+      </ClientOnly>
+    </a-drawer>
   </div>
 </template>
 
@@ -76,13 +89,26 @@ const param = ref({ PageIndex: 1, PageSize: 10, search: '' })
 const drawerBreakOpen = ref(false)
 const breakRef = ref(null)
 
+const drawerAvoidOpen = ref(false)
+const avoidRef = ref(null)
+
 const closeClassBreak = () => {
   breakRef.value?.reset()
+}
+
+const closeSubjectAvoid = () => {
+  avoidRef.value?.reset()
 }
 
 watch(drawerBreakOpen, val => {
   if (val) {
     breakRef.value?.refresh()
+  }
+})
+
+watch(drawerAvoidOpen, val => {
+  if (val) {
+    avoidRef.value?.refresh()
   }
 })
 
