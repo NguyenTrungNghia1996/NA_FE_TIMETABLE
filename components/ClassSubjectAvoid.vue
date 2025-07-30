@@ -1,39 +1,41 @@
 <template>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <a-card title="DANH SÁCH LỚP" class="md:col-span-1">
-      <ClassList ref="classRef" @select="handleSelect" />
+      <ClassList ref="classRef" @select="handleSelectClass" />
     </a-card>
-
-    <a-card v-if="selectedId" title="DANH SÁCH MÔN HỌC" class="md:col-span-1">
-      <SubjectList ref="subjectRef" :class-id="selectedId" />
+    <a-card v-if="selectedClassId" title="DANH SÁCH MÔN HỌC" class="md:col-span-1">
+      <SubjectList ref="subjectRef" :class-id="selectedClassId" @select="handleSubjectClass" />
     </a-card>
+    {{ selectedClassId }}/{{ selectedSubjectId }}
   </div>
 </template>
 
 <script setup>
-import ClassList from './ClassList.vue'
-import SubjectList from './SubjectList.vue'
+const selectedClassId = ref(null);
+const selectedSubjectId = ref(null);
 
-const selectedId = ref(null)
-const classRef = ref(null)
-const subjectRef = ref(null)
+const classRef = ref(null);
+const subjectRef = ref(null);
 
-const handleSelect = record => {
-  selectedId.value = record.id
-}
+const handleSelectClass = record => {
+  selectedClassId.value = record.id;
+};
+const handleSubjectClass = record => {
+  selectedSubjectId.value = record.id_mon;
+};
 
 const reset = () => {
-  selectedId.value = null
-  classRef.value?.reset?.()
-  subjectRef.value?.reset?.()
-}
+  selectedId.value = null;
+  classRef.value?.reset?.();
+  subjectRef.value?.reset?.();
+};
 
 const refresh = async () => {
-  await classRef.value?.refresh?.()
+  await classRef.value?.refresh?.();
   if (selectedId.value) {
-    await subjectRef.value?.refresh?.()
+    await subjectRef.value?.refresh?.();
   }
-}
+};
 
-defineExpose({ reset, refresh })
+defineExpose({ reset, refresh });
 </script>

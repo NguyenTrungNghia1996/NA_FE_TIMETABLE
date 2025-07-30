@@ -5,7 +5,7 @@
     :pagination="false"
     size="small"
     row-key="id_mon"
-    :row-selection="rowSelection"
+    :customRow="onRow"
   >
     <template #bodyCell="{ column, record, index }">
       <template v-if="column.key === 'stt'">
@@ -38,24 +38,25 @@
 <script setup>
 const props = defineProps({ classId: Number })
 const { RestApi } = useApi()
+const emit = defineEmits(['select'])
 
 const subjects = ref([])
-const selectedRowKeys = ref([])
-const rowSelection = reactive({
-  selectedRowKeys: selectedRowKeys.value,
-  onChange: keys => {
-    rowSelection.selectedRowKeys = keys
-    selectedRowKeys.value = keys
-  },
-})
+// const selectedRowKeys = ref([])
+// const rowSelection = reactive({
+//   selectedRowKeys: selectedRowKeys.value,
+//   onChange: keys => {
+//     rowSelection.selectedRowKeys = keys
+//     selectedRowKeys.value = keys
+//   },
+// })
 
-watch(
-  selectedRowKeys,
-  keys => {
-    rowSelection.selectedRowKeys = keys
-  },
-  { immediate: true },
-)
+// watch(
+//   selectedRowKeys,
+//   keys => {
+//     rowSelection.selectedRowKeys = keys
+//   },
+//   { immediate: true },
+// )
 const columns = [
   { title: 'STT', key: 'stt', width: 60, align: 'center' },
   { title: 'Tên môn học', dataIndex: 'ten_mon', key: 'name' },
@@ -93,13 +94,23 @@ watch(
 
 const reset = () => {
   subjects.value = []
-  selectedRowKeys.value = []
-  rowSelection.selectedRowKeys = []
 }
 
 const refresh = async () => {
   if (props.classId) await fetchSubjects(props.classId)
 }
 
-defineExpose({ reset, refresh, selectedRowKeys })
+defineExpose({ reset, refresh })
+
+const onRow = record => {
+  return {
+    onClick: () => {
+      emit('select', record)
+    },
+    style: {
+      cursor: 'pointer',
+    },
+  }
+}
+
 </script>
