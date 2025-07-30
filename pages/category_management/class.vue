@@ -3,6 +3,7 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4">
       <a-input-search v-model:value="searchText" placeholder="Tìm kiếm lớp học..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
       <a-button @click="resetForm" class="w-full md:w-auto">Đặt lại</a-button>
+      <a-button type="primary" @click="drawerBreakOpen = true" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Tiết nghỉ</a-button>
       <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Thêm mới</a-button>
     </div>
 
@@ -55,6 +56,16 @@
         </div>
       </template>
     </a-modal>
+    <a-drawer
+      v-model:open="drawerBreakOpen"
+      title="Thiết lập tiết nghỉ của lớp"
+      :footer="null"
+      height="100vh"
+      placement="bottom"
+      @close="closeClassBreak"
+    >
+      <ClassBreak ref="breakRef" />
+    </a-drawer>
   </div>
 </template>
 
@@ -62,6 +73,18 @@
 const settingStore = useSettingStore()
 const { RestApi } = useApi()
 const param = ref({ PageIndex: 1, PageSize: 10, search: '' })
+const drawerBreakOpen = ref(false)
+const breakRef = ref(null)
+
+const closeClassBreak = () => {
+  breakRef.value?.reset()
+}
+
+watch(drawerBreakOpen, val => {
+  if (val) {
+    breakRef.value?.refresh()
+  }
+})
 
 const columns = [
   { title: 'STT', key: 'stt', width: 60, align: 'center' },
