@@ -73,5 +73,21 @@ const onRow = record => {
     },
   };
 };
+
+const reset = () => {
+  classes.value = [];
+  pagination.current = 1;
+  pagination.pageSize = 10;
+  pagination.total = 0;
+};
+
+const refresh = async () => {
+  await fetchClasses();
+};
+
+defineExpose({
+  reset,
+  refresh,
+});
 onMounted(fetchClasses)
 </script>
