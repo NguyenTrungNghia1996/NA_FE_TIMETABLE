@@ -1,31 +1,26 @@
 <template>
   <div class="space-y-4">
     <SelectGradeLevel v-model="gradeId" />
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <a-card title="DANH SÁCH GIÁO VIÊN" class="md:col-span-1">
+    <div>
+      <a-card title="DANH SÁCH GIÁO VIÊN">
         <a-table
           :columns="columns"
           :data-source="classes"
           :loading="loading"
-          :pagination="false"
+          :pagination="pagination"
           size="small"
           row-key="id"
-          :customRow="onRow"
+          @change="handleTableChange"
         >
           <template #bodyCell="{ column, record, index }">
-            <template v-if="column.key === 'stt'">{{ index + 1 }}</template>
+            <template v-if="column.key === 'stt'">
+              {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
+            </template>
             <template v-else-if="column.key === 'name'">{{ record.ten }}</template>
             <template v-else-if="column.key === 'teacher'">{{ record.ten_giao_vien }}</template>
             <template v-else-if="column.key === 'shift'">{{ record.ten_ca }}</template>
           </template>
         </a-table>
-      </a-card>
-
-      <a-card title="Danh sách môn học" class="md:col-span-1">
-        <ClientOnly>
-          <SubjectList v-if="selectedClassId" ref="subjectRef" :class-id="selectedClassId" />
-          <a-empty v-else />
-        </ClientOnly>
       </a-card>
     </div>
   </div>
@@ -33,13 +28,19 @@
 
 <script setup>
 const { RestApi } = useApi()
-import SubjectList from './SubjectList.vue'
 
 const gradeId = ref(null)
 const classes = ref([])
 const loading = ref(false)
-const selectedClassId = ref(null)
-const subjectRef = ref(null)
+
+const pagination = reactive({
+  current: 1,
+  pageSize: 10,
+  total: 0,
+  showSizeChanger: true,
+  pageSizeOptions: ['10', '20', '50'],
+  showTotal: total => `Tổng ${total} bản ghi`,
+})
 
 const columns = [
   { title: 'STT', key: 'stt', width: 60, align: 'center' },
@@ -51,15 +52,24 @@ const columns = [
 async function fetchClasses(id) {
   if (!id) {
     classes.value = []
+    pagination.total = 0
     return
   }
   try {
     loading.value = true
-    const { data } = await RestApi.class.list({ params: { id_khoilop: id } })
+    const { data } = await RestApi.class.list({
+      params: {
+        id_khoilop: id,
+        PageIndex: pagination.current,
+        PageSize: pagination.pageSize,
+      },
+    })
     if (data.value?.status === 'success') {
       classes.value = data.value.data.items || []
+      pagination.total = data.value.data.totalrecord
     } else {
       classes.value = []
+      pagination.total = 0
     }
   } catch (err) {
     console.error('Fetch classes by grade error', err)
@@ -71,9 +81,8 @@ async function fetchClasses(id) {
 watch(
   gradeId,
   id => {
+    pagination.current = 1
     fetchClasses(id)
-    selectedClassId.value = null
-    subjectRef.value?.reset?.()
   },
   { immediate: true },
 )
@@ -81,26 +90,18 @@ watch(
 const reset = () => {
   gradeId.value = null
   classes.value = []
-  selectedClassId.value = null
-  subjectRef.value?.reset?.()
+  pagination.current = 1
+  pagination.total = 0
 }
 
 const refresh = async () => {
   await fetchClasses(gradeId.value)
-  if (selectedClassId.value) {
-    await subjectRef.value?.refresh?.()
-  }
 }
 
-const onRow = record => {
-  return {
-    onClick: () => {
-      selectedClassId.value = record.id
-    },
-    style: {
-      cursor: 'pointer',
-    },
-  }
+async function handleTableChange(pag) {
+  pagination.current = pag.current
+  pagination.pageSize = pag.pageSize
+  await fetchClasses(gradeId.value)
 }
 
 defineExpose({ reset, refresh })
