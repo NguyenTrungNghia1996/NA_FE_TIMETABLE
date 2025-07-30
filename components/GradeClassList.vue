@@ -1,8 +1,8 @@
 <template>
-  <div class="space-y-4">
-    <SelectGradeLevel v-model="gradeId" />
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-1 space-y-4">
     <div>
-      <a-card title="DANH SÁCH GIÁO VIÊN">
+      <SelectGradeLevel v-model="gradeId" />
+      <a-card title="DANH SÁCH LỚP">
         <a-table
           :columns="columns"
           :data-source="classes"
@@ -11,6 +11,7 @@
           size="small"
           row-key="id"
           @change="handleTableChange"
+          :customRow="onRow"
         >
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'stt'">
@@ -21,6 +22,11 @@
             <template v-else-if="column.key === 'shift'">{{ record.ten_ca }}</template>
           </template>
         </a-table>
+      </a-card>
+    </div>
+    <div>
+      <a-card title="DANH SÁCH MÔN HỌC">
+
       </a-card>
     </div>
   </div>
@@ -105,4 +111,15 @@ async function handleTableChange(pag) {
 }
 
 defineExpose({ reset, refresh })
+const onRow = record => {
+  return {
+    onClick: () => {
+      console.log(">>>",record);
+      // emit('select', record)
+    },
+    style: {
+      cursor: 'pointer',
+    },
+  }
+}
 </script>
