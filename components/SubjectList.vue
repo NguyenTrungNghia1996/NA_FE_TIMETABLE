@@ -5,6 +5,7 @@
     :pagination="false"
     size="small"
     row-key="id_mon"
+    :row-selection="rowSelection"
   >
     <template #bodyCell="{ column, record, index }">
       <template v-if="column.key === 'stt'">
@@ -39,6 +40,22 @@ const props = defineProps({ classId: Number })
 const { RestApi } = useApi()
 
 const subjects = ref([])
+const selectedRowKeys = ref([])
+const rowSelection = reactive({
+  selectedRowKeys: selectedRowKeys.value,
+  onChange: keys => {
+    rowSelection.selectedRowKeys = keys
+    selectedRowKeys.value = keys
+  },
+})
+
+watch(
+  selectedRowKeys,
+  keys => {
+    rowSelection.selectedRowKeys = keys
+  },
+  { immediate: true },
+)
 const columns = [
   { title: 'STT', key: 'stt', width: 60, align: 'center' },
   { title: 'Tên môn học', dataIndex: 'ten_mon', key: 'name' },
@@ -76,11 +93,13 @@ watch(
 
 const reset = () => {
   subjects.value = []
+  selectedRowKeys.value = []
+  rowSelection.selectedRowKeys = []
 }
 
 const refresh = async () => {
   if (props.classId) await fetchSubjects(props.classId)
 }
 
-defineExpose({ reset, refresh })
+defineExpose({ reset, refresh, selectedRowKeys })
 </script>
