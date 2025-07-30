@@ -26,7 +26,21 @@
     </div>
     <div>
       <a-card title="DANH SÁCH MÔN HỌC">
-
+        <a-table
+          :columns="subjectColumns"
+          :data-source="subjects"
+          :loading="subjectLoading"
+          :pagination="false"
+          size="small"
+          row-key="id"
+        >
+          <template #bodyCell="{ column, record, index }">
+            <template v-if="column.key === 'stt'">{{ index + 1 }}</template>
+            <template v-else-if="column.key === 'action'">
+              <a-switch v-model:checked="record.selected" size="small" />
+            </template>
+          </template>
+        </a-table>
       </a-card>
     </div>
   </div>
@@ -38,6 +52,9 @@ const { RestApi } = useApi()
 const gradeId = ref(null)
 const classes = ref([])
 const loading = ref(false)
+const selectedClassId = ref(null)
+const subjects = ref([])
+const subjectLoading = ref(false)
 
 const pagination = reactive({
   current: 1,
@@ -53,6 +70,30 @@ const columns = [
   { title: 'Tên lớp', key: 'name' },
   { title: 'Giáo viên chủ nhiệm', key: 'teacher' },
   { title: 'Ca học', key: 'shift' },
+]
+
+const subjectColumns = [
+  { title: 'STT', key: 'stt', width: 60, align: 'center' },
+  { title: 'Tên môn', dataIndex: 'ten_mon', key: 'name' },
+  { title: 'Giáo viên', dataIndex: 'ten_giao_vien', key: 'teacher' },
+  { title: 'Số tiết/tuần', dataIndex: 'so_tiet_tuan', key: 'weekly', align: 'center' },
+  {
+    title: 'Phòng học truyền thống',
+    children: [
+      { title: 'Phòng học', dataIndex: 'phong_truyen_thong', key: 'tradRoom', align: 'center' },
+      { title: 'Ca sáng', dataIndex: 'sang_trad', key: 'tradMorning', align: 'center' },
+      { title: 'Ca chiều', dataIndex: 'chieu_trad', key: 'tradAfternoon', align: 'center' },
+    ],
+  },
+  {
+    title: 'Phòng bộ môn',
+    children: [
+      { title: 'Phòng học', dataIndex: 'phong_bo_mon', key: 'specRoom', align: 'center' },
+      { title: 'Ca sáng', dataIndex: 'sang_spec', key: 'specMorning', align: 'center' },
+      { title: 'Ca chiều', dataIndex: 'chieu_spec', key: 'specAfternoon', align: 'center' },
+    ],
+  },
+  { title: 'Chọn', key: 'action', width: 80, align: 'center' },
 ]
 
 async function fetchClasses(id) {
@@ -96,12 +137,37 @@ watch(
 const reset = () => {
   gradeId.value = null
   classes.value = []
+  selectedClassId.value = null
+  subjects.value = []
   pagination.current = 1
   pagination.total = 0
 }
 
 const refresh = async () => {
   await fetchClasses(gradeId.value)
+  if (selectedClassId.value) {
+    await fetchSubjects(selectedClassId.value)
+  }
+}
+
+async function fetchSubjects(id) {
+  if (!id) {
+    subjects.value = []
+    return
+  }
+  try {
+    subjectLoading.value = true
+    const { data } = await RestApi.class.get_subjects({ params: { idLop: id } })
+    if (data.value?.status === 'success') {
+      subjects.value = data.value.data || []
+    } else {
+      subjects.value = []
+    }
+  } catch (err) {
+    console.error('Fetch subjects error', err)
+  } finally {
+    subjectLoading.value = false
+  }
 }
 
 async function handleTableChange(pag) {
@@ -114,8 +180,8 @@ defineExpose({ reset, refresh })
 const onRow = record => {
   return {
     onClick: () => {
-      console.log(">>>",record);
-      // emit('select', record)
+      selectedClassId.value = record.id
+      fetchSubjects(record.id)
     },
     style: {
       cursor: 'pointer',
