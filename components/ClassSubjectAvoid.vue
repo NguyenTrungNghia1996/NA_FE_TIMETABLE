@@ -4,38 +4,122 @@
       <ClassList ref="classRef" @select="handleSelectClass" />
     </a-card>
     <a-card v-if="selectedClassId" title="DANH SÁCH MÔN HỌC" class="md:col-span-1">
-      <SubjectList ref="subjectRef" :class-id="selectedClassId" @select="handleSubjectClass" />
+      <SubjectList
+        ref="subjectRef"
+        :class-id="selectedClassId"
+        @select="handleSubjectClass"
+      />
     </a-card>
-    {{ selectedClassId }}/{{ selectedSubjectId }}
+    <a-card
+      v-if="selectedClassId && selectedSubjectId"
+      title="CÁC TIẾT TRÁNH XẾP"
+      class="md:col-span-2"
+    >
+      <div v-if="schedule" class="space-y-4">
+        <div v-for="block in schedule.ds_Ca" :key="block.id">
+          <Timetable :block="block" />
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 mt-2">
+        <a-button type="primary" :loading="saving" @click="handleSave">Lưu</a-button>
+        <a-button danger @click="reset">Hủy</a-button>
+      </div>
+    </a-card>
   </div>
 </template>
 
 <script setup>
-const selectedClassId = ref(null);
-const selectedSubjectId = ref(null);
+import { message } from 'ant-design-vue'
+const { RestApi } = useApi()
 
-const classRef = ref(null);
-const subjectRef = ref(null);
+const selectedClassId = ref(null)
+const selectedSubjectId = ref(null)
+
+const classRef = ref(null)
+const subjectRef = ref(null)
+
+const schedule = ref()
+const saving = ref(false)
 
 const handleSelectClass = record => {
-  selectedClassId.value = record.id;
-};
+  selectedClassId.value = record.id
+}
 const handleSubjectClass = record => {
-  selectedSubjectId.value = record.id_mon;
-};
+  selectedSubjectId.value = record.id_mon
+}
+
+watch(
+  [selectedClassId, selectedSubjectId],
+  async ([clsId, subId]) => {
+    if (clsId && subId) {
+      try {
+        const { data } = await RestApi.class.get_subject_avoid({
+          params: { Id_lop: clsId, Id_mon: subId },
+        })
+        if (data.value?.status === 'success') {
+          schedule.value = data.value.data
+        } else {
+          schedule.value = undefined
+        }
+      } catch (err) {
+        console.error('Fetch avoid schedule error', err)
+      }
+    } else {
+      schedule.value = undefined
+    }
+  },
+  { immediate: true },
+)
+
+async function handleSave() {
+  if (!selectedClassId.value || !selectedSubjectId.value) return
+  try {
+    saving.value = true
+    const payload = {
+      id_lop: selectedClassId.value,
+      id_mon: selectedSubjectId.value,
+      ds_Ca: schedule.value?.ds_Ca || [],
+    }
+    const { data, error } = await RestApi.class.update_subject_avoid({
+      body: payload,
+    })
+    if (data.value?.status === 'success') {
+      message.success(data.value.message || 'Cập nhật thành công')
+    } else {
+      throw new Error(
+        error.value?.data?.message || data.value?.message || 'Cập nhật không thành công',
+      )
+    }
+  } catch (err) {
+    console.error('Update class subject avoid error', err)
+    message.error(err.message || 'Lỗi cập nhật')
+  } finally {
+    saving.value = false
+  }
+}
 
 const reset = () => {
-  selectedId.value = null;
-  classRef.value?.reset?.();
-  subjectRef.value?.reset?.();
-};
+  selectedClassId.value = null
+  selectedSubjectId.value = null
+  schedule.value = undefined
+  classRef.value?.reset?.()
+  subjectRef.value?.reset?.()
+}
 
 const refresh = async () => {
-  await classRef.value?.refresh?.();
-  if (selectedId.value) {
-    await subjectRef.value?.refresh?.();
+  await classRef.value?.refresh?.()
+  if (selectedClassId.value) {
+    await subjectRef.value?.refresh?.()
   }
-};
+  if (selectedClassId.value && selectedSubjectId.value) {
+    const { data } = await RestApi.class.get_subject_avoid({
+      params: { Id_lop: selectedClassId.value, Id_mon: selectedSubjectId.value },
+    })
+    if (data.value?.status === 'success') {
+      schedule.value = data.value.data
+    }
+  }
+}
 
-defineExpose({ reset, refresh });
+defineExpose({ reset, refresh })
 </script>
