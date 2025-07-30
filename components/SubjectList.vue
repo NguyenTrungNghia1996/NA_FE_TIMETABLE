@@ -56,7 +56,7 @@ async function fetchSubjects(id) {
   try {
     const { data } = await RestApi.class.get_subjects({ params: { idLop: id } })
     if (data.value?.status === 'success') {
-      subjects.value = data.value.data.items?.ds_mon || []
+      subjects.value = data.value.data?.ds_mon || []
     } else {
       subjects.value = []
     }
