@@ -14,7 +14,7 @@
         {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
       </template>
       <template v-else-if="column.key === 'name'">{{ record.ten }}</template>
-      <template v-else-if="column.key === 'grade'">{{ record.ten_khoi }}</template>
+      <template v-else-if="column.key === 'shift'">{{ record.ten_ca }}</template>
     </template>
   </a-table>
 </template>
@@ -28,7 +28,7 @@ const loading = ref(false)
 const columns = [
   { title: 'STT', key: 'stt', width: 60, align: 'center' },
   { title: 'Tên lớp', key: 'name' },
-  { title: 'Khối', key: 'grade' },
+  { title: 'Ca học', key: 'shift' },
 ]
 const pagination = reactive({
   current: 1,

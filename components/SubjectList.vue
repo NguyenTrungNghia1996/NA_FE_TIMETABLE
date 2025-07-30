@@ -6,8 +6,30 @@
     size="small"
     row-key="id_mon"
   >
-    <template #bodyCell="{ column, index }">
-      <template v-if="column.key === 'stt'">{{ index + 1 }}</template>
+    <template #bodyCell="{ column, record, index }">
+      <template v-if="column.key === 'stt'">
+        {{ index + 1 }}
+      </template>
+      <template v-else-if="column.key === 'trad'">
+        {{
+          (record.so_tiet_ca_sang_truyen_thong || 0) +
+            (record.so_tiet_ca_chieu_truyen_thong || 0)
+        }}
+      </template>
+      <template v-else-if="column.key === 'spec'">
+        {{
+          (record.so_tiet_ca_sang_phong_chuyen_dung || 0) +
+            (record.so_tiet_ca_chieu_phong_chuyen_dung || 0)
+        }}
+      </template>
+      <template v-else-if="column.key === 'period'">
+        {{
+          (record.so_tiet_ca_sang_truyen_thong || 0) +
+            (record.so_tiet_ca_chieu_truyen_thong || 0) +
+            (record.so_tiet_ca_sang_phong_chuyen_dung || 0) +
+            (record.so_tiet_ca_chieu_phong_chuyen_dung || 0)
+        }}
+      </template>
     </template>
   </a-table>
 </template>
@@ -20,6 +42,14 @@ const subjects = ref([])
 const columns = [
   { title: 'STT', key: 'stt', width: 60, align: 'center' },
   { title: 'Tên môn học', dataIndex: 'ten_mon', key: 'name' },
+  {
+    title: 'Tổng số tiết',
+    children: [
+      { title: 'Phòng truyền thống', key: 'trad', align: 'center' },
+      { title: 'Phòng chuyên dụng', key: 'spec', align: 'center' },
+    ],
+  },
+  { title: 'Số tiết', key: 'period', align: 'center' },
 ]
 
 async function fetchSubjects(id) {
