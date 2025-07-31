@@ -676,6 +676,9 @@ class Class {
   async get_subjects(data) {
     return await this.request.get(ENDPOINTS.CLASS_SUBJECT, data);
   }
+  async update_subjects(data) {
+    return await this.request.post(ENDPOINTS.CLASS_SUBJECT, data);
+  }
   async get_subject_avoid(data) {
     return await this.request.get(ENDPOINTS.CLASS_SUBJECT_AVOID, data);
   }
