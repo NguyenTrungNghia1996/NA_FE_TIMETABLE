@@ -32,21 +32,29 @@
           :loading="subjectLoading"
           :pagination="false"
           size="small"
-          row-key="id"
+          row-key="id_mon"
         >
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'stt'">{{ index + 1 }}</template>
+            <template v-else-if="column.key === 'weekly'">
+              {{ record.so_tiet_tuan }}
+            </template>
             <template v-else-if="column.key === 'action'">
-              <a-switch v-model:checked="record.selected" size="small" />
+              <a-switch v-model:checked="record.trang_thai" size="small" />
             </template>
           </template>
         </a-table>
+        <div class="flex justify-end gap-2 mt-2">
+          <a-button type="primary" :loading="saving" @click="handleSave">Lưu</a-button>
+          <a-button danger @click="resetSubjects">Hủy</a-button>
+        </div>
       </a-card>
     </div>
   </div>
 </template>
 
 <script setup>
+import { message } from 'ant-design-vue'
 const { RestApi } = useApi()
 
 const gradeId = ref(null)
@@ -55,6 +63,8 @@ const loading = ref(false)
 const selectedClassId = ref(null)
 const subjects = ref([])
 const subjectLoading = ref(false)
+const saving = ref(false)
+const subjectBackup = ref([])
 
 const pagination = reactive({
   current: 1,
@@ -80,17 +90,17 @@ const subjectColumns = [
   {
     title: 'Phòng học truyền thống',
     children: [
-      { title: 'Phòng học', dataIndex: 'phong_truyen_thong', key: 'tradRoom', align: 'center' },
-      { title: 'Ca sáng', dataIndex: 'sang_trad', key: 'tradMorning', align: 'center' },
-      { title: 'Ca chiều', dataIndex: 'chieu_trad', key: 'tradAfternoon', align: 'center' },
+      { title: 'Phòng học', dataIndex: 'ten_phong_truyen_thong', key: 'tradRoom', align: 'center' },
+      { title: 'Ca sáng', dataIndex: 'so_tiet_ca_sang_truyen_thong', key: 'tradMorning', align: 'center' },
+      { title: 'Ca chiều', dataIndex: 'so_tiet_ca_chieu_truyen_thong', key: 'tradAfternoon', align: 'center' },
     ],
   },
   {
     title: 'Phòng bộ môn',
     children: [
-      { title: 'Phòng học', dataIndex: 'phong_bo_mon', key: 'specRoom', align: 'center' },
-      { title: 'Ca sáng', dataIndex: 'sang_spec', key: 'specMorning', align: 'center' },
-      { title: 'Ca chiều', dataIndex: 'chieu_spec', key: 'specAfternoon', align: 'center' },
+      { title: 'Phòng học', dataIndex: 'ten_phong_chuyen_dung', key: 'specRoom', align: 'center' },
+      { title: 'Ca sáng', dataIndex: 'so_tiet_ca_sang_phong_chuyen_dung', key: 'specMorning', align: 'center' },
+      { title: 'Ca chiều', dataIndex: 'so_tiet_ca_chieu_phong_chuyen_dung', key: 'specAfternoon', align: 'center' },
     ],
   },
   { title: 'Chọn', key: 'action', width: 80, align: 'center' },
@@ -139,6 +149,7 @@ const reset = () => {
   classes.value = []
   selectedClassId.value = null
   subjects.value = []
+  subjectBackup.value = []
   pagination.current = 1
   pagination.total = 0
 }
@@ -159,9 +170,19 @@ async function fetchSubjects(id) {
     subjectLoading.value = true
     const { data } = await RestApi.class.get_subjects({ params: { idLop: id } })
     if (data.value?.status === 'success') {
-      subjects.value = data.value.data || []
+      const list = data.value.data?.ds_mon || []
+      subjects.value = list.map(mon => ({
+        ...mon,
+        so_tiet_tuan:
+          (mon.so_tiet_ca_sang_truyen_thong || 0) +
+          (mon.so_tiet_ca_chieu_truyen_thong || 0) +
+          (mon.so_tiet_ca_sang_phong_chuyen_dung || 0) +
+          (mon.so_tiet_ca_chieu_phong_chuyen_dung || 0),
+      }))
+      subjectBackup.value = JSON.parse(JSON.stringify(subjects.value))
     } else {
       subjects.value = []
+      subjectBackup.value = []
     }
   } catch (err) {
     console.error('Fetch subjects error', err)
@@ -174,6 +195,43 @@ async function handleTableChange(pag) {
   pagination.current = pag.current
   pagination.pageSize = pag.pageSize
   await fetchClasses(gradeId.value)
+}
+
+function resetSubjects() {
+  subjects.value = JSON.parse(JSON.stringify(subjectBackup.value))
+}
+
+async function handleSave() {
+  if (!selectedClassId.value) return
+  try {
+    saving.value = true
+    const payload = {
+      id_lop: selectedClassId.value,
+      ds_mon: subjects.value.map(mon => ({
+        id_mon: mon.id_mon,
+        trang_thai: mon.trang_thai,
+        id_giao_vien: mon.id_giao_vien,
+        id_phong_chuyen_dung: mon.id_phong_chuyen_dung,
+        id_phong_truyen_thong: mon.id_phong_truyen_thong,
+        so_tiet_ca_sang_truyen_thong: mon.so_tiet_ca_sang_truyen_thong,
+        so_tiet_ca_chieu_truyen_thong: mon.so_tiet_ca_chieu_truyen_thong,
+        so_tiet_ca_sang_phong_chuyen_dung: mon.so_tiet_ca_sang_phong_chuyen_dung,
+        so_tiet_ca_chieu_phong_chuyen_dung: mon.so_tiet_ca_chieu_phong_chuyen_dung,
+      })),
+    }
+    const { data, error } = await RestApi.class.update_subjects({ body: payload })
+    if (data.value?.status === 'success') {
+      message.success(data.value.message || 'Cập nhật thành công')
+      subjectBackup.value = JSON.parse(JSON.stringify(subjects.value))
+    } else {
+      throw new Error(error.value?.data?.message || data.value?.message || 'Cập nhật không thành công')
+    }
+  } catch (err) {
+    console.error('Update class subjects error', err)
+    message.error(err.message || 'Lỗi cập nhật')
+  } finally {
+    saving.value = false
+  }
 }
 
 defineExpose({ reset, refresh })
