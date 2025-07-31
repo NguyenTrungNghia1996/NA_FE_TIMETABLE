@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-1 space-y-4">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-1 space-y-4">
     <div>
       <SelectGradeLevel v-model="gradeId" />
       <a-card title="DANH SÁCH LỚP">
@@ -24,7 +24,7 @@
         </a-table>
       </a-card>
     </div>
-    <div>
+    <div class="col-span-2">
       <a-card title="DANH SÁCH MÔN HỌC">
         <a-table
           :columns="subjectColumns"
@@ -107,10 +107,10 @@
         :footer="null"
         width="600px"
         @cancel="cancelTeacher"
-      >
+      > 
         <a-radio-group v-model:value="teacherModal.filter" @change="loadTeachers" class="mb-2">
-          <a-radio-button value="subject">Môn học được chọn</a-radio-button>
-          <a-radio-button value="all">Tất cả giáo viên</a-radio-button>
+          <a-radio-button value="subject"><p class="uppercase">{{ teacherModal.record.ten_mon }}</p></a-radio-button>
+          <a-radio-button value="all"><p class="uppercase">Tất cả giáo viên</p></a-radio-button>
         </a-radio-group>
         <a-table
           :columns="teacherColumns"
@@ -150,6 +150,7 @@ const teacherModal = reactive({
   teachers: [],
   selectedId: null,
   record: null,
+
 })
 
 function updateWeekly(sub) {
