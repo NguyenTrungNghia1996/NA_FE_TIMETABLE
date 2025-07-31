@@ -3,16 +3,7 @@
     <div>
       <SelectGradeLevel v-model="gradeId" />
       <a-card title="DANH SÁCH LỚP">
-        <a-table
-          :columns="columns"
-          :data-source="classes"
-          :loading="loading"
-          :pagination="pagination"
-          size="small"
-          row-key="id"
-          @change="handleTableChange"
-          :customRow="onRow"
-        >
+        <a-table :columns="columns" :data-source="classes" :loading="loading" :pagination="pagination" size="small" row-key="id" @change="handleTableChange" :customRow="onRow">
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'stt'">
               {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
@@ -25,102 +16,57 @@
       </a-card>
     </div>
     <div class="col-span-2">
-      <a-card title="DANH SÁCH MÔN HỌC">
-        <a-table
-          :columns="subjectColumns"
-          :data-source="subjects"
-          :loading="subjectLoading"
-          :pagination="false"
-          size="small"
-          row-key="id_mon"
-        >
-          <template #bodyCell="{ column, record, index }">
-            <template v-if="column.key === 'stt'">{{ index + 1 }}</template>
-            <template v-else-if="column.key === 'teacher'">
-              <span
-                class="text-blue-600 cursor-pointer"
-                @click="openTeacherModal(record)"
-              >
-                {{ record.ten_giao_vien }}
-              </span>
+      <div class="overflow-x-auto">
+        <a-card title="DANH SÁCH MÔN HỌC">
+          <a-table :columns="subjectColumns" :data-source="subjects" :loading="subjectLoading" :pagination="false" size="small" row-key="id_mon" :scroll="{ x: 'max-content' }">
+            <template #bodyCell="{ column, record, index }">
+              <template v-if="column.key === 'stt'">{{ index + 1 }}</template>
+              <template v-else-if="column.key === 'teacher'">
+                <!-- <span class="text-blue-600 cursor-pointer" @click="openTeacherModal(record)">
+                  {{ record.ten_giao_vien || "Chọn giáo viên" }}
+                </span> -->
+                <div class="flex items-center justify-between w-full">
+                  <span>{{ record.ten_giao_vien }}</span>
+                  <button class="text-blue-600 hover:text-blue-800 cursor-pointer" @click="openTeacherModal(record)">
+                    <Icon name="ant-design:edit-outlined"/>
+                  </button>
+                </div>
+              </template>
+
+              <template v-else-if="column.key === 'weekly'">
+                {{ record.so_tiet_tuan > 0? record.so_tiet_tuan : "-" }}
+              </template>
+              <template v-else-if="column.key === 'tradMorning'">
+                <a-input-number v-if="record.trang_thai" v-model:value="record.so_tiet_ca_sang_truyen_thong" :min="0" size="small" style="width: 80px" @change="updateWeekly(record)" />
+              </template>
+              <template v-else-if="column.key === 'tradAfternoon'">
+                <a-input-number v-if="record.trang_thai" v-model:value="record.so_tiet_ca_chieu_truyen_thong" :min="0" size="small" style="width: 80px" @change="updateWeekly(record)" />
+              </template>
+              <template v-else-if="column.key === 'specMorning'">
+                <a-input-number v-if="record.trang_thai" v-model:value="record.so_tiet_ca_sang_phong_chuyen_dung" :min="0" size="small" style="width: 80px" @change="updateWeekly(record)" />
+              </template>
+              <template v-else-if="column.key === 'specAfternoon'">
+                <a-input-number v-if="record.trang_thai" v-model:value="record.so_tiet_ca_chieu_phong_chuyen_dung" :min="0" size="small" style="width: 80px" @change="updateWeekly(record)" />
+              </template>
+              <template v-else-if="column.key === 'action'">
+                <a-switch v-model:checked="record.trang_thai" size="small" @change="onStatusChange(record)" />
+              </template>
             </template>
-            <template v-else-if="column.key === 'weekly'">
-              {{ record.so_tiet_tuan }}
-            </template>
-            <template v-else-if="column.key === 'tradMorning'">
-              <a-input-number
-                v-if="record.trang_thai"
-                v-model:value="record.so_tiet_ca_sang_truyen_thong"
-                :min="0"
-                size="small"
-                style="width: 80px"
-                @change="updateWeekly(record)"
-              />
-            </template>
-            <template v-else-if="column.key === 'tradAfternoon'">
-              <a-input-number
-                v-if="record.trang_thai"
-                v-model:value="record.so_tiet_ca_chieu_truyen_thong"
-                :min="0"
-                size="small"
-                style="width: 80px"
-                @change="updateWeekly(record)"
-              />
-            </template>
-            <template v-else-if="column.key === 'specMorning'">
-              <a-input-number
-                v-if="record.trang_thai"
-                v-model:value="record.so_tiet_ca_sang_phong_chuyen_dung"
-                :min="0"
-                size="small"
-                style="width: 80px"
-                @change="updateWeekly(record)"
-              />
-            </template>
-            <template v-else-if="column.key === 'specAfternoon'">
-              <a-input-number
-                v-if="record.trang_thai"
-                v-model:value="record.so_tiet_ca_chieu_phong_chuyen_dung"
-                :min="0"
-                size="small"
-                style="width: 80px"
-                @change="updateWeekly(record)"
-              />
-            </template>
-            <template v-else-if="column.key === 'action'">
-              <a-switch
-                v-model:checked="record.trang_thai"
-                size="small"
-                @change="onStatusChange(record)"
-              />
-            </template>
-          </template>
-        </a-table>
-        <div class="flex justify-end gap-2 mt-2">
-          <a-button type="primary" :loading="saving" @click="handleSave">Lưu</a-button>
-          <a-button danger @click="resetSubjects">Hủy</a-button>
-        </div>
-      </a-card>
-      <a-modal
-        v-model:open="teacherModal.visible"
-        title="Chọn giáo viên"
-        :footer="null"
-        width="600px"
-        @cancel="cancelTeacher"
-      > 
+          </a-table>
+          <div class="flex justify-end gap-2 mt-2">
+            <a-button type="primary" :loading="saving" @click="handleSave">Lưu</a-button>
+            <a-button danger @click="resetSubjects">Hủy</a-button>
+          </div>
+        </a-card>
+      </div>
+      <a-modal v-model:open="teacherModal.visible" title="Chọn giáo viên" :footer="null" width="600px" @cancel="cancelTeacher">
         <a-radio-group v-model:value="teacherModal.filter" @change="loadTeachers" class="mb-2">
-          <a-radio-button value="subject"><p class="uppercase">{{ teacherModal.record.ten_mon }}</p></a-radio-button>
+          <a-radio-button value="subject"
+            ><p class="uppercase">{{ teacherModal.record.ten_mon }}</p></a-radio-button
+          >
           <a-radio-button value="all"><p class="uppercase">Tất cả giáo viên</p></a-radio-button>
         </a-radio-group>
-        <a-table
-          :columns="teacherColumns"
-          :data-source="teacherModal.teachers"
-          :loading="teacherModal.loading"
-          :pagination="false"
-          size="small"
-          row-key="id"
-          :row-selection="teacherRowSelection"
-        />
+        <a-table :columns="teacherColumns" :data-source="teacherModal.teachers" :loading="teacherModal.loading" :pagination="false" size="small" row-key="id" :row-selection="teacherRowSelection" />
         <div class="flex justify-end gap-2 mt-4">
           <a-button @click="cancelTeacher">Hủy</a-button>
           <a-button type="primary" @click="confirmTeacher">OK</a-button>
@@ -131,253 +77,244 @@
 </template>
 
 <script setup>
-import { message } from 'ant-design-vue'
-const { RestApi } = useApi()
+import { message } from "ant-design-vue";
+const { RestApi } = useApi();
 
-const gradeId = ref(null)
-const classes = ref([])
-const loading = ref(false)
-const selectedClassId = ref(null)
-const subjects = ref([])
-const subjectLoading = ref(false)
-const saving = ref(false)
-const subjectBackup = ref([])
+const gradeId = ref(null);
+const classes = ref([]);
+const loading = ref(false);
+const selectedClassId = ref(null);
+const subjects = ref([]);
+const subjectLoading = ref(false);
+const saving = ref(false);
+const subjectBackup = ref([]);
 
 const teacherModal = reactive({
   visible: false,
-  filter: 'subject',
+  filter: "subject",
   loading: false,
   teachers: [],
   selectedId: null,
   record: null,
-
-})
+});
 
 function updateWeekly(sub) {
-  sub.so_tiet_tuan =
-    (sub.so_tiet_ca_sang_truyen_thong || 0) +
-    (sub.so_tiet_ca_chieu_truyen_thong || 0) +
-    (sub.so_tiet_ca_sang_phong_chuyen_dung || 0) +
-    (sub.so_tiet_ca_chieu_phong_chuyen_dung || 0)
+  sub.so_tiet_tuan = (sub.so_tiet_ca_sang_truyen_thong || 0) + (sub.so_tiet_ca_chieu_truyen_thong || 0) + (sub.so_tiet_ca_sang_phong_chuyen_dung || 0) + (sub.so_tiet_ca_chieu_phong_chuyen_dung || 0);
 }
 
 function onStatusChange(sub) {
   if (!sub.trang_thai) {
-    sub.so_tiet_ca_sang_truyen_thong = 0
-    sub.so_tiet_ca_chieu_truyen_thong = 0
-    sub.so_tiet_ca_sang_phong_chuyen_dung = 0
-    sub.so_tiet_ca_chieu_phong_chuyen_dung = 0
+    sub.so_tiet_ca_sang_truyen_thong = 0;
+    sub.so_tiet_ca_chieu_truyen_thong = 0;
+    sub.so_tiet_ca_sang_phong_chuyen_dung = 0;
+    sub.so_tiet_ca_chieu_phong_chuyen_dung = 0;
   }
-  updateWeekly(sub)
+  updateWeekly(sub);
 }
 
 watch(
   subjects,
   val => {
-    val.forEach(s => updateWeekly(s))
+    val.forEach(s => updateWeekly(s));
   },
-  { deep: true }
-)
+  { deep: true },
+);
 
 const pagination = reactive({
   current: 1,
   pageSize: 10,
   total: 0,
   showSizeChanger: true,
-  pageSizeOptions: ['10', '20', '50'],
+  pageSizeOptions: ["10", "20", "50"],
   showTotal: total => `Tổng ${total} bản ghi`,
-})
+});
 
 const columns = [
-  { title: 'STT', key: 'stt', width: 60, align: 'center' },
-  { title: 'Tên lớp', key: 'name' },
-  { title: 'Giáo viên chủ nhiệm', key: 'teacher' },
-  { title: 'Ca học', key: 'shift' },
-]
+  { title: "STT", key: "stt", width: 60, align: "center" },
+  { title: "Tên lớp", key: "name" },
+  { title: "Giáo viên chủ nhiệm", key: "teacher" },
+  { title: "Ca học", key: "shift" },
+];
 
 const subjectColumns = [
-  { title: 'STT', key: 'stt', width: 60, align: 'center' },
-  { title: 'Tên môn', dataIndex: 'ten_mon', key: 'name' },
-  { title: 'Giáo viên', dataIndex: 'ten_giao_vien', key: 'teacher' },
-  { title: 'Số tiết/tuần', dataIndex: 'so_tiet_tuan', key: 'weekly', align: 'center' },
+  { title: "STT", key: "stt", width: 60, align: "center" },
+  { title: "Tên môn", dataIndex: "ten_mon", key: "name" },
+  { title: "Giáo viên", dataIndex: "ten_giao_vien", key: "teacher" },
+  { title: "Số tiết/tuần", dataIndex: "so_tiet_tuan", key: "weekly", align: "center" },
   {
-    title: 'Phòng học truyền thống',
+    title: "Phòng học truyền thống",
     children: [
-      { title: 'Phòng học', dataIndex: 'ten_phong_truyen_thong', key: 'tradRoom', align: 'center' },
-      { title: 'Ca sáng', dataIndex: 'so_tiet_ca_sang_truyen_thong', key: 'tradMorning', align: 'center' },
-      { title: 'Ca chiều', dataIndex: 'so_tiet_ca_chieu_truyen_thong', key: 'tradAfternoon', align: 'center' },
+      { title: "Phòng học", dataIndex: "ten_phong_truyen_thong", key: "tradRoom", align: "center" },
+      { title: "Ca sáng", dataIndex: "so_tiet_ca_sang_truyen_thong", key: "tradMorning", align: "center" },
+      { title: "Ca chiều", dataIndex: "so_tiet_ca_chieu_truyen_thong", key: "tradAfternoon", align: "center" },
     ],
   },
   {
-    title: 'Phòng bộ môn',
+    title: "Phòng bộ môn",
     children: [
-      { title: 'Phòng học', dataIndex: 'ten_phong_chuyen_dung', key: 'specRoom', align: 'center' },
-      { title: 'Ca sáng', dataIndex: 'so_tiet_ca_sang_phong_chuyen_dung', key: 'specMorning', align: 'center' },
-      { title: 'Ca chiều', dataIndex: 'so_tiet_ca_chieu_phong_chuyen_dung', key: 'specAfternoon', align: 'center' },
+      { title: "Phòng học", dataIndex: "ten_phong_chuyen_dung", key: "specRoom", align: "center" },
+      { title: "Ca sáng", dataIndex: "so_tiet_ca_sang_phong_chuyen_dung", key: "specMorning", align: "center" },
+      { title: "Ca chiều", dataIndex: "so_tiet_ca_chieu_phong_chuyen_dung", key: "specAfternoon", align: "center" },
     ],
   },
-  { title: 'Chọn', key: 'action', width: 80, align: 'center' },
-]
+  { title: "Chọn", key: "action", width: 80, align: "center" },
+];
 
 const teacherColumns = [
-  { title: 'STT', key: 'stt', width: 60, align: 'center' },
-  { title: 'Mã GV', dataIndex: 'ma_giao_vien', key: 'code' },
+  { title: "STT", key: "stt", width: 60, align: "center" },
+  { title: "Mã GV", dataIndex: "ma_giao_vien", key: "code" },
   {
-    title: 'Họ và tên',
-    key: 'name',
+    title: "Họ và tên",
+    key: "name",
     customRender: ({ record }) => `${record.ho_va_ho_dem} ${record.ten}`,
   },
-]
+];
 
 async function fetchClasses(id) {
   if (!id) {
-    classes.value = []
-    pagination.total = 0
-    return
+    classes.value = [];
+    pagination.total = 0;
+    return;
   }
   try {
-    loading.value = true
+    loading.value = true;
     const { data } = await RestApi.class.list({
       params: {
         id_khoilop: id,
         PageIndex: pagination.current,
         PageSize: pagination.pageSize,
       },
-    })
-    if (data.value?.status === 'success') {
-      classes.value = data.value.data.items || []
-      pagination.total = data.value.data.totalrecord
+    });
+    if (data.value?.status === "success") {
+      classes.value = data.value.data.items || [];
+      pagination.total = data.value.data.totalrecord;
     } else {
-      classes.value = []
-      pagination.total = 0
+      classes.value = [];
+      pagination.total = 0;
     }
   } catch (err) {
-    console.error('Fetch classes by grade error', err)
+    console.error("Fetch classes by grade error", err);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 watch(
   gradeId,
   id => {
-    pagination.current = 1
-    fetchClasses(id)
+    pagination.current = 1;
+    fetchClasses(id);
   },
   { immediate: true },
-)
+);
 
 const reset = () => {
-  gradeId.value = null
-  classes.value = []
-  selectedClassId.value = null
-  subjects.value = []
-  subjectBackup.value = []
-  pagination.current = 1
-  pagination.total = 0
-}
+  gradeId.value = null;
+  classes.value = [];
+  selectedClassId.value = null;
+  subjects.value = [];
+  subjectBackup.value = [];
+  pagination.current = 1;
+  pagination.total = 0;
+};
 
 const refresh = async () => {
-  await fetchClasses(gradeId.value)
+  await fetchClasses(gradeId.value);
   if (selectedClassId.value) {
-    await fetchSubjects(selectedClassId.value)
+    await fetchSubjects(selectedClassId.value);
   }
-}
+};
 
 async function fetchSubjects(id) {
   if (!id) {
-    subjects.value = []
-    return
+    subjects.value = [];
+    return;
   }
   try {
-    subjectLoading.value = true
-    const { data } = await RestApi.class.get_subjects({ params: { idLop: id } })
-    if (data.value?.status === 'success') {
-      const list = data.value.data?.ds_mon || []
+    subjectLoading.value = true;
+    const { data } = await RestApi.class.get_subjects({ params: { idLop: id } });
+    if (data.value?.status === "success") {
+      const list = data.value.data?.ds_mon || [];
       subjects.value = list.map(mon => ({
         ...mon,
-        so_tiet_tuan:
-          (mon.so_tiet_ca_sang_truyen_thong || 0) +
-          (mon.so_tiet_ca_chieu_truyen_thong || 0) +
-          (mon.so_tiet_ca_sang_phong_chuyen_dung || 0) +
-          (mon.so_tiet_ca_chieu_phong_chuyen_dung || 0),
-      }))
-      subjectBackup.value = JSON.parse(JSON.stringify(subjects.value))
+        so_tiet_tuan: (mon.so_tiet_ca_sang_truyen_thong || 0) + (mon.so_tiet_ca_chieu_truyen_thong || 0) + (mon.so_tiet_ca_sang_phong_chuyen_dung || 0) + (mon.so_tiet_ca_chieu_phong_chuyen_dung || 0),
+      }));
+      subjectBackup.value = JSON.parse(JSON.stringify(subjects.value));
     } else {
-      subjects.value = []
-      subjectBackup.value = []
+      subjects.value = [];
+      subjectBackup.value = [];
     }
   } catch (err) {
-    console.error('Fetch subjects error', err)
+    console.error("Fetch subjects error", err);
   } finally {
-    subjectLoading.value = false
+    subjectLoading.value = false;
   }
 }
 
 function openTeacherModal(record) {
-  teacherModal.record = record
-  teacherModal.visible = true
-  teacherModal.selectedId = record.id_giao_vien || null
-  teacherModal.filter = 'subject'
-  loadTeachers()
+  teacherModal.record = record;
+  teacherModal.visible = true;
+  teacherModal.selectedId = record.id_giao_vien || null;
+  teacherModal.filter = "subject";
+  loadTeachers();
 }
 
 async function loadTeachers() {
   try {
-    teacherModal.loading = true
-    const params = {}
-    if (teacherModal.filter === 'subject' && teacherModal.record) {
-      params.idMon = teacherModal.record.id_mon
+    teacherModal.loading = true;
+    const params = {};
+    if (teacherModal.filter === "subject" && teacherModal.record) {
+      params.idMon = teacherModal.record.id_mon;
     }
-    const { data } = await RestApi.teacher.list({ params })
-    if (data.value?.status === 'success') {
-      teacherModal.teachers = data.value.data.items || []
+    const { data } = await RestApi.teacher.list({ params });
+    if (data.value?.status === "success") {
+      teacherModal.teachers = data.value.data.items || [];
     } else {
-      teacherModal.teachers = []
+      teacherModal.teachers = [];
     }
   } catch (err) {
-    console.error('Fetch teachers error', err)
+    console.error("Fetch teachers error", err);
   } finally {
-    teacherModal.loading = false
+    teacherModal.loading = false;
   }
 }
 
 function cancelTeacher() {
-  teacherModal.visible = false
+  teacherModal.visible = false;
 }
 
 function confirmTeacher() {
-  if (!teacherModal.record) return
-  const t = teacherModal.teachers.find(tt => tt.id === teacherModal.selectedId)
+  if (!teacherModal.record) return;
+  const t = teacherModal.teachers.find(tt => tt.id === teacherModal.selectedId);
   if (t) {
-    teacherModal.record.id_giao_vien = t.id
-    teacherModal.record.ten_giao_vien = `${t.ho_va_ho_dem} ${t.ten}`
+    teacherModal.record.id_giao_vien = t.id;
+    teacherModal.record.ten_giao_vien = `${t.ho_va_ho_dem} ${t.ten}`;
   }
-  teacherModal.visible = false
+  teacherModal.visible = false;
 }
 
 const teacherRowSelection = computed(() => ({
-  type: 'radio',
+  type: "radio",
   selectedRowKeys: teacherModal.selectedId ? [teacherModal.selectedId] : [],
   onChange: keys => {
-    teacherModal.selectedId = keys[0]
+    teacherModal.selectedId = keys[0];
   },
-}))
+}));
 
 async function handleTableChange(pag) {
-  pagination.current = pag.current
-  pagination.pageSize = pag.pageSize
-  await fetchClasses(gradeId.value)
+  pagination.current = pag.current;
+  pagination.pageSize = pag.pageSize;
+  await fetchClasses(gradeId.value);
 }
 
 function resetSubjects() {
-  subjects.value = JSON.parse(JSON.stringify(subjectBackup.value))
+  subjects.value = JSON.parse(JSON.stringify(subjectBackup.value));
 }
 
 async function handleSave() {
-  if (!selectedClassId.value) return
+  if (!selectedClassId.value) return;
   try {
-    saving.value = true
+    saving.value = true;
     const payload = {
       id_lop: selectedClassId.value,
       ds_mon: subjects.value.map(mon => ({
@@ -391,32 +328,32 @@ async function handleSave() {
         so_tiet_ca_sang_phong_chuyen_dung: mon.so_tiet_ca_sang_phong_chuyen_dung,
         so_tiet_ca_chieu_phong_chuyen_dung: mon.so_tiet_ca_chieu_phong_chuyen_dung,
       })),
-    }
-    const { data, error } = await RestApi.class.update_subjects({ body: payload })
-    if (data.value?.status === 'success') {
-      message.success(data.value.message || 'Cập nhật thành công')
-      subjectBackup.value = JSON.parse(JSON.stringify(subjects.value))
+    };
+    const { data, error } = await RestApi.class.update_subjects({ body: payload });
+    if (data.value?.status === "success") {
+      message.success(data.value.message || "Cập nhật thành công");
+      subjectBackup.value = JSON.parse(JSON.stringify(subjects.value));
     } else {
-      throw new Error(error.value?.data?.message || data.value?.message || 'Cập nhật không thành công')
+      throw new Error(error.value?.data?.message || data.value?.message || "Cập nhật không thành công");
     }
   } catch (err) {
-    console.error('Update class subjects error', err)
-    message.error(err.message || 'Lỗi cập nhật')
+    console.error("Update class subjects error", err);
+    message.error(err.message || "Lỗi cập nhật");
   } finally {
-    saving.value = false
+    saving.value = false;
   }
 }
 
-defineExpose({ reset, refresh })
+defineExpose({ reset, refresh });
 const onRow = record => {
   return {
     onClick: () => {
-      selectedClassId.value = record.id
-      fetchSubjects(record.id)
+      selectedClassId.value = record.id;
+      fetchSubjects(record.id);
     },
     style: {
-      cursor: 'pointer',
+      cursor: "pointer",
     },
-  }
-}
+  };
+};
 </script>
