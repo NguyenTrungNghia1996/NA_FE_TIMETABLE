@@ -248,20 +248,14 @@ const roomColumns = [
 ];
 
 async function fetchClasses(id) {
-  if (!id) {
-    classes.value = [];
-    pagination.total = 0;
-    return;
-  }
   try {
     loading.value = true;
-    const { data } = await RestApi.class.list({
-      params: {
-        id_khoilop: id,
-        PageIndex: pagination.current,
-        PageSize: pagination.pageSize,
-      },
-    });
+    const params = {
+      PageIndex: pagination.current,
+      PageSize: pagination.pageSize,
+    };
+    if (id) params.id_khoilop = id;
+    const { data } = await RestApi.class.list({ params });
     if (data.value?.status === "success") {
       classes.value = data.value.data.items || [];
       pagination.total = data.value.data.totalrecord;
