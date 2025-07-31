@@ -36,6 +36,14 @@
         >
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'stt'">{{ index + 1 }}</template>
+            <template v-else-if="column.key === 'teacher'">
+              <span
+                class="text-blue-600 cursor-pointer"
+                @click="openTeacherModal(record)"
+              >
+                {{ record.ten_giao_vien }}
+              </span>
+            </template>
             <template v-else-if="column.key === 'weekly'">
               {{ record.so_tiet_tuan }}
             </template>
@@ -93,6 +101,31 @@
           <a-button danger @click="resetSubjects">Hủy</a-button>
         </div>
       </a-card>
+      <a-modal
+        v-model:open="teacherModal.visible"
+        title="Chọn giáo viên"
+        :footer="null"
+        width="600px"
+        @cancel="cancelTeacher"
+      >
+        <a-radio-group v-model:value="teacherModal.filter" @change="loadTeachers" class="mb-2">
+          <a-radio-button value="subject">Môn học được chọn</a-radio-button>
+          <a-radio-button value="all">Tất cả giáo viên</a-radio-button>
+        </a-radio-group>
+        <a-table
+          :columns="teacherColumns"
+          :data-source="teacherModal.teachers"
+          :loading="teacherModal.loading"
+          :pagination="false"
+          size="small"
+          row-key="id"
+          :row-selection="teacherRowSelection"
+        />
+        <div class="flex justify-end gap-2 mt-4">
+          <a-button @click="cancelTeacher">Hủy</a-button>
+          <a-button type="primary" @click="confirmTeacher">OK</a-button>
+        </div>
+      </a-modal>
     </div>
   </div>
 </template>
@@ -109,6 +142,15 @@ const subjects = ref([])
 const subjectLoading = ref(false)
 const saving = ref(false)
 const subjectBackup = ref([])
+
+const teacherModal = reactive({
+  visible: false,
+  filter: 'subject',
+  loading: false,
+  teachers: [],
+  selectedId: null,
+  record: null,
+})
 
 function updateWeekly(sub) {
   sub.so_tiet_tuan =
@@ -174,6 +216,16 @@ const subjectColumns = [
     ],
   },
   { title: 'Chọn', key: 'action', width: 80, align: 'center' },
+]
+
+const teacherColumns = [
+  { title: 'STT', key: 'stt', width: 60, align: 'center' },
+  { title: 'Mã GV', dataIndex: 'ma_giao_vien', key: 'code' },
+  {
+    title: 'Họ và tên',
+    key: 'name',
+    customRender: ({ record }) => `${record.ho_va_ho_dem} ${record.ten}`,
+  },
 ]
 
 async function fetchClasses(id) {
@@ -260,6 +312,56 @@ async function fetchSubjects(id) {
     subjectLoading.value = false
   }
 }
+
+function openTeacherModal(record) {
+  teacherModal.record = record
+  teacherModal.visible = true
+  teacherModal.selectedId = record.id_giao_vien || null
+  teacherModal.filter = 'subject'
+  loadTeachers()
+}
+
+async function loadTeachers() {
+  try {
+    teacherModal.loading = true
+    const params = {}
+    if (teacherModal.filter === 'subject' && teacherModal.record) {
+      params.idMon = teacherModal.record.id_mon
+    }
+    const { data } = await RestApi.teacher.list({ params })
+    if (data.value?.status === 'success') {
+      teacherModal.teachers = data.value.data.items || []
+    } else {
+      teacherModal.teachers = []
+    }
+  } catch (err) {
+    console.error('Fetch teachers error', err)
+  } finally {
+    teacherModal.loading = false
+  }
+}
+
+function cancelTeacher() {
+  teacherModal.visible = false
+}
+
+function confirmTeacher() {
+  if (!teacherModal.record) return
+  const t = teacherModal.teachers.find(tt => tt.id === teacherModal.selectedId)
+  if (t) {
+    teacherModal.record.id_giao_vien = t.id
+    teacherModal.record.ten_giao_vien = `${t.ho_va_ho_dem} ${t.ten}`
+  }
+  teacherModal.visible = false
+}
+
+const teacherRowSelection = computed(() => ({
+  type: 'radio',
+  selectedRowKeys: teacherModal.selectedId ? [teacherModal.selectedId] : [],
+  onChange: keys => {
+    teacherModal.selectedId = keys[0]
+  },
+}))
 
 async function handleTableChange(pag) {
   pagination.current = pag.current
