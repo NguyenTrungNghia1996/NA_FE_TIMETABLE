@@ -55,14 +55,10 @@ const columns = [
   { title: 'Tên môn học', dataIndex: 'ten', key: 'name' },
 ]
 
-async function fetchSubjects(grade, ship) {
-  if (!grade || !ship) {
-    subjects.value = []
-    return
-  }
+async function fetchSubjects() {
   try {
     loading.value = true
-    const { data } = await RestApi.subject.list({ params: { id_khoi: grade, id_ban: ship } })
+    const { data } = await RestApi.subject.list()
     if (data.value?.status === 'success') {
       subjects.value = data.value.data.items || []
     } else {
@@ -75,10 +71,10 @@ async function fetchSubjects(grade, ship) {
   }
 }
 
-watch([gradeId, shipId], ([g, b]) => {
+watch([gradeId, shipId], () => {
   selectedId.value = null
   schedule.value = undefined
-  fetchSubjects(g, b)
+  fetchSubjects()
 }, { immediate: true })
 
 watch([gradeId, shipId, selectedId], async ([g, b, id]) => {
@@ -130,7 +126,7 @@ const reset = () => {
 }
 
 const refresh = async () => {
-  await fetchSubjects(gradeId.value, shipId.value)
+  await fetchSubjects()
   if (gradeId.value && shipId.value && selectedId.value) {
     const { data } = await RestApi.subject_grade_level.get_avoid({
       params: { id_khoi: gradeId.value, id_ban: shipId.value, id_mon: selectedId.value }
