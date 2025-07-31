@@ -5,6 +5,7 @@
       <a-button @click="resetForm" class="w-full md:w-auto">Đặt lại</a-button>
       <a-button type="primary" @click="drawerBreakOpen = true" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Tiết nghỉ</a-button>
       <a-button type="primary" @click="drawerAvoidOpen = true" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Tiết tránh xếp của cặp Lớp - Môn học</a-button>
+      <a-button type="primary" @click="drawerSubjectOpen = true" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Môn học của lớp</a-button>
       <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Thêm mới</a-button>
     </div>
 
@@ -79,6 +80,18 @@
         <ClassSubjectAvoid ref="avoidRef" />
       </ClientOnly>
     </a-drawer>
+    <a-drawer
+      v-model:open="drawerSubjectOpen"
+      title="Môn học của lớp"
+      :footer="null"
+      height="100vh"
+      placement="bottom"
+      @close="closeClassSubject"
+    >
+      <ClientOnly>
+        <GradeClassList ref="gradeClassRef" />
+      </ClientOnly>
+    </a-drawer>
   </div>
 </template>
 
@@ -92,12 +105,19 @@ const breakRef = ref(null)
 const drawerAvoidOpen = ref(false)
 const avoidRef = ref(null)
 
+const drawerSubjectOpen = ref(false)
+const gradeClassRef = ref(null)
+
 const closeClassBreak = () => {
   breakRef.value?.reset()
 }
 
 const closeSubjectAvoid = () => {
   avoidRef.value?.reset()
+}
+
+const closeClassSubject = () => {
+  gradeClassRef.value?.reset()
 }
 
 watch(drawerBreakOpen, val => {
@@ -109,6 +129,12 @@ watch(drawerBreakOpen, val => {
 watch(drawerAvoidOpen, val => {
   if (val) {
     avoidRef.value?.refresh()
+  }
+})
+
+watch(drawerSubjectOpen, val => {
+  if (val) {
+    gradeClassRef.value?.refresh()
   }
 })
 
