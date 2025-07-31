@@ -71,6 +71,18 @@
           </template>
         </a-table>
       </ClientOnly>
+    <a-drawer
+      v-model:open="drawerAvoidOpen"
+      title="Thiết lập tiết tránh xếp của môn học theo khối"
+      :footer="null"
+      height="100vh"
+      placement="bottom"
+      @close="closeDrawerAvoid"
+    >
+      <ClientOnly>
+        <GradeSubjectAvoid ref="avoidRef" />
+      </ClientOnly>
+    </a-drawer>
     </div>
   </div>
 </template>
@@ -96,6 +108,20 @@ const summary = reactive({
 });
 
 const subjects = ref([]);
+
+const drawerAvoidOpen = ref(false)
+const avoidRef = ref(null)
+
+const closeDrawerAvoid = () => {
+  avoidRef.value?.reset?.()
+}
+
+watch(drawerAvoidOpen, val => {
+  if (val) {
+    avoidRef.value?.refresh?.()
+  }
+})
+
 
 const baseColumns = [
   {
@@ -198,9 +224,9 @@ const onEditableChange = (record) => {
 
 
 const handleAvoid = () => {
-  // TODO: Implement avoid schedule logic
-  console.log('Tiết tránh xếp clicked');
-};
+  drawerAvoidOpen.value = true
+}
+
 
 const handleUpdate = async () => {
   try {
