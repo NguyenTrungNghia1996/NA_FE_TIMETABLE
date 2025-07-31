@@ -24,7 +24,11 @@
               <template v-else-if="column.key === 'teacher'">
                 <div class="flex items-center justify-between w-full">
                   <span>{{ record.ten_giao_vien }}</span>
-                  <button class="text-blue-600 hover:text-blue-800 cursor-pointer" @click="openTeacherModal(record)">
+                  <button
+                    v-if="record.trang_thai"
+                    class="text-blue-600 hover:text-blue-800 cursor-pointer"
+                    @click="openTeacherModal(record)"
+                  >
                     <Icon name="ant-design:edit-outlined" />
                   </button>
                 </div>
@@ -32,7 +36,11 @@
               <template v-else-if="column.key === 'tradRoom'">
                 <div class="flex items-center justify-between w-full">
                   <span>{{ record.ten_phong_truyen_thong }}</span>
-                  <button class="text-blue-600 hover:text-blue-800 cursor-pointer" @click="openRoomModal(record, 'trad')">
+                  <button
+                    v-if="record.trang_thai"
+                    class="text-blue-600 hover:text-blue-800 cursor-pointer"
+                    @click="openRoomModal(record, 'trad')"
+                  >
                     <Icon name="ant-design:edit-outlined" />
                   </button>
                 </div>
@@ -60,7 +68,11 @@
               <template v-else-if="column.key === 'specRoom'">
                 <div class="flex items-center justify-between w-full">
                   <span>{{ record.ten_phong_chuyen_dung }}</span>
-                  <button class="text-blue-600 hover:text-blue-800 cursor-pointer" @click="openRoomModal(record, 'spec')">
+                  <button
+                    v-if="record.trang_thai"
+                    class="text-blue-600 hover:text-blue-800 cursor-pointer"
+                    @click="openRoomModal(record, 'spec')"
+                  >
                     <Icon name="ant-design:edit-outlined" />
                   </button>
                 </div>
