@@ -39,8 +39,52 @@
             <template v-else-if="column.key === 'weekly'">
               {{ record.so_tiet_tuan }}
             </template>
+            <template v-else-if="column.key === 'tradMorning'">
+              <a-input-number
+                v-if="record.trang_thai"
+                v-model:value="record.so_tiet_ca_sang_truyen_thong"
+                :min="0"
+                size="small"
+                style="width: 80px"
+                @change="updateWeekly(record)"
+              />
+            </template>
+            <template v-else-if="column.key === 'tradAfternoon'">
+              <a-input-number
+                v-if="record.trang_thai"
+                v-model:value="record.so_tiet_ca_chieu_truyen_thong"
+                :min="0"
+                size="small"
+                style="width: 80px"
+                @change="updateWeekly(record)"
+              />
+            </template>
+            <template v-else-if="column.key === 'specMorning'">
+              <a-input-number
+                v-if="record.trang_thai"
+                v-model:value="record.so_tiet_ca_sang_phong_chuyen_dung"
+                :min="0"
+                size="small"
+                style="width: 80px"
+                @change="updateWeekly(record)"
+              />
+            </template>
+            <template v-else-if="column.key === 'specAfternoon'">
+              <a-input-number
+                v-if="record.trang_thai"
+                v-model:value="record.so_tiet_ca_chieu_phong_chuyen_dung"
+                :min="0"
+                size="small"
+                style="width: 80px"
+                @change="updateWeekly(record)"
+              />
+            </template>
             <template v-else-if="column.key === 'action'">
-              <a-switch v-model:checked="record.trang_thai" size="small" />
+              <a-switch
+                v-model:checked="record.trang_thai"
+                size="small"
+                @change="onStatusChange(record)"
+              />
             </template>
           </template>
         </a-table>
@@ -65,6 +109,32 @@ const subjects = ref([])
 const subjectLoading = ref(false)
 const saving = ref(false)
 const subjectBackup = ref([])
+
+function updateWeekly(sub) {
+  sub.so_tiet_tuan =
+    (sub.so_tiet_ca_sang_truyen_thong || 0) +
+    (sub.so_tiet_ca_chieu_truyen_thong || 0) +
+    (sub.so_tiet_ca_sang_phong_chuyen_dung || 0) +
+    (sub.so_tiet_ca_chieu_phong_chuyen_dung || 0)
+}
+
+function onStatusChange(sub) {
+  if (!sub.trang_thai) {
+    sub.so_tiet_ca_sang_truyen_thong = 0
+    sub.so_tiet_ca_chieu_truyen_thong = 0
+    sub.so_tiet_ca_sang_phong_chuyen_dung = 0
+    sub.so_tiet_ca_chieu_phong_chuyen_dung = 0
+  }
+  updateWeekly(sub)
+}
+
+watch(
+  subjects,
+  val => {
+    val.forEach(s => updateWeekly(s))
+  },
+  { deep: true }
+)
 
 const pagination = reactive({
   current: 1,
