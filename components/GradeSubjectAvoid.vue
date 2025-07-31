@@ -14,7 +14,7 @@
         row-key="id"
         :customRow="onRow"
       >
-        <template #bodyCell="{ column, record, index }">
+        <template #bodyCell="{ column, index }">
           <template v-if="column.key === 'stt'">{{ index + 1 }}</template>
         </template>
       </a-table>
@@ -55,10 +55,14 @@ const columns = [
   { title: 'Tên môn học', dataIndex: 'ten', key: 'name' },
 ]
 
-async function fetchSubjects() {
+async function fetchSubjects(grade, ship) {
+  if (!grade || !ship) {
+    subjects.value = []
+    return
+  }
   try {
     loading.value = true
-    const { data } = await RestApi.subject.list()
+    const { data } = await RestApi.subject.list({ params: { id_khoi: grade, id_ban: ship } })
     if (data.value?.status === 'success') {
       subjects.value = data.value.data.items || []
     } else {
@@ -71,10 +75,10 @@ async function fetchSubjects() {
   }
 }
 
-watch([gradeId, shipId], () => {
+watch([gradeId, shipId], ([g, b]) => {
   selectedId.value = null
   schedule.value = undefined
-  fetchSubjects()
+  fetchSubjects(g, b)
 }, { immediate: true })
 
 watch([gradeId, shipId, selectedId], async ([g, b, id]) => {
@@ -126,7 +130,7 @@ const reset = () => {
 }
 
 const refresh = async () => {
-  await fetchSubjects()
+  await fetchSubjects(gradeId.value, shipId.value)
   if (gradeId.value && shipId.value && selectedId.value) {
     const { data } = await RestApi.subject_grade_level.get_avoid({
       params: { id_khoi: gradeId.value, id_ban: shipId.value, id_mon: selectedId.value }
