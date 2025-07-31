@@ -37,16 +37,36 @@
                 {{ record.so_tiet_tuan > 0? record.so_tiet_tuan : "-" }}
               </template>
               <template v-else-if="column.key === 'tradMorning'">
-                <a-input-number v-if="record.trang_thai" v-model:value="record.so_tiet_ca_sang_truyen_thong" :min="0" size="small" style="width: 80px" @change="updateWeekly(record)" />
+                <template v-if="record.trang_thai">
+                  <a-input-number v-model:value="record.so_tiet_ca_sang_truyen_thong" :min="0" size="small" style="width: 80px" @change="updateWeekly(record)" />
+                </template>
+                <template v-else>
+                  {{ record.so_tiet_ca_sang_truyen_thong > 0 ? record.so_tiet_ca_sang_truyen_thong : '-' }}
+                </template>
               </template>
               <template v-else-if="column.key === 'tradAfternoon'">
-                <a-input-number v-if="record.trang_thai" v-model:value="record.so_tiet_ca_chieu_truyen_thong" :min="0" size="small" style="width: 80px" @change="updateWeekly(record)" />
+                <template v-if="record.trang_thai">
+                  <a-input-number v-model:value="record.so_tiet_ca_chieu_truyen_thong" :min="0" size="small" style="width: 80px" @change="updateWeekly(record)" />
+                </template>
+                <template v-else>
+                  {{ record.so_tiet_ca_chieu_truyen_thong > 0 ? record.so_tiet_ca_chieu_truyen_thong : '-' }}
+                </template>
               </template>
               <template v-else-if="column.key === 'specMorning'">
-                <a-input-number v-if="record.trang_thai" v-model:value="record.so_tiet_ca_sang_phong_chuyen_dung" :min="0" size="small" style="width: 80px" @change="updateWeekly(record)" />
+                <template v-if="record.trang_thai">
+                  <a-input-number v-model:value="record.so_tiet_ca_sang_phong_chuyen_dung" :min="0" size="small" style="width: 80px" @change="updateWeekly(record)" />
+                </template>
+                <template v-else>
+                  {{ record.so_tiet_ca_sang_phong_chuyen_dung > 0 ? record.so_tiet_ca_sang_phong_chuyen_dung : '-' }}
+                </template>
               </template>
               <template v-else-if="column.key === 'specAfternoon'">
-                <a-input-number v-if="record.trang_thai" v-model:value="record.so_tiet_ca_chieu_phong_chuyen_dung" :min="0" size="small" style="width: 80px" @change="updateWeekly(record)" />
+                <template v-if="record.trang_thai">
+                  <a-input-number v-model:value="record.so_tiet_ca_chieu_phong_chuyen_dung" :min="0" size="small" style="width: 80px" @change="updateWeekly(record)" />
+                </template>
+                <template v-else>
+                  {{ record.so_tiet_ca_chieu_phong_chuyen_dung > 0 ? record.so_tiet_ca_chieu_phong_chuyen_dung : '-' }}
+                </template>
               </template>
               <template v-else-if="column.key === 'action'">
                 <a-switch v-model:checked="record.trang_thai" size="small" @change="onStatusChange(record)" />
