@@ -58,6 +58,7 @@
           <a-form-item label="Tên môn học" name="ten">
             <a-input v-model:value="formState.ten" placeholder="Nhập tên môn học" :maxlength="200" show-count />
           </a-form-item>
+          <!-- <SelectClassroomType v-model="formState.Id_loai_phong_hoc" name="Id_loai_phong_hoc" :rules="rules.Id_loai_phong_hoc" /> -->
           <SelectClassroomType v-model="formState.Id_loai_phong_hoc" name="Id_loai_phong_hoc" :rules="rules.Id_loai_phong_hoc" />
           <SelectKnowledge v-model="formState.Id_khoi_kien_thuc" name="Id_khoi_kien_thuc" :multiple="true" />
           <a-form-item label="Số tiết tối đa một ca" name="So_tiet_toi_da_mot_ca">
@@ -72,9 +73,9 @@
           <a-form-item>
             <a-checkbox v-model:checked="formState.Do_GVCN_phu_trach">Do GVCN phụ trách</a-checkbox>
           </a-form-item>
-          <a-form-item>
+          <!-- <a-form-item>
             <a-checkbox v-model:checked="formState.Khong_can_phong_hoc">Không cần phòng học</a-checkbox>
-          </a-form-item>
+          </a-form-item> -->
           <a-form-item>
             <a-checkbox v-model:checked="formState.Hoc_cach_ngay">Học cách ngày</a-checkbox>
           </a-form-item>
@@ -211,9 +212,9 @@ const rules = reactive({
   ten: [
     { required: true, message: 'Vui lòng nhập tên môn học', trigger: 'blur' }
   ],
-  Id_loai_phong_hoc: [
-    { required: true, message: 'Vui lòng chọn loại phòng học', trigger: 'blur' }
-  ],
+  // Id_loai_phong_hoc: [
+  //   { required: true, message: 'Vui lòng chọn loại phòng học', trigger: 'blur' }
+  // ],
   So_tiet_toi_da_mot_ca: [
     { required: true, message: 'Vui lòng nhập số tiết', trigger: 'blur', type: 'number' }
   ],
