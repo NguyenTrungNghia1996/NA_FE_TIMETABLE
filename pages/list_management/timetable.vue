@@ -124,7 +124,7 @@ const columns = [
   }
 ]
 
-const param = ref({ pageIndex: 1, pageSize: 10, search: '' })
+const param = ref({ pageIndex: 1, pageSize: 10 })
 
 const visible = ref(false)
 const isEdit = ref(false)
@@ -163,7 +163,12 @@ const handleTableChange = async (pag) => {
 }
 
 const handleSearch = async () => {
-  param.value.search = searchText.value
+  const search = searchText.value.trim()
+  if (search) {
+    param.value.search = search
+  } else {
+    delete param.value.search
+  }
   pagination.current = 1
   param.value.pageIndex = 1
   await fetchData({ ...param.value })
@@ -173,6 +178,7 @@ const resetSearch = async () => {
   searchText.value = ''
   pagination.current = 1
   param.value.pageIndex = 1
+  delete param.value.search
   await fetchData({ ...param.value })
 }
 
