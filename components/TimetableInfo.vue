@@ -14,6 +14,13 @@ const arrangePartial = type => {
 const cancelArrange = () => {
   console.log("Hủy kết quả xếp");
 };
+
+const props = defineProps({
+  id: {
+    type: [Number, String],
+    // required: true
+  }
+})
 </script>
 
 <template>
