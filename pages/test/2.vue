@@ -22,7 +22,7 @@ const closeDrawer = () => {
     <a-button type="primary" @click="drawerOpen = true">Mở demo</a-button>
     <a-drawer
       v-model:open="drawerOpen"
-      title="TimetableInfo Demo"
+      title="Xếp thời khóa biểu"
       :footer="null"
       height="100vh"
       placement="bottom"
