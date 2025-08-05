@@ -71,6 +71,9 @@ let ENDPOINTS = {
   CLASS_SUBJECT: "/api/lopmon",
   CLASS_SUBJECT_AVOID: "/api/lopmon/tiettranhxep",
 
+  //TIMETABLE
+  TIMETABLE: "/api/thoikhoabieu",
+
   S3: "/api/presigned_url",
 };
 import { useUserStore } from "~~/stores/userStore";
@@ -174,6 +177,7 @@ class RestApi {
     this.subject_combination = new SubjectCombination(this.request);
     this.teacher = new Teacher(this.request);
     this.class = new Class(this.request);
+    this.timetable = new Timetable(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -691,6 +695,24 @@ class Class {
   }
   async update_subject_avoid(data) {
     return await this.request.post(ENDPOINTS.CLASS_SUBJECT_AVOID, data);
+  }
+}
+
+class Timetable {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.TIMETABLE, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.TIMETABLE, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.TIMETABLE, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.TIMETABLE, data);
   }
 }
 export default () => {
