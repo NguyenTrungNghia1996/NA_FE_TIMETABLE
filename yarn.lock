@@ -744,11 +744,6 @@
     semver "^7.5.3"
     tar "^7.4.0"
 
-"@microsoft/clarity@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@microsoft/clarity/-/clarity-1.0.0.tgz#e5f6c87d4aac9bac0cedeaa94158a3fd32fbcd5e"
-  integrity sha512-2QY6SmXnqRj6dWhNY8NYCN3e53j4zCFebH4wGnNhdGV1mqAsQwql2fT0w8TISxCvwwfVp8idsWLIdrRHOms1PQ==
-
 "@napi-rs/wasm-runtime@^0.2.11":
   version "0.2.12"
   resolved "https://registry.yarnpkg.com/@napi-rs/wasm-runtime/-/wasm-runtime-0.2.12.tgz#3e78a8b96e6c33a6c517e1894efbd5385a7cb6f2"
@@ -1030,7 +1025,7 @@
   optionalDependencies:
     ipx "^2.1.0"
 
-"@nuxt/kit@3.18.1", "@nuxt/kit@^3.13.2", "@nuxt/kit@^3.15.4", "@nuxt/kit@^3.16.0", "@nuxt/kit@^3.17.1", "@nuxt/kit@^3.17.3", "@nuxt/kit@^3.17.4", "@nuxt/kit@^3.17.6", "@nuxt/kit@^3.9.0":
+"@nuxt/kit@3.18.1", "@nuxt/kit@^3.13.1", "@nuxt/kit@^3.13.2", "@nuxt/kit@^3.15.4", "@nuxt/kit@^3.16.0", "@nuxt/kit@^3.17.1", "@nuxt/kit@^3.17.3", "@nuxt/kit@^3.17.4", "@nuxt/kit@^3.17.6", "@nuxt/kit@^3.9.0":
   version "3.18.1"
   resolved "https://registry.yarnpkg.com/@nuxt/kit/-/kit-3.18.1.tgz#67b2fa8c5af7552f4a9dfa0160042849b8a0478f"
   integrity sha512-z6w1Fzv27CIKFlhct05rndkJSfoslplWH5fJ9dtusEvpYScLXp5cATWIbWkte9e9zFSmQTgDQJjNs3geQHE7og==
@@ -4950,6 +4945,13 @@ nth-check@^2.0.1:
   integrity sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==
   dependencies:
     boolbase "^1.0.0"
+
+nuxt-clarity-analytics@0.0.9:
+  version "0.0.9"
+  resolved "https://registry.yarnpkg.com/nuxt-clarity-analytics/-/nuxt-clarity-analytics-0.0.9.tgz#3cd53a34bb0f59afa652442269ecf1779a684f92"
+  integrity sha512-H5w+B5XOm9hdoVn3CnDCKIcnZli48UwuD8fP1bOogse0NVxNDUKhW0pdqOMRkniL/oORiqIwMrEZh12YE+23KQ==
+  dependencies:
+    "@nuxt/kit" "^3.13.1"
 
 nuxt@^3.17.4:
   version "3.18.1"
