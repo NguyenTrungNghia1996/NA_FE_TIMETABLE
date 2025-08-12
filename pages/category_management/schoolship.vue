@@ -53,7 +53,7 @@
         <div class="flex justify-end space-x-2">
           <a-button @click="handleCancel">Hủy</a-button>
           <a-button type="primary" @click="handleOk" :loading="confirmLoading">
-            {{ isEdit ? 'Cập nhật' : 'Thêm mới' }}
+            {{ isEdit ? "Cập nhật" : "Thêm mới" }}
           </a-button>
         </div>
       </template>
@@ -65,7 +65,7 @@
 const settingStore = useSettingStore();
 const { RestApi } = useApi();
 
-const searchText = ref('');
+const searchText = ref("");
 const loading = ref(false);
 const visible = ref(false);
 const confirmLoading = ref(false);
@@ -77,54 +77,52 @@ const pagination = reactive({
   pageSize: 10,
   total: 0,
   showSizeChanger: true,
-  pageSizeOptions: ['1', '10', '20', '50'],
-  showTotal: (total) => `Tổng ${total} bản ghi`
+  pageSizeOptions: ["1", "10", "20", "50"],
+  showTotal: total => `Tổng ${total} bản ghi`,
 });
 
 const columns = [
-  { title: 'STT', key: 'stt', width: 50, align: 'center' },
-  { title: 'Tên ban học', dataIndex: 'ten', key: 'ten', ellipsis: true },
-  { title: 'Tên cấp học', dataIndex: 'ten_cap', key: 'ten_cap', ellipsis: true },
-  { title: 'Ghi chú', dataIndex: 'ghi_chu', key: 'ghi_chu', ellipsis: true },
-  { title: 'Thao tác', key: 'action', width: 80, align: 'center', fixed: 'right' }
+  { title: "STT", key: "stt", width: 50, align: "center" },
+  { title: "Tên ban học", dataIndex: "ten", key: "ten", ellipsis: true },
+  { title: "Tên cấp học", dataIndex: "ten_cap", key: "ten_cap", ellipsis: true },
+  { title: "Ghi chú", dataIndex: "ghi_chu", key: "ghi_chu", ellipsis: true },
+  { title: "Thao tác", key: "action", width: 80, align: "center", fixed: "right" },
 ];
 
 const formState = reactive({
   id: null,
-  ten: '',
-  ghichu: '',
-  id_cap_hoc: undefined
+  ten: "",
+  ghichu: "",
+  id_cap_hoc: undefined,
 });
 
 const rules = reactive({
   ten: [
-    { required: true, message: 'Vui lòng nhập tên ban học', trigger: 'blur' },
-    { min: 2, message: 'Tên phải có ít nhất 2 ký tự', trigger: 'blur' }
+    { required: true, message: "Vui lòng nhập tên ban học", trigger: "blur" },
+    { min: 2, message: "Tên phải có ít nhất 2 ký tự", trigger: "blur" },
   ],
-  id_cap_hoc: [
-    { required: true, message: 'Vui lòng chọn cấp học', trigger: 'blur' }
-  ]
+  id_cap_hoc: [{ required: true, message: "Vui lòng chọn cấp học", trigger: "blur" }],
 });
 
-const param = ref({ PageIndex: 1, PageSize: 10, search: '' });
+const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
 const dataSource = ref([]);
 
-const fetchData = async (param) => {
+const fetchData = async param => {
   try {
     loading.value = true;
     const { data } = await RestApi.school_ship.list({ params: param });
-    if (data.value?.status === 'success') {
+    if (data.value?.status === "success") {
       dataSource.value = data.value.data.items || [];
       pagination.total = data.value.data.totalrecord;
     }
   } catch (err) {
-    message.error('Không thể tải dữ liệu');
+    message.error("Không thể tải dữ liệu");
   } finally {
     loading.value = false;
   }
 };
 
-const handleTableChange = async (pag) => {
+const handleTableChange = async pag => {
   pagination.current = pag.current;
   pagination.pageSize = pag.pageSize;
   param.value.PageIndex = pag.current;
@@ -140,20 +138,20 @@ const handleSearch = async () => {
 
 const showModal = async () => {
   isEdit.value = false;
-  Object.assign(formState, { id: null, ten: '', ghichu: '', id_cap_hoc: undefined });
+  Object.assign(formState, { id: null, ten: "", ghichu: "", id_cap_hoc: undefined });
   visible.value = true;
 };
 
-const editItem = async (id) => {
+const editItem = async id => {
   isEdit.value = true;
   try {
     const { data } = await RestApi.school_ship.detail({ params: { id } });
-    if (data.value?.status === 'success') {
+    if (data.value?.status === "success") {
       Object.assign(formState, { ...data.value.data });
       visible.value = true;
     }
   } catch (err) {
-    message.error('Không thể lấy dữ liệu chi tiết');
+    message.error("Không thể lấy dữ liệu chi tiết");
   }
 };
 
@@ -169,16 +167,16 @@ const handleOk = async () => {
       delete payload.id;
       res = await RestApi.school_ship.create({ body: payload });
     }
-    if (res.data.value?.status === 'success') {
-      message.success(res.data.value?.message || 'Thành công');
+    if (res.data.value?.status === "success") {
+      message.success(res.data.value?.message || "Thành công");
       await fetchData({ ...param.value });
       visible.value = false;
       formRef.value.resetFields();
     } else {
-      throw new Error(res.error?.value?.data?.message || 'Lỗi không xác định');
+      throw new Error(res.error?.value?.data?.message || "Lỗi không xác định");
     }
   } catch (err) {
-    message.error(err.message || 'Lỗi khi lưu thông tin');
+    message.error(err.message || "Lỗi khi lưu thông tin");
   } finally {
     confirmLoading.value = false;
   }
@@ -189,23 +187,25 @@ const handleCancel = () => {
   visible.value = false;
 };
 
-const deleteItem = async (id) => {
+const deleteItem = async id => {
   try {
     const { data } = await RestApi.school_ship.delete({ params: { id } });
-    if (data.value?.status === 'success') {
-      message.success(data.value?.message || 'Đã xóa');
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Đã xóa");
+      pagination.current = 1;
+      param.value.PageIndex = 1;
       await fetchData({ ...param.value });
     } else {
-      message.error(data.value?.message || 'Không thể xóa');
+      message.error(data.value?.message || "Không thể xóa");
     }
   } catch (err) {
-    message.error('Lỗi khi xóa');
+    message.error("Lỗi khi xóa");
   }
 };
 
 const resetForm = async () => {
   if (formRef.value) formRef.value.resetFields();
-  param.value = { PageIndex: 1, PageSize: 10, search: '' };
+  param.value = { PageIndex: 1, PageSize: 10, search: "" };
   pagination.current = 1;
   pagination.pageSize = 10;
   await fetchData({ ...param.value });

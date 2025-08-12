@@ -215,6 +215,8 @@ const handleCancel = () => {
 const deleteItem = async id => {
   try {
     await RestApi.timetable.delete({ params: { Id: id } });
+    pagination.current = 1;
+    param.value.pageIndex = 1;
     message.success("Xóa thành công");
   } catch (error) {
     message.error("Đã xảy ra lỗi khi xóa");

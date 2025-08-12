@@ -59,7 +59,7 @@
         <div class="flex justify-end space-x-2">
           <a-button @click="handleCancel">Hủy</a-button>
           <a-button type="primary" @click="handleOk" :loading="confirmLoading">
-            {{ isEdit ? 'Cập nhật' : 'Thêm mới' }}
+            {{ isEdit ? "Cập nhật" : "Thêm mới" }}
           </a-button>
         </div>
       </template>
@@ -73,15 +73,15 @@ const { RestApi } = useApi();
 const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
 
 const columns = [
-  { title: 'STT', key: 'stt', width: 50, align: 'center' },
-  { title: 'Tên Tổ chuyên môn', dataIndex: 'ten', key: 'ten', ellipsis: true },
-  { title: 'Ghi chú', dataIndex: 'ghi_chu', key: 'ghi_chu', ellipsis: true },
-  { title: 'Thao tác', key: 'action', width: 80, align: 'center', fixed: 'right' }
+  { title: "STT", key: "stt", width: 50, align: "center" },
+  { title: "Tên Tổ chuyên môn", dataIndex: "ten", key: "ten", ellipsis: true },
+  { title: "Ghi chú", dataIndex: "ghi_chu", key: "ghi_chu", ellipsis: true },
+  { title: "Thao tác", key: "action", width: 80, align: "center", fixed: "right" },
 ];
 
 const dataSource = ref([]);
 const loading = ref(false);
-const searchText = ref('');
+const searchText = ref("");
 const visible = ref(false);
 const confirmLoading = ref(false);
 const isEdit = ref(false);
@@ -92,27 +92,27 @@ const pagination = reactive({
   pageSize: 10,
   total: 0,
   showSizeChanger: true,
-  pageSizeOptions: ['1', '10', '20', '50'],
-  showTotal: (total) => `Tổng ${total} bản ghi`
+  pageSizeOptions: ["1", "10", "20", "50"],
+  showTotal: total => `Tổng ${total} bản ghi`,
 });
 
 const formState = reactive({
-  ten: '',
-  ghi_chu: ''
+  ten: "",
+  ghi_chu: "",
 });
 
 const rules = reactive({
   ten: [
-    { required: true, message: 'Vui lòng nhập tên Tổ chuyên môn', trigger: 'blur' },
-    { min: 2, message: 'Tên phải có ít nhất 2 ký tự', trigger: 'blur' }
-  ]
+    { required: true, message: "Vui lòng nhập tên Tổ chuyên môn", trigger: "blur" },
+    { min: 2, message: "Tên phải có ít nhất 2 ký tự", trigger: "blur" },
+  ],
 });
 
-const fetchData = async (param) => {
+const fetchData = async param => {
   try {
     loading.value = true;
     const { data } = await RestApi.expertise.list({ params: param });
-    if (data.value?.status === 'success') {
+    if (data.value?.status === "success") {
       dataSource.value = data.value.data.items || [];
       pagination.total = data.value.data.totalrecord;
     } else {
@@ -120,14 +120,14 @@ const fetchData = async (param) => {
       pagination.total = 0;
     }
   } catch (error) {
-    console.error('Error fetching data:', error);
-    message.error('Lỗi khi tải dữ liệu');
+    console.error("Error fetching data:", error);
+    message.error("Lỗi khi tải dữ liệu");
   } finally {
     loading.value = false;
   }
 };
 
-const handleTableChange = async (pag) => {
+const handleTableChange = async pag => {
   pagination.current = pag.current;
   pagination.pageSize = pag.pageSize;
   param.value.PageIndex = pag.current;
@@ -143,16 +143,16 @@ const handleSearch = async () => {
 
 const showModal = () => {
   isEdit.value = false;
-  Object.assign(formState, { ten: '', ghi_chu: '' });
+  Object.assign(formState, { ten: "", ghi_chu: "" });
   visible.value = true;
 };
 
-const editItem = (record) => {
+const editItem = record => {
   isEdit.value = true;
   Object.assign(formState, {
     id: record.id,
     ten: record.ten,
-    ghi_chu: record.ghi_chu || ''
+    ghi_chu: record.ghi_chu || "",
   });
   visible.value = true;
 };
@@ -163,22 +163,22 @@ const handleOk = async () => {
     confirmLoading.value = true;
     if (isEdit.value) {
       const { data, error } = await RestApi.expertise.update({ body: { ...formState } });
-      if (data.value?.status === 'success') {
+      if (data.value?.status === "success") {
         message.success(data.value?.message || "Cập nhật Tổ chuyên môn thành công");
       } else {
-        throw new Error(error.value?.data?.message || 'Cập nhật không thành công');
+        throw new Error(error.value?.data?.message || "Cập nhật không thành công");
       }
     } else {
       if (formState) delete formState.id;
       const { data, error } = await RestApi.expertise.create({ body: { ...formState } });
-      if (data.value?.status === 'success') {
+      if (data.value?.status === "success") {
         message.success(data.value?.message || "Tạo mới Tổ chuyên môn thành công");
       } else {
-        throw new Error(error.value?.data?.message || 'Thêm mới không thành công');
+        throw new Error(error.value?.data?.message || "Thêm mới không thành công");
       }
     }
   } catch (error) {
-    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin');
+    message.error(error.message || error.response?.data?.message || "Đã xảy ra lỗi khi lưu thông tin");
   } finally {
     await fetchData({ ...param.value });
     confirmLoading.value = false;
@@ -192,17 +192,19 @@ const handleCancel = () => {
   visible.value = false;
 };
 
-const deleteItem = async (id) => {
+const deleteItem = async id => {
   try {
     const { data } = await RestApi.expertise.delete({ params: { id: id } });
-    if (data.value?.status === 'success') {
-      message.success(data.value?.message || 'Xóa thành công');
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Xóa thành công");
+      pagination.current = 1;
+      param.value.PageIndex = 1;
     } else {
-      message.error(data.value?.message || 'Có lỗi xảy ra');
+      message.error(data.value?.message || "Có lỗi xảy ra");
     }
   } catch (error) {
-    console.error('Error deleting data:', error);
-    message.error('Có lỗi xảy ra khi xóa dữ liệu');
+    console.error("Error deleting data:", error);
+    message.error("Có lỗi xảy ra khi xóa dữ liệu");
   } finally {
     await fetchData({ ...param.value });
   }

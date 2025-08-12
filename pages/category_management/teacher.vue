@@ -221,6 +221,8 @@ const deleteItem = async id => {
     const { data } = await RestApi.teacher.delete({ params: { Id: id } });
     if (data.value?.status === "success") {
       message.success(data.value?.message || "Xóa thành công");
+      pagination.current = 1;
+      param.value.PageIndex = 1;
     } else {
       message.error(data.value?.message || "Có lỗi xảy ra");
     }
@@ -258,17 +260,17 @@ watch(drawerAvoidOpen, val => {
   }
 });
 
-const drawerAssignmentOpen = ref(false)
-const assignmentRef = ref()
+const drawerAssignmentOpen = ref(false);
+const assignmentRef = ref();
 
 watch(drawerAssignmentOpen, val => {
   if (val) {
-    assignmentRef.value?.refresh()
+    assignmentRef.value?.refresh();
   }
-})
+});
 
 const closeAssignmentDrawer = () => {
   // drawerOpen.value = false
-  assignmentRef.value?.reset()
-}
+  assignmentRef.value?.reset();
+};
 </script>
