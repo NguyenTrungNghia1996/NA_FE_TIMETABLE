@@ -30,6 +30,7 @@ export default defineNuxtConfig({
     encryptionKey: process.env.NUXT_ENCRYPTION_KEY || "default-strong-key-32-chars-123456",
     public: {
       baseURL: process.env.NUXT_PUBLIC_BASE_URL || "https://api.tkb.nguyenanh-est.com",
+      clarityId: process.env.NUXT_PUBLIC_CLARITY_ID || ''
     },
   },
   vite: {
