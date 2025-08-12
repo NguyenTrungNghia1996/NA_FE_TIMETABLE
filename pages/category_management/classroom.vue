@@ -13,7 +13,7 @@
       <a-table size="small" :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" @change="handleTableChange" bordered :scroll="{ x: 1000 }">
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'khong_kiem_tra_xung_dot'">
-            {{ record.khong_kiem_tra_xung_dot ? '✔️' : '❌' }}
+            {{ record.khong_kiem_tra_xung_dot ? "✔️" : "❌" }}
           </template>
 
           <template v-if="column.key === 'action'">
@@ -52,18 +52,18 @@
                     <a-menu>
                       <a-menu-item @click="editBusy(record)" :disabled="!settingStore.currentPermission">
                         <template #icon>
-                          <CalendarOutlined />
-                        </template>Sửa tiết bận
+                          <CalendarOutlined /> </template
+                        >Sửa tiết bận
                       </a-menu-item>
                       <a-menu-item @click="editItem(record)" :disabled="!settingStore.currentPermission">
                         <template #icon>
-                          <EditOutlined />
-                        </template>Sửa
+                          <EditOutlined /> </template
+                        >Sửa
                       </a-menu-item>
                       <a-menu-item danger @click="deleteItem(record.id)" :disabled="!settingStore.currentPermission">
                         <template #icon>
-                          <DeleteOutlined />
-                        </template>Xóa
+                          <DeleteOutlined /> </template
+                        >Xóa
                       </a-menu-item>
                     </a-menu>
                   </template>
@@ -91,12 +91,12 @@
         </a-form-item>
         <div class="flex justify-end gap-2 mt-6">
           <a-button @click="handleCancel">Hủy</a-button>
-          <a-button type="primary" @click="handleOk" :loading="confirmLoading">{{ isEdit ? 'Cập nhật' : 'Thêm mới' }}</a-button>
+          <a-button type="primary" @click="handleOk" :loading="confirmLoading">{{ isEdit ? "Cập nhật" : "Thêm mới" }}</a-button>
         </div>
       </a-form>
     </a-modal>
     <a-modal v-model:open="busy_modal" title="Chỉnh sửa tiết bận" @cancel="handleBusyCancel" :width="800" :footer="null">
-      <div v-for="(block) in busy_data.ds_Ca" :key="block.id" style="margin-bottom: 2rem;">
+      <div v-for="block in busy_data.ds_Ca" :key="block.id" style="margin-bottom: 2rem">
         <Timetable :block="block" />
       </div>
       <div class="flex justify-end gap-2 mt-6">
@@ -105,29 +105,12 @@
         <a-button type="primary" @click="handleBusyOk" :loading="confirmLoading">Cập Nhật</a-button>
       </div>
     </a-modal>
-    <a-drawer
-      v-model:open="busy_manager_modal"
-      title="Cài đặt tiết bận"
-      @close="closeBusyManager"
-      height="100vh"
-      placement="bottom"
-      :footer="null"
-    >
+    <a-drawer v-model:open="busy_manager_modal" title="Cài đặt tiết bận" @close="closeBusyManager" height="100vh" placement="bottom" :footer="null">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <a-table
-          :columns="busyColumns"
-          :data-source="dataSource"
-          :pagination="false"
-          bordered
-          size="small"
-        />
+        <a-table :columns="busyColumns" :data-source="dataSource" :pagination="false" bordered size="small" />
         <div v-if="selectedClassroom && busy_data" class="flex flex-col">
           <h3 class="font-medium mb-2">{{ selectedClassroom.ten }}</h3>
-          <div
-            v-for="(block) in busy_data.ds_Ca"
-            :key="block.id"
-            class="mb-8"
-          >
+          <div v-for="block in busy_data.ds_Ca" :key="block.id" class="mb-8">
             <Timetable :block="block" />
           </div>
           <div class="flex justify-end gap-2 mt-auto pt-2">
@@ -141,7 +124,6 @@
 </template>
 
 <script setup>
-import { h } from 'vue'
 const settingStore = useSettingStore();
 const { RestApi } = useApi();
 
@@ -151,9 +133,8 @@ const busy_manager_modal = ref(false);
 const selectedClassroom = ref(null);
 const busy_data = ref();
 
-
 const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
-const searchText = ref('');
+const searchText = ref("");
 const loading = ref(false);
 const visible = ref(false);
 const confirmLoading = ref(false);
@@ -165,79 +146,78 @@ const pagination = reactive({
   pageSize: 10,
   total: 0,
   showSizeChanger: true,
-  pageSizeOptions: ['1', '10', '20', '50'],
-  showTotal: (total) => `Tổng ${total} bản ghi`
+  pageSizeOptions: ["1", "10", "20", "50"],
+  showTotal: total => `Tổng ${total} bản ghi`,
 });
 
 const columns = [
   {
-    title: 'STT',
-    key: 'stt',
+    title: "STT",
+    key: "stt",
     width: 60,
-    align: 'center',
-    customRender: ({ index }) => (pagination.current - 1) * pagination.pageSize + index + 1
+    align: "center",
+    customRender: ({ index }) => (pagination.current - 1) * pagination.pageSize + index + 1,
   },
-  { title: 'Tên phòng học', dataIndex: 'ten', key: 'ten' },
-  { title: 'Sức chứa', dataIndex: 'suc_chua', key: 'suc_chua', align: 'center' },
-  { title: 'Loại phòng học', dataIndex: 'ten_loai_phong_hoc', key: 'ten_loai_phong_hoc' },
-  { title: 'Điểm trường', dataIndex: 'ten_diem_truong', key: 'ten_diem_truong' },
-  { title: 'Bỏ kiểm tra xung đột', key: 'khong_kiem_tra_xung_dot', align: 'center' },
-  { title: 'Thao tác', key: 'action', width: 120, align: 'center', fixed: 'right' }
+  { title: "Tên phòng học", dataIndex: "ten", key: "ten" },
+  { title: "Sức chứa", dataIndex: "suc_chua", key: "suc_chua", align: "center" },
+  { title: "Loại phòng học", dataIndex: "ten_loai_phong_hoc", key: "ten_loai_phong_hoc" },
+  { title: "Điểm trường", dataIndex: "ten_diem_truong", key: "ten_diem_truong" },
+  { title: "Bỏ kiểm tra xung đột", key: "khong_kiem_tra_xung_dot", align: "center" },
+  { title: "Thao tác", key: "action", width: 120, align: "center", fixed: "right" },
 ];
 
 // ===== Busy manager section start =====
 const busyColumns = [
   {
-    title: 'STT',
-    key: 'stt',
+    title: "STT",
+    key: "stt",
     width: 60,
-    align: 'center',
-    customRender: ({ index }) => index + 1
+    align: "center",
+    customRender: ({ index }) => index + 1,
   },
   {
-    title: 'Tên phòng học',
-    dataIndex: 'ten',
-    key: 'ten',
-    customRender: ({ record }) => h('a', { onClick: () => selectClassroom(record), class: 'text-blue-600 hover:underline' }, record.ten)
-  }
-
+    title: "Tên phòng học",
+    dataIndex: "ten",
+    key: "ten",
+    customRender: ({ record }) => h("a", { onClick: () => selectClassroom(record), class: "text-blue-600 hover:underline" }, record.ten),
+  },
 ];
 
 const dataSource = ref([]);
 const formState = reactive({
   id: null,
-  ten: '',
+  ten: "",
   suc_chua: 0,
   id_Loai_phong_hoc: null,
   id_Diem_truong: null,
   id_Don_vi: null,
-  khong_kiem_tra_xung_dot: false
+  khong_kiem_tra_xung_dot: false,
 });
 
 const rules = {
-  ten: [{ required: true, message: 'Nhập tên phòng học', trigger: 'blur' }],
-  suc_chua: [{ required: true, type: 'number', message: 'Nhập sức chứa', trigger: 'blur' }],
-  id_Loai_phong_hoc: [{ required: true, message: 'Chọn loại phòng học', trigger: 'change' }],
-  id_Diem_truong: [{ required: true, message: 'Chọn điểm trường', trigger: 'change' }]
+  ten: [{ required: true, message: "Nhập tên phòng học", trigger: "blur" }],
+  suc_chua: [{ required: true, type: "number", message: "Nhập sức chứa", trigger: "blur" }],
+  id_Loai_phong_hoc: [{ required: true, message: "Chọn loại phòng học", trigger: "change" }],
+  id_Diem_truong: [{ required: true, message: "Chọn điểm trường", trigger: "change" }],
 };
 
-const fetchData = async (param_soure) => {
+const fetchData = async param_soure => {
   try {
     loading.value = true;
     const { data } = await RestApi.classroom.list({ params: param_soure });
-    if (data.value?.status === 'success') {
+    if (data.value?.status === "success") {
       dataSource.value = data.value.data.items || [];
       pagination.total = data.value.data.totalrecord;
     } else {
-      dataSource.value = []
-      pagination.total = 0
+      dataSource.value = [];
+      pagination.total = 0;
     }
   } finally {
     loading.value = false;
   }
 };
 
-const handleTableChange = async (pag) => {
+const handleTableChange = async pag => {
   pagination.current = pag.current;
   pagination.pageSize = pag.pageSize;
   param.value.PageIndex = pag.current;
@@ -252,9 +232,9 @@ const handleSearch = async () => {
 };
 
 const resetSearch = async () => {
-  searchText.value = '';
+  searchText.value = "";
   pagination.current = 1;
-  param.value.search = '';
+  param.value.search = "";
   await fetchData({ ...param.value });
 };
 
@@ -270,48 +250,53 @@ const closeBusyManager = () => {
   busy_data.value = null;
 };
 
-const selectClassroom = async (record) => {
+const selectClassroom = async record => {
   selectedClassroom.value = record;
   try {
     const { data } = await RestApi.classroom.get_busy({ params: { id: record.id } });
-    if (data.value?.status === 'success') {
+    if (data.value?.status === "success") {
       busy_data.value = data.value.data;
     }
   } catch {
-    message.error('Không thể tải dữ liệu phòng học');
+    message.error("Không thể tải dữ liệu phòng học");
   }
 };
 
 const showModal = async () => {
   isEdit.value = false;
   Object.assign(formState, {
-    id: null, ten: '', suc_chua: null, id_Loai_phong_hoc: null,
-    id_Diem_truong: null, id_Don_vi: null, khong_kiem_tra_xung_dot: false
+    id: null,
+    ten: "",
+    suc_chua: null,
+    id_Loai_phong_hoc: null,
+    id_Diem_truong: null,
+    id_Don_vi: null,
+    khong_kiem_tra_xung_dot: false,
   });
   visible.value = true;
 };
 
-const editItem = async (record) => {
+const editItem = async record => {
   try {
     const { data } = await RestApi.classroom.detail({ params: { id: record.id } });
-    if (data.value?.status === 'success') {
+    if (data.value?.status === "success") {
       Object.assign(formState, data.value.data);
       isEdit.value = true;
       visible.value = true;
     }
   } catch {
-    message.error('Không thể tải dữ liệu phòng học');
+    message.error("Không thể tải dữ liệu phòng học");
   }
 };
-const editBusy = async (record) => {
+const editBusy = async record => {
   try {
     const { data } = await RestApi.classroom.get_busy({ params: { id: record.id } });
-    if (data.value?.status === 'success') {
-      busy_data.value = data.value.data
+    if (data.value?.status === "success") {
+      busy_data.value = data.value.data;
       busy_modal.value = true;
     }
   } catch {
-    message.error('Không thể tải dữ liệu phòng học');
+    message.error("Không thể tải dữ liệu phòng học");
   }
 };
 const handleOk = async () => {
@@ -319,29 +304,29 @@ const handleOk = async () => {
     await formRef.value.validate();
     confirmLoading.value = true;
     if (isEdit.value) {
-      const { data, error } = await RestApi.classroom.update({ body: { ...formState } })
-      if (data.value?.status === 'success') {
-        message.success(data.value.message || 'Cập nhật thành công')
+      const { data, error } = await RestApi.classroom.update({ body: { ...formState } });
+      if (data.value?.status === "success") {
+        message.success(data.value.message || "Cập nhật thành công");
         await fetchData({ ...param.value });
-        visible.value = false
+        visible.value = false;
       } else {
-        throw new Error(error.value?.data?.message || 'Cập nhật không thành công')
+        throw new Error(error.value?.data?.message || "Cập nhật không thành công");
       }
     } else {
       if (formState) {
-        delete formState.id
+        delete formState.id;
       }
-      const { data, error } = await RestApi.classroom.create({ body: { ...formState } })
-      if (data.value?.status === 'success') {
-        message.success(data.value.message || 'Thêm mới thành công')
+      const { data, error } = await RestApi.classroom.create({ body: { ...formState } });
+      if (data.value?.status === "success") {
+        message.success(data.value.message || "Thêm mới thành công");
         await fetchData({ ...param.value });
-        visible.value = false
+        visible.value = false;
       } else {
-        throw new Error(error.value?.data?.message || 'Thêm mới không thành công')
+        throw new Error(error.value?.data?.message || "Thêm mới không thành công");
       }
     }
   } catch (error) {
-    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin')
+    message.error(error.message || error.response?.data?.message || "Đã xảy ra lỗi khi lưu thông tin");
   } finally {
     confirmLoading.value = false;
   }
@@ -351,13 +336,13 @@ const updateBusy = async () => {
   try {
     confirmLoading.value = true;
     const { data, error } = await RestApi.classroom.update_busy({ body: busy_data.value });
-    if (data.value?.status === 'success') {
-      message.success(data.value.message || 'Cập nhật thành công');
+    if (data.value?.status === "success") {
+      message.success(data.value.message || "Cập nhật thành công");
       return true;
     }
-    throw new Error(error.value?.data?.message || 'Cập nhật không thành công');
+    throw new Error(error.value?.data?.message || "Cập nhật không thành công");
   } catch (error) {
-    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin');
+    message.error(error.message || error.response?.data?.message || "Đã xảy ra lỗi khi lưu thông tin");
     return false;
   } finally {
     confirmLoading.value = false;
@@ -382,16 +367,18 @@ const handleCancel = () => {
 const handleBusyCancel = () => {
   busy_data.value = [];
   busy_modal.value = false;
-}
-const deleteItem = async (id) => {
+};
+const deleteItem = async id => {
   try {
     const { data } = await RestApi.classroom.delete({ params: { id } });
-    if (data.value?.status === 'success') {
-      message.success(data.value.message || 'Đã xoá');
+    if (data.value?.status === "success") {
+      message.success(data.value.message || "Đã xoá");
+      pagination.current = 1;
+      param.value.PageIndex = 1;
       await fetchData({ ...param.value });
     }
   } catch {
-    message.error('Lỗi khi xoá');
+    message.error("Lỗi khi xoá");
   }
 };
 
@@ -400,9 +387,8 @@ await fetchData({ ...param.value });
 
 <style scoped>
 @media (max-width: 768px) {
-
-  .ant-table-thead>tr>th,
-  .ant-table-tbody>tr>td {
+  .ant-table-thead > tr > th,
+  .ant-table-tbody > tr > td {
     padding: 8px !important;
     font-size: 13px;
   }

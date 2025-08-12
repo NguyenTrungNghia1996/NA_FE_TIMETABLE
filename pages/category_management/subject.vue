@@ -20,7 +20,7 @@
             {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
           </template>
           <template v-if="column.key === 'bool'">
-            <span>{{ record[column.dataIndex] ? '✔️' : '❌' }}</span>
+            <span>{{ record[column.dataIndex] ? "✔️" : "❌" }}</span>
           </template>
           <template v-if="column.key === 'action'">
             <div class="flex justify-center">
@@ -91,7 +91,7 @@
         <div class="flex justify-end space-x-2">
           <a-button @click="handleCancel">Hủy</a-button>
           <a-button type="primary" @click="handleOk" :loading="confirmLoading">
-            {{ isEdit ? 'Cập nhật' : 'Thêm mới' }}
+            {{ isEdit ? "Cập nhật" : "Thêm mới" }}
           </a-button>
         </div>
       </template>
@@ -131,67 +131,66 @@
 </template>
 
 <script setup>
-const settingStore = useSettingStore()
-const { RestApi } = useApi()
+const settingStore = useSettingStore();
+const { RestApi } = useApi();
 
-const searchText = ref('')
-const loading = ref(false)
-const visible = ref(false)
-const confirmLoading = ref(false)
-const isEdit = ref(false)
-const formRef = ref()
-const busy_modal = ref(false)
-const busy_data = ref()
-const busy_manager_modal = ref(false)
-const selectedSubject = ref(null)
-
+const searchText = ref("");
+const loading = ref(false);
+const visible = ref(false);
+const confirmLoading = ref(false);
+const isEdit = ref(false);
+const formRef = ref();
+const busy_modal = ref(false);
+const busy_data = ref();
+const busy_manager_modal = ref(false);
+const selectedSubject = ref(null);
 
 const pagination = reactive({
   current: 1,
   pageSize: 10,
   total: 0,
   showSizeChanger: true,
-  pageSizeOptions: ['1', '10', '20', '50'],
-  showTotal: total => `Tổng ${total} bản ghi`
-})
+  pageSizeOptions: ["1", "10", "20", "50"],
+  showTotal: total => `Tổng ${total} bản ghi`,
+});
 
 const columns = [
-  { title: 'STT', key: 'stt', width: 50, align: 'center' },
-  { title: 'Tên môn học', dataIndex: 'ten', key: 'ten', ellipsis: true },
-  { title: 'Loại phòng học', dataIndex: 'ten_loai_phong_hoc', key: 'ten_loai_phong_hoc', ellipsis: true },
+  { title: "STT", key: "stt", width: 50, align: "center" },
+  { title: "Tên môn học", dataIndex: "ten", key: "ten", ellipsis: true },
+  { title: "Loại phòng học", dataIndex: "ten_loai_phong_hoc", key: "ten_loai_phong_hoc", ellipsis: true },
   // { title: 'Khối kiến thức', dataIndex: 'ten_khoi_kien_thuc', key: 'ten_khoi_kien_thuc', ellipsis: true },
-  { title: 'Số tiết/ca', dataIndex: 'so_tiet_toi_da_mot_ca', key: 'so_tiet_toi_da_mot_ca', align: 'center' },
-  { title: 'Số tiết/2 ca', dataIndex: 'so_tiet_toi_da_hai_ca', key: 'so_tiet_toi_da_hai_ca', align: 'center' },
-  { title: 'GVCN', dataIndex: 'do_GVCN_phu_trach', key: 'bool', align: 'center' },
-  { title: 'Không cần phòng học', dataIndex: 'khong_can_phong_hoc', key: 'bool', align: 'center' },
-  { title: 'Học cách ngày', dataIndex: 'hoc_cach_ngay', key: 'bool', align: 'center' },
-  { title: 'Xếp thành cặp', dataIndex: 'xep_thanh_cap', key: 'bool', align: 'center' },
-  { title: 'Tự chọn', dataIndex: 'la_mon_tu_chon', key: 'bool', align: 'center' },
-  { title: 'Thao tác', key: 'action', width: 100, align: 'center', fixed: 'right' }
-]
+  { title: "Số tiết/ca", dataIndex: "so_tiet_toi_da_mot_ca", key: "so_tiet_toi_da_mot_ca", align: "center" },
+  { title: "Số tiết/2 ca", dataIndex: "so_tiet_toi_da_hai_ca", key: "so_tiet_toi_da_hai_ca", align: "center" },
+  { title: "GVCN", dataIndex: "do_GVCN_phu_trach", key: "bool", align: "center" },
+  { title: "Không cần phòng học", dataIndex: "khong_can_phong_hoc", key: "bool", align: "center" },
+  { title: "Học cách ngày", dataIndex: "hoc_cach_ngay", key: "bool", align: "center" },
+  { title: "Xếp thành cặp", dataIndex: "xep_thanh_cap", key: "bool", align: "center" },
+  { title: "Tự chọn", dataIndex: "la_mon_tu_chon", key: "bool", align: "center" },
+  { title: "Thao tác", key: "action", width: 100, align: "center", fixed: "right" },
+];
 
 const busyColumns = [
   {
-    title: 'STT',
-    key: 'stt',
+    title: "STT",
+    key: "stt",
     width: 60,
-    align: 'center',
-    customRender: ({ index }) => index + 1
+    align: "center",
+    customRender: ({ index }) => index + 1,
   },
   {
-    title: 'Tên môn học',
-    dataIndex: 'ten',
-    key: 'ten',
-    customRender: ({ record }) => h('a', { onClick: () => selectSubject(record), class: 'text-blue-600 hover:underline' }, record.ten)
-  }
-]
+    title: "Tên môn học",
+    dataIndex: "ten",
+    key: "ten",
+    customRender: ({ record }) => h("a", { onClick: () => selectSubject(record), class: "text-blue-600 hover:underline" }, record.ten),
+  },
+];
 
-const param = ref({ PageIndex: 1, PageSize: 10, search: '' })
-const dataSource = ref([])
+const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
+const dataSource = ref([]);
 
 const formState = reactive({
-  ma: '',
-  ten: '',
+  ma: "",
+  ten: "",
   Id_loai_phong_hoc: undefined,
   Id_khoi_kien_thuc: [],
   Do_GVCN_phu_trach: false,
@@ -201,98 +200,92 @@ const formState = reactive({
   So_tiet_toi_da_mot_ca: 1,
   So_tiet_toi_da_hai_ca: 2,
   La_mon_tu_chon: false,
-  id_phong: []
-})
+  id_phong: [],
+});
 
 const rules = reactive({
   ma: [
-    { required: true, message: 'Vui lòng nhập mã môn học', trigger: 'blur' },
-    { max: 20, message: 'Mã môn học tối đa 20 ký tự', trigger: 'blur' }
+    { required: true, message: "Vui lòng nhập mã môn học", trigger: "blur" },
+    { max: 20, message: "Mã môn học tối đa 20 ký tự", trigger: "blur" },
   ],
-  ten: [
-    { required: true, message: 'Vui lòng nhập tên môn học', trigger: 'blur' }
-  ],
+  ten: [{ required: true, message: "Vui lòng nhập tên môn học", trigger: "blur" }],
   // Id_loai_phong_hoc: [
   //   { required: true, message: 'Vui lòng chọn loại phòng học', trigger: 'blur' }
   // ],
-  So_tiet_toi_da_mot_ca: [
-    { required: true, message: 'Vui lòng nhập số tiết', trigger: 'blur', type: 'number' }
-  ],
-  So_tiet_toi_da_hai_ca: [
-    { required: true, message: 'Vui lòng nhập số tiết', trigger: 'blur', type: 'number' }
-  ]
-})
+  So_tiet_toi_da_mot_ca: [{ required: true, message: "Vui lòng nhập số tiết", trigger: "blur", type: "number" }],
+  So_tiet_toi_da_hai_ca: [{ required: true, message: "Vui lòng nhập số tiết", trigger: "blur", type: "number" }],
+});
 
 watch(
   () => formState.Id_loai_phong_hoc,
   (val, oldVal) => {
     if (oldVal !== undefined && val !== oldVal) {
-      formState.id_phong = []
+      formState.id_phong = [];
     }
-  }
-)
+  },
+);
 
-const fetchData = async (param) => {
+const fetchData = async param => {
   try {
-    loading.value = true
-    const { data } = await RestApi.subject.list({ params: param })
-    if (data.value?.status === 'success') {
-      dataSource.value = data.value.data.items || []
-      pagination.total = data.value.data.totalrecord
+    loading.value = true;
+    const { data } = await RestApi.subject.list({ params: param });
+    if (data.value?.status === "success") {
+      dataSource.value = data.value.data.items || [];
+      pagination.total = data.value.data.totalrecord;
     } else {
-      dataSource.value = []
-      pagination.total = 0
+      dataSource.value = [];
+      pagination.total = 0;
     }
   } catch (error) {
-    console.error('Error fetching data:', error)
-    message.error('Lỗi khi tải dữ liệu')
+    console.error("Error fetching data:", error);
+    message.error("Lỗi khi tải dữ liệu");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
-const handleTableChange = async (pag) => {
-  pagination.current = pag.current
-  pagination.pageSize = pag.pageSize
-  param.value.PageIndex = pag.current
-  param.value.PageSize = pag.pageSize
-  await fetchData({ ...param.value })
-}
+const handleTableChange = async pag => {
+  pagination.current = pag.current;
+  pagination.pageSize = pag.pageSize;
+  param.value.PageIndex = pag.current;
+  param.value.PageSize = pag.pageSize;
+  await fetchData({ ...param.value });
+};
 
 const handleSearch = async () => {
-  param.value.search = searchText.value
-  pagination.current = 1
-  await fetchData({ ...param.value })
-}
+  param.value.search = searchText.value;
+  pagination.current = 1;
+  await fetchData({ ...param.value });
+};
 
 const openBusyManager = async () => {
-  await fetchData({ ...param.value })
-  busy_manager_modal.value = true
-}
+  await fetchData({ ...param.value });
+  busy_manager_modal.value = true;
+};
 
 const closeBusyManager = () => {
-  busy_manager_modal.value = false
-  selectedSubject.value = null
-  busy_data.value = null
-}
+  busy_manager_modal.value = false;
+  selectedSubject.value = null;
+  busy_data.value = null;
+};
 
-const selectSubject = async (record) => {
-  selectedSubject.value = record
+const selectSubject = async record => {
+  selectedSubject.value = record;
   try {
-    const { data } = await RestApi.subject.get_avoid({ params: { Id: record.id } })
-    if (data.value?.status === 'success') {
-      busy_data.value = data.value.data
+    const { data } = await RestApi.subject.get_avoid({ params: { Id: record.id } });
+    if (data.value?.status === "success") {
+      busy_data.value = data.value.data;
     }
   } catch (err) {
-    message.error('Không thể tải dữ liệu')
+    message.error("Không thể tải dữ liệu");
   }
-}
+};
 
 const showModal = () => {
-  isEdit.value = false
+  isEdit.value = false;
   Object.assign(formState, {
-    ma: '',
-    ten: '',
+    ma: "",
+    ten: "",
     Id_loai_phong_hoc: undefined,
     Id_khoi_kien_thuc: [],
     Do_GVCN_phu_trach: false,
@@ -302,16 +295,16 @@ const showModal = () => {
     So_tiet_toi_da_mot_ca: 1,
     So_tiet_toi_da_hai_ca: 2,
     La_mon_tu_chon: false,
-    id_phong: []
-  })
-  visible.value = true
-}
+    id_phong: [],
+  });
+  visible.value = true;
+};
 
-const editItem = async (record) => {
-  isEdit.value = true
+const editItem = async record => {
+  isEdit.value = true;
   try {
-    const { data } = await RestApi.subject.detail({ params: { Id: record.id } })
-    if (data.value?.status === 'success') {
+    const { data } = await RestApi.subject.detail({ params: { Id: record.id } });
+    if (data.value?.status === "success") {
       Object.assign(formState, {
         id: data.value.data.id,
         ma: data.value.data.ma,
@@ -324,129 +317,131 @@ const editItem = async (record) => {
         Xep_thanh_cap: data.value.data.xep_thanh_cap,
         So_tiet_toi_da_mot_ca: data.value.data.so_tiet_toi_da_mot_ca,
         So_tiet_toi_da_hai_ca: data.value.data.so_tiet_toi_da_hai_ca,
-        La_mon_tu_chon: data.value.data.la_mon_tu_chon
-      })
-      await nextTick()
-      formState.id_phong = data.value.data.id_phong
-      visible.value = true
+        La_mon_tu_chon: data.value.data.la_mon_tu_chon,
+      });
+      await nextTick();
+      formState.id_phong = data.value.data.id_phong;
+      visible.value = true;
     }
   } catch (err) {
-    message.error('Không thể lấy dữ liệu chi tiết')
+    message.error("Không thể lấy dữ liệu chi tiết");
   }
-}
+};
 
-const editBusy = async (record) => {
+const editBusy = async record => {
   try {
-    const { data } = await RestApi.subject.get_avoid({ params: { Id: record.id } })
-    if (data.value?.status === 'success') {
-      busy_data.value = data.value.data
-      busy_modal.value = true
+    const { data } = await RestApi.subject.get_avoid({ params: { Id: record.id } });
+    if (data.value?.status === "success") {
+      busy_data.value = data.value.data;
+      busy_modal.value = true;
     }
   } catch (err) {
-    message.error('Không thể tải dữ liệu')
+    message.error("Không thể tải dữ liệu");
   }
-}
+};
 
 const handleOk = async () => {
   try {
-    await formRef.value.validate()
-    confirmLoading.value = true
-    const payload = { ...formState }
-    let res
+    await formRef.value.validate();
+    confirmLoading.value = true;
+    const payload = { ...formState };
+    let res;
     if (isEdit.value) {
-      res = await RestApi.subject.update({ body: payload })
+      res = await RestApi.subject.update({ body: payload });
     } else {
-      delete payload.id
-      res = await RestApi.subject.create({ body: payload })
+      delete payload.id;
+      res = await RestApi.subject.create({ body: payload });
     }
-    if (res.data.value?.status === 'success') {
-      message.success(res.data.value?.message || 'Thành công')
-      await fetchData({ ...param.value })
-      visible.value = false
-      formRef.value.resetFields()
+    if (res.data.value?.status === "success") {
+      message.success(res.data.value?.message || "Thành công");
+      await fetchData({ ...param.value });
+      visible.value = false;
+      formRef.value.resetFields();
     } else {
-      throw new Error(res.error?.value?.data?.message || 'Lỗi không xác định')
+      throw new Error(res.error?.value?.data?.message || "Lỗi không xác định");
     }
   } catch (err) {
-    message.error(err.message || 'Lỗi khi lưu thông tin')
+    message.error(err.message || "Lỗi khi lưu thông tin");
   } finally {
-    confirmLoading.value = false
+    confirmLoading.value = false;
   }
-}
+};
 
 const handleCancel = () => {
-  formRef.value.resetFields()
-  visible.value = false
-}
+  formRef.value.resetFields();
+  visible.value = false;
+};
 
 const updateBusy = async () => {
   try {
-    confirmLoading.value = true
-    const { data, error } = await RestApi.subject.update_avoid({ body: busy_data.value })
-    if (data.value?.status === 'success') {
-      message.success(data.value.message || 'Cập nhật thành công')
-      return true
+    confirmLoading.value = true;
+    const { data, error } = await RestApi.subject.update_avoid({ body: busy_data.value });
+    if (data.value?.status === "success") {
+      message.success(data.value.message || "Cập nhật thành công");
+      return true;
     }
-    throw new Error(error.value?.data?.message || 'Cập nhật không thành công')
+    throw new Error(error.value?.data?.message || "Cập nhật không thành công");
   } catch (err) {
-    message.error(err.message || 'Đã xảy ra lỗi khi lưu thông tin')
-    return false
+    message.error(err.message || "Đã xảy ra lỗi khi lưu thông tin");
+    return false;
   } finally {
-    confirmLoading.value = false
+    confirmLoading.value = false;
   }
-}
+};
 
 const handleBusyOk = async () => {
   if (await updateBusy()) {
-    busy_modal.value = false
-    busy_manager_modal.value = false
+    busy_modal.value = false;
+    busy_manager_modal.value = false;
   }
-}
+};
 
 const saveBusy = async () => {
-  await updateBusy()
-}
+  await updateBusy();
+};
 
 const handleBusyCancel = () => {
-  busy_data.value = []
-  busy_modal.value = false
-}
+  busy_data.value = [];
+  busy_modal.value = false;
+};
 
-const deleteItem = async (id) => {
+const deleteItem = async id => {
   try {
-    const { data } = await RestApi.subject.delete({ params: { Id: id } })
-    if (data.value?.status === 'success') {
-      message.success(data.value?.message || 'Xóa thành công')
-      await fetchData({ ...param.value })
+    const { data } = await RestApi.subject.delete({ params: { Id: id } });
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Xóa thành công");
+      pagination.current = 1;
+      param.value.PageIndex = 1;
+      await fetchData({ ...param.value });
     } else {
-      message.error(data.value?.message || 'Không thể xóa')
+      message.error(data.value?.message || "Không thể xóa");
     }
   } catch (err) {
-    message.error('Lỗi khi xóa')
+    message.error("Lỗi khi xóa");
   }
-}
+};
 
 const resetForm = async () => {
-  if (formRef.value) formRef.value.resetFields()
-  param.value = { PageIndex: 1, PageSize: 10, search: '' }
-  pagination.current = 1
-  pagination.pageSize = 10
-  await fetchData({ ...param.value })
-}
+  if (formRef.value) formRef.value.resetFields();
+  param.value = { PageIndex: 1, PageSize: 10, search: "" };
+  pagination.current = 1;
+  pagination.pageSize = 10;
+  await fetchData({ ...param.value });
+};
 
-await fetchData({ ...param.value })
-const fixedLessonRef = ref()
-const statusDrawer = ref(false)
+await fetchData({ ...param.value });
+const fixedLessonRef = ref();
+const statusDrawer = ref(false);
 const openDrawer = () => {
   statusDrawer.value = true;
-}
+};
 const onCloseDrawer = () => {
-  fixedLessonRef.value?.reset()
-}
+  fixedLessonRef.value?.reset();
+};
 
-const subjectCombinationRef = ref()
-const SubjectCombinationDrawer = ref(false)
+const subjectCombinationRef = ref();
+const SubjectCombinationDrawer = ref(false);
 const onCloseSubjectCombinationDrawer = () => {
-  subjectCombinationRef.value?.reset()
-}
+  subjectCombinationRef.value?.reset();
+};
 </script>

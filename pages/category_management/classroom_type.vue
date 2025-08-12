@@ -252,7 +252,9 @@ const deleteItem = async id => {
     const { data } = await RestApi.classroom_type.delete({ params: { id: id } });
     if (data.value?.status === "success") {
       message.success("Xóa loại phòng học thành công");
-      fetchData();
+      pagination.current = 1;
+      param.value.PageIndex = 1;
+      await fetchData({ ...param.value });
     } else {
       message.error(data.value?.message || "Có lỗi xảy ra");
     }

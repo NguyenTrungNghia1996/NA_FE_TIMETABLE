@@ -209,6 +209,8 @@ const deleteItem = async (id) => {
     const { data } = await RestApi.school_period.delete({ params: { id } });
     if (data.value?.status === 'success') {
       message.success(data.value?.message || 'Đã xóa');
+      pagination.current = 1;
+      param.value.PageIndex = 1;
       await fetchData({ ...param.value });
     } else {
       message.error(data.value?.message || 'Không thể xóa');
