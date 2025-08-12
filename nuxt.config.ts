@@ -17,7 +17,16 @@ export default defineNuxtConfig({
   },
   antd: { extractStyle: true },
   css: ["~/assets/css/tailwind.css"],
-  modules: ["@nuxt/icon", "@nuxt/image", "@nuxtjs/tailwindcss", "@ant-design-vue/nuxt", "@pinia/nuxt", "pinia-plugin-persistedstate/nuxt", "@vueuse/nuxt"],
+  modules: [
+    "@nuxt/icon",
+    "@nuxt/image",
+    "@nuxtjs/tailwindcss",
+    "@ant-design-vue/nuxt",
+    "@pinia/nuxt",
+    "pinia-plugin-persistedstate/nuxt",
+    "@vueuse/nuxt",
+    "nuxt-clarity-analytics"
+  ],
   runtimeConfig: {
     encryptionKey: process.env.NUXT_ENCRYPTION_KEY || "default-strong-key-32-chars-123456",
     public: {
