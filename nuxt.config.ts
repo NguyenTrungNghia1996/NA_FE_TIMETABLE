@@ -24,7 +24,8 @@ export default defineNuxtConfig({
     "@ant-design-vue/nuxt",
     "@pinia/nuxt",
     "pinia-plugin-persistedstate/nuxt",
-    "@vueuse/nuxt"
+    "@vueuse/nuxt",
+    "nuxt-clarity-analytics"
   ],
   runtimeConfig: {
     encryptionKey: process.env.NUXT_ENCRYPTION_KEY || "default-strong-key-32-chars-123456",
