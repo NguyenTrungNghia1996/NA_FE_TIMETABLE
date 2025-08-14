@@ -1,14 +1,14 @@
 // /composables/useTimetable.js
 
 /**
- * Biến danh sách bản ghi flat thành cấu trúc dạng lưới có thể vẽ bảng.
+ * Biến danh sách bản ghi flat thành cấu trúc \"ds_Ca -> ds_Ngay -> ds_Tiet\".
  * @param {Array<Object>} records
  * @param {Object} opts
  * @param {number}   [opts.daysCount=7]            - số ngày hiển thị (1..7)
  * @param {number[]} [opts.shifts=[1,2]]           - danh sách ca
  * @param {number}   [opts.periodsPerShift=5]      - số tiết mỗi ca
  * @param {string[]} [opts.dayNames]               - nhãn ngày
- * @returns {{days:Array, unassigned:Array, index:Object}}
+ * @returns {{ds_Ca:Array, unassigned:Array, index:Object}}
  */
 export function transformTimetable(records = [], opts = {}) {
   const daysCount = opts.daysCount ?? 7;
@@ -41,46 +41,53 @@ export function transformTimetable(records = [], opts = {}) {
     index[keyOf(r.ngay, r.id_ca, r.tiet)] = r;
   }
 
-  const days = [];
-  for (let day = 1; day <= daysCount; day++) {
-    const caList = shifts.map((caId) => {
-      const periods = [];
+  const ds_Ca = [];
+  for (const caId of shifts) {
+    const ds_Ngay = [];
+    for (let day = 1; day <= daysCount; day++) {
+      const ds_Tiet = [];
       for (let p = 1; p <= periodsPerShift; p++) {
         const k = keyOf(day, caId, p);
         const cell = index[k];
-
         if (cell) {
-          periods.push(
-            cell.isRest
-              ? { tiet: p, type: "rest", isLock: !!cell.isLock, isRest: true, data: cell }
-              : { tiet: p, type: "lesson", isLock: !!cell.isLock, isRest: !!cell.isRest, data: cell }
-          );
+          ds_Tiet.push({ ...cell });
         } else {
-          periods.push({ tiet: p, type: "blank", isLock: false, isRest: false });
+          ds_Tiet.push({
+            id_chitiet: 0,
+            id_don_vi: 0,
+            id_tkb: 0,
+            id_mon: 0,
+            ten_mon: "",
+            id_giao_vien: 0,
+            ten_giao_vien: "",
+            id_phong: 0,
+            ten_phong: "",
+            tiet_thu_may: 0,
+            id_ca: caId,
+            ngay: day,
+            tiet: p,
+            isDrag: false,
+            isLock: false,
+            isRest: false,
+          });
         }
       }
-      return {
-        id_ca: caId,
-        label: caId === 1 ? "Ca sáng" : "Ca chiều",
-        periods,
-      };
-    });
-
-    days.push({
-      day,
-      label: dayNames[day - 1] ?? `Ngày ${day}`,
-      ca: caList,
-    });
+      ds_Ngay.push({
+        id: day,
+        ten: dayNames[day - 1] ?? `Ngày ${day}`,
+        ds_Tiet,
+      });
+    }
+    ds_Ca.push({ id: caId, ds_Ngay });
   }
 
-  return { days, unassigned, index };
+  return { ds_Ca, unassigned, index };
 }
 
 /**
- * Chuyển ngược từ lưới (days -> ca -> periods) về mảng bản ghi flat.
- * Dùng khi cần gửi kết quả sau kéo-thả về backend.
+ * Chuyển ngược từ cấu trúc ds_Ca -> ds_Ngay -> ds_Tiet về mảng bản ghi flat.
  *
- * @param {Object} grid - đối tượng từ transformTimetable: { days, unassigned? }
+ * @param {Object} grid - đối tượng từ transformTimetable: { ds_Ca, unassigned? }
  * @param {Object} [options]
  * @param {boolean} [options.includeRests=true]  - có đưa tiết nghỉ (isRest) vào danh sách không
  * @param {boolean} [options.includeBlanks=false]- có đưa ô trống vào danh sách không
@@ -109,34 +116,32 @@ export function toFlatRecordsFromGrid(grid, options = {}) {
 
   const out = [];
 
-  for (const d of grid?.days || []) {
-    const ngay = d.day;
-    for (const c of d.ca || []) {
-      const id_ca = c.id_ca;
-      for (const p of c.periods || []) {
-        const tiet = p.tiet;
+  for (const ca of grid?.ds_Ca || []) {
+    const id_ca = ca.id;
+    for (const ngayObj of ca.ds_Ngay || []) {
+      const ngay = ngayObj.id;
+      for (const tietObj of ngayObj.ds_Tiet || []) {
+        const rec = { ...baseDefaults, ...tietObj, id_ca, ngay, tiet: tietObj.tiet };
 
-        // lesson
-        if (p.type === "lesson" && p.data) {
-          out.push({ ...p.data, ngay, id_ca, tiet });
+        const isBlank =
+          !rec.isRest &&
+          !rec.id_chitiet &&
+          !rec.id_mon &&
+          !rec.ten_mon;
+
+        if (rec.isRest) {
+          if (!includeRests) continue;
+          out.push({ ...rec, isRest: true });
           continue;
         }
 
-        // rest
-        if (p.type === "rest") {
-          if (!includeRests) continue;
-          const rec = p.data
-            ? { ...p.data, ngay, id_ca, tiet, isRest: true }
-            : { ...baseDefaults, ngay, id_ca, tiet, isRest: true };
+        if (isBlank) {
+          if (!includeBlanks) continue;
           out.push(rec);
           continue;
         }
 
-        // blank
-        if (p.type === "blank") {
-          if (!includeBlanks) continue;
-          out.push({ ...baseDefaults, ngay, id_ca, tiet });
-        }
+        out.push(rec);
       }
     }
   }
@@ -150,12 +155,24 @@ export function toFlatRecordsFromGrid(grid, options = {}) {
 }
 
 /**
+ * Hàm tiện ích chuyển đổi nhanh từ ds_Ca (grid) về mảng bản ghi flat.
+ *
+ * @param {Array} ds_Ca - cấu trúc lưới từ transformTimetable
+ * @param {Array} [unassigned=[]] - các bản ghi chưa gán (nếu có)
+ * @param {Object} [options] - tham số giống toFlatRecordsFromGrid
+ * @returns {Array<Object>} danh sách bản ghi flat
+ */
+export function gridToFlat(ds_Ca, unassigned = [], options = {}) {
+  return toFlatRecordsFromGrid({ ds_Ca, unassigned }, options);
+}
+
+/**
  * Composable nạp & chuyển đổi thời khóa biểu (SSR-friendly).
  * @param {string|Array|Ref|ComputedRef} source - URL JSON hoặc records/phản ứng
  * @param {Object} opts - tham số cho transformTimetable
  */
 export function useTimetable(source, opts = {}) {
-  const days = ref([]);
+  const ds_Ca = ref([]);
   const unassigned = ref([]);
   const index = ref({});
   const pending = ref(false);
@@ -186,7 +203,7 @@ export function useTimetable(source, opts = {}) {
       }
 
       const res = transformTimetable(records, opts);
-      days.value = res.days;
+      ds_Ca.value = res.ds_Ca;
       unassigned.value = res.unassigned;
       index.value = res.index;
     } catch (e) {
@@ -196,5 +213,5 @@ export function useTimetable(source, opts = {}) {
     }
   }
 
-  return { days, unassigned, index, pending, error, refresh };
+  return { ds_Ca, unassigned, index, pending, error, refresh };
 }

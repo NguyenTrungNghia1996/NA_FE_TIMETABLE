@@ -5,7 +5,7 @@ import { useMenu } from "~~/composables/useMenu";
 export default defineNuxtRouteMiddleware(async to => {
   // Bỏ qua middleware nếu đang ở trang login
   // if (to.path === "/login" || to.path.startsWith("/test/")) return;
-  if (to.path === "/login") return;
+  if (to.path === "/login" || to.path === "/timetable") return;
   const userStore = useUserStore();
   const settingStore = useSettingStore();
   const { loadMenu } = useMenu();
