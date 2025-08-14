@@ -253,6 +253,15 @@ async function onCellClick(caId, dayId, pIdx) {
     const { data, error } = await RestApi.timetable.find_class_position({ body });
     if (data.value?.status === "success") {
       console.log("Find position response", data.value);
+      const { timetable, ds_chua_xep } = data.value.data || {};
+      if (Array.isArray(timetable)) {
+        props.rawTimetable.length = 0;
+        props.rawTimetable.push(...timetable);
+      }
+      if (Array.isArray(ds_chua_xep)) {
+        props.rawUnscheduled.length = 0;
+        props.rawUnscheduled.push(...ds_chua_xep);
+      }
     } else {
       console.error("Find position error", error.value || data.value);
     }
