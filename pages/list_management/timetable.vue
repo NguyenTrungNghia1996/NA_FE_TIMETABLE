@@ -23,6 +23,11 @@
                   <template #icon><CalendarOutlined /></template>
                 </a-button>
               </a-tooltip>
+              <a-tooltip title="Tinh chỉnh">
+                <a-button type="link" size="small" @click="openAdjustDrawer(record)">
+                  <template #icon><SettingOutlined /></template>
+                </a-button>
+              </a-tooltip>
               <a-tooltip title="Sửa">
                 <a-button type="link" size="small" @click="editItem(record)">
                   <template #icon><EditOutlined /></template>
@@ -61,6 +66,14 @@
     <a-drawer v-model:open="drawerInfoOpen" title="Xếp thời khóa biểu" :footer="null" height="100vh" placement="bottom" @close="closeInfoDrawer">
       <ClientOnly>
         <TimetableInfo ref="infoRef" />
+      </ClientOnly>
+    </a-drawer>
+    <a-drawer v-model:open="drawerAdjustOpen" title="Tinh chỉnh thời khóa biểu" :footer="null" height="100vh" placement="bottom">
+      <ClientOnly>
+        <div class="mb-4">
+          <SelectClass v-model="adjustClassId" />
+        </div>
+        <TimetableGrid :rawTimetable="adjustRawTimetable" :rawUnscheduled="adjustRawUnscheduled" />
       </ClientOnly>
     </a-drawer>
   </div>
@@ -229,6 +242,11 @@ await fetchData({ ...param.value });
 
 const drawerInfoOpen = ref(false);
 const infoRef = ref(null);
+const drawerAdjustOpen = ref(false);
+const adjustRawTimetable = ref([]);
+const adjustRawUnscheduled = ref([]);
+const adjustClassId = ref(null);
+const adjustTimetableId = ref(null);
 
 watch(drawerInfoOpen, val => {
   if (val) {
@@ -240,8 +258,44 @@ const closeInfoDrawer = () => {
   infoRef.value?.reset?.();
 };
 const openInfoDrawer = (reg) => {
-  
+
   drawerInfoOpen.value = true
 }
+const fetchAdjustData = async () => {
+  if (!adjustClassId.value || !adjustTimetableId.value) return;
+  try {
+    const { data } = await RestApi.request.get('/api/tkb/lop', {
+      params: { idLop: adjustClassId.value, idtkb: adjustTimetableId.value },
+    });
+    if (data.value?.status === 'success') {
+      const raw = data.value.data;
+      adjustRawTimetable.value = raw.timetable;
+      adjustRawUnscheduled.value = raw.ds_chua_xep.map(
+        ({ id_mon, ten_mon, id_giao_vien, ten_giao_vien, id_phong, ten_phong, tiet_thu_may }) => ({
+          id_mon,
+          ten_mon,
+          id_giao_vien,
+          ten_giao_vien,
+          id_phong,
+          ten_phong,
+          tiet_thu_may,
+        }),
+      );
+    } else {
+      adjustRawTimetable.value = [];
+      adjustRawUnscheduled.value = [];
+    }
+  } catch (error) {
+    message.error('Lỗi khi tải thời khóa biểu');
+  }
+};
+
+watch([adjustClassId, adjustTimetableId], fetchAdjustData);
+
+const openAdjustDrawer = record => {
+  adjustTimetableId.value = record.id;
+  drawerAdjustOpen.value = true;
+  fetchAdjustData();
+};
 </script>
 
