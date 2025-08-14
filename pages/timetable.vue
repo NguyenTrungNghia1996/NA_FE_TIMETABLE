@@ -6,10 +6,10 @@
     <h2 class="text-xl font-semibold mb-2">Thời khóa biểu 11A1</h2>
     <details class="border rounded">
       <summary class="cursor-pointer px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded-t">Xem dữ liệu JSON</summary>
-      <div class="max-h-64 overflow-auto p-3 text-xs grid gap-4 md:grid-cols-3">
+      <div class="max-h-64 overflow-auto p-3 text-xs grid gap-4 md:grid-cols-4">
         <div>
           <h4 class="font-semibold mb-1">Dữ liệu đầu vào</h4>
-          <pre>{{ rawInput.length }} /{{ JSON.stringify(rawInput, null, 2) }}</pre>
+          <pre>{{ rawTimetable.length }} /{{ JSON.stringify(rawTimetable, null, 2) }}</pre>
         </div>
         <div>
           <h4 class="font-semibold mb-1">Sau chuyển đổi</h4>
@@ -18,6 +18,10 @@
         <div>
           <h4 class="font-semibold mb-1">Chuyển ngược</h4>
           <pre>{{ reverted.length }} /{{ JSON.stringify(reverted, null, 2) }}</pre>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-1">Tiết chưa xếp</h4>
+          <pre>{{ JSON.stringify(rawUnscheduled, null, 2) }}</pre>
         </div>
       </div>
     </details>
