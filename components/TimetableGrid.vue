@@ -103,7 +103,24 @@ function onDrop(caId, dayId, pIdx) {
   if (!dragSource.value) return
   const src = getCell(dragSource.value.caId, dragSource.value.dayId, dragSource.value.pIdx)
   const dst = getCell(caId, dayId, pIdx)
-  if (!src || !dst || src.isLock || dst.isLock) return
+  if (!src || !dst) return
+
+  console.log('Drag drop', {
+    source: {
+      ca: dragSource.value.caId,
+      ngay: dragSource.value.dayId,
+      tiet: dragSource.value.pIdx + 1,
+      data: { ...src },
+    },
+    destination: {
+      ca: caId,
+      ngay: dayId,
+      tiet: pIdx + 1,
+      data: { ...dst },
+    },
+  })
+
+  if (src.isLock || dst.isLock) return
 
   const keys = Object.keys(src).filter(k => !['id_ca', 'ngay', 'tiet'].includes(k))
   const temp = {}
