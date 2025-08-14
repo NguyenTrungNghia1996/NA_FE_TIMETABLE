@@ -17,7 +17,10 @@
         </div>
       </div>
     </details>
-    <TimetableGrid :rawTimetable="rawTimetable" :rawUnscheduled="rawUnscheduled" />
+    <TimetableGrid
+      v-model:rawTimetable="rawTimetable"
+      v-model:rawUnscheduled="rawUnscheduled"
+    />
   </div>
 </template>
 <script setup>

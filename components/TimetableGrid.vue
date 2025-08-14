@@ -26,7 +26,7 @@
                 @dragstart="onDragStart(ca.id, ngay.id, pIdx)"
                 @dragover="onDragOver($event, ca.id, ngay.id, pIdx)"
                 @drop="onDrop(ca.id, ngay.id, pIdx)"
-                @click="emit('cell-click', { ca: ca.id, ngay: ngay.id, tiet: pIdx + 1, record: ngay.ds_Tiet[pIdx] })"
+                @click="onCellClick(ca.id, ngay.id, pIdx)"
                 @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)"
               >
                 <template v-if="ngay.ds_Tiet[pIdx].isRest">
@@ -116,6 +116,7 @@
 
 <script setup>
 import { transformTimetable, gridToFlat } from "@/composables/useTimetable";
+const { RestApi } = useApi();
 
 const props = defineProps({
   rawTimetable: {
@@ -129,7 +130,7 @@ const props = defineProps({
 });
 
 const dsCa = ref([]);
-const emit = defineEmits(["cell-click"]);
+const emit = defineEmits(["cell-click", "update:rawTimetable", "update:rawUnscheduled"]);
 const showAddModal = ref(false);
 const selectedIdx = ref(0);
 const targetCell = ref(null);
@@ -156,10 +157,9 @@ watch(
   { immediate: true, deep: true }
 );
 
-function updateRawTimetable() {
-  const flat = gridToFlat(dsCa.value, props.rawUnscheduled);
-  props.rawTimetable.length = 0;
-  props.rawTimetable.push(...flat);
+function updateRawTimetable(unscheduled = props.rawUnscheduled) {
+  const flat = gridToFlat(dsCa.value, unscheduled);
+  emit("update:rawTimetable", flat);
 }
 
 const dragSource = ref(null);
@@ -227,6 +227,46 @@ function openContextMenu(event, caId, dayId, pIdx) {
   contextMenu.cell = cell;
 }
 
+async function onCellClick(caId, dayId, pIdx) {
+  const cell = getCell(caId, dayId, pIdx);
+  console.log("Cell clicked", {
+    ca: caId,
+    ngay: dayId,
+    tiet: pIdx + 1,
+    data: { ...cell },
+  });
+  emit("cell-click", { ca: caId, ngay: dayId, tiet: pIdx + 1, record: cell });
+
+  try {
+    const body = {
+      id_lop: 2,
+      timetable: [
+        {
+          ...cell,
+          id_ca: caId,
+          ngay: dayId,
+          tiet: pIdx + 1,
+        },
+      ],
+    };
+    const { data, error } = await RestApi.timetable.find_class_position({ body });
+    if (data.value?.status === "success") {
+      console.log("Find position response", data.value);
+      const { timetable, ds_chua_xep } = data.value.data || {};
+      if (Array.isArray(timetable)) {
+        emit("update:rawTimetable", timetable);
+      }
+      if (Array.isArray(ds_chua_xep)) {
+        emit("update:rawUnscheduled", ds_chua_xep);
+      }
+    } else {
+      console.error("Find position error", error.value || data.value);
+    }
+  } catch (err) {
+    console.error("Find position error", err);
+  }
+}
+
 function setRest(val) {
   const cell = getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell) return;
@@ -288,7 +328,11 @@ function clearCell() {
     isRest: false,
     isLock: false,
   });
-  if (hasData) props.rawUnscheduled.push({ ...removed });
+  let updatedUnscheduled = props.rawUnscheduled;
+  if (hasData) {
+    updatedUnscheduled = [...props.rawUnscheduled, { ...removed }];
+    emit("update:rawUnscheduled", updatedUnscheduled);
+  }
   console.log("Cleared Cell", {
     ca: contextMenu.ca,
     ngay: contextMenu.ngay,
@@ -296,7 +340,7 @@ function clearCell() {
     data: { ...cell },
   });
   contextMenu.show = false;
-  updateRawTimetable();
+  updateRawTimetable(updatedUnscheduled);
 }
 
 function addLesson() {
@@ -310,8 +354,10 @@ function addLesson() {
 
 function confirmAdd() {
   if (selectedIdx.value == null || !targetCell.value) return;
-  const lesson = props.rawUnscheduled.splice(selectedIdx.value, 1)[0];
+  const unscheduled = [...props.rawUnscheduled];
+  const lesson = unscheduled.splice(selectedIdx.value, 1)[0];
   if (!lesson) return;
+  emit("update:rawUnscheduled", unscheduled);
   const cell = targetCell.value;
   cell.id_mon = lesson.id_mon;
   cell.ten_mon = lesson.ten_mon;
@@ -323,6 +369,6 @@ function confirmAdd() {
   showAddModal.value = false;
   targetCell.value = null;
   console.log("Lesson added", { cell: { ...cell }, lesson });
-  updateRawTimetable();
+  updateRawTimetable(unscheduled);
 }
 </script>
