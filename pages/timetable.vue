@@ -27,23 +27,20 @@
     </details>
     <TimetableGrid :dsCa="dsCa" @cell-clear="onCellClear" @cell-add="onCellAdd" />
 
-    <div
-      v-if="showAddModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    <a-modal
+      v-model:open="showAddModal"
+      title="Chọn tiết học"
+      ok-text="Thêm"
+      cancel-text="Hủy"
+      @ok="confirmAdd"
+      @cancel="showAddModal = false"
     >
-      <div class="bg-white p-4 rounded w-72">
-        <h3 class="font-semibold mb-2">Chọn tiết học</h3>
-        <select v-model="selectedIdx" class="border w-full mb-4">
-          <option v-for="(lesson, idx) in rawUnscheduled" :key="idx" :value="idx">
-            {{ lesson.ten_mon }} - {{ lesson.ten_giao_vien }}
-          </option>
-        </select>
-        <div class="flex justify-end gap-2">
-          <button class="px-3 py-1 border rounded" @click="showAddModal = false">Hủy</button>
-          <button class="px-3 py-1 bg-blue-500 text-white rounded" @click="confirmAdd">Thêm</button>
-        </div>
-      </div>
-    </div>
+      <a-select v-model:value="selectedIdx" class="w-full mb-4">
+        <a-select-option v-for="(lesson, idx) in rawUnscheduled" :key="idx" :value="idx">
+          {{ lesson.ten_mon }} - {{ lesson.ten_giao_vien }}
+        </a-select-option>
+      </a-select>
+    </a-modal>
   </div>
 </template>
 <script setup>
