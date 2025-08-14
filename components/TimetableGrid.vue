@@ -35,10 +35,41 @@
     <!-- Context Menu -->
     <div v-if="contextMenu.show" class="absolute bg-white border shadow rounded text-sm z-50" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
       <ul class="min-w-[150px] py-1 select-none">
-        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" v-if="!contextMenu.cell?.isRest" @click="setRest(true)">Đặt tiết nghỉ</li>
-        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" v-else @click="setRest(false)">Xóa tiết nghỉ</li>
-        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" v-if="!contextMenu.cell?.isLock" @click="setLock(true)">Đặt tiết khóa</li>
-        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" v-else @click="setLock(false)">Xóa tiết khóa</li>
+        <li
+          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+          v-if="!contextMenu.cell?.ten_mon && !contextMenu.cell?.isRest"
+          @click="addLesson"
+        >
+          Thêm tiết học
+        </li>
+        <li
+          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+          v-if="!contextMenu.cell?.isRest"
+          @click="setRest(true)"
+        >
+          Đặt tiết nghỉ
+        </li>
+        <li
+          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+          v-else
+          @click="setRest(false)"
+        >
+          Xóa tiết nghỉ
+        </li>
+        <li
+          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+          v-if="!contextMenu.cell?.isLock"
+          @click="setLock(true)"
+        >
+          Đặt tiết khóa
+        </li>
+        <li
+          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+          v-else
+          @click="setLock(false)"
+        >
+          Xóa tiết khóa
+        </li>
         <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click="clearCell">Xóa tiết</li>
       </ul>
     </div>
@@ -46,7 +77,7 @@
 </template>
 
 <script setup>
-const emit = defineEmits(["cell-click"]);
+const emit = defineEmits(["cell-click", "cell-clear", "cell-add"]);
 
 const props = defineProps({
   dsCa: {
@@ -155,6 +186,16 @@ function setLock(val) {
 function clearCell() {
   const cell = getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell) return;
+  const removed = {
+    id_mon: cell.id_mon,
+    ten_mon: cell.ten_mon,
+    id_giao_vien: cell.id_giao_vien,
+    ten_giao_vien: cell.ten_giao_vien,
+    id_phong: cell.id_phong,
+    ten_phong: cell.ten_phong,
+    tiet_thu_may: cell.tiet_thu_may,
+  };
+  const hasData = cell.id_chitiet || cell.id_mon || cell.ten_mon;
   Object.assign(cell, {
     id_chitiet: 0,
     id_don_vi: 0,
@@ -169,6 +210,7 @@ function clearCell() {
     isRest: false,
     isLock: false,
   });
+  if (hasData) emit("cell-clear", removed);
   console.log("Cleared Cell", {
     ca: contextMenu.ca,
     ngay: contextMenu.ngay,
@@ -177,4 +219,17 @@ function clearCell() {
   });
   contextMenu.show = false;
 }
+
+  function addLesson() {
+    const cell = getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
+    if (!cell || cell.ten_mon) return;
+    emit("cell-add", { record: cell });
+    console.log("Add lesson request", {
+      ca: contextMenu.ca,
+      ngay: contextMenu.ngay,
+      tiet: contextMenu.pIdx + 1,
+      data: { ...cell },
+    });
+    contextMenu.show = false;
+  }
 </script>

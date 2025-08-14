@@ -53,7 +53,7 @@
         "id_ca": 1,
         "ngay": 1,
         "tiet": 3,
-        "isDrag": false,
+        "isDrag": true,
         "isLock": false,
         "isRest": false
       },
