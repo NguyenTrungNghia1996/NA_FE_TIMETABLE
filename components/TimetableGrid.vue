@@ -116,6 +116,7 @@
 
 <script setup>
 import { transformTimetable, gridToFlat } from "@/composables/useTimetable";
+const { RestApi } = useApi();
 
 const props = defineProps({
   rawTimetable: {
@@ -249,11 +250,12 @@ async function onCellClick(caId, dayId, pIdx) {
         },
       ],
     };
-    const res = await $fetch("/api/tkb/timvitri/lop", {
-      method: "POST",
-      body,
-    });
-    console.log("Find position response", res);
+    const { data, error } = await RestApi.timetable.find_class_position({ body });
+    if (data.value?.status === "success") {
+      console.log("Find position response", data.value);
+    } else {
+      console.error("Find position error", error.value || data.value);
+    }
   } catch (err) {
     console.error("Find position error", err);
   }
