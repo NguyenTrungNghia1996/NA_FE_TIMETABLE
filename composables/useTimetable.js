@@ -91,14 +91,14 @@ export function transformTimetable(records = [], opts = {}) {
  * @param {Object} [options]
  * @param {boolean} [options.includeRests=true]  - có đưa tiết nghỉ (isRest) vào danh sách không
  * @param {boolean} [options.includeBlanks=false]- có đưa ô trống vào danh sách không
- * @param {Array<Object>} [options.mergeUnassigned] - mảng unassigned để cộng dồn
+ * @param {Array<Object>} [options.mergeUnassigned] - mảng unassigned để cộng dồn (mặc định dùng grid.unassigned)
  * @param {Object} [options.baseDefaults] - default cho ô trống/thiếu data
  * @returns {Array<Object>}
  */
 export function toFlatRecordsFromGrid(grid, options = {}) {
   const includeRests = options.includeRests ?? true;
   const includeBlanks = options.includeBlanks ?? false;
-  const mergeUnassigned = options.mergeUnassigned ?? [];
+  const mergeUnassigned = options.mergeUnassigned ?? grid?.unassigned ?? [];
   const baseDefaults = {
     id_don_vi: 1,
     id_tkb: 2,
@@ -146,8 +146,9 @@ export function toFlatRecordsFromGrid(grid, options = {}) {
     }
   }
 
-  // cộng thêm các ô unassigned nếu muốn
+  // cộng thêm các ô unassigned nếu có
   if (Array.isArray(mergeUnassigned) && mergeUnassigned.length) {
+    console.log("Unassigned periods:", mergeUnassigned);
     out.push(...mergeUnassigned);
   }
 
