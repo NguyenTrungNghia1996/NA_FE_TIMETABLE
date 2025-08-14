@@ -17,9 +17,9 @@
         "id_ca": 1,
         "ngay": 1,
         "tiet": 1,
-        "isDrag": false,
+        "isDrag": true,
         "isLock": false,
-        "isRest": true
+        "isRest": false
       },
       {
         "id_chitiet": 1,
@@ -28,14 +28,14 @@
         "id_mon": 2,
         "ten_mon": "Tiếng Anh",
         "id_giao_vien": 8,
-        "ten_giao_vien": "",
+        "ten_giao_vien": "tên giáo viên",
         "id_phong": 2,
         "ten_phong": "Không cần phòng",
         "tiet_thu_may": 1,
         "id_ca": 1,
         "ngay": 1,
         "tiet": 2,
-        "isDrag": false,
+        "isDrag": true,
         "isLock": false,
         "isRest": false
       },
