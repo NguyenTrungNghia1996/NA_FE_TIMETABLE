@@ -7,27 +7,26 @@
     <details class="border rounded">
       <summary class="cursor-pointer px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded-t">Xem dữ liệu JSON</summary>
       <div class="max-h-64 overflow-auto p-3 text-xs">
-        <pre>{{ JSON.stringify(test, null, 2) }}</pre>
+        <pre>{{ JSON.stringify(dsCa, null, 2) }}</pre>
       </div>
     </details>
-    <TimetableView :days="test" @cell-click="onCellClick" />
+    <div v-for="block in dsCa" :key="block.id" class="mb-4">
+      <Timetable :block="block" />
+    </div>
   </div>
 </template>
 <script setup>
-import { transformTimetable, toFlatRecordsFromGrid } from "@/composables/useTimetable";
+import { transformTimetable } from "@/composables/useTimetable";
 const raw = ref();
 raw.value = await $fetch("/data.json");
-const test = ref();
-function onCellClick(payload) {
-  console.log("clicked: ", payload);
-}
+const dsCa = ref([]);
 onMounted(() => {
-  const { days, unassigned, index } = transformTimetable(raw.value.data.timetable, {
+  const { ds_Ca } = transformTimetable(raw.value.data.timetable, {
     daysCount: 7,
     shifts: [1, 2],
     periodsPerShift: 5,
     dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
   });
-  test.value = days;
+  dsCa.value = ds_Ca;
 });
 </script>
