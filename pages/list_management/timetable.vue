@@ -70,6 +70,9 @@
     </a-drawer>
     <a-drawer v-model:open="drawerAdjustOpen" title="Tinh chỉnh thời khóa biểu" :footer="null" height="100vh" placement="bottom">
       <ClientOnly>
+        <div class="mb-4">
+          <SelectGradeLevel v-model="adjustGradeId" />
+        </div>
         <TimetableGrid :rawTimetable="adjustRawTimetable" :rawUnscheduled="adjustRawUnscheduled" />
       </ClientOnly>
     </a-drawer>
@@ -242,6 +245,8 @@ const infoRef = ref(null);
 const drawerAdjustOpen = ref(false);
 const adjustRawTimetable = ref([]);
 const adjustRawUnscheduled = ref([]);
+const adjustGradeId = ref(null);
+const adjustTimetableId = ref(null);
 
 watch(drawerInfoOpen, val => {
   if (val) {
@@ -256,21 +261,41 @@ const openInfoDrawer = (reg) => {
 
   drawerInfoOpen.value = true
 }
-const openAdjustDrawer = async record => {
-  const raw = await $fetch("/data.json");
-  adjustRawTimetable.value = raw.data.timetable;
-  adjustRawUnscheduled.value = raw.data.ds_chua_xep.map(
-    ({ id_mon, ten_mon, id_giao_vien, ten_giao_vien, id_phong, ten_phong, tiet_thu_may }) => ({
-      id_mon,
-      ten_mon,
-      id_giao_vien,
-      ten_giao_vien,
-      id_phong,
-      ten_phong,
-      tiet_thu_may,
-    })
-  );
+const fetchAdjustData = async () => {
+  if (!adjustGradeId.value || !adjustTimetableId.value) return;
+  try {
+    const { data } = await RestApi.request.get('/api/tkb/lop', {
+      params: { idLop: adjustGradeId.value, idtkb: adjustTimetableId.value },
+    });
+    if (data.value?.status === 'success') {
+      const raw = data.value.data;
+      adjustRawTimetable.value = raw.timetable;
+      adjustRawUnscheduled.value = raw.ds_chua_xep.map(
+        ({ id_mon, ten_mon, id_giao_vien, ten_giao_vien, id_phong, ten_phong, tiet_thu_may }) => ({
+          id_mon,
+          ten_mon,
+          id_giao_vien,
+          ten_giao_vien,
+          id_phong,
+          ten_phong,
+          tiet_thu_may,
+        }),
+      );
+    } else {
+      adjustRawTimetable.value = [];
+      adjustRawUnscheduled.value = [];
+    }
+  } catch (error) {
+    message.error('Lỗi khi tải thời khóa biểu');
+  }
+};
+
+watch([adjustGradeId, adjustTimetableId], fetchAdjustData);
+
+const openAdjustDrawer = record => {
+  adjustTimetableId.value = record.id;
   drawerAdjustOpen.value = true;
+  fetchAdjustData();
 };
 </script>
 
