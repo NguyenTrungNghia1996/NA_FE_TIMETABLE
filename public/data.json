@@ -10,7 +10,7 @@
         "id_mon": 0,
         "ten_mon": "",
         "id_giao_vien": 0,
-        "ten_giao_vien": "",
+        "ten_giao_vien": "tên giáo viên",
         "id_phong": 0,
         "ten_phong": "",
         "tiet_thu_may": 0,

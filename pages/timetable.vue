@@ -44,6 +44,6 @@ onMounted(async () => {
 });
 
 function onCellClick(payload) {
-  console.log("Cell clicked", payload);
+  console.log("Cell clicked", payload.record);
 }
 </script>
