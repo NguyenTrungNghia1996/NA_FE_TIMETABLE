@@ -155,6 +155,18 @@ export function toFlatRecordsFromGrid(grid, options = {}) {
 }
 
 /**
+ * Hàm tiện ích chuyển đổi nhanh từ ds_Ca (grid) về mảng bản ghi flat.
+ *
+ * @param {Array} ds_Ca - cấu trúc lưới từ transformTimetable
+ * @param {Array} [unassigned=[]] - các bản ghi chưa gán (nếu có)
+ * @param {Object} [options] - tham số giống toFlatRecordsFromGrid
+ * @returns {Array<Object>} danh sách bản ghi flat
+ */
+export function gridToFlat(ds_Ca, unassigned = [], options = {}) {
+  return toFlatRecordsFromGrid({ ds_Ca, unassigned }, options);
+}
+
+/**
  * Composable nạp & chuyển đổi thời khóa biểu (SSR-friendly).
  * @param {string|Array|Ref|ComputedRef} source - URL JSON hoặc records/phản ứng
  * @param {Object} opts - tham số cho transformTimetable

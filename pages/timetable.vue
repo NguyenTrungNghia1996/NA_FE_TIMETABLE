@@ -10,9 +10,7 @@
         <pre>{{ JSON.stringify(dsCa, null, 2) }}</pre>
       </div>
     </details>
-    <div v-for="block in dsCa" :key="block.id" class="mb-4">
-      <Timetable :block="block" />
-    </div>
+    <TimetableGrid :dsCa="dsCa" />
   </div>
 </template>
 <script setup>
