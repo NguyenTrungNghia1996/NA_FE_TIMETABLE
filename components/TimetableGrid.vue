@@ -130,7 +130,7 @@ const props = defineProps({
 });
 
 const dsCa = ref([]);
-const emit = defineEmits(["cell-click"]);
+const emit = defineEmits(["cell-click", "update:rawTimetable", "update:rawUnscheduled"]);
 const showAddModal = ref(false);
 const selectedIdx = ref(0);
 const targetCell = ref(null);
@@ -157,10 +157,9 @@ watch(
   { immediate: true, deep: true }
 );
 
-function updateRawTimetable() {
-  const flat = gridToFlat(dsCa.value, props.rawUnscheduled);
-  props.rawTimetable.length = 0;
-  props.rawTimetable.push(...flat);
+function updateRawTimetable(unscheduled = props.rawUnscheduled) {
+  const flat = gridToFlat(dsCa.value, unscheduled);
+  emit("update:rawTimetable", flat);
 }
 
 const dragSource = ref(null);
@@ -255,12 +254,10 @@ async function onCellClick(caId, dayId, pIdx) {
       console.log("Find position response", data.value);
       const { timetable, ds_chua_xep } = data.value.data || {};
       if (Array.isArray(timetable)) {
-        props.rawTimetable.length = 0;
-        props.rawTimetable.push(...timetable);
+        emit("update:rawTimetable", timetable);
       }
       if (Array.isArray(ds_chua_xep)) {
-        props.rawUnscheduled.length = 0;
-        props.rawUnscheduled.push(...ds_chua_xep);
+        emit("update:rawUnscheduled", ds_chua_xep);
       }
     } else {
       console.error("Find position error", error.value || data.value);
@@ -331,7 +328,11 @@ function clearCell() {
     isRest: false,
     isLock: false,
   });
-  if (hasData) props.rawUnscheduled.push({ ...removed });
+  let updatedUnscheduled = props.rawUnscheduled;
+  if (hasData) {
+    updatedUnscheduled = [...props.rawUnscheduled, { ...removed }];
+    emit("update:rawUnscheduled", updatedUnscheduled);
+  }
   console.log("Cleared Cell", {
     ca: contextMenu.ca,
     ngay: contextMenu.ngay,
@@ -339,7 +340,7 @@ function clearCell() {
     data: { ...cell },
   });
   contextMenu.show = false;
-  updateRawTimetable();
+  updateRawTimetable(updatedUnscheduled);
 }
 
 function addLesson() {
@@ -353,8 +354,10 @@ function addLesson() {
 
 function confirmAdd() {
   if (selectedIdx.value == null || !targetCell.value) return;
-  const lesson = props.rawUnscheduled.splice(selectedIdx.value, 1)[0];
+  const unscheduled = [...props.rawUnscheduled];
+  const lesson = unscheduled.splice(selectedIdx.value, 1)[0];
   if (!lesson) return;
+  emit("update:rawUnscheduled", unscheduled);
   const cell = targetCell.value;
   cell.id_mon = lesson.id_mon;
   cell.ten_mon = lesson.ten_mon;
@@ -366,6 +369,6 @@ function confirmAdd() {
   showAddModal.value = false;
   targetCell.value = null;
   console.log("Lesson added", { cell: { ...cell }, lesson });
-  updateRawTimetable();
+  updateRawTimetable(unscheduled);
 }
 </script>

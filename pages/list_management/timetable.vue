@@ -73,7 +73,10 @@
         <div class="mb-4">
           <SelectClass v-model="adjustClassId" />
         </div>
-        <TimetableGrid :rawTimetable="adjustRawTimetable" :rawUnscheduled="adjustRawUnscheduled" />
+        <TimetableGrid
+          v-model:rawTimetable="adjustRawTimetable"
+          v-model:rawUnscheduled="adjustRawUnscheduled"
+        />
       </ClientOnly>
     </a-drawer>
   </div>
