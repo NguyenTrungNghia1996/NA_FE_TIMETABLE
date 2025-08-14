@@ -165,6 +165,12 @@ function setRest(val) {
     cell.id_mon = 0
     cell.id_giao_vien = 0
   }
+  console.log(val ? 'Set rest period' : 'Cleared rest period', {
+    ca: contextMenu.ca,
+    ngay: contextMenu.ngay,
+    tiet: contextMenu.pIdx + 1,
+    data: { ...cell },
+  })
   contextMenu.show = false
 }
 
@@ -172,6 +178,12 @@ function setLock(val) {
   const cell = getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx)
   if (!cell) return
   cell.isLock = val
+  console.log(val ? 'Set locked period' : 'Cleared locked period', {
+    ca: contextMenu.ca,
+    ngay: contextMenu.ngay,
+    tiet: contextMenu.pIdx + 1,
+    data: { ...cell },
+  })
   contextMenu.show = false
 }
 
