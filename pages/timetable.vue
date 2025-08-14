@@ -96,9 +96,17 @@ function onCellAdd({ record }) {
 }
 
 function confirmAdd() {
-  if (selectedIdx.value == null) return;
+  if (selectedIdx.value == null || !targetCell.value) return;
   const lesson = rawUnscheduled.value.splice(selectedIdx.value, 1)[0];
-  Object.assign(targetCell.value, lesson);
+  if (!lesson) return;
+  const cell = targetCell.value;
+  cell.id_mon = lesson.id_mon;
+  cell.ten_mon = lesson.ten_mon;
+  cell.id_giao_vien = lesson.id_giao_vien;
+  cell.ten_giao_vien = lesson.ten_giao_vien;
+  cell.id_phong = lesson.id_phong;
+  cell.ten_phong = lesson.ten_phong;
+  cell.tiet_thu_may = lesson.tiet_thu_may;
   showAddModal.value = false;
   targetCell.value = null;
   console.log("Lesson added", lesson);
