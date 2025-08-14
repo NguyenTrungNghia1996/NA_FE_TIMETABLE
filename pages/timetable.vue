@@ -27,14 +27,16 @@
 <script setup>
 import { transformTimetable, gridToFlat } from "@/composables/useTimetable";
 
-const rawInput = ref([]);
+const rawTimetable = ref([]);
+const rawUnscheduled = ref([]);
 const dsCa = ref([]);
 const reverted = computed(() => gridToFlat(dsCa.value));
 
 onMounted(async () => {
   const raw = await $fetch("/data.json");
-  rawInput.value = raw.data.timetable;
-  const { ds_Ca } = transformTimetable(rawInput.value, {
+  rawTimetable.value = raw.data.timetable;
+  rawUnscheduled.value = raw.data.ds_chua_xep;
+  const { ds_Ca } = transformTimetable(rawTimetable.value, {
     daysCount: 7,
     shifts: [1, 2],
     periodsPerShift: 5,
