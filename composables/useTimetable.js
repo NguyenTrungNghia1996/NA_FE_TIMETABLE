@@ -164,11 +164,14 @@ export function toFlatRecordsFromGrid(grid, options = {}) {
  *
  * @param {Array} ds_Ca - cấu trúc lưới từ transformTimetable
  * @param {Array} [unassigned=[]] - các bản ghi chưa gán (nếu có)
- * @param {Object} [options] - tham số giống toFlatRecordsFromGrid
+ * @param {Object} [options] - tham số giống toFlatRecordsFromGrid (includeBlanks mặc định true)
  * @returns {Array<Object>} danh sách bản ghi flat
  */
 export function gridToFlat(ds_Ca, unassigned = [], options = {}) {
-  return toFlatRecordsFromGrid({ ds_Ca, unassigned }, options);
+  return toFlatRecordsFromGrid(
+    { ds_Ca, unassigned },
+    { includeBlanks: true, ...options }
+  );
 }
 
 /**
