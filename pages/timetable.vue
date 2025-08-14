@@ -25,7 +25,7 @@
         </div>
       </div>
     </details>
-    <TimetableGrid :dsCa="dsCa" @cell-click="onCellClick" />
+    <TimetableGrid :dsCa="dsCa" @cell-click="onCellClick" @cell-clear="onCellClear" />
   </div>
 </template>
 <script setup>
@@ -34,12 +34,30 @@ import { transformTimetable, gridToFlat } from "@/composables/useTimetable";
 const rawTimetable = ref([]);
 const rawUnscheduled = ref([]);
 const dsCa = ref([]);
-const reverted = computed(() => gridToFlat(dsCa.value));
+const reverted = computed(() => gridToFlat(dsCa.value, rawUnscheduled.value));
 
 onMounted(async () => {
   const raw = await $fetch("/data.json");
   rawTimetable.value = raw.data.timetable;
-  rawUnscheduled.value = raw.data.ds_chua_xep;
+  rawUnscheduled.value = raw.data.ds_chua_xep.map(
+    ({
+      id_mon,
+      ten_mon,
+      id_giao_vien,
+      ten_giao_vien,
+      id_phong,
+      ten_phong,
+      tiet_thu_may,
+    }) => ({
+      id_mon,
+      ten_mon,
+      id_giao_vien,
+      ten_giao_vien,
+      id_phong,
+      ten_phong,
+      tiet_thu_may,
+    })
+  );
   const { ds_Ca } = transformTimetable(rawTimetable.value, {
     daysCount: 7,
     shifts: [1, 2],
@@ -49,7 +67,15 @@ onMounted(async () => {
   dsCa.value = ds_Ca;
 });
 
-function onCellClick(payload) {
-  console.log("Cell clicked", payload.record);
+function onCellClick({ record }) {
+  if (record.ten_mon || rawUnscheduled.value.length === 0) return;
+  const lesson = rawUnscheduled.value.shift();
+  Object.assign(record, lesson);
+  console.log("Lesson added", lesson);
+}
+
+function onCellClear(record) {
+  rawUnscheduled.value.push({ ...record });
+  console.log("Unscheduled added", record);
 }
 </script>

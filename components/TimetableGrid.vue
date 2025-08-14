@@ -46,7 +46,7 @@
 </template>
 
 <script setup>
-const emit = defineEmits(["cell-click"]);
+const emit = defineEmits(["cell-click", "cell-clear"]);
 
 const props = defineProps({
   dsCa: {
@@ -155,6 +155,16 @@ function setLock(val) {
 function clearCell() {
   const cell = getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell) return;
+  const removed = {
+    id_mon: cell.id_mon,
+    ten_mon: cell.ten_mon,
+    id_giao_vien: cell.id_giao_vien,
+    ten_giao_vien: cell.ten_giao_vien,
+    id_phong: cell.id_phong,
+    ten_phong: cell.ten_phong,
+    tiet_thu_may: cell.tiet_thu_may,
+  };
+  const hasData = cell.id_chitiet || cell.id_mon || cell.ten_mon;
   Object.assign(cell, {
     id_chitiet: 0,
     id_don_vi: 0,
@@ -169,6 +179,7 @@ function clearCell() {
     isRest: false,
     isLock: false,
   });
+  if (hasData) emit("cell-clear", removed);
   console.log("Cleared Cell", {
     ca: contextMenu.ca,
     ngay: contextMenu.ngay,
