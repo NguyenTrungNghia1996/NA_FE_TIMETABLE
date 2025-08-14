@@ -73,6 +73,7 @@ let ENDPOINTS = {
 
   //TIMETABLE
   TIMETABLE: "/api/thoikhoabieu",
+  TIMETABLE_FIND_CLASS_POSITION: "/api/tkb/timvitri/lop",
 
   S3: "/api/presigned_url",
 };
@@ -713,6 +714,9 @@ class Timetable {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.TIMETABLE, data);
+  }
+  async find_class_position(data) {
+    return await this.request.post(ENDPOINTS.TIMETABLE_FIND_CLASS_POSITION, data);
   }
 }
 export default () => {
