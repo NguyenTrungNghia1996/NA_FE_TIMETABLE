@@ -81,6 +81,10 @@ export function transformTimetable(records = [], opts = {}) {
     ds_Ca.push({ id: caId, ds_Ngay });
   }
 
+  if (unassigned.length) {
+    console.log("Unassigned periods:", unassigned);
+  }
+
   return { ds_Ca, unassigned, index };
 }
 
