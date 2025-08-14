@@ -26,7 +26,7 @@
                 @dragstart="onDragStart(ca.id, ngay.id, pIdx)"
                 @dragover="onDragOver($event, ca.id, ngay.id, pIdx)"
                 @drop="onDrop(ca.id, ngay.id, pIdx)"
-                @click="emit('cell-click', { ca: ca.id, ngay: ngay.id, tiet: pIdx + 1, record: ngay.ds_Tiet[pIdx] })"
+                @click="onCellClick(ca.id, ngay.id, pIdx)"
                 @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)"
               >
                 <template v-if="ngay.ds_Tiet[pIdx].isRest">
@@ -225,6 +225,38 @@ function openContextMenu(event, caId, dayId, pIdx) {
   contextMenu.ngay = dayId;
   contextMenu.pIdx = pIdx;
   contextMenu.cell = cell;
+}
+
+async function onCellClick(caId, dayId, pIdx) {
+  const cell = getCell(caId, dayId, pIdx);
+  console.log("Cell clicked", {
+    ca: caId,
+    ngay: dayId,
+    tiet: pIdx + 1,
+    data: { ...cell },
+  });
+  emit("cell-click", { ca: caId, ngay: dayId, tiet: pIdx + 1, record: cell });
+
+  try {
+    const body = {
+      id_lop: 2,
+      timetable: [
+        {
+          ...cell,
+          id_ca: caId,
+          ngay: dayId,
+          tiet: pIdx + 1,
+        },
+      ],
+    };
+    const res = await $fetch("/api/tkb/timvitri/lop", {
+      method: "POST",
+      body,
+    });
+    console.log("Find position response", res);
+  } catch (err) {
+    console.error("Find position error", err);
+  }
 }
 
 function setRest(val) {
