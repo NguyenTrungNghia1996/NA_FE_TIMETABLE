@@ -16,9 +16,12 @@
               <td
                 v-for="ngay in ca.ds_Ngay"
                 :key="ngay.id"
-                class="border p-2 text-xs align-top min-w-[120px] cursor-move relative select-none"
-                :class="{ 'bg-red-50': ngay.ds_Tiet[pIdx].isLock }"
-                :draggable="!ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock"
+                class="border p-2 text-xs align-top min-w-[120px] relative select-none"
+                :class="[
+                  { 'cursor-move': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock },
+                  { 'bg-red-50': ngay.ds_Tiet[pIdx].isLock }
+                ]"
+                :draggable="ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock"
                 @dragstart="onDragStart(ca.id, ngay.id, pIdx)"
                 @dragover="onDragOver($event, ca.id, ngay.id, pIdx)"
                 @drop="onDrop(ca.id, ngay.id, pIdx)"
@@ -96,6 +99,8 @@ function getCell(caId, dayId, pIdx) {
 }
 
 function onDragStart(caId, dayId, pIdx) {
+  const cell = getCell(caId, dayId, pIdx)
+  if (!cell?.isDrag) return
   dragSource.value = { caId, dayId, pIdx }
 }
 
@@ -120,7 +125,7 @@ function onDrop(caId, dayId, pIdx) {
     },
   })
 
-  if (src.isLock || src.isRest || dst.isLock || dst.isRest) return
+  if (src.isLock || src.isRest || dst.isLock || dst.isRest || !src.isDrag || !dst.isDrag) return
 
   const keys = Object.keys(src).filter(k => !['id_ca', 'ngay', 'tiet'].includes(k))
   const temp = {}
@@ -133,7 +138,7 @@ function onDrop(caId, dayId, pIdx) {
 
 function onDragOver(event, caId, dayId, pIdx) {
   const cell = getCell(caId, dayId, pIdx)
-  if (!cell?.isRest && !cell?.isLock) {
+  if (cell?.isDrag && !cell.isRest && !cell.isLock) {
     event.preventDefault()
   }
 }
