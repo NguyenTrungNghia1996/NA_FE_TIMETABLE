@@ -17,6 +17,7 @@
                 v-for="ngay in ca.ds_Ngay"
                 :key="ngay.id"
                 class="border p-2 text-xs align-top min-w-[120px]"
+                @click="emit('cell-click', { ca: ca.id, ngay: ngay.id, tiet: pIdx + 1, record: ngay.ds_Tiet[pIdx] })"
               >
                 <template v-if="ngay.ds_Tiet[pIdx].isRest">
                   <span class="italic text-gray-500">Nghỉ</span>
@@ -38,6 +39,8 @@
 </template>
 
 <script setup>
+const emit = defineEmits(['cell-click'])
+
 defineProps({
   dsCa: {
     type: Array,
