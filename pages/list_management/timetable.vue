@@ -71,7 +71,7 @@
     <a-drawer v-model:open="drawerAdjustOpen" title="Tinh chỉnh thời khóa biểu" :footer="null" height="100vh" placement="bottom">
       <ClientOnly>
         <div class="mb-4">
-          <SelectGradeLevel v-model="adjustGradeId" />
+          <SelectClass v-model="adjustClassId" />
         </div>
         <TimetableGrid :rawTimetable="adjustRawTimetable" :rawUnscheduled="adjustRawUnscheduled" />
       </ClientOnly>
@@ -245,7 +245,7 @@ const infoRef = ref(null);
 const drawerAdjustOpen = ref(false);
 const adjustRawTimetable = ref([]);
 const adjustRawUnscheduled = ref([]);
-const adjustGradeId = ref(null);
+const adjustClassId = ref(null);
 const adjustTimetableId = ref(null);
 
 watch(drawerInfoOpen, val => {
@@ -262,10 +262,10 @@ const openInfoDrawer = (reg) => {
   drawerInfoOpen.value = true
 }
 const fetchAdjustData = async () => {
-  if (!adjustGradeId.value || !adjustTimetableId.value) return;
+  if (!adjustClassId.value || !adjustTimetableId.value) return;
   try {
     const { data } = await RestApi.request.get('/api/tkb/lop', {
-      params: { idLop: adjustGradeId.value, idtkb: adjustTimetableId.value },
+      params: { idLop: adjustClassId.value, idtkb: adjustTimetableId.value },
     });
     if (data.value?.status === 'success') {
       const raw = data.value.data;
@@ -290,7 +290,7 @@ const fetchAdjustData = async () => {
   }
 };
 
-watch([adjustGradeId, adjustTimetableId], fetchAdjustData);
+watch([adjustClassId, adjustTimetableId], fetchAdjustData);
 
 const openAdjustDrawer = record => {
   adjustTimetableId.value = record.id;
