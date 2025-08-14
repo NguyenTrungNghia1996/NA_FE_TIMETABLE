@@ -1,26 +1,26 @@
 <template>
   <div @click="contextMenu.show = false">
     <div v-for="ca in dsCa" :key="ca.id" class="mb-6">
-      <h3 class="font-semibold mb-2">Ca {{ ca.id }}</h3>
+      <h3 class="font-semibold mb-2 select-none">Ca {{ ca.id }}</h3>
       <div class="overflow-x-auto">
-        <table class="min-w-full border-collapse">
+        <table class="min-w-full border-collapse select-none">
           <thead>
             <tr>
-              <th class="border p-2">Tiết / Ngày</th>
-              <th v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2">{{ ngay.ten }}</th>
+              <th class="border p-2 select-none">Tiết / Ngày</th>
+              <th v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 select-none">{{ ngay.ten }}</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
-              <td class="border p-2 text-center font-medium">Tiết {{ pIdx + 1 }}</td>
+              <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
               <td
                 v-for="ngay in ca.ds_Ngay"
                 :key="ngay.id"
-                class="border p-2 text-xs align-top min-w-[120px] cursor-move relative"
+                class="border p-2 text-xs align-top min-w-[120px] cursor-move relative select-none"
                 :class="{ 'bg-red-50': ngay.ds_Tiet[pIdx].isLock }"
                 :draggable="!ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock"
                 @dragstart="onDragStart(ca.id, ngay.id, pIdx)"
-                @dragover.prevent
+                @dragover="onDragOver($event, ca.id, ngay.id, pIdx)"
                 @drop="onDrop(ca.id, ngay.id, pIdx)"
                 @click="emit('cell-click', { ca: ca.id, ngay: ngay.id, tiet: pIdx + 1, record: ngay.ds_Tiet[pIdx] })"
                 @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)"
@@ -49,7 +49,7 @@
       class="absolute bg-white border shadow rounded text-sm z-50"
       :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
     >
-      <ul class="min-w-[150px] py-1">
+      <ul class="min-w-[150px] py-1 select-none">
         <li
           class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
           v-if="!contextMenu.cell?.isRest"
@@ -120,7 +120,7 @@ function onDrop(caId, dayId, pIdx) {
     },
   })
 
-  if (src.isLock || dst.isLock) return
+  if (src.isLock || src.isRest || dst.isLock || dst.isRest) return
 
   const keys = Object.keys(src).filter(k => !['id_ca', 'ngay', 'tiet'].includes(k))
   const temp = {}
@@ -129,6 +129,13 @@ function onDrop(caId, dayId, pIdx) {
   keys.forEach(k => (dst[k] = temp[k]))
 
   dragSource.value = null
+}
+
+function onDragOver(event, caId, dayId, pIdx) {
+  const cell = getCell(caId, dayId, pIdx)
+  if (!cell?.isRest && !cell?.isLock) {
+    event.preventDefault()
+  }
 }
 
 function openContextMenu(event, caId, dayId, pIdx) {
