@@ -220,10 +220,16 @@ function clearCell() {
   contextMenu.show = false;
 }
 
-function addLesson() {
-  const cell = getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
-  if (!cell || cell.ten_mon) return;
-  emit("cell-add", { record: cell });
-  contextMenu.show = false;
-}
+  function addLesson() {
+    const cell = getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
+    if (!cell || cell.ten_mon) return;
+    emit("cell-add", { record: cell });
+    console.log("Add lesson request", {
+      ca: contextMenu.ca,
+      ngay: contextMenu.ngay,
+      tiet: contextMenu.pIdx + 1,
+      data: { ...cell },
+    });
+    contextMenu.show = false;
+  }
 </script>
