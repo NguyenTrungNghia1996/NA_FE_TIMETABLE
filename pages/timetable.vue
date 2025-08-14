@@ -25,7 +25,25 @@
         </div>
       </div>
     </details>
-    <TimetableGrid :dsCa="dsCa" @cell-click="onCellClick" @cell-clear="onCellClear" />
+    <TimetableGrid :dsCa="dsCa" @cell-clear="onCellClear" @cell-add="onCellAdd" />
+
+    <div
+      v-if="showAddModal"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+    >
+      <div class="bg-white p-4 rounded w-72">
+        <h3 class="font-semibold mb-2">Chọn tiết học</h3>
+        <select v-model="selectedIdx" class="border w-full mb-4">
+          <option v-for="(lesson, idx) in rawUnscheduled" :key="idx" :value="idx">
+            {{ lesson.ten_mon }} - {{ lesson.ten_giao_vien }}
+          </option>
+        </select>
+        <div class="flex justify-end gap-2">
+          <button class="px-3 py-1 border rounded" @click="showAddModal = false">Hủy</button>
+          <button class="px-3 py-1 bg-blue-500 text-white rounded" @click="confirmAdd">Thêm</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script setup>
@@ -35,6 +53,9 @@ const rawTimetable = ref([]);
 const rawUnscheduled = ref([]);
 const dsCa = ref([]);
 const reverted = computed(() => gridToFlat(dsCa.value, rawUnscheduled.value));
+const showAddModal = ref(false);
+const selectedIdx = ref(0);
+const targetCell = ref(null);
 
 onMounted(async () => {
   const raw = await $fetch("/data.json");
@@ -67,10 +88,19 @@ onMounted(async () => {
   dsCa.value = ds_Ca;
 });
 
-function onCellClick({ record }) {
-  if (record.ten_mon || rawUnscheduled.value.length === 0) return;
-  const lesson = rawUnscheduled.value.shift();
-  Object.assign(record, lesson);
+function onCellAdd({ record }) {
+  if (rawUnscheduled.value.length === 0) return;
+  targetCell.value = record;
+  selectedIdx.value = 0;
+  showAddModal.value = true;
+}
+
+function confirmAdd() {
+  if (selectedIdx.value == null) return;
+  const lesson = rawUnscheduled.value.splice(selectedIdx.value, 1)[0];
+  Object.assign(targetCell.value, lesson);
+  showAddModal.value = false;
+  targetCell.value = null;
   console.log("Lesson added", lesson);
 }
 

@@ -35,10 +35,41 @@
     <!-- Context Menu -->
     <div v-if="contextMenu.show" class="absolute bg-white border shadow rounded text-sm z-50" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
       <ul class="min-w-[150px] py-1 select-none">
-        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" v-if="!contextMenu.cell?.isRest" @click="setRest(true)">Đặt tiết nghỉ</li>
-        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" v-else @click="setRest(false)">Xóa tiết nghỉ</li>
-        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" v-if="!contextMenu.cell?.isLock" @click="setLock(true)">Đặt tiết khóa</li>
-        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" v-else @click="setLock(false)">Xóa tiết khóa</li>
+        <li
+          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+          v-if="!contextMenu.cell?.ten_mon && !contextMenu.cell?.isRest"
+          @click="addLesson"
+        >
+          Thêm tiết học
+        </li>
+        <li
+          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+          v-if="!contextMenu.cell?.isRest"
+          @click="setRest(true)"
+        >
+          Đặt tiết nghỉ
+        </li>
+        <li
+          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+          v-else
+          @click="setRest(false)"
+        >
+          Xóa tiết nghỉ
+        </li>
+        <li
+          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+          v-if="!contextMenu.cell?.isLock"
+          @click="setLock(true)"
+        >
+          Đặt tiết khóa
+        </li>
+        <li
+          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
+          v-else
+          @click="setLock(false)"
+        >
+          Xóa tiết khóa
+        </li>
         <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click="clearCell">Xóa tiết</li>
       </ul>
     </div>
@@ -46,7 +77,7 @@
 </template>
 
 <script setup>
-const emit = defineEmits(["cell-click", "cell-clear"]);
+const emit = defineEmits(["cell-click", "cell-clear", "cell-add"]);
 
 const props = defineProps({
   dsCa: {
@@ -186,6 +217,13 @@ function clearCell() {
     tiet: contextMenu.pIdx + 1,
     data: { ...cell },
   });
+  contextMenu.show = false;
+}
+
+function addLesson() {
+  const cell = getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
+  if (!cell || cell.ten_mon) return;
+  emit("cell-add", { record: cell });
   contextMenu.show = false;
 }
 </script>
