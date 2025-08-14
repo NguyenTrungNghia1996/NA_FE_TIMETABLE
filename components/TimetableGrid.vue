@@ -19,6 +19,7 @@
                 class="border p-2 text-xs align-top min-w-[120px] relative select-none"
                 :class="[
                   { 'cursor-move': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock },
+                  { 'bg-green-50': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock },
                   { 'bg-red-50': ngay.ds_Tiet[pIdx].isLock }
                 ]"
                 :draggable="ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock"
