@@ -15,7 +15,7 @@
               <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
               <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] relative select-none" :class="[{ 'cursor-move': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock }, { 'bg-green-50': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock }, { 'bg-red-50': ngay.ds_Tiet[pIdx].isLock }]" :draggable="ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="emit('cell-click', { ca: ca.id, ngay: ngay.id, tiet: pIdx + 1, record: ngay.ds_Tiet[pIdx] })" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
                 <template v-if="ngay.ds_Tiet[pIdx].isRest">
-                  <span class="italic text-gray-500">Nghỉ</span>
+                  <span class="italic text-red-500">Nghỉ</span>
                 </template>
                 <template v-else-if="ngay.ds_Tiet[pIdx].ten_mon">
                   <div class="font-medium leading-tight">{{ ngay.ds_Tiet[pIdx].ten_mon }}</div>
