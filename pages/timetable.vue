@@ -9,7 +9,7 @@
       <div class="max-h-64 overflow-auto p-3 text-xs grid gap-4 md:grid-cols-3">
         <div>
           <h4 class="font-semibold mb-1">Dữ liệu đầu vào</h4>
-          <pre>{{ JSON.stringify(rawInput, null, 2) }}</pre>
+          <pre>{{ rawInput.length }} /{{ JSON.stringify(rawInput, null, 2) }}</pre>
         </div>
         <div>
           <h4 class="font-semibold mb-1">Sau chuyển đổi</h4>
@@ -17,7 +17,7 @@
         </div>
         <div>
           <h4 class="font-semibold mb-1">Chuyển ngược</h4>
-          <pre>{{ JSON.stringify(reverted, null, 2) }}</pre>
+          <pre>{{ reverted.length }} /{{ JSON.stringify(reverted, null, 2) }}</pre>
         </div>
       </div>
     </details>
