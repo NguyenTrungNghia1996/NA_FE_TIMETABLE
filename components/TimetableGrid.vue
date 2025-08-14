@@ -13,7 +13,22 @@
           <tbody>
             <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
               <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
-              <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] relative select-none" :class="[{ 'cursor-move': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock }, { 'bg-green-50': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock }, { 'bg-red-50': ngay.ds_Tiet[pIdx].isLock }]" :draggable="ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="emit('cell-click', { ca: ca.id, ngay: ngay.id, tiet: pIdx + 1, record: ngay.ds_Tiet[pIdx] })" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
+              <td
+                v-for="ngay in ca.ds_Ngay"
+                :key="ngay.id"
+                class="border p-2 text-xs align-top min-w-[120px] relative select-none"
+                :class="[
+                  { 'cursor-move': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock },
+                  { 'bg-green-50': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock },
+                  { 'bg-red-50': ngay.ds_Tiet[pIdx].isLock },
+                ]"
+                :draggable="ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock"
+                @dragstart="onDragStart(ca.id, ngay.id, pIdx)"
+                @dragover="onDragOver($event, ca.id, ngay.id, pIdx)"
+                @drop="onDrop(ca.id, ngay.id, pIdx)"
+                @click="emit('cell-click', { ca: ca.id, ngay: ngay.id, tiet: pIdx + 1, record: ngay.ds_Tiet[pIdx] })"
+                @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)"
+              >
                 <template v-if="ngay.ds_Tiet[pIdx].isRest">
                   <span class="italic text-red-500">Nghỉ</span>
                 </template>
@@ -33,7 +48,11 @@
     </div>
 
     <!-- Context Menu -->
-    <div v-if="contextMenu.show" class="absolute bg-white border shadow rounded text-sm z-50" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
+    <div
+      v-if="contextMenu.show"
+      class="absolute bg-white border shadow rounded text-sm z-50"
+      :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
+    >
       <ul class="min-w-[150px] py-1 select-none">
         <li
           class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
@@ -73,24 +92,81 @@
         <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click="clearCell">Xóa tiết</li>
       </ul>
     </div>
+
+    <a-modal
+      v-model:open="showAddModal"
+      title="Chọn tiết học"
+      ok-text="Thêm"
+      cancel-text="Hủy"
+      @ok="confirmAdd"
+      @cancel="showAddModal = false"
+    >
+      <a-select v-model:value="selectedIdx" class="w-full mb-4">
+        <a-select-option
+          v-for="(lesson, idx) in rawUnscheduled"
+          :key="idx"
+          :value="idx"
+        >
+          {{ lesson.ten_mon }} - {{ lesson.ten_giao_vien }}
+        </a-select-option>
+      </a-select>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
-const emit = defineEmits(["cell-click", "cell-clear", "cell-add"]);
+import { transformTimetable, gridToFlat } from "@/composables/useTimetable";
 
 const props = defineProps({
-  dsCa: {
+  rawTimetable: {
+    type: Array,
+    required: true,
+  },
+  rawUnscheduled: {
     type: Array,
     required: true,
   },
 });
 
+const dsCa = ref([]);
+const emit = defineEmits(["cell-click"]);
+const showAddModal = ref(false);
+const selectedIdx = ref(0);
+const targetCell = ref(null);
+
+watch(
+  () => props.rawTimetable,
+  () => {
+    const { ds_Ca } = transformTimetable(props.rawTimetable, {
+      daysCount: 7,
+      shifts: [1, 2],
+      periodsPerShift: 5,
+      dayNames: [
+        "Thứ 2",
+        "Thứ 3",
+        "Thứ 4",
+        "Thứ 5",
+        "Thứ 6",
+        "Thứ 7",
+        "Chủ Nhật",
+      ],
+    });
+    dsCa.value = ds_Ca;
+  },
+  { immediate: true, deep: true }
+);
+
+function updateRawTimetable() {
+  const flat = gridToFlat(dsCa.value, props.rawUnscheduled);
+  props.rawTimetable.length = 0;
+  props.rawTimetable.push(...flat);
+}
+
 const dragSource = ref(null);
 const contextMenu = reactive({ show: false, x: 0, y: 0, ca: null, ngay: null, pIdx: null, cell: null });
 
 function getCell(caId, dayId, pIdx) {
-  const ca = props.dsCa.find(c => c.id === caId);
+  const ca = dsCa.value.find(c => c.id === caId);
   const ngay = ca?.ds_Ngay.find(n => n.id === dayId);
   return ngay?.ds_Tiet[pIdx];
 }
@@ -129,8 +205,8 @@ function onDrop(caId, dayId, pIdx) {
   keys.forEach(k => (temp[k] = src[k]));
   keys.forEach(k => (src[k] = dst[k]));
   keys.forEach(k => (dst[k] = temp[k]));
-
   dragSource.value = null;
+  updateRawTimetable();
 }
 
 function onDragOver(event, caId, dayId, pIdx) {
@@ -168,6 +244,7 @@ function setRest(val) {
     data: { ...cell },
   });
   contextMenu.show = false;
+  updateRawTimetable();
 }
 
 function setLock(val) {
@@ -181,6 +258,7 @@ function setLock(val) {
     data: { ...cell },
   });
   contextMenu.show = false;
+  updateRawTimetable();
 }
 
 function clearCell() {
@@ -210,7 +288,7 @@ function clearCell() {
     isRest: false,
     isLock: false,
   });
-  if (hasData) emit("cell-clear", removed);
+  if (hasData) props.rawUnscheduled.push({ ...removed });
   console.log("Cleared Cell", {
     ca: contextMenu.ca,
     ngay: contextMenu.ngay,
@@ -218,18 +296,33 @@ function clearCell() {
     data: { ...cell },
   });
   contextMenu.show = false;
+  updateRawTimetable();
 }
 
-  function addLesson() {
-    const cell = getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
-    if (!cell || cell.ten_mon) return;
-    emit("cell-add", { record: cell });
-    console.log("Add lesson request", {
-      ca: contextMenu.ca,
-      ngay: contextMenu.ngay,
-      tiet: contextMenu.pIdx + 1,
-      data: { ...cell },
-    });
-    contextMenu.show = false;
-  }
+function addLesson() {
+  const cell = getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
+  if (!cell || cell.ten_mon) return;
+  targetCell.value = cell;
+  selectedIdx.value = 0;
+  showAddModal.value = true;
+  contextMenu.show = false;
+}
+
+function confirmAdd() {
+  if (selectedIdx.value == null || !targetCell.value) return;
+  const lesson = props.rawUnscheduled.splice(selectedIdx.value, 1)[0];
+  if (!lesson) return;
+  const cell = targetCell.value;
+  cell.id_mon = lesson.id_mon;
+  cell.ten_mon = lesson.ten_mon;
+  cell.id_giao_vien = lesson.id_giao_vien;
+  cell.ten_giao_vien = lesson.ten_giao_vien;
+  cell.id_phong = lesson.id_phong;
+  cell.ten_phong = lesson.ten_phong;
+  cell.tiet_thu_may = lesson.tiet_thu_may;
+  showAddModal.value = false;
+  targetCell.value = null;
+  console.log("Lesson added", { cell: { ...cell }, lesson });
+  updateRawTimetable();
+}
 </script>
