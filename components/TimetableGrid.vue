@@ -75,6 +75,7 @@
           </div>
         </a-tab-pane>
       </a-tabs>
+      <TeacherUnscheduledTable v-if="teacherUnscheduled.length" :data="teacherUnscheduled" class="mt-4" />
     </div>
 
     <!-- Context Menu -->
@@ -124,6 +125,7 @@ const dsCa = ref([]);
 const activeCa = ref(1);
 const teacherDsCa = ref([]);
 const teacherActiveCa = ref(1);
+const teacherUnscheduled = ref([]);
 const emit = defineEmits(["cell-click", "update:rawTimetable", "update:rawUnscheduled"]);
 const showAddModal = ref(false);
 const selectedIdx = ref(0);
@@ -282,7 +284,8 @@ async function onCellClick(caId, dayId, pIdx) {
         params: { idGV: cell.id_giao_vien, idtkb: props.timetableId },
       });
       if (data.value?.status === "success") {
-        const { ds_Ca } = transformTimetable(data.value.data.timetable || [], {
+        const { timetable, ds_chua_xep } = data.value.data || {};
+        const { ds_Ca } = transformTimetable(timetable || [], {
           daysCount: 7,
           shifts: [1, 2],
           periodsPerShift: 5,
@@ -290,12 +293,32 @@ async function onCellClick(caId, dayId, pIdx) {
         });
         teacherDsCa.value = ds_Ca;
         teacherActiveCa.value = ds_Ca[0]?.id || 1;
+        teacherUnscheduled.value = Array.isArray(ds_chua_xep)
+          ? ds_chua_xep.map(
+              ({ id_mon, ten_mon, id_lop, ten_lop, id_phong, ten_phong, tiet_thu_may }) => ({
+                id_mon,
+                ten_mon,
+                id_lop,
+                ten_lop,
+                id_phong,
+                ten_phong,
+                tiet_thu_may,
+              }),
+            )
+          : [];
       } else {
         console.error("Get teacher timetable error", error.value || data.value);
+        teacherDsCa.value = [];
+        teacherUnscheduled.value = [];
       }
     } catch (err) {
       console.error("Get teacher timetable error", err);
+      teacherDsCa.value = [];
+      teacherUnscheduled.value = [];
     }
+  } else {
+    teacherDsCa.value = [];
+    teacherUnscheduled.value = [];
   }
   if (cell?.id_mon) {
     selectedSubjectId.value = cell.id_mon;
