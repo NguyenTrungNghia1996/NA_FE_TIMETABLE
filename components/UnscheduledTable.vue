@@ -1,14 +1,8 @@
 <template>
   <div class="mt-4">
-    <h4 class="font-semibold mb-2">Tiết chưa xếp</h4>
+    <h4 class="font-semibold mb-2">Tiết chưa xếp của lớp học</h4>
     <ClientOnly>
-      <a-table
-        :columns="columns"
-        :data-source="data"
-        :pagination="false"
-        bordered
-        size="small"
-      />
+      <a-table :columns="columns" :data-source="data" :pagination="false" bordered size="small" />
     </ClientOnly>
   </div>
 </template>
@@ -23,32 +17,32 @@ const props = defineProps({
 
 const columns = [
   {
-    title: 'STT',
-    key: 'stt',
+    title: "STT",
+    key: "stt",
     width: 70,
-    align: 'center',
+    align: "center",
     customRender: ({ index }) => index + 1,
   },
   {
-    title: 'Môn học',
-    dataIndex: 'ten_mon',
-    key: 'ten_mon',
+    title: "Môn học",
+    dataIndex: "ten_mon",
+    key: "ten_mon",
   },
   {
-    title: 'Giáo viên',
-    dataIndex: 'ten_giao_vien',
-    key: 'ten_giao_vien',
+    title: "Giáo viên",
+    dataIndex: "ten_giao_vien",
+    key: "ten_giao_vien",
   },
   {
-    title: 'Phòng',
-    dataIndex: 'ten_phong',
-    key: 'ten_phong',
+    title: "Phòng",
+    dataIndex: "ten_phong",
+    key: "ten_phong",
   },
   {
-    title: 'Tiết thứ',
-    dataIndex: 'tiet_thu_may',
-    key: 'tiet_thu_may',
-    align: 'center',
+    title: "Tiết thứ",
+    dataIndex: "tiet_thu_may",
+    key: "tiet_thu_may",
+    align: "center",
     width: 120,
   },
 ];

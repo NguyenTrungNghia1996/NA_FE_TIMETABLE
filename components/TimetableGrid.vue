@@ -1,41 +1,43 @@
 <template>
   <div @click="contextMenu.show = false">
-    <a-tabs v-model:activeKey="activeCa">
-      <a-tab-pane v-for="ca in dsCa" :key="ca.id" :tab="`Ca ${ca.id}`">
-        <div class="overflow-x-auto">
-          <table class="min-w-full border-collapse select-none">
-            <thead>
-              <tr>
-                <th class="border p-2 select-none">Tiết / Ngày</th>
-                <th v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 select-none">{{ ngay.ten }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
-                <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
-                <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] relative select-none" :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="isDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
-                  <template v-if="ngay.ds_Tiet[pIdx].isRest">
-                    <span class="italic text-red-500">Nghỉ</span>
-                  </template>
-                  <template v-else-if="ngay.ds_Tiet[pIdx].ten_mon">
-                    <div class="font-medium leading-tight">{{ ngay.ds_Tiet[pIdx].ten_mon }} - {{ ngay.ds_Tiet[pIdx].ten_giao_vien }}</div>
-                    <div class="text-gray-600">{{ ngay.ds_Tiet[pIdx].ten_phong }}</div>
-                  </template>
-                  <template v-else>
-                    <span class="text-gray-400">Trống</span>
-                  </template>
-                  <div v-if="ngay.ds_Tiet[pIdx].isLock" class="absolute top-1 right-1 text-[10px] text-red-600">Khóa</div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </a-tab-pane>
-    </a-tabs>
+    <div class="grid grid-cols-4 gap-2">
+      <a-tabs v-model:activeKey="activeCa" class="col-span-3">
+        <a-tab-pane v-for="ca in dsCa" :key="ca.id" :tab="`Ca ${ca.id}`">
+          <div class="overflow-x-auto">
+            <table class="min-w-full border-collapse select-none">
+              <thead>
+                <tr>
+                  <th class="border p-2 select-none">Tiết / Ngày</th>
+                  <th v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 select-none">{{ ngay.ten }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
+                  <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
+                  <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] relative select-none" :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="isDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
+                    <template v-if="ngay.ds_Tiet[pIdx].isRest">
+                      <span class="italic text-red-500">Nghỉ</span>
+                    </template>
+                    <template v-else-if="ngay.ds_Tiet[pIdx].ten_mon">
+                      <div class="font-medium leading-tight">{{ ngay.ds_Tiet[pIdx].ten_mon }} - {{ ngay.ds_Tiet[pIdx].ten_giao_vien }}</div>
+                      <div class="text-gray-600">{{ ngay.ds_Tiet[pIdx].ten_phong }}</div>
+                    </template>
+                    <template v-else>
+                      <span class="text-gray-400">Trống</span>
+                    </template>
+                    <div v-if="ngay.ds_Tiet[pIdx].isLock" class="absolute top-1 right-1 text-[10px] text-red-600">Khóa</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </a-tab-pane>
+      </a-tabs>
+      <UnscheduledTable :data="props.rawUnscheduled" class="mt-4" />
+    </div>
 
-    <div v-if="teacherDsCa.length" class="mt-6">
-      <h3 class="font-medium mb-2">Thời khóa biểu giáo viên</h3>
-      <a-tabs v-model:activeKey="teacherActiveCa">
+    <div v-if="teacherDsCa.length" class="grid grid-cols-4 gap-2">
+      <a-tabs v-model:activeKey="teacherActiveCa" class="col-span-3">
         <a-tab-pane v-for="ca in teacherDsCa" :key="ca.id" :tab="`Ca ${ca.id}`">
           <div class="overflow-x-auto">
             <table class="min-w-full border-collapse select-none">
@@ -48,20 +50,14 @@
               <tbody>
                 <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
                   <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
-                  <td
-                    v-for="ngay in ca.ds_Ngay"
-                    :key="ngay.id"
-                    class="border p-2 text-xs align-top min-w-[120px] select-none"
-                  >
+                  <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] select-none">
                     <template v-if="ngay.ds_Tiet[pIdx].isRest">
                       <span class="italic text-red-500">Nghỉ</span>
                     </template>
                     <template v-else-if="ngay.ds_Tiet[pIdx].ten_mon">
                       <div class="font-medium leading-tight">
                         {{ ngay.ds_Tiet[pIdx].ten_mon }}
-                        <template v-if="ngay.ds_Tiet[pIdx].ten_lop">
-                          - {{ ngay.ds_Tiet[pIdx].ten_lop }}
-                        </template>
+                        <template v-if="ngay.ds_Tiet[pIdx].ten_lop"> - {{ ngay.ds_Tiet[pIdx].ten_lop }} </template>
                       </div>
                       <div class="text-gray-600">{{ ngay.ds_Tiet[pIdx].ten_phong }}</div>
                     </template>
@@ -294,17 +290,15 @@ async function onCellClick(caId, dayId, pIdx) {
         teacherDsCa.value = ds_Ca;
         teacherActiveCa.value = ds_Ca[0]?.id || 1;
         teacherUnscheduled.value = Array.isArray(ds_chua_xep)
-          ? ds_chua_xep.map(
-              ({ id_mon, ten_mon, id_lop, ten_lop, id_phong, ten_phong, tiet_thu_may }) => ({
-                id_mon,
-                ten_mon,
-                id_lop,
-                ten_lop,
-                id_phong,
-                ten_phong,
-                tiet_thu_may,
-              }),
-            )
+          ? ds_chua_xep.map(({ id_mon, ten_mon, id_lop, ten_lop, id_phong, ten_phong, tiet_thu_may }) => ({
+              id_mon,
+              ten_mon,
+              id_lop,
+              ten_lop,
+              id_phong,
+              ten_phong,
+              tiet_thu_may,
+            }))
           : [];
       } else {
         console.error("Get teacher timetable error", error.value || data.value);
