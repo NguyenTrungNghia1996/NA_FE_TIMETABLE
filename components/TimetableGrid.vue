@@ -147,9 +147,14 @@ function onDragStart(caId, dayId, pIdx) {
 
 async function onDrop(caId, dayId, pIdx) {
   if (!dragSource.value) return;
-  const src = getCell(dragSource.value.caId, dragSource.value.dayId, dragSource.value.pIdx);
+  const srcCa = dragSource.value.caId;
+  const srcDay = dragSource.value.dayId;
+  const srcPIdx = dragSource.value.pIdx;
+  const src = getCell(srcCa, srcDay, srcPIdx);
   const dst = getCell(caId, dayId, pIdx);
   if (!src || !dst) return;
+  const srcClone = { ...src };
+  const dstClone = { ...dst };
 
   console.log("Drag drop", {
     source: {
@@ -179,7 +184,10 @@ async function onDrop(caId, dayId, pIdx) {
   try {
     const body = {
       id_lop: props.classId,
-      timetable: [{ ...src }, { ...dst }],
+      timetable: [
+        { ...srcClone, id_ca: caId, ngay: dayId, tiet: pIdx + 1 },
+        { ...dstClone, id_ca: srcCa, ngay: srcDay, tiet: srcPIdx + 1 },
+      ],
     };
     const { data, error } = await RestApi.timetable.update_class({ body });
     if (data.value?.status !== "success") {
