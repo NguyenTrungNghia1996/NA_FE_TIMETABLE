@@ -13,28 +13,13 @@
           <tbody>
             <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
               <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
-              <td
-                v-for="ngay in ca.ds_Ngay"
-                :key="ngay.id"
-                class="border p-2 text-xs align-top min-w-[120px] relative select-none"
-                :class="[
-                  { 'cursor-move': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock },
-                  { 'bg-green-50': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock },
-                  { 'bg-red-50': ngay.ds_Tiet[pIdx].isLock },
-                ]"
-                :draggable="ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock"
-                @dragstart="onDragStart(ca.id, ngay.id, pIdx)"
-                @dragover="onDragOver($event, ca.id, ngay.id, pIdx)"
-                @drop="onDrop(ca.id, ngay.id, pIdx)"
-                @click="onCellClick(ca.id, ngay.id, pIdx)"
-                @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)"
-              >
+              <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] relative select-none" :class="[{ 'cursor-move': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock }, { 'bg-green-100': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock }, { 'bg-red-50': ngay.ds_Tiet[pIdx].isLock }]" :draggable="ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
                 <template v-if="ngay.ds_Tiet[pIdx].isRest">
                   <span class="italic text-red-500">Nghỉ</span>
                 </template>
                 <template v-else-if="ngay.ds_Tiet[pIdx].ten_mon">
-                  <div class="font-medium leading-tight">{{ ngay.ds_Tiet[pIdx].ten_mon }}</div>
-                  <div class="text-gray-600">{{ ngay.ds_Tiet[pIdx].ten_giao_vien }}</div>
+                  <div class="font-medium leading-tight">{{ ngay.ds_Tiet[pIdx].ten_mon }} - {{ ngay.ds_Tiet[pIdx].ten_giao_vien }}</div>
+                  <div class="text-gray-600">{{ ngay.ds_Tiet[pIdx].ten_phong }}</div>
                 </template>
                 <template v-else>
                   <span class="text-gray-400">Trống</span>
@@ -48,67 +33,20 @@
     </div>
 
     <!-- Context Menu -->
-    <div
-      v-if="contextMenu.show"
-      class="absolute bg-white border shadow rounded text-sm z-50"
-      :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
-    >
+    <div v-if="contextMenu.show" class="absolute bg-white border shadow rounded text-sm z-50" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
       <ul class="min-w-[150px] py-1 select-none">
-        <li
-          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
-          v-if="!contextMenu.cell?.ten_mon && !contextMenu.cell?.isRest"
-          @click="addLesson"
-        >
-          Thêm tiết học
-        </li>
-        <li
-          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
-          v-if="!contextMenu.cell?.isRest"
-          @click="setRest(true)"
-        >
-          Đặt tiết nghỉ
-        </li>
-        <li
-          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
-          v-else
-          @click="setRest(false)"
-        >
-          Xóa tiết nghỉ
-        </li>
-        <li
-          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
-          v-if="!contextMenu.cell?.isLock"
-          @click="setLock(true)"
-        >
-          Đặt tiết khóa
-        </li>
-        <li
-          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
-          v-else
-          @click="setLock(false)"
-        >
-          Xóa tiết khóa
-        </li>
+        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" v-if="!contextMenu.cell?.ten_mon && !contextMenu.cell?.isRest" @click="addLesson">Thêm tiết học</li>
+        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" v-if="!contextMenu.cell?.isRest" @click="setRest(true)">Đặt tiết nghỉ</li>
+        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" v-else @click="setRest(false)">Xóa tiết nghỉ</li>
+        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" v-if="!contextMenu.cell?.isLock" @click="setLock(true)">Đặt tiết khóa</li>
+        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" v-else @click="setLock(false)">Xóa tiết khóa</li>
         <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click="clearCell">Xóa tiết</li>
       </ul>
     </div>
 
-    <a-modal
-      v-model:open="showAddModal"
-      title="Chọn tiết học"
-      ok-text="Thêm"
-      cancel-text="Hủy"
-      @ok="confirmAdd"
-      @cancel="showAddModal = false"
-    >
+    <a-modal v-model:open="showAddModal" title="Chọn tiết học" ok-text="Thêm" cancel-text="Hủy" @ok="confirmAdd" @cancel="showAddModal = false">
       <a-select v-model:value="selectedIdx" class="w-full mb-4">
-        <a-select-option
-          v-for="(lesson, idx) in rawUnscheduled"
-          :key="idx"
-          :value="idx"
-        >
-          {{ lesson.ten_mon }} - {{ lesson.ten_giao_vien }}
-        </a-select-option>
+        <a-select-option v-for="(lesson, idx) in rawUnscheduled" :key="idx" :value="idx"> {{ lesson.ten_mon }} - {{ lesson.ten_giao_vien }} </a-select-option>
       </a-select>
     </a-modal>
   </div>
@@ -142,19 +80,11 @@ watch(
       daysCount: 7,
       shifts: [1, 2],
       periodsPerShift: 5,
-      dayNames: [
-        "Thứ 2",
-        "Thứ 3",
-        "Thứ 4",
-        "Thứ 5",
-        "Thứ 6",
-        "Thứ 7",
-        "Chủ Nhật",
-      ],
+      dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
     });
     dsCa.value = ds_Ca;
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 function updateRawTimetable(unscheduled = props.rawUnscheduled) {
