@@ -13,24 +13,7 @@
           <tbody>
             <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
               <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
-              <td
-                v-for="ngay in ca.ds_Ngay"
-                :key="ngay.id"
-                class="border p-2 text-xs align-top min-w-[120px] relative select-none"
-                :class="[
-                  { 'cursor-move': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock },
-                  { 'bg-green-100': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock },
-                  { 'bg-red-50': ngay.ds_Tiet[pIdx].isLock },
-                  { 'bg-sky-200': isSameSubject(ca.id, ngay.id, pIdx) },
-                  { 'bg-sky-400': isSelectedCell(ca.id, ngay.id, pIdx) }
-                ]"
-                :draggable="ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock"
-                @dragstart="onDragStart(ca.id, ngay.id, pIdx)"
-                @dragover="onDragOver($event, ca.id, ngay.id, pIdx)"
-                @drop="onDrop(ca.id, ngay.id, pIdx)"
-                @click="onCellClick(ca.id, ngay.id, pIdx)"
-                @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)"
-              >
+              <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] relative select-none" :class="[{ 'cursor-move': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock }, { 'bg-green-100': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock }, { 'bg-red-50': ngay.ds_Tiet[pIdx].isLock }, { 'bg-sky-200': isSameSubject(ca.id, ngay.id, pIdx) }, { 'bg-sky-400': isSelectedCell(ca.id, ngay.id, pIdx) }]" :draggable="ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
                 <template v-if="ngay.ds_Tiet[pIdx].isRest">
                   <span class="italic text-red-500">Nghỉ</span>
                 </template>
@@ -125,12 +108,7 @@ function getCell(caId, dayId, pIdx) {
 }
 
 function isSelectedCell(caId, dayId, pIdx) {
-  return (
-    selectedCellPos.value &&
-    selectedCellPos.value.ca === caId &&
-    selectedCellPos.value.ngay === dayId &&
-    selectedCellPos.value.pIdx === pIdx
-  );
+  return selectedCellPos.value && selectedCellPos.value.ca === caId && selectedCellPos.value.ngay === dayId && selectedCellPos.value.pIdx === pIdx;
 }
 
 function isSameSubject(caId, dayId, pIdx) {
@@ -184,10 +162,7 @@ async function onDrop(caId, dayId, pIdx) {
   try {
     const body = {
       id_lop: props.classId,
-      timetable: [
-        { ...srcClone, id_ca: caId, ngay: dayId, tiet: pIdx + 1 },
-        { ...dstClone, id_ca: srcCa, ngay: srcDay, tiet: srcPIdx + 1 },
-      ],
+      timetable: [{ ...srcClone }, { ...dstClone }],
     };
     const { data, error } = await RestApi.timetable.update_class({ body });
     if (data.value?.status !== "success") {
