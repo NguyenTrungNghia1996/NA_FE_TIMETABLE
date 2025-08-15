@@ -82,6 +82,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  classId: {
+    type: Number,
+    default: null,
+  },
 });
 
 const dsCa = ref([]);
@@ -174,8 +178,8 @@ async function onDrop(caId, dayId, pIdx) {
 
   try {
     const body = {
-      id_lop: 2,
-      timetable: gridToFlat(dsCa.value),
+      id_lop: props.classId,
+      timetable: [{ ...src }, { ...dst }],
     };
     const { data, error } = await RestApi.timetable.update_class({ body });
     if (data.value?.status !== "success") {
@@ -224,7 +228,7 @@ async function onCellClick(caId, dayId, pIdx) {
 
   try {
     const body = {
-      id_lop: 2,
+      id_lop: props.classId,
       timetable: [
         {
           ...cell,
