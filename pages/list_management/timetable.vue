@@ -73,12 +73,10 @@
         <div class="mb-4">
           <SelectClass v-model="adjustClassId" />
         </div>
-        <TimetableGrid
-          v-model:rawTimetable="adjustRawTimetable"
-          v-model:rawUnscheduled="adjustRawUnscheduled"
-          :classId="adjustClassId"
-        />
-        <UnscheduledTable :data="adjustRawUnscheduled" class="mt-4" />
+        <div class="grid grid-cols-4 gap-2">
+          <TimetableGrid class="col-span-3" v-model:rawTimetable="adjustRawTimetable" v-model:rawUnscheduled="adjustRawUnscheduled" :classId="adjustClassId" />
+          <UnscheduledTable :data="adjustRawUnscheduled" class="mt-4" />
+        </div>
       </ClientOnly>
     </a-drawer>
   </div>
@@ -262,36 +260,33 @@ watch(drawerInfoOpen, val => {
 const closeInfoDrawer = () => {
   infoRef.value?.reset?.();
 };
-const openInfoDrawer = (reg) => {
-
-  drawerInfoOpen.value = true
-}
+const openInfoDrawer = reg => {
+  drawerInfoOpen.value = true;
+};
 const fetchAdjustData = async () => {
   if (!adjustClassId.value || !adjustTimetableId.value) return;
   try {
     const { data } = await RestApi.timetable.get_class({
       params: { idLop: adjustClassId.value, idtkb: adjustTimetableId.value },
     });
-    if (data.value?.status === 'success') {
+    if (data.value?.status === "success") {
       const raw = data.value.data;
       adjustRawTimetable.value = raw.timetable;
-      adjustRawUnscheduled.value = raw.ds_chua_xep.map(
-        ({ id_mon, ten_mon, id_giao_vien, ten_giao_vien, id_phong, ten_phong, tiet_thu_may }) => ({
-          id_mon,
-          ten_mon,
-          id_giao_vien,
-          ten_giao_vien,
-          id_phong,
-          ten_phong,
-          tiet_thu_may,
-        }),
-      );
+      adjustRawUnscheduled.value = raw.ds_chua_xep.map(({ id_mon, ten_mon, id_giao_vien, ten_giao_vien, id_phong, ten_phong, tiet_thu_may }) => ({
+        id_mon,
+        ten_mon,
+        id_giao_vien,
+        ten_giao_vien,
+        id_phong,
+        ten_phong,
+        tiet_thu_may,
+      }));
     } else {
       adjustRawTimetable.value = [];
       adjustRawUnscheduled.value = [];
     }
   } catch (error) {
-    message.error('Lỗi khi tải thời khóa biểu');
+    message.error("Lỗi khi tải thời khóa biểu");
   }
 };
 
@@ -303,4 +298,3 @@ const openAdjustDrawer = record => {
   fetchAdjustData();
 };
 </script>
-
