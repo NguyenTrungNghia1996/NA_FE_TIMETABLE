@@ -241,6 +241,8 @@ async function onDrop(caId, dayId, pIdx) {
         if (listData.value?.status === "success") {
           emit("update:rawTimetable", listData.value.data.timetable);
           emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+          selectedSubjectId.value = null;
+          selectedCellPos.value = null;
         } else {
           message.error("Load timetable error", listError.value || listData.value);
         }
