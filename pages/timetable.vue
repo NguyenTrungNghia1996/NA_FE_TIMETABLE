@@ -21,6 +21,7 @@
       v-model:rawTimetable="rawTimetable"
       v-model:rawUnscheduled="rawUnscheduled"
     />
+    <UnscheduledTable :data="rawUnscheduled" class="mt-6" />
   </div>
 </template>
 <script setup>

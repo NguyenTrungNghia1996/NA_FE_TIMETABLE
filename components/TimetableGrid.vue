@@ -1,36 +1,55 @@
 <template>
   <div @click="contextMenu.show = false">
-    <div v-for="ca in dsCa" :key="ca.id" class="mb-6">
-      <h3 class="font-semibold mb-2 select-none">Ca {{ ca.id }}</h3>
-      <div class="overflow-x-auto">
-        <table class="min-w-full border-collapse select-none">
-          <thead>
-            <tr>
-              <th class="border p-2 select-none">Tiết / Ngày</th>
-              <th v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 select-none">{{ ngay.ten }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
-              <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
-              <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] relative select-none" :class="[{ 'cursor-move': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock }, { 'bg-green-100': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock }, { 'bg-red-50': ngay.ds_Tiet[pIdx].isLock }, { 'bg-sky-200': isSameSubject(ca.id, ngay.id, pIdx) }, { 'bg-sky-400': isSelectedCell(ca.id, ngay.id, pIdx) }]" :draggable="ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
-                <template v-if="ngay.ds_Tiet[pIdx].isRest">
-                  <span class="italic text-red-500">Nghỉ</span>
-                </template>
-                <template v-else-if="ngay.ds_Tiet[pIdx].ten_mon">
-                  <div class="font-medium leading-tight">{{ ngay.ds_Tiet[pIdx].ten_mon }} - {{ ngay.ds_Tiet[pIdx].ten_giao_vien }}</div>
-                  <div class="text-gray-600">{{ ngay.ds_Tiet[pIdx].ten_phong }}</div>
-                </template>
-                <template v-else>
-                  <span class="text-gray-400">Trống</span>
-                </template>
-                <div v-if="ngay.ds_Tiet[pIdx].isLock" class="absolute top-1 right-1 text-[10px] text-red-600">Khóa</div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <a-tabs v-model:activeKey="activeCa">
+      <a-tab-pane v-for="ca in dsCa" :key="ca.id" :tab="`Ca ${ca.id}`">
+        <div class="overflow-x-auto">
+          <table class="min-w-full border-collapse select-none">
+            <thead>
+              <tr>
+                <th class="border p-2 select-none">Tiết / Ngày</th>
+                <th v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 select-none">{{ ngay.ten }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
+                <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
+                <td
+                  v-for="ngay in ca.ds_Ngay"
+                  :key="ngay.id"
+                  class="border p-2 text-xs align-top min-w-[120px] relative select-none"
+                  :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])"
+                  :draggable="isDraggable(ngay.ds_Tiet[pIdx])"
+                  @dragstart="onDragStart(ca.id, ngay.id, pIdx)"
+                  @dragover="onDragOver($event, ca.id, ngay.id, pIdx)"
+                  @drop="onDrop(ca.id, ngay.id, pIdx)"
+                  @click="onCellClick(ca.id, ngay.id, pIdx)"
+                  @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)"
+                >
+                  <template v-if="ngay.ds_Tiet[pIdx].isRest">
+                    <span class="italic text-red-500">Nghỉ</span>
+                  </template>
+                  <template v-else-if="ngay.ds_Tiet[pIdx].ten_mon">
+                    <div class="font-medium leading-tight">
+                      {{ ngay.ds_Tiet[pIdx].ten_mon }} - {{ ngay.ds_Tiet[pIdx].ten_giao_vien }}
+                    </div>
+                    <div class="text-gray-600">{{ ngay.ds_Tiet[pIdx].ten_phong }}</div>
+                  </template>
+                  <template v-else>
+                    <span class="text-gray-400">Trống</span>
+                  </template>
+                  <div
+                    v-if="ngay.ds_Tiet[pIdx].isLock"
+                    class="absolute top-1 right-1 text-[10px] text-red-600"
+                  >
+                    Khóa
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </a-tab-pane>
+    </a-tabs>
 
     <!-- Context Menu -->
     <div v-if="contextMenu.show" class="absolute bg-white border shadow rounded text-sm z-50" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
@@ -72,6 +91,7 @@ const props = defineProps({
 });
 
 const dsCa = ref([]);
+const activeCa = ref(1);
 const emit = defineEmits(["cell-click", "update:rawTimetable", "update:rawUnscheduled"]);
 const showAddModal = ref(false);
 const selectedIdx = ref(0);
@@ -89,6 +109,7 @@ watch(
       dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
     });
     dsCa.value = ds_Ca;
+    activeCa.value = ds_Ca[0]?.id || 1;
   },
   { immediate: true, deep: true },
 );
@@ -117,9 +138,24 @@ function isSameSubject(caId, dayId, pIdx) {
   return cell?.id_mon === selectedSubjectId.value && !isSelectedCell(caId, dayId, pIdx);
 }
 
+function isDraggable(cell) {
+  return cell?.isDrag && !cell.isRest && !cell.isLock;
+}
+
+function cellClasses(caId, dayId, pIdx, cell) {
+  const drag = isDraggable(cell);
+  return {
+    'cursor-move': drag,
+    'bg-green-100': drag,
+    'bg-red-50': cell.isLock,
+    'bg-sky-200': isSameSubject(caId, dayId, pIdx),
+    'bg-sky-400': isSelectedCell(caId, dayId, pIdx),
+  };
+}
+
 function onDragStart(caId, dayId, pIdx) {
   const cell = getCell(caId, dayId, pIdx);
-  if (!cell?.isDrag) return;
+  if (!isDraggable(cell)) return;
   dragSource.value = { caId, dayId, pIdx };
 }
 
@@ -149,7 +185,7 @@ async function onDrop(caId, dayId, pIdx) {
     },
   });
 
-  if (src.isLock || src.isRest || dst.isLock || dst.isRest || !src.isDrag || !dst.isDrag) return;
+  if (!isDraggable(src) || !isDraggable(dst)) return;
 
   const keys = Object.keys(src).filter(k => !["id_ca", "ngay", "tiet"].includes(k));
   const temp = {};
@@ -189,7 +225,7 @@ async function onDrop(caId, dayId, pIdx) {
 
 function onDragOver(event, caId, dayId, pIdx) {
   const cell = getCell(caId, dayId, pIdx);
-  if (cell?.isDrag && !cell.isRest && !cell.isLock) {
+  if (isDraggable(cell)) {
     event.preventDefault();
   }
 }
