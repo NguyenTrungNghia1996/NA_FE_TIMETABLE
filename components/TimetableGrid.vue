@@ -230,8 +230,20 @@ function openContextMenu(event, caId, dayId, pIdx) {
 async function onCellClick(caId, dayId, pIdx) {
   const cell = getCell(caId, dayId, pIdx);
   emit("cell-click", { ca: caId, ngay: dayId, tiet: pIdx + 1, record: cell });
-
-  console.log(">>>>>>>", cell.id_giao_vien, props.timetableId);
+  if (cell?.id_giao_vien && props.timetableId) {
+    try {
+      const { data, error } = await RestApi.timetable.get_teacher({
+        params: { idGV: cell.id_giao_vien, idtkb: props.timetableId },
+      });
+      if (error.value) {
+        console.error("Get teacher timetable error", error.value);
+      } else {
+        console.log("Teacher timetable", data.value);
+      }
+    } catch (err) {
+      console.error("Get teacher timetable error", err);
+    }
+  }
   if (cell?.id_mon) {
     selectedSubjectId.value = cell.id_mon;
     selectedCellPos.value = { ca: caId, ngay: dayId, pIdx };
