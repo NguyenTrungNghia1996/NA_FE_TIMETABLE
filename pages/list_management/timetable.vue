@@ -268,7 +268,7 @@ const openInfoDrawer = (reg) => {
 const fetchAdjustData = async () => {
   if (!adjustClassId.value || !adjustTimetableId.value) return;
   try {
-    const { data } = await RestApi.request.get('/api/tkb/lop', {
+    const { data } = await RestApi.timetable.get_class({
       params: { idLop: adjustClassId.value, idtkb: adjustTimetableId.value },
     });
     if (data.value?.status === 'success') {

@@ -169,7 +169,7 @@ async function onDrop(caId, dayId, pIdx) {
       message.error("Update timetable error", error.value || data.value);
     } else {
       try {
-        const { data: listData, error: listError } = await RestApi.request.get("/api/tkb/lop", {
+        const { data: listData, error: listError } = await RestApi.timetable.get_class({
           params: { idLop: props.classId, idtkb: dstClone.id_tkb },
         });
         if (listData.value?.status === "success") {
