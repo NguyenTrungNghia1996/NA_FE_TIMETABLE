@@ -74,6 +74,7 @@ let ENDPOINTS = {
   //TIMETABLE
   TIMETABLE: "/api/thoikhoabieu",
   TIMETABLE_FIND_CLASS_POSITION: "/api/tkb/timvitri/lop",
+  TIMETABLE_UPDATE_CLASS: "/api/tkb/update/lop",
 
   S3: "/api/presigned_url",
 };
@@ -717,6 +718,9 @@ class Timetable {
   }
   async find_class_position(data) {
     return await this.request.post(ENDPOINTS.TIMETABLE_FIND_CLASS_POSITION, data);
+  }
+  async update_class(data) {
+    return await this.request.post(ENDPOINTS.TIMETABLE_UPDATE_CLASS, data);
   }
 }
 export default () => {

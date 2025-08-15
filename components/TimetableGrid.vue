@@ -13,7 +13,7 @@
           <tbody>
             <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
               <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
-              <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] relative select-none" :class="[{ 'cursor-move': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock }, { 'bg-green-100': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock }, { 'bg-red-50': ngay.ds_Tiet[pIdx].isLock }]" :draggable="ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
+              <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] relative select-none" :class="[{ 'cursor-move': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock }, { 'bg-green-100': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock }, { 'bg-red-50': ngay.ds_Tiet[pIdx].isLock }, { 'bg-sky-200': isSameSubject(ca.id, ngay.id, pIdx) }, { 'bg-sky-400': isSelectedCell(ca.id, ngay.id, pIdx) }]" :draggable="ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
                 <template v-if="ngay.ds_Tiet[pIdx].isRest">
                   <span class="italic text-red-500">Nghỉ</span>
                 </template>
@@ -65,6 +65,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  classId: {
+    type: Number,
+    default: null,
+  },
 });
 
 const dsCa = ref([]);
@@ -72,6 +76,8 @@ const emit = defineEmits(["cell-click", "update:rawTimetable", "update:rawUnsche
 const showAddModal = ref(false);
 const selectedIdx = ref(0);
 const targetCell = ref(null);
+const selectedSubjectId = ref(null);
+const selectedCellPos = ref(null);
 
 watch(
   () => props.rawTimetable,
@@ -101,17 +107,32 @@ function getCell(caId, dayId, pIdx) {
   return ngay?.ds_Tiet[pIdx];
 }
 
+function isSelectedCell(caId, dayId, pIdx) {
+  return selectedCellPos.value && selectedCellPos.value.ca === caId && selectedCellPos.value.ngay === dayId && selectedCellPos.value.pIdx === pIdx;
+}
+
+function isSameSubject(caId, dayId, pIdx) {
+  if (!selectedSubjectId.value) return false;
+  const cell = getCell(caId, dayId, pIdx);
+  return cell?.id_mon === selectedSubjectId.value && !isSelectedCell(caId, dayId, pIdx);
+}
+
 function onDragStart(caId, dayId, pIdx) {
   const cell = getCell(caId, dayId, pIdx);
   if (!cell?.isDrag) return;
   dragSource.value = { caId, dayId, pIdx };
 }
 
-function onDrop(caId, dayId, pIdx) {
+async function onDrop(caId, dayId, pIdx) {
   if (!dragSource.value) return;
-  const src = getCell(dragSource.value.caId, dragSource.value.dayId, dragSource.value.pIdx);
+  const srcCa = dragSource.value.caId;
+  const srcDay = dragSource.value.dayId;
+  const srcPIdx = dragSource.value.pIdx;
+  const src = getCell(srcCa, srcDay, srcPIdx);
   const dst = getCell(caId, dayId, pIdx);
   if (!src || !dst) return;
+  const srcClone = { ...src };
+  const dstClone = { ...dst };
 
   console.log("Drag drop", {
     source: {
@@ -137,6 +158,19 @@ function onDrop(caId, dayId, pIdx) {
   keys.forEach(k => (dst[k] = temp[k]));
   dragSource.value = null;
   updateRawTimetable();
+
+  try {
+    const body = {
+      id_lop: props.classId,
+      timetable: [{ ...srcClone }, { ...dstClone }],
+    };
+    const { data, error } = await RestApi.timetable.update_class({ body });
+    if (data.value?.status !== "success") {
+      console.error("Update timetable error", error.value || data.value);
+    }
+  } catch (err) {
+    console.error("Update timetable error", err);
+  }
 }
 
 function onDragOver(event, caId, dayId, pIdx) {
@@ -167,9 +201,17 @@ async function onCellClick(caId, dayId, pIdx) {
   });
   emit("cell-click", { ca: caId, ngay: dayId, tiet: pIdx + 1, record: cell });
 
+  if (cell?.id_mon) {
+    selectedSubjectId.value = cell.id_mon;
+    selectedCellPos.value = { ca: caId, ngay: dayId, pIdx };
+  } else {
+    selectedSubjectId.value = null;
+    selectedCellPos.value = null;
+  }
+
   try {
     const body = {
-      id_lop: 2,
+      id_lop: props.classId,
       timetable: [
         {
           ...cell,

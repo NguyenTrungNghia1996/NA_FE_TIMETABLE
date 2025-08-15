@@ -76,6 +76,7 @@
         <TimetableGrid
           v-model:rawTimetable="adjustRawTimetable"
           v-model:rawUnscheduled="adjustRawUnscheduled"
+          :classId="adjustClassId"
         />
       </ClientOnly>
     </a-drawer>
