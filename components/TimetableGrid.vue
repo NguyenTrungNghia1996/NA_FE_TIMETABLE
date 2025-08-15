@@ -78,6 +78,7 @@ const props = defineProps({
 
 const dsCa = ref([]);
 const activeCa = ref(1);
+const teacherDsCa = ref([]);
 const emit = defineEmits(["cell-click", "update:rawTimetable", "update:rawUnscheduled"]);
 const showAddModal = ref(false);
 const selectedIdx = ref(0);
@@ -235,10 +236,16 @@ async function onCellClick(caId, dayId, pIdx) {
       const { data, error } = await RestApi.timetable.get_teacher({
         params: { idGV: cell.id_giao_vien, idtkb: props.timetableId },
       });
-      if (error.value) {
-        console.error("Get teacher timetable error", error.value);
+      if (data.value?.status === "success") {
+        const { ds_Ca } = transformTimetable(data.value.data.timetable || [], {
+          daysCount: 7,
+          shifts: [1, 2],
+          periodsPerShift: 5,
+          dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+        });
+        teacherDsCa.value = ds_Ca;
       } else {
-        console.log("Teacher timetable", data.value);
+        console.error("Get teacher timetable error", error.value || data.value);
       }
     } catch (err) {
       console.error("Get teacher timetable error", err);
