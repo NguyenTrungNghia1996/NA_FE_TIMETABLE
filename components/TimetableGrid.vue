@@ -13,28 +13,13 @@
           <tbody>
             <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
               <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
-              <td
-                v-for="ngay in ca.ds_Ngay"
-                :key="ngay.id"
-                class="border p-2 text-xs align-top min-w-[120px] relative select-none"
-                :class="[
-                  { 'cursor-move': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock },
-                  { 'bg-green-50': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock },
-                  { 'bg-red-50': ngay.ds_Tiet[pIdx].isLock },
-                ]"
-                :draggable="ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock"
-                @dragstart="onDragStart(ca.id, ngay.id, pIdx)"
-                @dragover="onDragOver($event, ca.id, ngay.id, pIdx)"
-                @drop="onDrop(ca.id, ngay.id, pIdx)"
-                @click="onCellClick(ca.id, ngay.id, pIdx)"
-                @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)"
-              >
+              <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] relative select-none" :class="[{ 'cursor-move': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock }, { 'bg-green-100': ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock }, { 'bg-red-50': ngay.ds_Tiet[pIdx].isLock }, { 'bg-sky-200': isSameSubject(ca.id, ngay.id, pIdx) }, { 'bg-sky-400': isSelectedCell(ca.id, ngay.id, pIdx) }]" :draggable="ngay.ds_Tiet[pIdx].isDrag && !ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isLock" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
                 <template v-if="ngay.ds_Tiet[pIdx].isRest">
                   <span class="italic text-red-500">Nghỉ</span>
                 </template>
                 <template v-else-if="ngay.ds_Tiet[pIdx].ten_mon">
-                  <div class="font-medium leading-tight">{{ ngay.ds_Tiet[pIdx].ten_mon }}</div>
-                  <div class="text-gray-600">{{ ngay.ds_Tiet[pIdx].ten_giao_vien }}</div>
+                  <div class="font-medium leading-tight">{{ ngay.ds_Tiet[pIdx].ten_mon }} - {{ ngay.ds_Tiet[pIdx].ten_giao_vien }}</div>
+                  <div class="text-gray-600">{{ ngay.ds_Tiet[pIdx].ten_phong }}</div>
                 </template>
                 <template v-else>
                   <span class="text-gray-400">Trống</span>
@@ -48,67 +33,20 @@
     </div>
 
     <!-- Context Menu -->
-    <div
-      v-if="contextMenu.show"
-      class="absolute bg-white border shadow rounded text-sm z-50"
-      :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }"
-    >
+    <div v-if="contextMenu.show" class="absolute bg-white border shadow rounded text-sm z-50" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
       <ul class="min-w-[150px] py-1 select-none">
-        <li
-          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
-          v-if="!contextMenu.cell?.ten_mon && !contextMenu.cell?.isRest"
-          @click="addLesson"
-        >
-          Thêm tiết học
-        </li>
-        <li
-          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
-          v-if="!contextMenu.cell?.isRest"
-          @click="setRest(true)"
-        >
-          Đặt tiết nghỉ
-        </li>
-        <li
-          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
-          v-else
-          @click="setRest(false)"
-        >
-          Xóa tiết nghỉ
-        </li>
-        <li
-          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
-          v-if="!contextMenu.cell?.isLock"
-          @click="setLock(true)"
-        >
-          Đặt tiết khóa
-        </li>
-        <li
-          class="px-3 py-1 hover:bg-gray-100 cursor-pointer"
-          v-else
-          @click="setLock(false)"
-        >
-          Xóa tiết khóa
-        </li>
+        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" v-if="!contextMenu.cell?.ten_mon && !contextMenu.cell?.isRest" @click="addLesson">Thêm tiết học</li>
+        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" v-if="!contextMenu.cell?.isRest" @click="setRest(true)">Đặt tiết nghỉ</li>
+        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" v-else @click="setRest(false)">Xóa tiết nghỉ</li>
+        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" v-if="!contextMenu.cell?.isLock" @click="setLock(true)">Đặt tiết khóa</li>
+        <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" v-else @click="setLock(false)">Xóa tiết khóa</li>
         <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click="clearCell">Xóa tiết</li>
       </ul>
     </div>
 
-    <a-modal
-      v-model:open="showAddModal"
-      title="Chọn tiết học"
-      ok-text="Thêm"
-      cancel-text="Hủy"
-      @ok="confirmAdd"
-      @cancel="showAddModal = false"
-    >
+    <a-modal v-model:open="showAddModal" title="Chọn tiết học" ok-text="Thêm" cancel-text="Hủy" @ok="confirmAdd" @cancel="showAddModal = false">
       <a-select v-model:value="selectedIdx" class="w-full mb-4">
-        <a-select-option
-          v-for="(lesson, idx) in rawUnscheduled"
-          :key="idx"
-          :value="idx"
-        >
-          {{ lesson.ten_mon }} - {{ lesson.ten_giao_vien }}
-        </a-select-option>
+        <a-select-option v-for="(lesson, idx) in rawUnscheduled" :key="idx" :value="idx"> {{ lesson.ten_mon }} - {{ lesson.ten_giao_vien }} </a-select-option>
       </a-select>
     </a-modal>
   </div>
@@ -127,6 +65,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
+  classId: {
+    type: Number,
+    default: null,
+  },
 });
 
 const dsCa = ref([]);
@@ -134,6 +76,8 @@ const emit = defineEmits(["cell-click", "update:rawTimetable", "update:rawUnsche
 const showAddModal = ref(false);
 const selectedIdx = ref(0);
 const targetCell = ref(null);
+const selectedSubjectId = ref(null);
+const selectedCellPos = ref(null);
 
 watch(
   () => props.rawTimetable,
@@ -142,19 +86,11 @@ watch(
       daysCount: 7,
       shifts: [1, 2],
       periodsPerShift: 5,
-      dayNames: [
-        "Thứ 2",
-        "Thứ 3",
-        "Thứ 4",
-        "Thứ 5",
-        "Thứ 6",
-        "Thứ 7",
-        "Chủ Nhật",
-      ],
+      dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
     });
     dsCa.value = ds_Ca;
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 function updateRawTimetable(unscheduled = props.rawUnscheduled) {
@@ -171,17 +107,32 @@ function getCell(caId, dayId, pIdx) {
   return ngay?.ds_Tiet[pIdx];
 }
 
+function isSelectedCell(caId, dayId, pIdx) {
+  return selectedCellPos.value && selectedCellPos.value.ca === caId && selectedCellPos.value.ngay === dayId && selectedCellPos.value.pIdx === pIdx;
+}
+
+function isSameSubject(caId, dayId, pIdx) {
+  if (!selectedSubjectId.value) return false;
+  const cell = getCell(caId, dayId, pIdx);
+  return cell?.id_mon === selectedSubjectId.value && !isSelectedCell(caId, dayId, pIdx);
+}
+
 function onDragStart(caId, dayId, pIdx) {
   const cell = getCell(caId, dayId, pIdx);
   if (!cell?.isDrag) return;
   dragSource.value = { caId, dayId, pIdx };
 }
 
-function onDrop(caId, dayId, pIdx) {
+async function onDrop(caId, dayId, pIdx) {
   if (!dragSource.value) return;
-  const src = getCell(dragSource.value.caId, dragSource.value.dayId, dragSource.value.pIdx);
+  const srcCa = dragSource.value.caId;
+  const srcDay = dragSource.value.dayId;
+  const srcPIdx = dragSource.value.pIdx;
+  const src = getCell(srcCa, srcDay, srcPIdx);
   const dst = getCell(caId, dayId, pIdx);
   if (!src || !dst) return;
+  const srcClone = { ...src };
+  const dstClone = { ...dst };
 
   console.log("Drag drop", {
     source: {
@@ -207,6 +158,33 @@ function onDrop(caId, dayId, pIdx) {
   keys.forEach(k => (dst[k] = temp[k]));
   dragSource.value = null;
   updateRawTimetable();
+
+  try {
+    const body = {
+      id_lop: props.classId,
+      timetable: [{ ...srcClone }, { ...dstClone }],
+    };
+    const { data, error } = await RestApi.timetable.update_class({ body });
+    if (data.value?.status !== "success") {
+      message.error("Update timetable error", error.value || data.value);
+    } else {
+      try {
+        const { data: listData, error: listError } = await RestApi.timetable.get_class({
+          params: { idLop: props.classId, idtkb: dstClone.id_tkb },
+        });
+        if (listData.value?.status === "success") {
+          emit("update:rawTimetable", listData.value.data.timetable);
+          emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+        } else {
+          message.error("Load timetable error", listError.value || listData.value);
+        }
+      } catch (listErr) {
+        message.error("Load timetable error", listErr);
+      }
+    }
+  } catch (err) {
+    message.error("Update timetable error", err);
+  }
 }
 
 function onDragOver(event, caId, dayId, pIdx) {
@@ -237,9 +215,17 @@ async function onCellClick(caId, dayId, pIdx) {
   });
   emit("cell-click", { ca: caId, ngay: dayId, tiet: pIdx + 1, record: cell });
 
+  if (cell?.id_mon) {
+    selectedSubjectId.value = cell.id_mon;
+    selectedCellPos.value = { ca: caId, ngay: dayId, pIdx };
+  } else {
+    selectedSubjectId.value = null;
+    selectedCellPos.value = null;
+  }
+
   try {
     const body = {
-      id_lop: 2,
+      id_lop: props.classId,
       timetable: [
         {
           ...cell,
