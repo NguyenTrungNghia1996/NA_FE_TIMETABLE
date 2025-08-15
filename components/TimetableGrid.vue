@@ -141,7 +141,7 @@ function onDragStart(caId, dayId, pIdx) {
   dragSource.value = { caId, dayId, pIdx };
 }
 
-function onDrop(caId, dayId, pIdx) {
+async function onDrop(caId, dayId, pIdx) {
   if (!dragSource.value) return;
   const src = getCell(dragSource.value.caId, dragSource.value.dayId, dragSource.value.pIdx);
   const dst = getCell(caId, dayId, pIdx);
@@ -171,6 +171,19 @@ function onDrop(caId, dayId, pIdx) {
   keys.forEach(k => (dst[k] = temp[k]));
   dragSource.value = null;
   updateRawTimetable();
+
+  try {
+    const body = {
+      id_lop: 2,
+      timetable: gridToFlat(dsCa.value),
+    };
+    const { data, error } = await RestApi.timetable.update_class({ body });
+    if (data.value?.status !== "success") {
+      console.error("Update timetable error", error.value || data.value);
+    }
+  } catch (err) {
+    console.error("Update timetable error", err);
+  }
 }
 
 function onDragOver(event, caId, dayId, pIdx) {
