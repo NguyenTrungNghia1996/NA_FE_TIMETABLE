@@ -1,6 +1,6 @@
 <template>
   <div class="mt-4">
-    <h4 class="font-semibold mb-2">Tiết chưa xếp của lớp học</h4>
+    <h4 class="font-semibold mb-2">Tiết chưa xếp của giáo viên</h4>
     <ClientOnly>
       <a-table :columns="columns" :data-source="data" :pagination="false" bordered size="small" />
     </ClientOnly>
@@ -29,9 +29,9 @@ const columns = [
     key: "ten_mon",
   },
   {
-    title: "Giáo viên",
-    dataIndex: "ten_giao_vien",
-    key: "ten_giao_vien",
+    title: "Lớp",
+    dataIndex: "ten_lop",
+    key: "ten_lop",
   },
   {
     title: "Phòng",

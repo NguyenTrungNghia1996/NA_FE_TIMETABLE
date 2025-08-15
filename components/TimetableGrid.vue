@@ -1,55 +1,78 @@
 <template>
   <div @click="contextMenu.show = false">
-    <a-tabs v-model:activeKey="activeCa">
-      <a-tab-pane v-for="ca in dsCa" :key="ca.id" :tab="`Ca ${ca.id}`">
-        <div class="overflow-x-auto">
-          <table class="min-w-full border-collapse select-none">
-            <thead>
-              <tr>
-                <th class="border p-2 select-none">Tiết / Ngày</th>
-                <th v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 select-none">{{ ngay.ten }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
-                <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
-                <td
-                  v-for="ngay in ca.ds_Ngay"
-                  :key="ngay.id"
-                  class="border p-2 text-xs align-top min-w-[120px] relative select-none"
-                  :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])"
-                  :draggable="isDraggable(ngay.ds_Tiet[pIdx])"
-                  @dragstart="onDragStart(ca.id, ngay.id, pIdx)"
-                  @dragover="onDragOver($event, ca.id, ngay.id, pIdx)"
-                  @drop="onDrop(ca.id, ngay.id, pIdx)"
-                  @click="onCellClick(ca.id, ngay.id, pIdx)"
-                  @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)"
-                >
-                  <template v-if="ngay.ds_Tiet[pIdx].isRest">
-                    <span class="italic text-red-500">Nghỉ</span>
-                  </template>
-                  <template v-else-if="ngay.ds_Tiet[pIdx].ten_mon">
-                    <div class="font-medium leading-tight">
-                      {{ ngay.ds_Tiet[pIdx].ten_mon }} - {{ ngay.ds_Tiet[pIdx].ten_giao_vien }}
-                    </div>
-                    <div class="text-gray-600">{{ ngay.ds_Tiet[pIdx].ten_phong }}</div>
-                  </template>
-                  <template v-else>
-                    <span class="text-gray-400">Trống</span>
-                  </template>
-                  <div
-                    v-if="ngay.ds_Tiet[pIdx].isLock"
-                    class="absolute top-1 right-1 text-[10px] text-red-600"
-                  >
-                    Khóa
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </a-tab-pane>
-    </a-tabs>
+    <div class="grid grid-cols-4 gap-2">
+      <a-tabs v-model:activeKey="activeCa" class="col-span-3">
+        <a-tab-pane v-for="ca in dsCa" :key="ca.id" :tab="`Ca ${ca.id}`">
+          <div class="overflow-x-auto">
+            <table class="min-w-full border-collapse select-none">
+              <thead>
+                <tr>
+                  <th class="border p-2 select-none">Tiết / Ngày</th>
+                  <th v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 select-none">{{ ngay.ten }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
+                  <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
+                  <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] relative select-none" :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="isDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
+                    <template v-if="ngay.ds_Tiet[pIdx].isRest">
+                      <span class="italic text-red-500">Nghỉ</span>
+                    </template>
+                    <template v-else-if="ngay.ds_Tiet[pIdx].ten_mon">
+                      <div class="font-medium leading-tight">{{ ngay.ds_Tiet[pIdx].ten_mon }} - {{ ngay.ds_Tiet[pIdx].ten_giao_vien }}</div>
+                      <div class="text-gray-600">{{ ngay.ds_Tiet[pIdx].ten_phong }}</div>
+                    </template>
+                    <template v-else>
+                      <span class="text-gray-400">Trống</span>
+                    </template>
+                    <div v-if="ngay.ds_Tiet[pIdx].isLock" class="absolute top-1 right-1 text-[10px] text-red-600">Khóa</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </a-tab-pane>
+      </a-tabs>
+      <UnscheduledTable :data="props.rawUnscheduled" class="mt-4" />
+    </div>
+
+    <div v-if="teacherDsCa.length" class="grid grid-cols-4 gap-2">
+      <a-tabs v-model:activeKey="teacherActiveCa" class="col-span-3">
+        <a-tab-pane v-for="ca in teacherDsCa" :key="ca.id" :tab="`Ca ${ca.id}`">
+          <div class="overflow-x-auto">
+            <table class="min-w-full border-collapse select-none">
+              <thead>
+                <tr>
+                  <th class="border p-2 select-none">Tiết / Ngày</th>
+                  <th v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 select-none">{{ ngay.ten }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
+                  <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
+                  <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] select-none">
+                    <template v-if="ngay.ds_Tiet[pIdx].isRest">
+                      <span class="italic text-red-500">Nghỉ</span>
+                    </template>
+                    <template v-else-if="ngay.ds_Tiet[pIdx].ten_mon">
+                      <div class="font-medium leading-tight">
+                        {{ ngay.ds_Tiet[pIdx].ten_mon }}
+                        <template v-if="ngay.ds_Tiet[pIdx].ten_lop"> - {{ ngay.ds_Tiet[pIdx].ten_lop }} </template>
+                      </div>
+                      <div class="text-gray-600">{{ ngay.ds_Tiet[pIdx].ten_phong }}</div>
+                    </template>
+                    <template v-else>
+                      <span class="text-gray-400">Trống</span>
+                    </template>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </a-tab-pane>
+      </a-tabs>
+      <TeacherUnscheduledTable v-if="teacherUnscheduled.length" :data="teacherUnscheduled" class="mt-4" />
+    </div>
 
     <!-- Context Menu -->
     <div v-if="contextMenu.show" class="absolute bg-white border shadow rounded text-sm z-50" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
@@ -88,10 +111,17 @@ const props = defineProps({
     type: Number,
     default: null,
   },
+  timetableId: {
+    type: Number,
+    default: null,
+  },
 });
 
 const dsCa = ref([]);
 const activeCa = ref(1);
+const teacherDsCa = ref([]);
+const teacherActiveCa = ref(1);
+const teacherUnscheduled = ref([]);
 const emit = defineEmits(["cell-click", "update:rawTimetable", "update:rawUnscheduled"]);
 const showAddModal = ref(false);
 const selectedIdx = ref(0);
@@ -145,11 +175,11 @@ function isDraggable(cell) {
 function cellClasses(caId, dayId, pIdx, cell) {
   const drag = isDraggable(cell);
   return {
-    'cursor-move': drag,
-    'bg-green-100': drag,
-    'bg-red-50': cell.isLock,
-    'bg-sky-200': isSameSubject(caId, dayId, pIdx),
-    'bg-sky-400': isSelectedCell(caId, dayId, pIdx),
+    "cursor-move": drag,
+    "bg-green-100": drag,
+    "bg-red-50": cell.isLock,
+    "bg-sky-200": isSameSubject(caId, dayId, pIdx),
+    "bg-sky-400": isSelectedCell(caId, dayId, pIdx),
   };
 }
 
@@ -243,14 +273,47 @@ function openContextMenu(event, caId, dayId, pIdx) {
 
 async function onCellClick(caId, dayId, pIdx) {
   const cell = getCell(caId, dayId, pIdx);
-  console.log("Cell clicked", {
-    ca: caId,
-    ngay: dayId,
-    tiet: pIdx + 1,
-    data: { ...cell },
-  });
   emit("cell-click", { ca: caId, ngay: dayId, tiet: pIdx + 1, record: cell });
-
+  if (cell?.id_giao_vien && props.timetableId) {
+    try {
+      const { data, error } = await RestApi.timetable.get_teacher({
+        params: { idGV: cell.id_giao_vien, idtkb: props.timetableId },
+      });
+      if (data.value?.status === "success") {
+        const { timetable, ds_chua_xep } = data.value.data || {};
+        const { ds_Ca } = transformTimetable(timetable || [], {
+          daysCount: 7,
+          shifts: [1, 2],
+          periodsPerShift: 5,
+          dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+        });
+        teacherDsCa.value = ds_Ca;
+        teacherActiveCa.value = ds_Ca[0]?.id || 1;
+        teacherUnscheduled.value = Array.isArray(ds_chua_xep)
+          ? ds_chua_xep.map(({ id_mon, ten_mon, id_lop, ten_lop, id_phong, ten_phong, tiet_thu_may }) => ({
+              id_mon,
+              ten_mon,
+              id_lop,
+              ten_lop,
+              id_phong,
+              ten_phong,
+              tiet_thu_may,
+            }))
+          : [];
+      } else {
+        console.error("Get teacher timetable error", error.value || data.value);
+        teacherDsCa.value = [];
+        teacherUnscheduled.value = [];
+      }
+    } catch (err) {
+      console.error("Get teacher timetable error", err);
+      teacherDsCa.value = [];
+      teacherUnscheduled.value = [];
+    }
+  } else {
+    teacherDsCa.value = [];
+    teacherUnscheduled.value = [];
+  }
   if (cell?.id_mon) {
     selectedSubjectId.value = cell.id_mon;
     selectedCellPos.value = { ca: caId, ngay: dayId, pIdx };
@@ -258,7 +321,6 @@ async function onCellClick(caId, dayId, pIdx) {
     selectedSubjectId.value = null;
     selectedCellPos.value = null;
   }
-
   try {
     const body = {
       id_lop: props.classId,
