@@ -74,7 +74,7 @@
           <SelectClass v-model="adjustClassId" />
         </div>
         <div class="grid grid-cols-4 gap-2">
-          <TimetableGrid class="col-span-3" v-model:rawTimetable="adjustRawTimetable" v-model:rawUnscheduled="adjustRawUnscheduled" :classId="adjustClassId" />
+          <TimetableGrid class="col-span-3" v-model:rawTimetable="adjustRawTimetable" v-model:rawUnscheduled="adjustRawUnscheduled" :classId="adjustClassId" :timetableId="adjustTimetableId" />
           <UnscheduledTable :data="adjustRawUnscheduled" class="mt-4" />
         </div>
       </ClientOnly>

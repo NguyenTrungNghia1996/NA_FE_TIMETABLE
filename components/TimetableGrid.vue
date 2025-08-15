@@ -13,36 +13,18 @@
             <tbody>
               <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
                 <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
-                <td
-                  v-for="ngay in ca.ds_Ngay"
-                  :key="ngay.id"
-                  class="border p-2 text-xs align-top min-w-[120px] relative select-none"
-                  :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])"
-                  :draggable="isDraggable(ngay.ds_Tiet[pIdx])"
-                  @dragstart="onDragStart(ca.id, ngay.id, pIdx)"
-                  @dragover="onDragOver($event, ca.id, ngay.id, pIdx)"
-                  @drop="onDrop(ca.id, ngay.id, pIdx)"
-                  @click="onCellClick(ca.id, ngay.id, pIdx)"
-                  @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)"
-                >
+                <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] relative select-none" :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="isDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
                   <template v-if="ngay.ds_Tiet[pIdx].isRest">
                     <span class="italic text-red-500">Nghỉ</span>
                   </template>
                   <template v-else-if="ngay.ds_Tiet[pIdx].ten_mon">
-                    <div class="font-medium leading-tight">
-                      {{ ngay.ds_Tiet[pIdx].ten_mon }} - {{ ngay.ds_Tiet[pIdx].ten_giao_vien }}
-                    </div>
+                    <div class="font-medium leading-tight">{{ ngay.ds_Tiet[pIdx].ten_mon }} - {{ ngay.ds_Tiet[pIdx].ten_giao_vien }}</div>
                     <div class="text-gray-600">{{ ngay.ds_Tiet[pIdx].ten_phong }}</div>
                   </template>
                   <template v-else>
                     <span class="text-gray-400">Trống</span>
                   </template>
-                  <div
-                    v-if="ngay.ds_Tiet[pIdx].isLock"
-                    class="absolute top-1 right-1 text-[10px] text-red-600"
-                  >
-                    Khóa
-                  </div>
+                  <div v-if="ngay.ds_Tiet[pIdx].isLock" class="absolute top-1 right-1 text-[10px] text-red-600">Khóa</div>
                 </td>
               </tr>
             </tbody>
@@ -85,6 +67,10 @@ const props = defineProps({
     required: true,
   },
   classId: {
+    type: Number,
+    default: null,
+  },
+  timetableId: {
     type: Number,
     default: null,
   },
@@ -145,11 +131,11 @@ function isDraggable(cell) {
 function cellClasses(caId, dayId, pIdx, cell) {
   const drag = isDraggable(cell);
   return {
-    'cursor-move': drag,
-    'bg-green-100': drag,
-    'bg-red-50': cell.isLock,
-    'bg-sky-200': isSameSubject(caId, dayId, pIdx),
-    'bg-sky-400': isSelectedCell(caId, dayId, pIdx),
+    "cursor-move": drag,
+    "bg-green-100": drag,
+    "bg-red-50": cell.isLock,
+    "bg-sky-200": isSameSubject(caId, dayId, pIdx),
+    "bg-sky-400": isSelectedCell(caId, dayId, pIdx),
   };
 }
 
@@ -243,14 +229,9 @@ function openContextMenu(event, caId, dayId, pIdx) {
 
 async function onCellClick(caId, dayId, pIdx) {
   const cell = getCell(caId, dayId, pIdx);
-  console.log("Cell clicked", {
-    ca: caId,
-    ngay: dayId,
-    tiet: pIdx + 1,
-    data: { ...cell },
-  });
   emit("cell-click", { ca: caId, ngay: dayId, tiet: pIdx + 1, record: cell });
 
+  console.log(">>>>>>>", cell.id_giao_vien, props.timetableId);
   if (cell?.id_mon) {
     selectedSubjectId.value = cell.id_mon;
     selectedCellPos.value = { ca: caId, ngay: dayId, pIdx };
@@ -258,7 +239,6 @@ async function onCellClick(caId, dayId, pIdx) {
     selectedSubjectId.value = null;
     selectedCellPos.value = null;
   }
-
   try {
     const body = {
       id_lop: props.classId,
