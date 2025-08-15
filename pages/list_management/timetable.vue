@@ -78,6 +78,7 @@
           v-model:rawUnscheduled="adjustRawUnscheduled"
           :classId="adjustClassId"
         />
+        <UnscheduledTable :data="adjustRawUnscheduled" class="mt-4" />
       </ClientOnly>
     </a-drawer>
   </div>
