@@ -166,10 +166,24 @@ async function onDrop(caId, dayId, pIdx) {
     };
     const { data, error } = await RestApi.timetable.update_class({ body });
     if (data.value?.status !== "success") {
-      console.error("Update timetable error", error.value || data.value);
+      message.error("Update timetable error", error.value || data.value);
+    } else {
+      try {
+        const { data: listData, error: listError } = await RestApi.request.get("/api/tkb/lop", {
+          params: { idLop: props.classId, idtkb: dstClone.id_tkb },
+        });
+        if (listData.value?.status === "success") {
+          emit("update:rawTimetable", listData.value.data.timetable);
+          emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+        } else {
+          message.error("Load timetable error", listError.value || listData.value);
+        }
+      } catch (listErr) {
+        message.error("Load timetable error", listErr);
+      }
     }
   } catch (err) {
-    console.error("Update timetable error", err);
+    message.error("Update timetable error", err);
   }
 }
 
