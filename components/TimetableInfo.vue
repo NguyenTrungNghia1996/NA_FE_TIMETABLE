@@ -46,7 +46,8 @@ const cancelArrange = () => {
 };
 
 async function fetchInfo() {
-  if (!props.timetableId) return;
+  // if (!props.timetableId) return;
+  // settingStore.setLoading(true);
   try {
     const { data } = await RestApi.timetable.detail({
       params: { Id: props.timetableId },
@@ -59,6 +60,7 @@ async function fetchInfo() {
   } catch (err) {
     console.error("Fetch timetable info error", err);
   }
+  // settingStore.setLoading(false);
 }
 
 function reset() {
@@ -74,8 +76,9 @@ async function refresh() {
   await fetchInfo();
 }
 
-watch(() => props.timetableId, await fetchInfo(), { immediate: true });
-
+// watch(() => props.timetableId, await fetchInfo(), { immediate: true });
+onMounted(fetchInfo);
+watch(() => props.timetableId, fetchInfo);
 defineExpose({ refresh, reset });
 </script>
 
