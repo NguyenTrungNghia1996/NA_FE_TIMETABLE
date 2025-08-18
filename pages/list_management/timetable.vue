@@ -70,7 +70,7 @@
     </a-drawer>
     <a-drawer v-model:open="drawerAdjustOpen" title="Tinh chỉnh thời khóa biểu" :footer="null" height="100vh" placement="bottom">
       <ClientOnly>
-        <div class="mb-4">
+        <div class="mb-2">
           <SelectClass v-model="adjustClassId" />
         </div>
         <TimetableGrid v-model:rawTimetable="adjustRawTimetable" v-model:rawUnscheduled="adjustRawUnscheduled" :classId="adjustClassId" :timetableId="adjustTimetableId" />
