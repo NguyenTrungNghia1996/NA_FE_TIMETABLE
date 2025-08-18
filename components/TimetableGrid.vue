@@ -2,8 +2,8 @@
   <div @click="contextMenu.show = false" class="grid grid-cols-1 gap-5">
     <SelectClass v-model="selectedClassId" class="mb-2" />
     <div class="grid grid-cols-4 gap-2">
-      <a-tabs v-model:activeKey="activeCa" class="col-span-3">
-        <a-tab-pane v-for="ca in dsCa" :key="ca.id" :tab="`Ca ${ca.id}`">
+      <a-tabs v-model:activeKey="activeCa" class="col-span-3" type="card" size="small">
+        <a-tab-pane v-for="ca in dsCa" :key="ca.id" :tab="ca.id == 1 ? 'Ca Sáng' : 'Ca Chiều'">
           <div class="overflow-x-auto">
             <table class="min-w-full border-collapse select-none">
               <thead>
@@ -39,8 +39,8 @@
 
     <SelectTeacher v-model="selectedTeacherId" />
     <div v-if="teacherDsCa.length" class="grid grid-cols-4 gap-2">
-      <a-tabs v-model:activeKey="teacherActiveCa" class="col-span-3">
-        <a-tab-pane v-for="ca in teacherDsCa" :key="ca.id" :tab="`Ca ${ca.id}`">
+      <a-tabs v-model:activeKey="teacherActiveCa" class="col-span-3" type="card" size="small">
+        <a-tab-pane v-for="ca in teacherDsCa" :key="ca.id" :tab="ca.id == 1 ? 'Ca Sáng' : 'Ca Chiều'">
           <div class="overflow-x-auto">
             <table class="min-w-full border-collapse select-none">
               <thead>
@@ -91,11 +91,7 @@
 
     <a-modal v-model:open="showAddModal" title="Chọn tiết học" ok-text="Thêm" cancel-text="Hủy" @ok="confirmAdd" @cancel="showAddModal = false">
       <a-select v-model:value="selectedIdx" class="w-full mb-4">
-        <a-select-option
-          v-for="(lesson, idx) in contextMenu.isTeacher ? teacherUnscheduled : rawUnscheduled"
-          :key="idx"
-          :value="idx"
-        >
+        <a-select-option v-for="(lesson, idx) in contextMenu.isTeacher ? teacherUnscheduled : rawUnscheduled" :key="idx" :value="idx">
           {{ lesson.ten_mon }}
           <template v-if="contextMenu.isTeacher">
             <template v-if="lesson.ten_lop"> - {{ lesson.ten_lop }} </template>
@@ -531,9 +527,7 @@ async function onTeacherCellClick(caId, dayId, pIdx) {
 }
 
 function setRest(val) {
-  const cell = contextMenu.isTeacher
-    ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx)
-    : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
+  const cell = contextMenu.isTeacher ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx) : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell) return;
   cell.isRest = val;
   if (val) {
@@ -560,9 +554,7 @@ function setRest(val) {
 }
 
 function setLock(val) {
-  const cell = contextMenu.isTeacher
-    ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx)
-    : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
+  const cell = contextMenu.isTeacher ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx) : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell) return;
   cell.isLock = val;
   // console.log(val ? "Set locked period" : "Cleared locked period", {
@@ -578,9 +570,7 @@ function setLock(val) {
 }
 
 function clearCell() {
-  const cell = contextMenu.isTeacher
-    ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx)
-    : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
+  const cell = contextMenu.isTeacher ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx) : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell) return;
   const removed = contextMenu.isTeacher
     ? {
@@ -639,9 +629,7 @@ function clearCell() {
 }
 
 function addLesson() {
-  const cell = contextMenu.isTeacher
-    ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx)
-    : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
+  const cell = contextMenu.isTeacher ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx) : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell || cell.ten_mon) return;
   targetCell.value = cell;
   selectedIdx.value = 0;
