@@ -51,7 +51,17 @@
               <tbody>
                 <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
                   <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
-                  <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] select-none">
+                  <td
+                    v-for="ngay in ca.ds_Ngay"
+                    :key="ngay.id"
+                    class="border p-2 text-xs align-top min-w-[120px] relative select-none"
+                    :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])"
+                    :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])"
+                    @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)"
+                    @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)"
+                    @drop="onTeacherDrop(ca.id, ngay.id, pIdx)"
+                    @click="onTeacherCellClick(ca.id, ngay.id, pIdx)"
+                  >
                     <template v-if="ngay.ds_Tiet[pIdx].isRest">
                       <span class="italic text-red-500">Nghỉ</span>
                     </template>
@@ -65,6 +75,7 @@
                     <template v-else>
                       <span class="text-gray-400">Trống</span>
                     </template>
+                    <div v-if="ngay.ds_Tiet[pIdx].isLock" class="absolute top-1 right-1 text-[10px] text-red-600">Khóa</div>
                   </td>
                 </tr>
               </tbody>
@@ -161,10 +172,17 @@ function updateRawTimetable(unscheduled = props.rawUnscheduled) {
 }
 
 const dragSource = ref(null);
+const teacherDragSource = ref(null);
 const contextMenu = reactive({ show: false, x: 0, y: 0, ca: null, ngay: null, pIdx: null, cell: null });
 
 function getCell(caId, dayId, pIdx) {
   const ca = dsCa.value.find(c => c.id === caId);
+  const ngay = ca?.ds_Ngay.find(n => n.id === dayId);
+  return ngay?.ds_Tiet[pIdx];
+}
+
+function getTeacherCell(caId, dayId, pIdx) {
+  const ca = teacherDsCa.value.find(c => c.id === caId);
   const ngay = ca?.ds_Ngay.find(n => n.id === dayId);
   return ngay?.ds_Tiet[pIdx];
 }
@@ -221,6 +239,10 @@ function isDraggable(cell) {
   return cell?.isDrag && !cell.isRest && !cell.isLock;
 }
 
+function teacherIsDraggable(cell) {
+  return cell?.isDrag && !cell.isRest && !cell.isLock;
+}
+
 function cellClasses(caId, dayId, pIdx, cell) {
   const drag = isDraggable(cell);
   return {
@@ -229,6 +251,15 @@ function cellClasses(caId, dayId, pIdx, cell) {
     "bg-red-50": cell.isLock,
     "bg-sky-200": isSameSubject(caId, dayId, pIdx),
     "bg-sky-400": isSelectedCell(caId, dayId, pIdx),
+  };
+}
+
+function teacherCellClasses(caId, dayId, pIdx, cell) {
+  const drag = teacherIsDraggable(cell);
+  return {
+    "cursor-move": drag,
+    "bg-green-100": drag,
+    "bg-red-50": cell.isLock,
   };
 }
 
@@ -304,6 +335,70 @@ async function onDrop(caId, dayId, pIdx) {
   }
 }
 
+function onTeacherDragStart(caId, dayId, pIdx) {
+  const cell = getTeacherCell(caId, dayId, pIdx);
+  if (!teacherIsDraggable(cell)) return;
+  teacherDragSource.value = { caId, dayId, pIdx };
+}
+
+async function onTeacherDrop(caId, dayId, pIdx) {
+  if (!teacherDragSource.value) return;
+  const srcCa = teacherDragSource.value.caId;
+  const srcDay = teacherDragSource.value.dayId;
+  const srcPIdx = teacherDragSource.value.pIdx;
+  const src = getTeacherCell(srcCa, srcDay, srcPIdx);
+  const dst = getTeacherCell(caId, dayId, pIdx);
+  if (!src || !dst) return;
+  const srcClone = { ...src };
+  const dstClone = { ...dst };
+
+  if (!teacherIsDraggable(src) || !teacherIsDraggable(dst)) return;
+
+  const keys = Object.keys(src).filter(k => !["id_ca", "ngay", "tiet"].includes(k));
+  const temp = {};
+  keys.forEach(k => (temp[k] = src[k]));
+  keys.forEach(k => (src[k] = dst[k]));
+  keys.forEach(k => (dst[k] = temp[k]));
+  teacherDragSource.value = null;
+
+  try {
+    const body = {
+      id_giao_vien: selectedTeacherId.value,
+      timetable: [{ ...srcClone }, { ...dstClone }],
+    };
+    const { data, error } = await RestApi.timetable.update_teacher({ body });
+    if (data.value?.status !== "success") {
+      message.error("Update teacher timetable error", error.value || data.value);
+    } else {
+      await fetchTeacherTimetable(selectedTeacherId.value);
+      if (props.classId && props.timetableId) {
+        try {
+          const { data: listData, error: listError } = await RestApi.timetable.get_class({
+            params: { idLop: props.classId, idtkb: dstClone.id_tkb },
+          });
+          if (listData.value?.status === "success") {
+            emit("update:rawTimetable", listData.value.data.timetable);
+            emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+          } else {
+            message.error("Load timetable error", listError.value || listData.value);
+          }
+        } catch (listErr) {
+          message.error("Load timetable error", listErr);
+        }
+      }
+    }
+  } catch (err) {
+    message.error("Update teacher timetable error", err);
+  }
+}
+
+function onTeacherDragOver(event, caId, dayId, pIdx) {
+  const cell = getTeacherCell(caId, dayId, pIdx);
+  if (teacherIsDraggable(cell)) {
+    event.preventDefault();
+  }
+}
+
 function onDragOver(event, caId, dayId, pIdx) {
   const cell = getCell(caId, dayId, pIdx);
   if (isDraggable(cell)) {
@@ -364,6 +459,45 @@ async function onCellClick(caId, dayId, pIdx) {
     }
   } catch (err) {
     console.error("Find position error", err);
+  }
+}
+
+async function onTeacherCellClick(caId, dayId, pIdx) {
+  const cell = getTeacherCell(caId, dayId, pIdx);
+  if (!selectedTeacherId.value || !cell) return;
+  try {
+    const body = {
+      id_giao_vien: selectedTeacherId.value,
+      timetable: [
+        {
+          ...cell,
+          id_ca: caId,
+          ngay: dayId,
+          tiet: pIdx + 1,
+        },
+      ],
+    };
+    const { data, error } = await RestApi.timetable.find_teacher_position({ body });
+    if (data.value?.status === "success") {
+      const { timetable, ds_chua_xep } = data.value.data || {};
+      if (Array.isArray(timetable)) {
+        const { ds_Ca } = transformTimetable(timetable, {
+          daysCount: 7,
+          shifts: [1, 2],
+          periodsPerShift: 5,
+          dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+        });
+        teacherDsCa.value = ds_Ca;
+        teacherActiveCa.value = ds_Ca[0]?.id || 1;
+      }
+      if (Array.isArray(ds_chua_xep)) {
+        teacherUnscheduled.value = ds_chua_xep;
+      }
+    } else {
+      console.error("Find teacher position error", error.value || data.value);
+    }
+  } catch (err) {
+    console.error("Find teacher position error", err);
   }
 }
 
