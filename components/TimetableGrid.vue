@@ -561,19 +561,43 @@ function setRest(val) {
   }
 }
 
-function setLock(val) {
-  const cell = contextMenu.isTeacher ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx) : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
-  if (!cell) return;
-  cell.isLock = val;
-  // console.log(val ? "Set locked period" : "Cleared locked period", {
-  //   ca: contextMenu.ca,
-  //   ngay: contextMenu.ngay,
-  //   tiet: contextMenu.pIdx + 1,
-  //   data: { ...cell },
-  // });
-  contextMenu.show = false;
-  if (!contextMenu.isTeacher) {
-    updateRawTimetable();
+async function setLock(val) {
+  const cell = contextMenu.isTeacher
+    ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx)
+    : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
+  if (!cell || !cell.id_chitiet) return;
+  try {
+    const apiFn = val ? RestApi.timetable.lock_period : RestApi.timetable.unlock_period;
+    const { data, error } = await apiFn({ params: { Id: cell.id_chitiet } });
+    if (data.value?.status === "success") {
+      cell.isLock = val;
+      contextMenu.show = false;
+      if (!contextMenu.isTeacher) {
+        updateRawTimetable();
+      }
+      if (!val) {
+        try {
+          const { data: listData, error: listError } = await RestApi.timetable.get_class({
+            params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
+          });
+          if (listData.value?.status === "success") {
+            emit("update:rawTimetable", listData.value.data.timetable);
+            emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+          } else {
+            message.error("Load timetable error", listError.value || listData.value);
+          }
+        } catch (listErr) {
+          message.error("Load timetable error", listErr);
+        }
+        if (selectedTeacherId.value && props.timetableId) {
+          await fetchTeacherTimetable(selectedTeacherId.value);
+        }
+      }
+    } else {
+      message.error("Set lock error", error.value || data.value);
+    }
+  } catch (err) {
+    message.error("Set lock error", err);
   }
 }
 
