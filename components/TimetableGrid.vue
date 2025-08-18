@@ -1,5 +1,6 @@
 <template>
   <div @click="contextMenu.show = false" class="grid grid-cols-1 gap-5">
+    <SelectClass v-model="selectedClassId" class="mb-2" />
     <div class="grid grid-cols-4 gap-2">
       <a-tabs v-model:activeKey="activeCa" class="col-span-3">
         <a-tab-pane v-for="ca in dsCa" :key="ca.id" :tab="`Ca ${ca.id}`">
@@ -51,17 +52,7 @@
               <tbody>
                 <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
                   <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
-                  <td
-                    v-for="ngay in ca.ds_Ngay"
-                    :key="ngay.id"
-                    class="border p-2 text-xs align-top min-w-[120px] relative select-none"
-                    :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])"
-                    :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])"
-                    @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)"
-                    @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)"
-                    @drop="onTeacherDrop(ca.id, ngay.id, pIdx)"
-                    @click="onTeacherCellClick(ca.id, ngay.id, pIdx)"
-                  >
+                  <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] relative select-none" :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)" @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)" @drop="onTeacherDrop(ca.id, ngay.id, pIdx)" @click="onTeacherCellClick(ca.id, ngay.id, pIdx)">
                     <template v-if="ngay.ds_Tiet[pIdx].isRest">
                       <span class="italic text-red-500">Nghỉ</span>
                     </template>
@@ -135,12 +126,27 @@ const teacherDsCa = ref([]);
 const teacherActiveCa = ref(1);
 const teacherUnscheduled = ref([]);
 const selectedTeacherId = ref(null);
-const emit = defineEmits(["cell-click", "update:rawTimetable", "update:rawUnscheduled"]);
+const selectedClassId = ref(props.classId);
+const emit = defineEmits(["cell-click", "update:rawTimetable", "update:rawUnscheduled", "update:classId"]);
 const showAddModal = ref(false);
 const selectedIdx = ref(0);
 const targetCell = ref(null);
 const selectedSubjectId = ref(null);
 const selectedCellPos = ref(null);
+
+watch(
+  () => props.classId,
+  id => {
+    selectedClassId.value = id;
+  },
+);
+
+watch(selectedClassId, async id => {
+  emit("update:classId", id);
+  if (id && selectedTeacherId.value && props.timetableId) {
+    await fetchTeacherTimetable(selectedTeacherId.value);
+  }
+});
 
 watch(
   () => props.rawTimetable,
@@ -214,15 +220,17 @@ async function fetchTeacherTimetable(teacherId) {
           }))
         : [];
     } else {
-      console.error("Get teacher timetable error", error.value || data.value);
+      message.error("Get teacher timetable error", error.value || data.value);
       teacherDsCa.value = [];
       teacherUnscheduled.value = [];
     }
   } catch (err) {
-    console.error("Get teacher timetable error", err);
+    message.error("Get teacher timetable error", err);
     teacherDsCa.value = [];
     teacherUnscheduled.value = [];
   }
+  selectedSubjectId.value = null;
+  selectedCellPos.value = null;
 }
 
 function isSelectedCell(caId, dayId, pIdx) {
@@ -280,20 +288,20 @@ async function onDrop(caId, dayId, pIdx) {
   const srcClone = { ...src };
   const dstClone = { ...dst };
 
-  console.log("Drag drop", {
-    source: {
-      ca: dragSource.value.caId,
-      ngay: dragSource.value.dayId,
-      tiet: dragSource.value.pIdx + 1,
-      data: { ...src },
-    },
-    destination: {
-      ca: caId,
-      ngay: dayId,
-      tiet: pIdx + 1,
-      data: { ...dst },
-    },
-  });
+  // console.log("Drag drop", {
+  //   source: {
+  //     ca: dragSource.value.caId,
+  //     ngay: dragSource.value.dayId,
+  //     tiet: dragSource.value.pIdx + 1,
+  //     data: { ...src },
+  //   },
+  //   destination: {
+  //     ca: caId,
+  //     ngay: dayId,
+  //     tiet: pIdx + 1,
+  //     data: { ...dst },
+  //   },
+  // });
 
   if (!isDraggable(src) || !isDraggable(dst)) return;
 
@@ -307,7 +315,7 @@ async function onDrop(caId, dayId, pIdx) {
 
   try {
     const body = {
-      id_lop: props.classId,
+      id_lop: selectedClassId.value,
       timetable: [{ ...srcClone }, { ...dstClone }],
     };
     const { data, error } = await RestApi.timetable.update_class({ body });
@@ -316,7 +324,7 @@ async function onDrop(caId, dayId, pIdx) {
     } else {
       try {
         const { data: listData, error: listError } = await RestApi.timetable.get_class({
-          params: { idLop: props.classId, idtkb: dstClone.id_tkb },
+          params: { idLop: selectedClassId.value, idtkb: dstClone.id_tkb },
         });
         if (listData.value?.status === "success") {
           emit("update:rawTimetable", listData.value.data.timetable);
@@ -371,10 +379,10 @@ async function onTeacherDrop(caId, dayId, pIdx) {
       message.error("Update teacher timetable error", error.value || data.value);
     } else {
       await fetchTeacherTimetable(selectedTeacherId.value);
-      if (props.classId && props.timetableId) {
+      if (selectedClassId.value && props.timetableId) {
         try {
           const { data: listData, error: listError } = await RestApi.timetable.get_class({
-            params: { idLop: props.classId, idtkb: dstClone.id_tkb },
+            params: { idLop: selectedClassId.value, idtkb: dstClone.id_tkb },
           });
           if (listData.value?.status === "success") {
             emit("update:rawTimetable", listData.value.data.timetable);
@@ -434,7 +442,7 @@ async function onCellClick(caId, dayId, pIdx) {
   }
   try {
     const body = {
-      id_lop: props.classId,
+      id_lop: selectedClassId.value,
       timetable: [
         {
           ...cell,
@@ -446,7 +454,7 @@ async function onCellClick(caId, dayId, pIdx) {
     };
     const { data, error } = await RestApi.timetable.find_class_position({ body });
     if (data.value?.status === "success") {
-      console.log("Find position response", data.value);
+      // message.log("Find position response", data.value);
       const { timetable, ds_chua_xep } = data.value.data || {};
       if (Array.isArray(timetable)) {
         emit("update:rawTimetable", timetable);
@@ -455,15 +463,16 @@ async function onCellClick(caId, dayId, pIdx) {
         emit("update:rawUnscheduled", ds_chua_xep);
       }
     } else {
-      console.error("Find position error", error.value || data.value);
+      message.error("Find position error", error.value || data.value);
     }
   } catch (err) {
-    console.error("Find position error", err);
+    message.error("Find position error", err);
   }
 }
 
 async function onTeacherCellClick(caId, dayId, pIdx) {
   const cell = getTeacherCell(caId, dayId, pIdx);
+  selectedClassId.value = cell.id_lop;
   if (!selectedTeacherId.value || !cell) return;
   try {
     const body = {
@@ -494,10 +503,10 @@ async function onTeacherCellClick(caId, dayId, pIdx) {
         teacherUnscheduled.value = ds_chua_xep;
       }
     } else {
-      console.error("Find teacher position error", error.value || data.value);
+      message.error("Find teacher position error", error.value || data.value);
     }
   } catch (err) {
-    console.error("Find teacher position error", err);
+    message.error("Find teacher position error", err);
   }
 }
 
@@ -511,12 +520,12 @@ function setRest(val) {
     cell.id_mon = 0;
     cell.id_giao_vien = 0;
   }
-  console.log(val ? "Set rest period" : "Cleared rest period", {
-    ca: contextMenu.ca,
-    ngay: contextMenu.ngay,
-    tiet: contextMenu.pIdx + 1,
-    data: { ...cell },
-  });
+  // console.log(val ? "Set rest period" : "Cleared rest period", {
+  //   ca: contextMenu.ca,
+  //   ngay: contextMenu.ngay,
+  //   tiet: contextMenu.pIdx + 1,
+  //   data: { ...cell },
+  // });
   contextMenu.show = false;
   updateRawTimetable();
 }
@@ -525,12 +534,12 @@ function setLock(val) {
   const cell = getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell) return;
   cell.isLock = val;
-  console.log(val ? "Set locked period" : "Cleared locked period", {
-    ca: contextMenu.ca,
-    ngay: contextMenu.ngay,
-    tiet: contextMenu.pIdx + 1,
-    data: { ...cell },
-  });
+  // console.log(val ? "Set locked period" : "Cleared locked period", {
+  //   ca: contextMenu.ca,
+  //   ngay: contextMenu.ngay,
+  //   tiet: contextMenu.pIdx + 1,
+  //   data: { ...cell },
+  // });
   contextMenu.show = false;
   updateRawTimetable();
 }
@@ -567,12 +576,12 @@ function clearCell() {
     updatedUnscheduled = [...props.rawUnscheduled, { ...removed }];
     emit("update:rawUnscheduled", updatedUnscheduled);
   }
-  console.log("Cleared Cell", {
-    ca: contextMenu.ca,
-    ngay: contextMenu.ngay,
-    tiet: contextMenu.pIdx + 1,
-    data: { ...cell },
-  });
+  // console.log("Cleared Cell", {
+  //   ca: contextMenu.ca,
+  //   ngay: contextMenu.ngay,
+  //   tiet: contextMenu.pIdx + 1,
+  //   data: { ...cell },
+  // });
   contextMenu.show = false;
   updateRawTimetable(updatedUnscheduled);
 }
@@ -602,7 +611,7 @@ function confirmAdd() {
   cell.tiet_thu_may = lesson.tiet_thu_may;
   showAddModal.value = false;
   targetCell.value = null;
-  console.log("Lesson added", { cell: { ...cell }, lesson });
+  message.log("Lesson added", { cell: { ...cell }, lesson });
   updateRawTimetable(unscheduled);
 }
 </script>
