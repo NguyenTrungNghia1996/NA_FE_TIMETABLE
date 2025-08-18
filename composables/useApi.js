@@ -80,6 +80,8 @@ let ENDPOINTS = {
   TIMETABLE_UPDATE_TEACHER: "/api/tkb/update/giaovien",
   TIMETABLE_CLASS: "/api/tkb/lop",
   TIMETABLE_TEACHER: "/api/tkb/giaovien",
+  TIMETABLE_LOCK_PERIOD: "/api/tkb/khoatiet",
+  TIMETABLE_UNLOCK_PERIOD: "/api/tkb/huykhoa",
 
   S3: "/api/presigned_url",
 };
@@ -741,6 +743,12 @@ class Timetable {
   }
   async get_teacher(data) {
     return await this.request.get(ENDPOINTS.TIMETABLE_TEACHER, data);
+  }
+  async lock_period(data) {
+    return await this.request.put(ENDPOINTS.TIMETABLE_LOCK_PERIOD, data);
+  }
+  async unlock_period(data) {
+    return await this.request.put(ENDPOINTS.TIMETABLE_UNLOCK_PERIOD, data);
   }
 }
 export default () => {

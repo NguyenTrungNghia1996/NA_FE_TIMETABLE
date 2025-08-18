@@ -335,7 +335,6 @@ async function onDrop(caId, dayId, pIdx) {
       id_lop: selectedClassId.value,
       timetable: [{ ...srcClone }, { ...dstClone }],
     };
-    console.log(">>>>>", dstClone.id_giao_vien);
     const { data, error } = await RestApi.timetable.update_class({ body });
     if (data.value?.status !== "success") {
       message.error("Update timetable error", error.value || data.value);
@@ -561,19 +560,45 @@ function setRest(val) {
   }
 }
 
-function setLock(val) {
+async function setLock(val) {
   const cell = contextMenu.isTeacher ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx) : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
-  if (!cell) return;
-  cell.isLock = val;
-  // console.log(val ? "Set locked period" : "Cleared locked period", {
-  //   ca: contextMenu.ca,
-  //   ngay: contextMenu.ngay,
-  //   tiet: contextMenu.pIdx + 1,
-  //   data: { ...cell },
-  // });
-  contextMenu.show = false;
-  if (!contextMenu.isTeacher) {
-    updateRawTimetable();
+  if (!cell || !cell.id_chitiet) return;
+  try {
+    if (val) {
+      const { data, error } = await RestApi.timetable.lock_period({ params: { Id: cell.id_chitiet } });
+      if (data.value?.status === "success") {
+        const { data: listData, error: listError } = await RestApi.timetable.get_class({
+          params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
+        });
+        if (listData.value?.status === "success") {
+          emit("update:rawTimetable", listData.value.data.timetable);
+          emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+        } else {
+          message.error("Load timetable error", listError.value || listData.value);
+        }
+        if (selectedTeacherId.value && props.timetableId) {
+          await fetchTeacherTimetable(selectedTeacherId.value);
+        }
+      }
+    } else {
+      const { data, error } = await RestApi.timetable.unlock_period({ params: { Id: cell.id_chitiet } });
+      if (data.value?.status === "success") {
+        const { data: listData, error: listError } = await RestApi.timetable.get_class({
+          params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
+        });
+        if (listData.value?.status === "success") {
+          emit("update:rawTimetable", listData.value.data.timetable);
+          emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+        } else {
+          message.error("Load timetable error", listError.value || listData.value);
+        }
+        if (selectedTeacherId.value && props.timetableId) {
+          await fetchTeacherTimetable(selectedTeacherId.value);
+        }
+      }
+    }
+  } catch (err) {
+    message.error("Set lock error", err);
   }
 }
 
