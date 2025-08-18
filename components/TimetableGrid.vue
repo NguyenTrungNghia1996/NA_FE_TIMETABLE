@@ -35,6 +35,7 @@
       </a-tabs>
       <UnscheduledTable :data="props.rawUnscheduled" class="mt-4" />
     </div>
+    <SelectTeacher v-model="selectedTeacherId" class="mb-4 w-full max-w-xs" />
 
     <div v-if="teacherDsCa.length" class="grid grid-cols-4 gap-2">
       <a-tabs v-model:activeKey="teacherActiveCa" class="col-span-3">
@@ -122,6 +123,7 @@ const activeCa = ref(1);
 const teacherDsCa = ref([]);
 const teacherActiveCa = ref(1);
 const teacherUnscheduled = ref([]);
+const selectedTeacherId = ref(null);
 const emit = defineEmits(["cell-click", "update:rawTimetable", "update:rawUnscheduled"]);
 const showAddModal = ref(false);
 const selectedIdx = ref(0);
@@ -144,6 +146,15 @@ watch(
   { immediate: true, deep: true },
 );
 
+watch(selectedTeacherId, async id => {
+  if (id && props.timetableId) {
+    await fetchTeacherTimetable(id);
+  } else {
+    teacherDsCa.value = [];
+    teacherUnscheduled.value = [];
+  }
+});
+
 function updateRawTimetable(unscheduled = props.rawUnscheduled) {
   const flat = gridToFlat(dsCa.value, unscheduled);
   emit("update:rawTimetable", flat);
@@ -156,6 +167,44 @@ function getCell(caId, dayId, pIdx) {
   const ca = dsCa.value.find(c => c.id === caId);
   const ngay = ca?.ds_Ngay.find(n => n.id === dayId);
   return ngay?.ds_Tiet[pIdx];
+}
+
+async function fetchTeacherTimetable(teacherId) {
+  try {
+    const { data, error } = await RestApi.timetable.get_teacher({
+      params: { idGV: teacherId, idtkb: props.timetableId },
+    });
+    if (data.value?.status === "success") {
+      const { timetable, ds_chua_xep } = data.value.data || {};
+      const { ds_Ca } = transformTimetable(timetable || [], {
+        daysCount: 7,
+        shifts: [1, 2],
+        periodsPerShift: 5,
+        dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+      });
+      teacherDsCa.value = ds_Ca;
+      teacherActiveCa.value = ds_Ca[0]?.id || 1;
+      teacherUnscheduled.value = Array.isArray(ds_chua_xep)
+        ? ds_chua_xep.map(({ id_mon, ten_mon, id_lop, ten_lop, id_phong, ten_phong, tiet_thu_may }) => ({
+            id_mon,
+            ten_mon,
+            id_lop,
+            ten_lop,
+            id_phong,
+            ten_phong,
+            tiet_thu_may,
+          }))
+        : [];
+    } else {
+      console.error("Get teacher timetable error", error.value || data.value);
+      teacherDsCa.value = [];
+      teacherUnscheduled.value = [];
+    }
+  } catch (err) {
+    console.error("Get teacher timetable error", err);
+    teacherDsCa.value = [];
+    teacherUnscheduled.value = [];
+  }
 }
 
 function isSelectedCell(caId, dayId, pIdx) {
@@ -276,45 +325,10 @@ function openContextMenu(event, caId, dayId, pIdx) {
 async function onCellClick(caId, dayId, pIdx) {
   const cell = getCell(caId, dayId, pIdx);
   emit("cell-click", { ca: caId, ngay: dayId, tiet: pIdx + 1, record: cell });
-  if (cell?.id_giao_vien && props.timetableId) {
-    try {
-      const { data, error } = await RestApi.timetable.get_teacher({
-        params: { idGV: cell.id_giao_vien, idtkb: props.timetableId },
-      });
-      if (data.value?.status === "success") {
-        const { timetable, ds_chua_xep } = data.value.data || {};
-        const { ds_Ca } = transformTimetable(timetable || [], {
-          daysCount: 7,
-          shifts: [1, 2],
-          periodsPerShift: 5,
-          dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-        });
-        teacherDsCa.value = ds_Ca;
-        teacherActiveCa.value = ds_Ca[0]?.id || 1;
-        teacherUnscheduled.value = Array.isArray(ds_chua_xep)
-          ? ds_chua_xep.map(({ id_mon, ten_mon, id_lop, ten_lop, id_phong, ten_phong, tiet_thu_may }) => ({
-              id_mon,
-              ten_mon,
-              id_lop,
-              ten_lop,
-              id_phong,
-              ten_phong,
-              tiet_thu_may,
-            }))
-          : [];
-      } else {
-        console.error("Get teacher timetable error", error.value || data.value);
-        teacherDsCa.value = [];
-        teacherUnscheduled.value = [];
-      }
-    } catch (err) {
-      console.error("Get teacher timetable error", err);
-      teacherDsCa.value = [];
-      teacherUnscheduled.value = [];
-    }
+  if (cell?.id_giao_vien) {
+    selectedTeacherId.value = cell.id_giao_vien;
   } else {
-    teacherDsCa.value = [];
-    teacherUnscheduled.value = [];
+    selectedTeacherId.value = null;
   }
   if (cell?.id_mon) {
     selectedSubjectId.value = cell.id_mon;
