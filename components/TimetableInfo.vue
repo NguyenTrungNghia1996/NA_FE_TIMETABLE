@@ -19,8 +19,14 @@ const totalLessons = computed(() => info.tong_tat_ca_tiet);
 const arrangedLessons = computed(() => info.tong_tiet_da_xep);
 const unarrangedLessons = computed(() => info.tong_tiet_chua_xep);
 
-const arrangeAll = () => {
-  console.log("Xếp toàn trường");
+const arrangeAll = async () => {
+  try {
+    await RestApi.timetable.arrange_all({
+      params: { Idtkb: props.timetableId },
+    });
+  } catch (err) {
+    console.error("Arrange all error", err);
+  }
 };
 
 const arrangePartial = type => {
