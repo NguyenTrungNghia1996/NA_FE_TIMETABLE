@@ -52,17 +52,7 @@
               <tbody>
                 <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
                   <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
-                  <td
-                    v-for="ngay in ca.ds_Ngay"
-                    :key="ngay.id"
-                    class="border p-2 text-xs align-top min-w-[120px] relative select-none"
-                    :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])"
-                    :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])"
-                    @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)"
-                    @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)"
-                    @drop="onTeacherDrop(ca.id, ngay.id, pIdx)"
-                    @click="onTeacherCellClick(ca.id, ngay.id, pIdx)"
-                  >
+                  <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] relative select-none" :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)" @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)" @drop="onTeacherDrop(ca.id, ngay.id, pIdx)" @click="onTeacherCellClick(ca.id, ngay.id, pIdx)">
                     <template v-if="ngay.ds_Tiet[pIdx].isRest">
                       <span class="italic text-red-500">Nghỉ</span>
                     </template>
@@ -137,12 +127,7 @@ const teacherActiveCa = ref(1);
 const teacherUnscheduled = ref([]);
 const selectedTeacherId = ref(null);
 const selectedClassId = ref(props.classId);
-const emit = defineEmits([
-  "cell-click",
-  "update:rawTimetable",
-  "update:rawUnscheduled",
-  "update:classId",
-]);
+const emit = defineEmits(["cell-click", "update:rawTimetable", "update:rawUnscheduled", "update:classId"]);
 const showAddModal = ref(false);
 const selectedIdx = ref(0);
 const targetCell = ref(null);
