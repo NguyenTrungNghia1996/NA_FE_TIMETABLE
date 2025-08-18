@@ -153,6 +153,8 @@ watch(selectedClassId, async id => {
   emit("update:classId", id);
   if (id && selectedTeacherId.value && props.timetableId) {
     await fetchTeacherTimetable(selectedTeacherId.value);
+    selectedSubjectId.value = null;
+    selectedCellPos.value = null;
   }
 });
 
@@ -246,8 +248,6 @@ async function fetchTeacherTimetable(teacherId) {
     teacherDsCa.value = [];
     teacherUnscheduled.value = [];
   }
-  selectedSubjectId.value = null;
-  selectedCellPos.value = null;
 }
 
 function isSelectedCell(caId, dayId, pIdx) {
