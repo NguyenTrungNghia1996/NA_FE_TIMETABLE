@@ -470,6 +470,7 @@ async function onCellClick(caId, dayId, pIdx) {
 
 async function onTeacherCellClick(caId, dayId, pIdx) {
   const cell = getTeacherCell(caId, dayId, pIdx);
+  selectedClassId.value = cell.id_lop;
   if (!selectedTeacherId.value || !cell) return;
   try {
     const body = {
