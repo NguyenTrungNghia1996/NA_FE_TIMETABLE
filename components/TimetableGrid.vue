@@ -672,6 +672,7 @@ async function addLesson() {
         ],
       };
       const { data, error } = await RestApi.timetable.find_class_lesson({ body });
+      console.log(data.value.data);
       if (data.value?.status === "success") {
         lessonOptions.value = Array.isArray(data.value.data) ? data.value.data : [];
       } else {
@@ -707,7 +708,7 @@ function confirmAdd() {
     showAddModal.value = false;
     targetCell.value = null;
     lessonOptions.value = [];
-    message.log("Lesson added", { cell: { ...cell }, lesson });
+    console.log("Lesson added", { cell: { ...cell }, lesson });
   } else {
     const cell = targetCell.value;
     cell.id_mon = lesson.id_mon;
@@ -720,7 +721,7 @@ function confirmAdd() {
     showAddModal.value = false;
     targetCell.value = null;
     lessonOptions.value = [];
-    message.log("Lesson added", { cell: { ...cell }, lesson });
+    console.log("Lesson added", { cell: { ...cell }, lesson });
     updateRawTimetable();
   }
 }
