@@ -73,6 +73,7 @@ let ENDPOINTS = {
 
   //TIMETABLE
   TIMETABLE: "/api/thoikhoabieu",
+  TIMETABLE_DETAIL: "/api/thoikhoabieu/detail",
   TIMETABLE_FIND_CLASS_POSITION: "/api/tkb/timvitri/lop",
   TIMETABLE_FIND_TEACHER_POSITION: "/api/tkb/timvitri/giaovien",
   TIMETABLE_UPDATE_CLASS: "/api/tkb/update/lop",
@@ -710,6 +711,9 @@ class Timetable {
   }
   async list(data) {
     return await this.request.get(ENDPOINTS.TIMETABLE, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.TIMETABLE_DETAIL, data);
   }
   async create(data) {
     return await this.request.post(ENDPOINTS.TIMETABLE, data);
