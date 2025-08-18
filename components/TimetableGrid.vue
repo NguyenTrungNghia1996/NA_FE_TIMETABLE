@@ -52,7 +52,7 @@
               <tbody>
                 <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
                   <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
-                  <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] relative select-none" :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)" @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)" @drop="onTeacherDrop(ca.id, ngay.id, pIdx)" @click="onTeacherCellClick(ca.id, ngay.id, pIdx)">
+                  <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] relative select-none" :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)" @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)" @drop="onTeacherDrop(ca.id, ngay.id, pIdx)" @click="onTeacherCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx, true)">
                     <template v-if="ngay.ds_Tiet[pIdx].isRest">
                       <span class="italic text-red-500">Nghỉ</span>
                     </template>
@@ -91,7 +91,17 @@
 
     <a-modal v-model:open="showAddModal" title="Chọn tiết học" ok-text="Thêm" cancel-text="Hủy" @ok="confirmAdd" @cancel="showAddModal = false">
       <a-select v-model:value="selectedIdx" class="w-full mb-4">
-        <a-select-option v-for="(lesson, idx) in rawUnscheduled" :key="idx" :value="idx"> {{ lesson.ten_mon }} - {{ lesson.ten_giao_vien }} </a-select-option>
+        <a-select-option
+          v-for="(lesson, idx) in contextMenu.isTeacher ? teacherUnscheduled : rawUnscheduled"
+          :key="idx"
+          :value="idx"
+        >
+          {{ lesson.ten_mon }}
+          <template v-if="contextMenu.isTeacher">
+            <template v-if="lesson.ten_lop"> - {{ lesson.ten_lop }} </template>
+          </template>
+          <template v-else> - {{ lesson.ten_giao_vien }} </template>
+        </a-select-option>
       </a-select>
     </a-modal>
   </div>
@@ -179,7 +189,16 @@ function updateRawTimetable(unscheduled = props.rawUnscheduled) {
 
 const dragSource = ref(null);
 const teacherDragSource = ref(null);
-const contextMenu = reactive({ show: false, x: 0, y: 0, ca: null, ngay: null, pIdx: null, cell: null });
+const contextMenu = reactive({
+  show: false,
+  x: 0,
+  y: 0,
+  ca: null,
+  ngay: null,
+  pIdx: null,
+  cell: null,
+  isTeacher: false,
+});
 
 function getCell(caId, dayId, pIdx) {
   const ca = dsCa.value.find(c => c.id === caId);
@@ -414,8 +433,8 @@ function onDragOver(event, caId, dayId, pIdx) {
   }
 }
 
-function openContextMenu(event, caId, dayId, pIdx) {
-  const cell = getCell(caId, dayId, pIdx);
+function openContextMenu(event, caId, dayId, pIdx, isTeacher = false) {
+  const cell = isTeacher ? getTeacherCell(caId, dayId, pIdx) : getCell(caId, dayId, pIdx);
   contextMenu.show = true;
   contextMenu.x = event.clientX;
   contextMenu.y = event.clientY;
@@ -423,6 +442,7 @@ function openContextMenu(event, caId, dayId, pIdx) {
   contextMenu.ngay = dayId;
   contextMenu.pIdx = pIdx;
   contextMenu.cell = cell;
+  contextMenu.isTeacher = isTeacher;
 }
 
 async function onCellClick(caId, dayId, pIdx) {
@@ -511,14 +531,21 @@ async function onTeacherCellClick(caId, dayId, pIdx) {
 }
 
 function setRest(val) {
-  const cell = getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
+  const cell = contextMenu.isTeacher
+    ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx)
+    : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell) return;
   cell.isRest = val;
   if (val) {
     cell.ten_mon = "";
-    cell.ten_giao_vien = "";
     cell.id_mon = 0;
-    cell.id_giao_vien = 0;
+    if (contextMenu.isTeacher) {
+      cell.ten_lop = "";
+      cell.id_lop = 0;
+    } else {
+      cell.ten_giao_vien = "";
+      cell.id_giao_vien = 0;
+    }
   }
   // console.log(val ? "Set rest period" : "Cleared rest period", {
   //   ca: contextMenu.ca,
@@ -527,11 +554,15 @@ function setRest(val) {
   //   data: { ...cell },
   // });
   contextMenu.show = false;
-  updateRawTimetable();
+  if (!contextMenu.isTeacher) {
+    updateRawTimetable();
+  }
 }
 
 function setLock(val) {
-  const cell = getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
+  const cell = contextMenu.isTeacher
+    ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx)
+    : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell) return;
   cell.isLock = val;
   // console.log(val ? "Set locked period" : "Cleared locked period", {
@@ -541,21 +572,35 @@ function setLock(val) {
   //   data: { ...cell },
   // });
   contextMenu.show = false;
-  updateRawTimetable();
+  if (!contextMenu.isTeacher) {
+    updateRawTimetable();
+  }
 }
 
 function clearCell() {
-  const cell = getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
+  const cell = contextMenu.isTeacher
+    ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx)
+    : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell) return;
-  const removed = {
-    id_mon: cell.id_mon,
-    ten_mon: cell.ten_mon,
-    id_giao_vien: cell.id_giao_vien,
-    ten_giao_vien: cell.ten_giao_vien,
-    id_phong: cell.id_phong,
-    ten_phong: cell.ten_phong,
-    tiet_thu_may: cell.tiet_thu_may,
-  };
+  const removed = contextMenu.isTeacher
+    ? {
+        id_mon: cell.id_mon,
+        ten_mon: cell.ten_mon,
+        id_lop: cell.id_lop,
+        ten_lop: cell.ten_lop,
+        id_phong: cell.id_phong,
+        ten_phong: cell.ten_phong,
+        tiet_thu_may: cell.tiet_thu_may,
+      }
+    : {
+        id_mon: cell.id_mon,
+        ten_mon: cell.ten_mon,
+        id_giao_vien: cell.id_giao_vien,
+        ten_giao_vien: cell.ten_giao_vien,
+        id_phong: cell.id_phong,
+        ten_phong: cell.ten_phong,
+        tiet_thu_may: cell.tiet_thu_may,
+      };
   const hasData = cell.id_chitiet || cell.id_mon || cell.ten_mon;
   Object.assign(cell, {
     id_chitiet: 0,
@@ -565,16 +610,24 @@ function clearCell() {
     ten_mon: "",
     id_giao_vien: 0,
     ten_giao_vien: "",
+    id_lop: 0,
+    ten_lop: "",
     id_phong: 0,
     ten_phong: "",
     tiet_thu_may: 0,
     isRest: false,
     isLock: false,
   });
-  let updatedUnscheduled = props.rawUnscheduled;
   if (hasData) {
-    updatedUnscheduled = [...props.rawUnscheduled, { ...removed }];
-    emit("update:rawUnscheduled", updatedUnscheduled);
+    if (contextMenu.isTeacher) {
+      teacherUnscheduled.value = [...teacherUnscheduled.value, { ...removed }];
+    } else {
+      const updatedUnscheduled = [...props.rawUnscheduled, { ...removed }];
+      emit("update:rawUnscheduled", updatedUnscheduled);
+      updateRawTimetable(updatedUnscheduled);
+    }
+  } else if (!contextMenu.isTeacher) {
+    updateRawTimetable();
   }
   // console.log("Cleared Cell", {
   //   ca: contextMenu.ca,
@@ -583,11 +636,12 @@ function clearCell() {
   //   data: { ...cell },
   // });
   contextMenu.show = false;
-  updateRawTimetable(updatedUnscheduled);
 }
 
 function addLesson() {
-  const cell = getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
+  const cell = contextMenu.isTeacher
+    ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx)
+    : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell || cell.ten_mon) return;
   targetCell.value = cell;
   selectedIdx.value = 0;
@@ -597,21 +651,39 @@ function addLesson() {
 
 function confirmAdd() {
   if (selectedIdx.value == null || !targetCell.value) return;
-  const unscheduled = [...props.rawUnscheduled];
-  const lesson = unscheduled.splice(selectedIdx.value, 1)[0];
-  if (!lesson) return;
-  emit("update:rawUnscheduled", unscheduled);
-  const cell = targetCell.value;
-  cell.id_mon = lesson.id_mon;
-  cell.ten_mon = lesson.ten_mon;
-  cell.id_giao_vien = lesson.id_giao_vien;
-  cell.ten_giao_vien = lesson.ten_giao_vien;
-  cell.id_phong = lesson.id_phong;
-  cell.ten_phong = lesson.ten_phong;
-  cell.tiet_thu_may = lesson.tiet_thu_may;
-  showAddModal.value = false;
-  targetCell.value = null;
-  message.log("Lesson added", { cell: { ...cell }, lesson });
-  updateRawTimetable(unscheduled);
+  if (contextMenu.isTeacher) {
+    const unscheduled = [...teacherUnscheduled.value];
+    const lesson = unscheduled.splice(selectedIdx.value, 1)[0];
+    if (!lesson) return;
+    teacherUnscheduled.value = unscheduled;
+    const cell = targetCell.value;
+    cell.id_mon = lesson.id_mon;
+    cell.ten_mon = lesson.ten_mon;
+    cell.id_lop = lesson.id_lop;
+    cell.ten_lop = lesson.ten_lop;
+    cell.id_phong = lesson.id_phong;
+    cell.ten_phong = lesson.ten_phong;
+    cell.tiet_thu_may = lesson.tiet_thu_may;
+    showAddModal.value = false;
+    targetCell.value = null;
+    message.log("Lesson added", { cell: { ...cell }, lesson });
+  } else {
+    const unscheduled = [...props.rawUnscheduled];
+    const lesson = unscheduled.splice(selectedIdx.value, 1)[0];
+    if (!lesson) return;
+    emit("update:rawUnscheduled", unscheduled);
+    const cell = targetCell.value;
+    cell.id_mon = lesson.id_mon;
+    cell.ten_mon = lesson.ten_mon;
+    cell.id_giao_vien = lesson.id_giao_vien;
+    cell.ten_giao_vien = lesson.ten_giao_vien;
+    cell.id_phong = lesson.id_phong;
+    cell.ten_phong = lesson.ten_phong;
+    cell.tiet_thu_may = lesson.tiet_thu_may;
+    showAddModal.value = false;
+    targetCell.value = null;
+    message.log("Lesson added", { cell: { ...cell }, lesson });
+    updateRawTimetable(unscheduled);
+  }
 }
 </script>
