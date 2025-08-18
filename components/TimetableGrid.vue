@@ -229,6 +229,8 @@ async function fetchTeacherTimetable(teacherId) {
     teacherDsCa.value = [];
     teacherUnscheduled.value = [];
   }
+  selectedSubjectId.value = null;
+  selectedCellPos.value = null;
 }
 
 function isSelectedCell(caId, dayId, pIdx) {
