@@ -93,7 +93,7 @@
 
     <a-modal v-model:open="showAddModal" title="Chọn tiết học" ok-text="Thêm" cancel-text="Hủy" @ok="confirmAdd" @cancel="showAddModal = false">
       <a-select v-model:value="selectedIdx" class="w-full mb-4">
-        <a-select-option v-for="(lesson, idx) in contextMenu.isTeacher ? teacherUnscheduled : rawUnscheduled" :key="idx" :value="idx">
+        <a-select-option v-for="(lesson, idx) in lessonOptions" :key="idx" :value="idx">
           {{ lesson.ten_mon }}
           <template v-if="contextMenu.isTeacher">
             <template v-if="lesson.ten_lop"> - {{ lesson.ten_lop }} </template>
@@ -141,6 +141,7 @@ const selectedIdx = ref(0);
 const targetCell = ref(null);
 const selectedSubjectId = ref(null);
 const selectedCellPos = ref(null);
+const lessonOptions = ref([]);
 
 watch(
   () => props.classId,
@@ -633,22 +634,68 @@ async function clearCell() {
   contextMenu.show = false;
 }
 
-function addLesson() {
+async function addLesson() {
   const cell = contextMenu.isTeacher ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx) : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell || cell.ten_mon) return;
-  targetCell.value = cell;
-  selectedIdx.value = 0;
-  showAddModal.value = true;
   contextMenu.show = false;
+  try {
+    let body;
+    if (contextMenu.isTeacher) {
+      body = {
+        id_giao_vien: selectedTeacherId.value,
+        timetable: [
+          {
+            ...cell,
+            id_ca: contextMenu.ca,
+            ngay: contextMenu.ngay,
+            tiet: contextMenu.pIdx + 1,
+          },
+        ],
+      };
+      const { data, error } = await RestApi.timetable.find_teacher_lesson({ body });
+      if (data.value?.status === "success") {
+        lessonOptions.value = Array.isArray(data.value.data) ? data.value.data : [];
+      } else {
+        message.error("Find lessons error", error.value || data.value);
+        return;
+      }
+    } else {
+      body = {
+        id_lop: selectedClassId.value,
+        timetable: [
+          {
+            ...cell,
+            id_ca: contextMenu.ca,
+            ngay: contextMenu.ngay,
+            tiet: contextMenu.pIdx + 1,
+          },
+        ],
+      };
+      const { data, error } = await RestApi.timetable.find_class_lesson({ body });
+      if (data.value?.status === "success") {
+        lessonOptions.value = Array.isArray(data.value.data) ? data.value.data : [];
+      } else {
+        message.error("Find lessons error", error.value || data.value);
+        return;
+      }
+    }
+    if (!lessonOptions.value.length) {
+      message.info("Không có tiết học phù hợp");
+      return;
+    }
+    targetCell.value = cell;
+    selectedIdx.value = 0;
+    showAddModal.value = true;
+  } catch (err) {
+    message.error("Find lessons error", err);
+  }
 }
 
 function confirmAdd() {
   if (selectedIdx.value == null || !targetCell.value) return;
+  const lesson = lessonOptions.value[selectedIdx.value];
+  if (!lesson) return;
   if (contextMenu.isTeacher) {
-    const unscheduled = [...teacherUnscheduled.value];
-    const lesson = unscheduled.splice(selectedIdx.value, 1)[0];
-    if (!lesson) return;
-    teacherUnscheduled.value = unscheduled;
     const cell = targetCell.value;
     cell.id_mon = lesson.id_mon;
     cell.ten_mon = lesson.ten_mon;
@@ -659,12 +706,9 @@ function confirmAdd() {
     cell.tiet_thu_may = lesson.tiet_thu_may;
     showAddModal.value = false;
     targetCell.value = null;
+    lessonOptions.value = [];
     message.log("Lesson added", { cell: { ...cell }, lesson });
   } else {
-    const unscheduled = [...props.rawUnscheduled];
-    const lesson = unscheduled.splice(selectedIdx.value, 1)[0];
-    if (!lesson) return;
-    emit("update:rawUnscheduled", unscheduled);
     const cell = targetCell.value;
     cell.id_mon = lesson.id_mon;
     cell.ten_mon = lesson.ten_mon;
@@ -675,8 +719,9 @@ function confirmAdd() {
     cell.tiet_thu_may = lesson.tiet_thu_may;
     showAddModal.value = false;
     targetCell.value = null;
+    lessonOptions.value = [];
     message.log("Lesson added", { cell: { ...cell }, lesson });
-    updateRawTimetable(unscheduled);
+    updateRawTimetable();
   }
 }
 </script>
