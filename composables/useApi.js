@@ -82,6 +82,7 @@ let ENDPOINTS = {
   TIMETABLE_TEACHER: "/api/tkb/giaovien",
   TIMETABLE_LOCK_PERIOD: "/api/tkb/khoatiet",
   TIMETABLE_UNLOCK_PERIOD: "/api/tkb/huykhoa",
+  TIMETABLE_CANCEL_PERIOD: "/api/tkb/huytiet",
 
   S3: "/api/presigned_url",
 };
@@ -89,8 +90,8 @@ import { useUserStore } from "~~/stores/userStore";
 class Request {
   constructor() {
     this.handler = {
-      onRequest({ request, options }) { },
-      onRequestError({ request, options, error }) { },
+      onRequest({ request, options }) {},
+      onRequestError({ request, options, error }) {},
       onResponse({ request, response, options }) {
         return response._data;
       },
@@ -635,8 +636,8 @@ class SubjectCombination {
     return await this.request.delete(ENDPOINTS.SUBJECT_COMBINATION, data);
   }
 }
-class Teacher{
-   constructor() {
+class Teacher {
+  constructor() {
     this.request = new Request();
   }
   async list(data) {
@@ -749,6 +750,9 @@ class Timetable {
   }
   async unlock_period(data) {
     return await this.request.put(ENDPOINTS.TIMETABLE_UNLOCK_PERIOD, data);
+  }
+  async cancel_period(data) {
+    return await this.request.put(ENDPOINTS.TIMETABLE_CANCEL_PERIOD, data);
   }
 }
 export default () => {
