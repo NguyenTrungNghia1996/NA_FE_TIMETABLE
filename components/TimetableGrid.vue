@@ -93,7 +93,7 @@
 
     <a-modal v-model:open="showAddModal" title="Chọn tiết học" ok-text="Thêm" cancel-text="Hủy" @ok="confirmAdd" @cancel="showAddModal = false">
       <a-select v-model:value="selectedIdx" class="w-full mb-4">
-        <a-select-option v-for="(lesson, idx) in contextMenu.isTeacher ? teacherUnscheduled : rawUnscheduled" :key="idx" :value="idx">
+        <a-select-option v-for="(lesson, idx) in lessonOptions" :key="idx" :value="idx">
           {{ lesson.ten_mon }}
           <template v-if="contextMenu.isTeacher">
             <template v-if="lesson.ten_lop"> - {{ lesson.ten_lop }} </template>
@@ -141,6 +141,7 @@ const selectedIdx = ref(0);
 const targetCell = ref(null);
 const selectedSubjectId = ref(null);
 const selectedCellPos = ref(null);
+const lessonOptions = ref([]);
 
 watch(
   () => props.classId,
@@ -335,7 +336,6 @@ async function onDrop(caId, dayId, pIdx) {
       id_lop: selectedClassId.value,
       timetable: [{ ...srcClone }, { ...dstClone }],
     };
-    console.log(">>>>>", dstClone.id_giao_vien);
     const { data, error } = await RestApi.timetable.update_class({ body });
     if (data.value?.status !== "success") {
       message.error("Update timetable error", error.value || data.value);
@@ -561,97 +561,142 @@ function setRest(val) {
   }
 }
 
-function setLock(val) {
+async function setLock(val) {
   const cell = contextMenu.isTeacher ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx) : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
-  if (!cell) return;
-  cell.isLock = val;
-  // console.log(val ? "Set locked period" : "Cleared locked period", {
-  //   ca: contextMenu.ca,
-  //   ngay: contextMenu.ngay,
-  //   tiet: contextMenu.pIdx + 1,
-  //   data: { ...cell },
-  // });
-  contextMenu.show = false;
-  if (!contextMenu.isTeacher) {
-    updateRawTimetable();
-  }
-}
-
-function clearCell() {
-  const cell = contextMenu.isTeacher ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx) : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
-  if (!cell) return;
-  const removed = contextMenu.isTeacher
-    ? {
-        id_mon: cell.id_mon,
-        ten_mon: cell.ten_mon,
-        id_lop: cell.id_lop,
-        ten_lop: cell.ten_lop,
-        id_phong: cell.id_phong,
-        ten_phong: cell.ten_phong,
-        tiet_thu_may: cell.tiet_thu_may,
+  if (!cell || !cell.id_chitiet) return;
+  try {
+    if (val) {
+      const { data, error } = await RestApi.timetable.lock_period({ params: { Id: cell.id_chitiet } });
+      if (data.value?.status === "success") {
+        const { data: listData, error: listError } = await RestApi.timetable.get_class({
+          params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
+        });
+        if (listData.value?.status === "success") {
+          emit("update:rawTimetable", listData.value.data.timetable);
+          emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+          selectedSubjectId.value = null;
+          selectedCellPos.value = null;
+        } else {
+          message.error("Load timetable error", listError.value || listData.value);
+        }
+        if (selectedTeacherId.value && props.timetableId) {
+          await fetchTeacherTimetable(selectedTeacherId.value);
+        }
       }
-    : {
-        id_mon: cell.id_mon,
-        ten_mon: cell.ten_mon,
-        id_giao_vien: cell.id_giao_vien,
-        ten_giao_vien: cell.ten_giao_vien,
-        id_phong: cell.id_phong,
-        ten_phong: cell.ten_phong,
-        tiet_thu_may: cell.tiet_thu_may,
-      };
-  const hasData = cell.id_chitiet || cell.id_mon || cell.ten_mon;
-  Object.assign(cell, {
-    id_chitiet: 0,
-    id_don_vi: 0,
-    id_tkb: 0,
-    id_mon: 0,
-    ten_mon: "",
-    id_giao_vien: 0,
-    ten_giao_vien: "",
-    id_lop: 0,
-    ten_lop: "",
-    id_phong: 0,
-    ten_phong: "",
-    tiet_thu_may: 0,
-    isRest: false,
-    isLock: false,
-  });
-  if (hasData) {
-    if (contextMenu.isTeacher) {
-      teacherUnscheduled.value = [...teacherUnscheduled.value, { ...removed }];
     } else {
-      const updatedUnscheduled = [...props.rawUnscheduled, { ...removed }];
-      emit("update:rawUnscheduled", updatedUnscheduled);
-      updateRawTimetable(updatedUnscheduled);
+      const { data, error } = await RestApi.timetable.unlock_period({ params: { Id: cell.id_chitiet } });
+      if (data.value?.status === "success") {
+        const { data: listData, error: listError } = await RestApi.timetable.get_class({
+          params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
+        });
+        if (listData.value?.status === "success") {
+          emit("update:rawTimetable", listData.value.data.timetable);
+          emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+        } else {
+          message.error("Load timetable error", listError.value || listData.value);
+        }
+        if (selectedTeacherId.value && props.timetableId) {
+          await fetchTeacherTimetable(selectedTeacherId.value);
+        }
+      }
     }
-  } else if (!contextMenu.isTeacher) {
-    updateRawTimetable();
+  } catch (err) {
+    message.error("Set lock error", err);
   }
-  // console.log("Cleared Cell", {
-  //   ca: contextMenu.ca,
-  //   ngay: contextMenu.ngay,
-  //   tiet: contextMenu.pIdx + 1,
-  //   data: { ...cell },
-  // });
+}
+
+async function clearCell() {
+  const cell = contextMenu.isTeacher ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx) : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
+  if (!cell) return;
+  try {
+    const { data, error } = await RestApi.timetable.cancel_period({ params: { Id: cell.id_chitiet } });
+    if (data.value?.status === "success") {
+      const { data: listData, error: listError } = await RestApi.timetable.get_class({
+        params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
+      });
+      if (listData.value?.status === "success") {
+        emit("update:rawTimetable", listData.value.data.timetable);
+        emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+        selectedSubjectId.value = null;
+        selectedCellPos.value = null;
+      } else {
+        message.error("Load timetable error", listError.value || listData.value);
+      }
+      if (selectedTeacherId.value && props.timetableId) {
+        await fetchTeacherTimetable(selectedTeacherId.value);
+      }
+    } else {
+      message.error("Clear cell error", error.value || data.value);
+    }
+  } catch (err) {
+    message.error("Clear cell error", err);
+  }
   contextMenu.show = false;
 }
 
-function addLesson() {
+async function addLesson() {
   const cell = contextMenu.isTeacher ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx) : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell || cell.ten_mon) return;
-  targetCell.value = cell;
-  selectedIdx.value = 0;
-  showAddModal.value = true;
   contextMenu.show = false;
+  try {
+    let body;
+    if (contextMenu.isTeacher) {
+      body = {
+        id_giao_vien: selectedTeacherId.value,
+        timetable: [
+          {
+            ...cell,
+            id_ca: contextMenu.ca,
+            ngay: contextMenu.ngay,
+            tiet: contextMenu.pIdx + 1,
+          },
+        ],
+      };
+      const { data, error } = await RestApi.timetable.find_teacher_lesson({ body });
+      if (data.value?.status === "success") {
+        lessonOptions.value = Array.isArray(data.value.data) ? data.value.data : [];
+      } else {
+        message.error("Find lessons error", error.value || data.value);
+        return;
+      }
+    } else {
+      body = {
+        id_lop: selectedClassId.value,
+        timetable: [
+          {
+            ...cell,
+            id_ca: contextMenu.ca,
+            ngay: contextMenu.ngay,
+            tiet: contextMenu.pIdx + 1,
+          },
+        ],
+      };
+      const { data, error } = await RestApi.timetable.find_class_lesson({ body });
+      console.log(data.value.data);
+      if (data.value?.status === "success") {
+        lessonOptions.value = Array.isArray(data.value.data) ? data.value.data : [];
+      } else {
+        message.error("Find lessons error", error.value || data.value);
+        return;
+      }
+    }
+    if (!lessonOptions.value.length) {
+      message.info("Không có tiết học phù hợp");
+      return;
+    }
+    targetCell.value = cell;
+    selectedIdx.value = 0;
+    showAddModal.value = true;
+  } catch (err) {
+    message.error("Find lessons error", err);
+  }
 }
 
 function confirmAdd() {
   if (selectedIdx.value == null || !targetCell.value) return;
+  const lesson = lessonOptions.value[selectedIdx.value];
+  if (!lesson) return;
   if (contextMenu.isTeacher) {
-    const unscheduled = [...teacherUnscheduled.value];
-    const lesson = unscheduled.splice(selectedIdx.value, 1)[0];
-    if (!lesson) return;
-    teacherUnscheduled.value = unscheduled;
     const cell = targetCell.value;
     cell.id_mon = lesson.id_mon;
     cell.ten_mon = lesson.ten_mon;
@@ -662,12 +707,9 @@ function confirmAdd() {
     cell.tiet_thu_may = lesson.tiet_thu_may;
     showAddModal.value = false;
     targetCell.value = null;
-    message.log("Lesson added", { cell: { ...cell }, lesson });
+    lessonOptions.value = [];
+    console.log("Lesson added", { cell: { ...cell }, lesson });
   } else {
-    const unscheduled = [...props.rawUnscheduled];
-    const lesson = unscheduled.splice(selectedIdx.value, 1)[0];
-    if (!lesson) return;
-    emit("update:rawUnscheduled", unscheduled);
     const cell = targetCell.value;
     cell.id_mon = lesson.id_mon;
     cell.ten_mon = lesson.ten_mon;
@@ -678,8 +720,9 @@ function confirmAdd() {
     cell.tiet_thu_may = lesson.tiet_thu_may;
     showAddModal.value = false;
     targetCell.value = null;
-    message.log("Lesson added", { cell: { ...cell }, lesson });
-    updateRawTimetable(unscheduled);
+    lessonOptions.value = [];
+    console.log("Lesson added", { cell: { ...cell }, lesson });
+    updateRawTimetable();
   }
 }
 </script>

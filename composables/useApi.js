@@ -76,10 +76,15 @@ let ENDPOINTS = {
   TIMETABLE_DETAIL: "/api/thoikhoabieu/detail",
   TIMETABLE_FIND_CLASS_POSITION: "/api/tkb/timvitri/lop",
   TIMETABLE_FIND_TEACHER_POSITION: "/api/tkb/timvitri/giaovien",
+  TIMETABLE_FIND_CLASS_LESSON: "/api/tkb/timtiet/lop",
+  TIMETABLE_FIND_TEACHER_LESSON: "/api/tkb/timtiet/giaovien",
   TIMETABLE_UPDATE_CLASS: "/api/tkb/update/lop",
   TIMETABLE_UPDATE_TEACHER: "/api/tkb/update/giaovien",
   TIMETABLE_CLASS: "/api/tkb/lop",
   TIMETABLE_TEACHER: "/api/tkb/giaovien",
+  TIMETABLE_LOCK_PERIOD: "/api/tkb/khoatiet",
+  TIMETABLE_UNLOCK_PERIOD: "/api/tkb/huykhoa",
+  TIMETABLE_CANCEL_PERIOD: "/api/tkb/huytiet",
 
   S3: "/api/presigned_url",
 };
@@ -87,8 +92,8 @@ import { useUserStore } from "~~/stores/userStore";
 class Request {
   constructor() {
     this.handler = {
-      onRequest({ request, options }) { },
-      onRequestError({ request, options, error }) { },
+      onRequest({ request, options }) {},
+      onRequestError({ request, options, error }) {},
       onResponse({ request, response, options }) {
         return response._data;
       },
@@ -633,8 +638,8 @@ class SubjectCombination {
     return await this.request.delete(ENDPOINTS.SUBJECT_COMBINATION, data);
   }
 }
-class Teacher{
-   constructor() {
+class Teacher {
+  constructor() {
     this.request = new Request();
   }
   async list(data) {
@@ -730,6 +735,12 @@ class Timetable {
   async find_teacher_position(data) {
     return await this.request.post(ENDPOINTS.TIMETABLE_FIND_TEACHER_POSITION, data);
   }
+  async find_class_lesson(data) {
+    return await this.request.post(ENDPOINTS.TIMETABLE_FIND_CLASS_LESSON, data);
+  }
+  async find_teacher_lesson(data) {
+    return await this.request.post(ENDPOINTS.TIMETABLE_FIND_TEACHER_LESSON, data);
+  }
   async update_class(data) {
     return await this.request.post(ENDPOINTS.TIMETABLE_UPDATE_CLASS, data);
   }
@@ -741,6 +752,15 @@ class Timetable {
   }
   async get_teacher(data) {
     return await this.request.get(ENDPOINTS.TIMETABLE_TEACHER, data);
+  }
+  async lock_period(data) {
+    return await this.request.put(ENDPOINTS.TIMETABLE_LOCK_PERIOD, data);
+  }
+  async unlock_period(data) {
+    return await this.request.put(ENDPOINTS.TIMETABLE_UNLOCK_PERIOD, data);
+  }
+  async cancel_period(data) {
+    return await this.request.put(ENDPOINTS.TIMETABLE_CANCEL_PERIOD, data);
   }
 }
 export default () => {
