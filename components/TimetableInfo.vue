@@ -19,8 +19,22 @@ const totalLessons = computed(() => info.tong_tat_ca_tiet);
 const arrangedLessons = computed(() => info.tong_tiet_da_xep);
 const unarrangedLessons = computed(() => info.tong_tiet_chua_xep);
 
-const arrangeAll = () => {
-  console.log("Xếp toàn trường");
+const settingStore = useSettingStore();
+const arrangeAll = async () => {
+  settingStore.setLoading(true);
+  try {
+    const { data, status, error } = await RestApi.timetable.arrange_all({
+      params: { Idtkb: props.timetableId },
+    });
+    if (data.value.status == "success") {
+      message.success(data.value.data || "");
+    }
+  } catch (err) {
+    console.error("Arrange all error", err);
+  } finally {
+    await fetchInfo();
+  }
+  settingStore.setLoading(false);
 };
 
 const arrangePartial = type => {
@@ -60,13 +74,13 @@ async function refresh() {
   await fetchInfo();
 }
 
-watch(() => props.timetableId, fetchInfo, { immediate: true });
+watch(() => props.timetableId, await fetchInfo(), { immediate: true });
 
 defineExpose({ refresh, reset });
 </script>
 
 <template>
-  <div class=" min-h-screen">
+  <div class="min-h-screen">
     <!-- Header -->
     <div class="flex justify-end items-center mb-6">
       <!-- <h1 class="text-xl font-bold text-gray-700">THÔNG TIN THỜI KHÓA BIỂU</h1> -->
