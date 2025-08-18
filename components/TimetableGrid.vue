@@ -1,5 +1,6 @@
 <template>
   <div @click="contextMenu.show = false" class="grid grid-cols-1 gap-5">
+    <SelectClass v-model="selectedClassId" class="mb-2" />
     <div class="grid grid-cols-4 gap-2">
       <a-tabs v-model:activeKey="activeCa" class="col-span-3">
         <a-tab-pane v-for="ca in dsCa" :key="ca.id" :tab="`Ca ${ca.id}`">
@@ -135,12 +136,32 @@ const teacherDsCa = ref([]);
 const teacherActiveCa = ref(1);
 const teacherUnscheduled = ref([]);
 const selectedTeacherId = ref(null);
-const emit = defineEmits(["cell-click", "update:rawTimetable", "update:rawUnscheduled"]);
+const selectedClassId = ref(props.classId);
+const emit = defineEmits([
+  "cell-click",
+  "update:rawTimetable",
+  "update:rawUnscheduled",
+  "update:classId",
+]);
 const showAddModal = ref(false);
 const selectedIdx = ref(0);
 const targetCell = ref(null);
 const selectedSubjectId = ref(null);
 const selectedCellPos = ref(null);
+
+watch(
+  () => props.classId,
+  id => {
+    selectedClassId.value = id;
+  },
+);
+
+watch(selectedClassId, async id => {
+  emit("update:classId", id);
+  if (id && selectedTeacherId.value && props.timetableId) {
+    await fetchTeacherTimetable(selectedTeacherId.value);
+  }
+});
 
 watch(
   () => props.rawTimetable,
@@ -307,7 +328,7 @@ async function onDrop(caId, dayId, pIdx) {
 
   try {
     const body = {
-      id_lop: props.classId,
+      id_lop: selectedClassId.value,
       timetable: [{ ...srcClone }, { ...dstClone }],
     };
     const { data, error } = await RestApi.timetable.update_class({ body });
@@ -316,7 +337,7 @@ async function onDrop(caId, dayId, pIdx) {
     } else {
       try {
         const { data: listData, error: listError } = await RestApi.timetable.get_class({
-          params: { idLop: props.classId, idtkb: dstClone.id_tkb },
+          params: { idLop: selectedClassId.value, idtkb: dstClone.id_tkb },
         });
         if (listData.value?.status === "success") {
           emit("update:rawTimetable", listData.value.data.timetable);
@@ -371,10 +392,10 @@ async function onTeacherDrop(caId, dayId, pIdx) {
       message.error("Update teacher timetable error", error.value || data.value);
     } else {
       await fetchTeacherTimetable(selectedTeacherId.value);
-      if (props.classId && props.timetableId) {
+      if (selectedClassId.value && props.timetableId) {
         try {
           const { data: listData, error: listError } = await RestApi.timetable.get_class({
-            params: { idLop: props.classId, idtkb: dstClone.id_tkb },
+            params: { idLop: selectedClassId.value, idtkb: dstClone.id_tkb },
           });
           if (listData.value?.status === "success") {
             emit("update:rawTimetable", listData.value.data.timetable);
@@ -434,7 +455,7 @@ async function onCellClick(caId, dayId, pIdx) {
   }
   try {
     const body = {
-      id_lop: props.classId,
+      id_lop: selectedClassId.value,
       timetable: [
         {
           ...cell,
