@@ -220,12 +220,12 @@ async function fetchTeacherTimetable(teacherId) {
           }))
         : [];
     } else {
-      console.error("Get teacher timetable error", error.value || data.value);
+      message.error("Get teacher timetable error", error.value || data.value);
       teacherDsCa.value = [];
       teacherUnscheduled.value = [];
     }
   } catch (err) {
-    console.error("Get teacher timetable error", err);
+    message.error("Get teacher timetable error", err);
     teacherDsCa.value = [];
     teacherUnscheduled.value = [];
   }
@@ -288,20 +288,20 @@ async function onDrop(caId, dayId, pIdx) {
   const srcClone = { ...src };
   const dstClone = { ...dst };
 
-  console.log("Drag drop", {
-    source: {
-      ca: dragSource.value.caId,
-      ngay: dragSource.value.dayId,
-      tiet: dragSource.value.pIdx + 1,
-      data: { ...src },
-    },
-    destination: {
-      ca: caId,
-      ngay: dayId,
-      tiet: pIdx + 1,
-      data: { ...dst },
-    },
-  });
+  // console.log("Drag drop", {
+  //   source: {
+  //     ca: dragSource.value.caId,
+  //     ngay: dragSource.value.dayId,
+  //     tiet: dragSource.value.pIdx + 1,
+  //     data: { ...src },
+  //   },
+  //   destination: {
+  //     ca: caId,
+  //     ngay: dayId,
+  //     tiet: pIdx + 1,
+  //     data: { ...dst },
+  //   },
+  // });
 
   if (!isDraggable(src) || !isDraggable(dst)) return;
 
@@ -454,7 +454,7 @@ async function onCellClick(caId, dayId, pIdx) {
     };
     const { data, error } = await RestApi.timetable.find_class_position({ body });
     if (data.value?.status === "success") {
-      console.log("Find position response", data.value);
+      // message.log("Find position response", data.value);
       const { timetable, ds_chua_xep } = data.value.data || {};
       if (Array.isArray(timetable)) {
         emit("update:rawTimetable", timetable);
@@ -463,10 +463,10 @@ async function onCellClick(caId, dayId, pIdx) {
         emit("update:rawUnscheduled", ds_chua_xep);
       }
     } else {
-      console.error("Find position error", error.value || data.value);
+      message.error("Find position error", error.value || data.value);
     }
   } catch (err) {
-    console.error("Find position error", err);
+    message.error("Find position error", err);
   }
 }
 
@@ -503,10 +503,10 @@ async function onTeacherCellClick(caId, dayId, pIdx) {
         teacherUnscheduled.value = ds_chua_xep;
       }
     } else {
-      console.error("Find teacher position error", error.value || data.value);
+      message.error("Find teacher position error", error.value || data.value);
     }
   } catch (err) {
-    console.error("Find teacher position error", err);
+    message.error("Find teacher position error", err);
   }
 }
 
@@ -520,12 +520,12 @@ function setRest(val) {
     cell.id_mon = 0;
     cell.id_giao_vien = 0;
   }
-  console.log(val ? "Set rest period" : "Cleared rest period", {
-    ca: contextMenu.ca,
-    ngay: contextMenu.ngay,
-    tiet: contextMenu.pIdx + 1,
-    data: { ...cell },
-  });
+  // console.log(val ? "Set rest period" : "Cleared rest period", {
+  //   ca: contextMenu.ca,
+  //   ngay: contextMenu.ngay,
+  //   tiet: contextMenu.pIdx + 1,
+  //   data: { ...cell },
+  // });
   contextMenu.show = false;
   updateRawTimetable();
 }
@@ -534,12 +534,12 @@ function setLock(val) {
   const cell = getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell) return;
   cell.isLock = val;
-  console.log(val ? "Set locked period" : "Cleared locked period", {
-    ca: contextMenu.ca,
-    ngay: contextMenu.ngay,
-    tiet: contextMenu.pIdx + 1,
-    data: { ...cell },
-  });
+  // console.log(val ? "Set locked period" : "Cleared locked period", {
+  //   ca: contextMenu.ca,
+  //   ngay: contextMenu.ngay,
+  //   tiet: contextMenu.pIdx + 1,
+  //   data: { ...cell },
+  // });
   contextMenu.show = false;
   updateRawTimetable();
 }
@@ -576,12 +576,12 @@ function clearCell() {
     updatedUnscheduled = [...props.rawUnscheduled, { ...removed }];
     emit("update:rawUnscheduled", updatedUnscheduled);
   }
-  console.log("Cleared Cell", {
-    ca: contextMenu.ca,
-    ngay: contextMenu.ngay,
-    tiet: contextMenu.pIdx + 1,
-    data: { ...cell },
-  });
+  // console.log("Cleared Cell", {
+  //   ca: contextMenu.ca,
+  //   ngay: contextMenu.ngay,
+  //   tiet: contextMenu.pIdx + 1,
+  //   data: { ...cell },
+  // });
   contextMenu.show = false;
   updateRawTimetable(updatedUnscheduled);
 }
@@ -611,7 +611,7 @@ function confirmAdd() {
   cell.tiet_thu_may = lesson.tiet_thu_may;
   showAddModal.value = false;
   targetCell.value = null;
-  console.log("Lesson added", { cell: { ...cell }, lesson });
+  message.log("Lesson added", { cell: { ...cell }, lesson });
   updateRawTimetable(unscheduled);
 }
 </script>
