@@ -604,62 +604,82 @@ async function setLock(val) {
   }
 }
 
-function clearCell() {
+async function clearCell() {
   const cell = contextMenu.isTeacher ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx) : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell) return;
-  const removed = contextMenu.isTeacher
-    ? {
-        id_mon: cell.id_mon,
-        ten_mon: cell.ten_mon,
-        id_lop: cell.id_lop,
-        ten_lop: cell.ten_lop,
-        id_phong: cell.id_phong,
-        ten_phong: cell.ten_phong,
-        tiet_thu_may: cell.tiet_thu_may,
+  if (cell.id_chitiet) {
+    try {
+      const { data, error } = await RestApi.timetable.cancel_period({ params: { Id: cell.id_chitiet } });
+      if (data.value?.status === "success") {
+        const { data: listData, error: listError } = await RestApi.timetable.get_class({
+          params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
+        });
+        if (listData.value?.status === "success") {
+          emit("update:rawTimetable", listData.value.data.timetable);
+          emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+          selectedSubjectId.value = null;
+          selectedCellPos.value = null;
+        } else {
+          message.error("Load timetable error", listError.value || listData.value);
+        }
+        if (selectedTeacherId.value && props.timetableId) {
+          await fetchTeacherTimetable(selectedTeacherId.value);
+        }
+      } else {
+        message.error("Clear cell error", error.value || data.value);
       }
-    : {
-        id_mon: cell.id_mon,
-        ten_mon: cell.ten_mon,
-        id_giao_vien: cell.id_giao_vien,
-        ten_giao_vien: cell.ten_giao_vien,
-        id_phong: cell.id_phong,
-        ten_phong: cell.ten_phong,
-        tiet_thu_may: cell.tiet_thu_may,
-      };
-  const hasData = cell.id_chitiet || cell.id_mon || cell.ten_mon;
-  Object.assign(cell, {
-    id_chitiet: 0,
-    id_don_vi: 0,
-    id_tkb: 0,
-    id_mon: 0,
-    ten_mon: "",
-    id_giao_vien: 0,
-    ten_giao_vien: "",
-    id_lop: 0,
-    ten_lop: "",
-    id_phong: 0,
-    ten_phong: "",
-    tiet_thu_may: 0,
-    isRest: false,
-    isLock: false,
-  });
-  if (hasData) {
-    if (contextMenu.isTeacher) {
-      teacherUnscheduled.value = [...teacherUnscheduled.value, { ...removed }];
-    } else {
-      const updatedUnscheduled = [...props.rawUnscheduled, { ...removed }];
-      emit("update:rawUnscheduled", updatedUnscheduled);
-      updateRawTimetable(updatedUnscheduled);
+    } catch (err) {
+      message.error("Clear cell error", err);
     }
-  } else if (!contextMenu.isTeacher) {
-    updateRawTimetable();
+  } else {
+    const removed = contextMenu.isTeacher
+      ? {
+          id_mon: cell.id_mon,
+          ten_mon: cell.ten_mon,
+          id_lop: cell.id_lop,
+          ten_lop: cell.ten_lop,
+          id_phong: cell.id_phong,
+          ten_phong: cell.ten_phong,
+          tiet_thu_may: cell.tiet_thu_may,
+        }
+      : {
+          id_mon: cell.id_mon,
+          ten_mon: cell.ten_mon,
+          id_giao_vien: cell.id_giao_vien,
+          ten_giao_vien: cell.ten_giao_vien,
+          id_phong: cell.id_phong,
+          ten_phong: cell.ten_phong,
+          tiet_thu_may: cell.tiet_thu_may,
+        };
+    const hasData = cell.id_mon || cell.ten_mon;
+    Object.assign(cell, {
+      id_chitiet: 0,
+      id_don_vi: 0,
+      id_tkb: 0,
+      id_mon: 0,
+      ten_mon: "",
+      id_giao_vien: 0,
+      ten_giao_vien: "",
+      id_lop: 0,
+      ten_lop: "",
+      id_phong: 0,
+      ten_phong: "",
+      tiet_thu_may: 0,
+      isRest: false,
+      isLock: false,
+    });
+    if (hasData) {
+      if (contextMenu.isTeacher) {
+        teacherUnscheduled.value = [...teacherUnscheduled.value, { ...removed }];
+      } else {
+        const updatedUnscheduled = [...props.rawUnscheduled, { ...removed }];
+        emit("update:rawUnscheduled", updatedUnscheduled);
+        updateRawTimetable(updatedUnscheduled);
+      }
+    } else if (!contextMenu.isTeacher) {
+      updateRawTimetable();
+    }
   }
-  // console.log("Cleared Cell", {
-  //   ca: contextMenu.ca,
-  //   ngay: contextMenu.ngay,
-  //   tiet: contextMenu.pIdx + 1,
-  //   data: { ...cell },
-  // });
   contextMenu.show = false;
 }
 
