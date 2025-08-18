@@ -305,22 +305,6 @@ async function onDrop(caId, dayId, pIdx) {
   if (!src || !dst) return;
   const srcClone = { ...src };
   const dstClone = { ...dst };
-
-  // console.log("Drag drop", {
-  //   source: {
-  //     ca: dragSource.value.caId,
-  //     ngay: dragSource.value.dayId,
-  //     tiet: dragSource.value.pIdx + 1,
-  //     data: { ...src },
-  //   },
-  //   destination: {
-  //     ca: caId,
-  //     ngay: dayId,
-  //     tiet: pIdx + 1,
-  //     data: { ...dst },
-  //   },
-  // });
-
   if (!isDraggable(src) || !isDraggable(dst)) return;
 
   const keys = Object.keys(src).filter(k => !["id_ca", "ngay", "tiet"].includes(k));
@@ -549,12 +533,6 @@ function setRest(val) {
       cell.id_giao_vien = 0;
     }
   }
-  // console.log(val ? "Set rest period" : "Cleared rest period", {
-  //   ca: contextMenu.ca,
-  //   ngay: contextMenu.ngay,
-  //   tiet: contextMenu.pIdx + 1,
-  //   data: { ...cell },
-  // });
   contextMenu.show = false;
   if (!contextMenu.isTeacher) {
     updateRawTimetable();
@@ -672,7 +650,6 @@ async function addLesson() {
         ],
       };
       const { data, error } = await RestApi.timetable.find_class_lesson({ body });
-      console.log(data.value.data);
       if (data.value?.status === "success") {
         lessonOptions.value = Array.isArray(data.value.data) ? data.value.data : [];
       } else {

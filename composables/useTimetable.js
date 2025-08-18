@@ -82,7 +82,7 @@ export function transformTimetable(records = [], opts = {}) {
   }
 
   if (unassigned.length) {
-    console.log("Unassigned periods:", unassigned);
+    // console.log("Unassigned periods:", unassigned);
   }
 
   return { ds_Ca, unassigned, index };
@@ -152,7 +152,7 @@ export function toFlatRecordsFromGrid(grid, options = {}) {
 
   // cộng thêm các ô unassigned nếu có
   if (Array.isArray(mergeUnassigned) && mergeUnassigned.length) {
-    console.log("Unassigned periods:", mergeUnassigned);
+    // console.log("Unassigned periods:", mergeUnassigned);
     out.push(...mergeUnassigned);
   }
 

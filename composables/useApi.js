@@ -85,6 +85,7 @@ let ENDPOINTS = {
   TIMETABLE_LOCK_PERIOD: "/api/tkb/khoatiet",
   TIMETABLE_UNLOCK_PERIOD: "/api/tkb/huykhoa",
   TIMETABLE_CANCEL_PERIOD: "/api/tkb/huytiet",
+  TIMETABLE_ARRANGE_ALL: "/api/tkb",
 
   S3: "/api/presigned_url",
 };
@@ -761,6 +762,9 @@ class Timetable {
   }
   async cancel_period(data) {
     return await this.request.put(ENDPOINTS.TIMETABLE_CANCEL_PERIOD, data);
+  }
+  async arrange_all(data) {
+    return await this.request.post(ENDPOINTS.TIMETABLE_ARRANGE_ALL, data);
   }
 }
 export default () => {
