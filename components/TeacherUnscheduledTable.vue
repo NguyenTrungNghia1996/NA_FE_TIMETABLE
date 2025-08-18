@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-4">
+  <div>
     <h4 class="font-semibold mb-2">Tiết chưa xếp của giáo viên</h4>
     <ClientOnly>
       <a-table :columns="columns" :data-source="data" :pagination="false" bordered size="small" />

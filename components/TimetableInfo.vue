@@ -1,7 +1,23 @@
 <script setup>
-const totalLessons = ref(400);
-const arrangedLessons = ref(400);
-const unarrangedLessons = ref(0);
+const props = defineProps({
+  timetableId: {
+    type: [Number, String],
+    required: true,
+  },
+});
+
+const { RestApi } = useApi();
+
+const info = reactive({
+  ten: "",
+  tong_tat_ca_tiet: 0,
+  tong_tiet_da_xep: 0,
+  tong_tiet_chua_xep: 0,
+});
+
+const totalLessons = computed(() => info.tong_tat_ca_tiet);
+const arrangedLessons = computed(() => info.tong_tiet_da_xep);
+const unarrangedLessons = computed(() => info.tong_tiet_chua_xep);
 
 const arrangeAll = () => {
   console.log("Xếp toàn trường");
@@ -15,12 +31,38 @@ const cancelArrange = () => {
   console.log("Hủy kết quả xếp");
 };
 
-const props = defineProps({
-  id: {
-    type: [Number, String],
-    // required: true
+async function fetchInfo() {
+  if (!props.timetableId) return;
+  try {
+    const { data } = await RestApi.timetable.detail({
+      params: { Id: props.timetableId },
+    });
+    if (data.value?.status === "success") {
+      Object.assign(info, data.value.data || {});
+    } else {
+      reset();
+    }
+  } catch (err) {
+    console.error("Fetch timetable info error", err);
   }
-})
+}
+
+function reset() {
+  Object.assign(info, {
+    ten: "",
+    tong_tat_ca_tiet: 0,
+    tong_tiet_da_xep: 0,
+    tong_tiet_chua_xep: 0,
+  });
+}
+
+async function refresh() {
+  await fetchInfo();
+}
+
+watch(() => props.timetableId, fetchInfo, { immediate: true });
+
+defineExpose({ refresh, reset });
 </script>
 
 <template>
@@ -35,7 +77,7 @@ const props = defineProps({
     <div class="bg-white p-4 rounded-md shadow-lg mb-8">
       <p class="mb-2">
         <span class="font-semibold">Tên thời khóa biểu:</span>
-        <span class="ml-2">Thời khóa biểu cả năm</span>
+        <span class="ml-2">{{ info.ten }}</span>
       </p>
       <p class="mb-2">
         <span class="font-semibold">Tổng số tiết: </span>

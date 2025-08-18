@@ -65,17 +65,12 @@
     </a-modal>
     <a-drawer v-model:open="drawerInfoOpen" title="Xếp thời khóa biểu" :footer="null" height="100vh" placement="bottom" @close="closeInfoDrawer">
       <ClientOnly>
-        <TimetableInfo ref="infoRef" />
+        <TimetableInfo ref="infoRef" :timetableId="infoTimetableId" />
       </ClientOnly>
     </a-drawer>
     <a-drawer v-model:open="drawerAdjustOpen" title="Tinh chỉnh thời khóa biểu" :footer="null" height="100vh" placement="bottom">
       <ClientOnly>
-        <TimetableGrid
-          v-model:rawTimetable="adjustRawTimetable"
-          v-model:rawUnscheduled="adjustRawUnscheduled"
-          v-model:classId="adjustClassId"
-          :timetableId="adjustTimetableId"
-        />
+        <TimetableGrid v-model:rawTimetable="adjustRawTimetable" v-model:rawUnscheduled="adjustRawUnscheduled" v-model:classId="adjustClassId" :timetableId="adjustTimetableId" />
       </ClientOnly>
     </a-drawer>
   </div>
@@ -249,6 +244,7 @@ const adjustRawTimetable = ref([]);
 const adjustRawUnscheduled = ref([]);
 const adjustClassId = ref(null);
 const adjustTimetableId = ref(null);
+const infoTimetableId = ref(null);
 
 watch(drawerInfoOpen, val => {
   if (val) {
@@ -260,6 +256,7 @@ const closeInfoDrawer = () => {
   infoRef.value?.reset?.();
 };
 const openInfoDrawer = reg => {
+  infoTimetableId.value = reg.id;
   drawerInfoOpen.value = true;
 };
 const fetchAdjustData = async () => {
