@@ -335,6 +335,7 @@ async function onDrop(caId, dayId, pIdx) {
       id_lop: selectedClassId.value,
       timetable: [{ ...srcClone }, { ...dstClone }],
     };
+    console.log(">>>>>", dstClone.id_giao_vien);
     const { data, error } = await RestApi.timetable.update_class({ body });
     if (data.value?.status !== "success") {
       message.error("Update timetable error", error.value || data.value);
@@ -348,6 +349,7 @@ async function onDrop(caId, dayId, pIdx) {
           emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
           selectedSubjectId.value = null;
           selectedCellPos.value = null;
+          await fetchTeacherTimetable(srcClone.id_giao_vien);
         } else {
           message.error("Load timetable error", listError.value || listData.value);
         }
