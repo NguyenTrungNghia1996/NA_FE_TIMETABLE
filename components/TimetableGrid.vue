@@ -1,5 +1,5 @@
 <template>
-  <div @click="contextMenu.show = false">
+  <div @click="contextMenu.show = false" class="grid grid-cols-1 gap-5">
     <div class="grid grid-cols-4 gap-2">
       <a-tabs v-model:activeKey="activeCa" class="col-span-3">
         <a-tab-pane v-for="ca in dsCa" :key="ca.id" :tab="`Ca ${ca.id}`">
@@ -35,8 +35,8 @@
       </a-tabs>
       <UnscheduledTable :data="props.rawUnscheduled" class="mt-4" />
     </div>
-    <SelectTeacher v-model="selectedTeacherId" class="mb-4 w-full max-w-xs" />
 
+    <SelectTeacher v-model="selectedTeacherId" />
     <div v-if="teacherDsCa.length" class="grid grid-cols-4 gap-2">
       <a-tabs v-model:activeKey="teacherActiveCa" class="col-span-3">
         <a-tab-pane v-for="ca in teacherDsCa" :key="ca.id" :tab="`Ca ${ca.id}`">
