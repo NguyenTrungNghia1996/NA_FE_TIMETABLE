@@ -2,8 +2,8 @@
   <div @click="contextMenu.show = false" class="grid grid-cols-1 gap-5">
     <SelectClass v-model="selectedClassId" class="mb-2" />
     <div class="grid grid-cols-4 gap-2">
-      <a-tabs v-model:activeKey="activeCa" class="col-span-3" type="card" size="small">
-        <a-tab-pane v-for="ca in dsCa" :key="ca.id" :tab="ca.id == 1 ? 'Ca Sáng' : 'Ca Chiều'">
+      <div class="col-span-3 h-70 overflow-auto" type="card" size="small">
+        <div v-for="ca in dsCa" :key="ca.id" :tab="ca.id == 1 ? 'Ca Sáng' : 'Ca Chiều'">
           <div class="overflow-x-auto">
             <table class="min-w-full border-collapse select-none">
               <thead>
@@ -32,15 +32,15 @@
               </tbody>
             </table>
           </div>
-        </a-tab-pane>
-      </a-tabs>
+        </div>
+      </div>
       <UnscheduledTable :data="props.rawUnscheduled" class="mt-4" />
     </div>
 
     <SelectTeacher v-model="selectedTeacherId" />
     <div v-if="teacherDsCa.length" class="grid grid-cols-4 gap-2">
-      <a-tabs v-model:activeKey="teacherActiveCa" class="col-span-3" type="card" size="small">
-        <a-tab-pane v-for="ca in teacherDsCa" :key="ca.id" :tab="ca.id == 1 ? 'Ca Sáng' : 'Ca Chiều'">
+      <div class="col-span-3 h-70 overflow-auto" type="card" size="small">
+        <div v-for="ca in teacherDsCa" :key="ca.id" :tab="ca.id == 1 ? 'Ca Sáng' : 'Ca Chiều'">
           <div class="overflow-x-auto">
             <table class="min-w-full border-collapse select-none">
               <thead>
@@ -72,8 +72,8 @@
               </tbody>
             </table>
           </div>
-        </a-tab-pane>
-      </a-tabs>
+        </div>
+      </div>
       <TeacherUnscheduledTable v-if="teacherUnscheduled.length" :data="teacherUnscheduled" class="mt-4" />
     </div>
 
