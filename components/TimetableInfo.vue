@@ -20,21 +20,239 @@ const arrangedLessons = computed(() => info.tong_tiet_da_xep);
 const unarrangedLessons = computed(() => info.tong_tiet_chua_xep);
 
 const settingStore = useSettingStore();
+const subjectModal = reactive({
+  visible: false,
+  loading: false,
+  data: [],
+  selectedRowKeys: [],
+});
+const subjectColumns = [
+  { title: "Tên môn học", dataIndex: "ten" },
+  { title: "Tổng tiết", dataIndex: "tong_tiet" },
+  { title: "Tiết chưa xếp", dataIndex: "tiet_chua_xep" },
+  { title: "Tiết đã xếp", dataIndex: "tiet_da_xep" },
+];
+const subjectRowSelection = computed(() => ({
+  selectedRowKeys: subjectModal.selectedRowKeys,
+  onChange: keys => (subjectModal.selectedRowKeys = keys),
+}));
+
+const classModal = reactive({
+  visible: false,
+  loading: false,
+  data: [],
+  selectedRowKeys: [],
+});
+const classColumns = [
+  { title: "Tên lớp", dataIndex: "ten" },
+  { title: "Tổng tiết", dataIndex: "tong_tiet" },
+  { title: "Tiết chưa xếp", dataIndex: "tiet_chua_xep" },
+  { title: "Tiết đã xếp", dataIndex: "tiet_da_xep" },
+];
+const classRowSelection = computed(() => ({
+  selectedRowKeys: classModal.selectedRowKeys,
+  onChange: keys => (classModal.selectedRowKeys = keys),
+}));
+
+const roomModal = reactive({
+  visible: false,
+  loading: false,
+  data: [],
+  selectedRowKeys: [],
+});
+const roomColumns = [
+  { title: "Tên phòng học", dataIndex: "ten" },
+  { title: "Tổng tiết", dataIndex: "tong_tiet" },
+  { title: "Tiết chưa xếp", dataIndex: "tiet_chua_xep" },
+  { title: "Tiết đã xếp", dataIndex: "tiet_da_xep" },
+];
+const roomRowSelection = computed(() => ({
+  selectedRowKeys: roomModal.selectedRowKeys,
+  onChange: keys => (roomModal.selectedRowKeys = keys),
+}));
+
+const fetchSubjectLessons = async () => {
+  subjectModal.loading = true;
+  try {
+    const { data, error } = await RestApi.timetable.subject_list({
+      params: { idtkb: props.timetableId },
+    });
+    if (error.value) {
+      throw new Error(error.value?.data?.message || "Không thể tải danh sách môn học");
+    }
+    subjectModal.data = data.value?.data || [];
+  } catch (err) {
+    message.error(err.message || "Không thể tải danh sách môn học");
+  } finally {
+    subjectModal.loading = false;
+  }
+};
+const openSubjectModal = async () => {
+  await fetchSubjectLessons();
+  subjectModal.visible = true;
+};
+const confirmArrangeSubject = async () => {
+  if (!subjectModal.selectedRowKeys.length) {
+    subjectModal.visible = false;
+    return;
+  }
+  subjectModal.loading = true;
+  try {
+    const { data, error } = await RestApi.timetable.arrange_subject({
+      body: { id_tkb: props.timetableId, ids: subjectModal.selectedRowKeys },
+    });
+    if (error.value || data.value?.status !== "success") {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xếp môn học không thành công");
+    }
+    message.success(data.value.message || data.value.data || "");
+    subjectModal.visible = false;
+    subjectModal.selectedRowKeys = [];
+    await fetchInfo();
+  } catch (err) {
+    message.error(err.message || "Xếp môn học không thành công");
+  } finally {
+    subjectModal.loading = false;
+  }
+};
+
+const fetchClassLessons = async () => {
+  classModal.loading = true;
+  try {
+    const { data, error } = await RestApi.timetable.class_list({
+      params: { idtkb: props.timetableId },
+    });
+    if (error.value) {
+      throw new Error(error.value?.data?.message || "Không thể tải danh sách lớp");
+    }
+    classModal.data = data.value?.data || [];
+  } catch (err) {
+    message.error(err.message || "Không thể tải danh sách lớp");
+  } finally {
+    classModal.loading = false;
+  }
+};
+const openClassModal = async () => {
+  await fetchClassLessons();
+  classModal.visible = true;
+};
+const confirmArrangeClass = async () => {
+  if (!classModal.selectedRowKeys.length) {
+    classModal.visible = false;
+    return;
+  }
+  classModal.loading = true;
+  try {
+    const { data, error } = await RestApi.timetable.arrange_class({
+      body: { id_tkb: props.timetableId, ids: classModal.selectedRowKeys },
+    });
+    if (error.value || data.value?.status !== "success") {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xếp lớp không thành công");
+    }
+    message.success(data.value.message || data.value.data || "");
+    classModal.visible = false;
+    classModal.selectedRowKeys = [];
+    await fetchInfo();
+  } catch (err) {
+    message.error(err.message || "Xếp lớp không thành công");
+  } finally {
+    classModal.loading = false;
+  }
+};
+
+const fetchRoomLessons = async () => {
+  roomModal.loading = true;
+  try {
+    const { data, error } = await RestApi.timetable.room_list({
+      params: { idtkb: props.timetableId },
+    });
+    if (error.value) {
+      throw new Error(error.value?.data?.message || "Không thể tải danh sách phòng học");
+    }
+    roomModal.data = data.value?.data || [];
+  } catch (err) {
+    message.error(err.message || "Không thể tải danh sách phòng học");
+  } finally {
+    roomModal.loading = false;
+  }
+};
+const openRoomModal = async () => {
+  await fetchRoomLessons();
+  roomModal.visible = true;
+};
+const confirmArrangeRoom = async () => {
+  if (!roomModal.selectedRowKeys.length) {
+    roomModal.visible = false;
+    return;
+  }
+  roomModal.loading = true;
+  try {
+    const { data, error } = await RestApi.timetable.arrange_room({
+      body: { id_tkb: props.timetableId, ids: roomModal.selectedRowKeys },
+    });
+    if (error.value || data.value?.status !== "success") {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xếp phòng học không thành công");
+    }
+    message.success(data.value.message || data.value.data || "");
+    roomModal.visible = false;
+    roomModal.selectedRowKeys = [];
+    await fetchInfo();
+  } catch (err) {
+    message.error(err.message || "Xếp phòng học không thành công");
+  } finally {
+    roomModal.loading = false;
+  }
+};
+const arrangeFunctionRoom = async () => {
+  settingStore.setLoading(true);
+  try {
+    const { data, error } = await RestApi.timetable.arrange_function_room({
+      params: { idtkb: props.timetableId },
+    });
+    if (error.value || data.value?.status !== "success") {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xếp phòng chức năng không thành công");
+    }
+    message.success(data.value.message || data.value.data || "");
+    await fetchInfo();
+  } catch (err) {
+    message.error(err.message || "Xếp phòng chức năng không thành công");
+  } finally {
+    settingStore.setLoading(false);
+  }
+};
+
+const arrangeGvcn = async () => {
+  settingStore.setLoading(true);
+  try {
+    const { data, error } = await RestApi.timetable.arrange_gvcn({
+      params: { idtkb: props.timetableId },
+    });
+    if (error.value || data.value?.status !== "success") {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xếp GVCN không thành công");
+    }
+    message.success(data.value.message || data.value.data || "");
+    await fetchInfo();
+  } catch (err) {
+    message.error(err.message || "Xếp GVCN không thành công");
+  } finally {
+    settingStore.setLoading(false);
+  }
+};
 const arrangeAll = async () => {
   settingStore.setLoading(true);
   try {
-    const { data, status, error } = await RestApi.timetable.arrange_all({
+    const { data, error } = await RestApi.timetable.arrange_all({
       params: { Idtkb: props.timetableId },
     });
-    if (data.value.status == "success") {
-      message.success(data.value.data || "");
+    if (error.value || data.value?.status !== "success") {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xếp thời khóa biểu không thành công");
     }
+    message.success(data.value.data || "");
   } catch (err) {
-    console.error("Arrange all error", err);
+    message.error(err.message || "Xếp thời khóa biểu không thành công");
   } finally {
     await fetchInfo();
+    settingStore.setLoading(false);
   }
-  settingStore.setLoading(false);
 };
 
 const arrangePartial = type => {
@@ -42,13 +260,13 @@ const arrangePartial = type => {
   // console.log("Xếp cục bộ:", type);
   switch (type) {
     case "Xếp Phòng chức năng":
-      console.log("Thực hiện xếp Phòng chức năng");
+      arrangeFunctionRoom();
       break;
     case "Xếp GVCN":
-      console.log("Thực hiện xếp Giáo viên chủ nhiệm");
+      arrangeGvcn();
       break;
     case "Xếp Môn học":
-      console.log("Thực hiện xếp Môn học");
+      openSubjectModal();
       break;
     case "Xếp Giáo viên":
       console.log("Thực hiện xếp Giáo viên");
@@ -57,7 +275,7 @@ const arrangePartial = type => {
       console.log("Thực hiện xếp Nhóm");
       break;
     case "Xếp Lớp":
-      console.log("Thực hiện xếp Lớp");
+      openClassModal();
       break;
     case "Xếp Lớp - Môn":
       console.log("Thực hiện xếp Lớp - Môn");
@@ -66,7 +284,7 @@ const arrangePartial = type => {
       console.log("Thực hiện xếp Khối - Môn");
       break;
     case "Xếp Phòng học":
-      console.log("Thực hiện xếp Phòng học");
+      openRoomModal();
       break;
     default:
       console.log("Chức năng không hợp lệ");
@@ -76,14 +294,15 @@ const arrangePartial = type => {
 const cancelArrange = async () => {
   settingStore.setLoading(true);
   try {
-    const { data } = await RestApi.timetable.cancel_result({
+    const { data, error } = await RestApi.timetable.cancel_result({
       params: { Id: props.timetableId },
     });
-    if (data.value?.status === "success") {
-      message.success(data.value.data || "");
+    if (error.value || data.value?.status !== "success") {
+      throw new Error(error.value?.data?.message || data.value?.message || "Hủy kết quả xếp không thành công");
     }
+    message.success(data.value.data || "");
   } catch (err) {
-    console.error("Cancel arrange error", err);
+    message.error(err.message || "Hủy kết quả xếp không thành công");
   } finally {
     await fetchInfo();
     settingStore.setLoading(false);
@@ -94,16 +313,21 @@ async function fetchInfo() {
   // if (!props.timetableId) return;
   // settingStore.setLoading(true);
   try {
-    const { data } = await RestApi.timetable.detail({
+    const { data, error } = await RestApi.timetable.detail({
       params: { Id: props.timetableId },
     });
+    if (error.value) {
+      message.error(error.value?.data?.message || "Không thể tải thông tin thời khóa biểu");
+      reset();
+      return;
+    }
     if (data.value?.status === "success") {
       Object.assign(info, data.value.data || {});
     } else {
       reset();
     }
   } catch (err) {
-    console.error("Fetch timetable info error", err);
+    message.error(err.message || "Không thể tải thông tin thời khóa biểu");
   }
   // settingStore.setLoading(false);
 }
@@ -173,6 +397,15 @@ defineExpose({ refresh, reset });
         </div>
       </div>
     </div>
+    <a-modal v-model:open="subjectModal.visible" title="Xếp Môn học" :confirm-loading="subjectModal.loading" @ok="confirmArrangeSubject" @cancel="subjectModal.visible = false" width="800px">
+      <a-table :columns="subjectColumns" :data-source="subjectModal.data" :row-selection="subjectRowSelection" row-key="id" :pagination="false" :scroll="{ y: 600 }" size="small" />
+    </a-modal>
+    <a-modal v-model:open="classModal.visible" title="Xếp Lớp" :confirm-loading="classModal.loading" @ok="confirmArrangeClass" @cancel="classModal.visible = false" width="800px">
+      <a-table :columns="classColumns" :data-source="classModal.data" :row-selection="classRowSelection" row-key="id" :pagination="false" :scroll="{ y: 600 }" size="small" />
+    </a-modal>
+    <a-modal v-model:open="roomModal.visible" title="Xếp Phòng học" :confirm-loading="roomModal.loading" @ok="confirmArrangeRoom" @cancel="roomModal.visible = false" width="800px">
+      <a-table :columns="roomColumns" :data-source="roomModal.data" :row-selection="roomRowSelection" row-key="id" :pagination="false" :scroll="{ y: 600 }" size="small" />
+    </a-modal>
   </div>
 </template>
 

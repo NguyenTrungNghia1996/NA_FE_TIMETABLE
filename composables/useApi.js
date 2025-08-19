@@ -88,6 +88,14 @@ let ENDPOINTS = {
   TIMETABLE_CANCEL_PERIOD: "/api/tkb/huytiet",
   TIMETABLE_CANCEL_RESULT: "/api/thoikhoabieu/huykq",
   TIMETABLE_ARRANGE_ALL: "/api/tkb",
+  TIMETABLE_SUBJECT_LIST: "/api/sotiet/monhoc",
+  TIMETABLE_ARRANGE_SUBJECT: "/api/tkb/xeptheomon",
+  TIMETABLE_CLASS_LIST: "/api/sotiet/lophoc",
+  TIMETABLE_ARRANGE_CLASS: "/api/tkb/xeptheolop",
+  TIMETABLE_ROOM_LIST: "/api/sotiet/phonghoc",
+  TIMETABLE_ARRANGE_ROOM: "/api/tkb/xeptheophong",
+  TIMETABLE_ARRANGE_GVCN: "/api/tkb/xeptheogvcn",
+  TIMETABLE_ARRANGE_FUNCTION_ROOM: "/api/tkb/xeptheophongcn",
 
   S3: "/api/presigned_url",
 };
@@ -773,6 +781,30 @@ class Timetable {
   }
   async arrange_all(data) {
     return await this.request.post(ENDPOINTS.TIMETABLE_ARRANGE_ALL, data);
+  }
+  async subject_list(data) {
+    return await this.request.get(ENDPOINTS.TIMETABLE_SUBJECT_LIST, data);
+  }
+  async arrange_subject(data) {
+    return await this.request.post(ENDPOINTS.TIMETABLE_ARRANGE_SUBJECT, data);
+  }
+  async class_list(data) {
+    return await this.request.get(ENDPOINTS.TIMETABLE_CLASS_LIST, data);
+  }
+  async arrange_class(data) {
+    return await this.request.post(ENDPOINTS.TIMETABLE_ARRANGE_CLASS, data);
+  }
+  async room_list(data) {
+    return await this.request.get(ENDPOINTS.TIMETABLE_ROOM_LIST, data);
+  }
+  async arrange_room(data) {
+    return await this.request.post(ENDPOINTS.TIMETABLE_ARRANGE_ROOM, data);
+  }
+  async arrange_gvcn(data) {
+    return await this.request.post(ENDPOINTS.TIMETABLE_ARRANGE_GVCN, data);
+  }
+  async arrange_function_room(data) {
+    return await this.request.post(ENDPOINTS.TIMETABLE_ARRANGE_FUNCTION_ROOM, data);
   }
 }
 export default () => {
