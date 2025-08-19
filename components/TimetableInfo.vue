@@ -202,6 +202,41 @@ const confirmArrangeRoom = async () => {
     roomModal.loading = false;
   }
 };
+const arrangeFunctionRoom = async () => {
+  settingStore.setLoading(true);
+  try {
+    const { data, error } = await RestApi.timetable.arrange_function_room({
+      params: { idtkb: props.timetableId },
+    });
+    if (error.value || data.value?.status !== "success") {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xếp phòng chức năng không thành công");
+    }
+    message.success(data.value.message || data.value.data || "");
+    await fetchInfo();
+  } catch (err) {
+    message.error(err.message || "Xếp phòng chức năng không thành công");
+  } finally {
+    settingStore.setLoading(false);
+  }
+};
+
+const arrangeGvcn = async () => {
+  settingStore.setLoading(true);
+  try {
+    const { data, error } = await RestApi.timetable.arrange_gvcn({
+      params: { idtkb: props.timetableId },
+    });
+    if (error.value || data.value?.status !== "success") {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xếp GVCN không thành công");
+    }
+    message.success(data.value.message || data.value.data || "");
+    await fetchInfo();
+  } catch (err) {
+    message.error(err.message || "Xếp GVCN không thành công");
+  } finally {
+    settingStore.setLoading(false);
+  }
+};
 const arrangeAll = async () => {
   settingStore.setLoading(true);
   try {
@@ -225,10 +260,10 @@ const arrangePartial = type => {
   // console.log("Xếp cục bộ:", type);
   switch (type) {
     case "Xếp Phòng chức năng":
-      console.log("Thực hiện xếp Phòng chức năng");
+      arrangeFunctionRoom();
       break;
     case "Xếp GVCN":
-      console.log("Thực hiện xếp Giáo viên chủ nhiệm");
+      arrangeGvcn();
       break;
     case "Xếp Môn học":
       openSubjectModal();

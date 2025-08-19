@@ -94,6 +94,8 @@ let ENDPOINTS = {
   TIMETABLE_ARRANGE_CLASS: "/api/tkb/xeptheolop",
   TIMETABLE_ROOM_LIST: "/api/sotiet/phonghoc",
   TIMETABLE_ARRANGE_ROOM: "/api/tkb/xeptheophong",
+  TIMETABLE_ARRANGE_GVCN: "/api/tkb/xeptheogvcn",
+  TIMETABLE_ARRANGE_FUNCTION_ROOM: "/api/tkb/xeptheophongcn",
 
   S3: "/api/presigned_url",
 };
@@ -797,6 +799,12 @@ class Timetable {
   }
   async arrange_room(data) {
     return await this.request.post(ENDPOINTS.TIMETABLE_ARRANGE_ROOM, data);
+  }
+  async arrange_gvcn(data) {
+    return await this.request.post(ENDPOINTS.TIMETABLE_ARRANGE_GVCN, data);
+  }
+  async arrange_function_room(data) {
+    return await this.request.post(ENDPOINTS.TIMETABLE_ARRANGE_FUNCTION_ROOM, data);
   }
 }
 export default () => {
