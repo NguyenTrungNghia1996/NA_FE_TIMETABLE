@@ -20,6 +20,62 @@ const arrangedLessons = computed(() => info.tong_tiet_da_xep);
 const unarrangedLessons = computed(() => info.tong_tiet_chua_xep);
 
 const settingStore = useSettingStore();
+const subjectModal = reactive({
+  visible: false,
+  loading: false,
+  data: [],
+  selectedRowKeys: [],
+});
+const subjectColumns = [
+  { title: "Tên môn học", dataIndex: "ten" },
+  { title: "Tổng tiết", dataIndex: "tong_tiet" },
+  { title: "Tiết chưa xếp", dataIndex: "tiet_chua_xep" },
+  { title: "Tiết đã xếp", dataIndex: "tiet_da_xep" },
+];
+const subjectRowSelection = computed(() => ({
+  selectedRowKeys: subjectModal.selectedRowKeys,
+  onChange: keys => (subjectModal.selectedRowKeys = keys),
+}));
+
+const fetchSubjectLessons = async () => {
+  subjectModal.loading = true;
+  try {
+    const { data } = await RestApi.timetable.subject_list({
+      params: { idtkb: props.timetableId },
+    });
+    subjectModal.data = data.value?.data || [];
+  } catch (err) {
+    console.error("Fetch subject lessons error", err);
+  } finally {
+    subjectModal.loading = false;
+  }
+};
+const openSubjectModal = async () => {
+  await fetchSubjectLessons();
+  subjectModal.visible = true;
+};
+const confirmArrangeSubject = async () => {
+  if (!subjectModal.selectedRowKeys.length) {
+    subjectModal.visible = false;
+    return;
+  }
+  subjectModal.loading = true;
+  try {
+    const { data } = await RestApi.timetable.arrange_subject({
+      body: { id_tkb: props.timetableId, ids: subjectModal.selectedRowKeys },
+    });
+    if (data.value?.status === "success") {
+      message.success(data.value.message || data.value.data || "");
+    }
+    subjectModal.visible = false;
+    subjectModal.selectedRowKeys = [];
+    await fetchInfo();
+  } catch (err) {
+    console.error("Arrange subjects error", err);
+  } finally {
+    subjectModal.loading = false;
+  }
+};
 const arrangeAll = async () => {
   settingStore.setLoading(true);
   try {
@@ -48,7 +104,7 @@ const arrangePartial = type => {
       console.log("Thực hiện xếp Giáo viên chủ nhiệm");
       break;
     case "Xếp Môn học":
-      console.log("Thực hiện xếp Môn học");
+      openSubjectModal();
       break;
     case "Xếp Giáo viên":
       console.log("Thực hiện xếp Giáo viên");
@@ -173,6 +229,9 @@ defineExpose({ refresh, reset });
         </div>
       </div>
     </div>
+    <a-modal v-model:open="subjectModal.visible" title="Xếp Môn học" :confirm-loading="subjectModal.loading" @ok="confirmArrangeSubject" @cancel="subjectModal.visible = false" width="800px">
+      <a-table :columns="subjectColumns" :data-source="subjectModal.data" :row-selection="subjectRowSelection" row-key="id" :pagination="false" :scroll="{ y: 600 }" size="small" />
+    </a-modal>
   </div>
 </template>
 
