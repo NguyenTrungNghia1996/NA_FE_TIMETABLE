@@ -88,6 +88,8 @@ let ENDPOINTS = {
   TIMETABLE_CANCEL_PERIOD: "/api/tkb/huytiet",
   TIMETABLE_CANCEL_RESULT: "/api/thoikhoabieu/huykq",
   TIMETABLE_ARRANGE_ALL: "/api/tkb",
+  TIMETABLE_SUBJECT_LIST: "/api/sotiet/monhoc",
+  TIMETABLE_ARRANGE_SUBJECT: "/api/tkb/xeptheomon",
 
   S3: "/api/presigned_url",
 };
@@ -773,6 +775,12 @@ class Timetable {
   }
   async arrange_all(data) {
     return await this.request.post(ENDPOINTS.TIMETABLE_ARRANGE_ALL, data);
+  }
+  async subject_list(data) {
+    return await this.request.get(ENDPOINTS.TIMETABLE_SUBJECT_LIST, data);
+  }
+  async arrange_subject(data) {
+    return await this.request.post(ENDPOINTS.TIMETABLE_ARRANGE_SUBJECT, data);
   }
 }
 export default () => {
