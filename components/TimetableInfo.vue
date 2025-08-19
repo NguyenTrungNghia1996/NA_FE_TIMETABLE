@@ -74,12 +74,15 @@ const roomRowSelection = computed(() => ({
 const fetchSubjectLessons = async () => {
   subjectModal.loading = true;
   try {
-    const { data } = await RestApi.timetable.subject_list({
+    const { data, error } = await RestApi.timetable.subject_list({
       params: { idtkb: props.timetableId },
     });
+    if (error.value) {
+      throw new Error(error.value?.data?.message || "Không thể tải danh sách môn học");
+    }
     subjectModal.data = data.value?.data || [];
   } catch (err) {
-    console.error("Fetch subject lessons error", err);
+    message.error(err.message || "Không thể tải danh sách môn học");
   } finally {
     subjectModal.loading = false;
   }
@@ -95,17 +98,18 @@ const confirmArrangeSubject = async () => {
   }
   subjectModal.loading = true;
   try {
-    const { data } = await RestApi.timetable.arrange_subject({
+    const { data, error } = await RestApi.timetable.arrange_subject({
       body: { id_tkb: props.timetableId, ids: subjectModal.selectedRowKeys },
     });
-    if (data.value?.status === "success") {
-      message.success(data.value.message || data.value.data || "");
+    if (error.value || data.value?.status !== "success") {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xếp môn học không thành công");
     }
+    message.success(data.value.message || data.value.data || "");
     subjectModal.visible = false;
     subjectModal.selectedRowKeys = [];
     await fetchInfo();
   } catch (err) {
-    console.error("Arrange subjects error", err);
+    message.error(err.message || "Xếp môn học không thành công");
   } finally {
     subjectModal.loading = false;
   }
@@ -114,12 +118,15 @@ const confirmArrangeSubject = async () => {
 const fetchClassLessons = async () => {
   classModal.loading = true;
   try {
-    const { data } = await RestApi.timetable.class_list({
+    const { data, error } = await RestApi.timetable.class_list({
       params: { idtkb: props.timetableId },
     });
+    if (error.value) {
+      throw new Error(error.value?.data?.message || "Không thể tải danh sách lớp");
+    }
     classModal.data = data.value?.data || [];
   } catch (err) {
-    console.error("Fetch class lessons error", err);
+    message.error(err.message || "Không thể tải danh sách lớp");
   } finally {
     classModal.loading = false;
   }
@@ -135,17 +142,18 @@ const confirmArrangeClass = async () => {
   }
   classModal.loading = true;
   try {
-    const { data } = await RestApi.timetable.arrange_class({
+    const { data, error } = await RestApi.timetable.arrange_class({
       body: { id_tkb: props.timetableId, ids: classModal.selectedRowKeys },
     });
-    if (data.value?.status === "success") {
-      message.success(data.value.message || data.value.data || "");
+    if (error.value || data.value?.status !== "success") {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xếp lớp không thành công");
     }
+    message.success(data.value.message || data.value.data || "");
     classModal.visible = false;
     classModal.selectedRowKeys = [];
     await fetchInfo();
   } catch (err) {
-    console.error("Arrange classes error", err);
+    message.error(err.message || "Xếp lớp không thành công");
   } finally {
     classModal.loading = false;
   }
@@ -154,12 +162,15 @@ const confirmArrangeClass = async () => {
 const fetchRoomLessons = async () => {
   roomModal.loading = true;
   try {
-    const { data } = await RestApi.timetable.room_list({
+    const { data, error } = await RestApi.timetable.room_list({
       params: { idtkb: props.timetableId },
     });
+    if (error.value) {
+      throw new Error(error.value?.data?.message || "Không thể tải danh sách phòng học");
+    }
     roomModal.data = data.value?.data || [];
   } catch (err) {
-    console.error("Fetch room lessons error", err);
+    message.error(err.message || "Không thể tải danh sách phòng học");
   } finally {
     roomModal.loading = false;
   }
@@ -175,17 +186,18 @@ const confirmArrangeRoom = async () => {
   }
   roomModal.loading = true;
   try {
-    const { data } = await RestApi.timetable.arrange_room({
+    const { data, error } = await RestApi.timetable.arrange_room({
       body: { id_tkb: props.timetableId, ids: roomModal.selectedRowKeys },
     });
-    if (data.value?.status === "success") {
-      message.success(data.value.message || data.value.data || "");
+    if (error.value || data.value?.status !== "success") {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xếp phòng học không thành công");
     }
+    message.success(data.value.message || data.value.data || "");
     roomModal.visible = false;
     roomModal.selectedRowKeys = [];
     await fetchInfo();
   } catch (err) {
-    console.error("Arrange rooms error", err);
+    message.error(err.message || "Xếp phòng học không thành công");
   } finally {
     roomModal.loading = false;
   }
@@ -193,18 +205,19 @@ const confirmArrangeRoom = async () => {
 const arrangeAll = async () => {
   settingStore.setLoading(true);
   try {
-    const { data, status, error } = await RestApi.timetable.arrange_all({
+    const { data, error } = await RestApi.timetable.arrange_all({
       params: { Idtkb: props.timetableId },
     });
-    if (data.value.status == "success") {
-      message.success(data.value.data || "");
+    if (error.value || data.value?.status !== "success") {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xếp thời khóa biểu không thành công");
     }
+    message.success(data.value.data || "");
   } catch (err) {
-    console.error("Arrange all error", err);
+    message.error(err.message || "Xếp thời khóa biểu không thành công");
   } finally {
     await fetchInfo();
+    settingStore.setLoading(false);
   }
-  settingStore.setLoading(false);
 };
 
 const arrangePartial = type => {
@@ -246,14 +259,15 @@ const arrangePartial = type => {
 const cancelArrange = async () => {
   settingStore.setLoading(true);
   try {
-    const { data } = await RestApi.timetable.cancel_result({
+    const { data, error } = await RestApi.timetable.cancel_result({
       params: { Id: props.timetableId },
     });
-    if (data.value?.status === "success") {
-      message.success(data.value.data || "");
+    if (error.value || data.value?.status !== "success") {
+      throw new Error(error.value?.data?.message || data.value?.message || "Hủy kết quả xếp không thành công");
     }
+    message.success(data.value.data || "");
   } catch (err) {
-    console.error("Cancel arrange error", err);
+    message.error(err.message || "Hủy kết quả xếp không thành công");
   } finally {
     await fetchInfo();
     settingStore.setLoading(false);
@@ -264,16 +278,21 @@ async function fetchInfo() {
   // if (!props.timetableId) return;
   // settingStore.setLoading(true);
   try {
-    const { data } = await RestApi.timetable.detail({
+    const { data, error } = await RestApi.timetable.detail({
       params: { Id: props.timetableId },
     });
+    if (error.value) {
+      message.error(error.value?.data?.message || "Không thể tải thông tin thời khóa biểu");
+      reset();
+      return;
+    }
     if (data.value?.status === "success") {
       Object.assign(info, data.value.data || {});
     } else {
       reset();
     }
   } catch (err) {
-    console.error("Fetch timetable info error", err);
+    message.error(err.message || "Không thể tải thông tin thời khóa biểu");
   }
   // settingStore.setLoading(false);
 }
