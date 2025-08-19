@@ -37,6 +37,23 @@ const subjectRowSelection = computed(() => ({
   onChange: keys => (subjectModal.selectedRowKeys = keys),
 }));
 
+const classModal = reactive({
+  visible: false,
+  loading: false,
+  data: [],
+  selectedRowKeys: [],
+});
+const classColumns = [
+  { title: "Tên lớp", dataIndex: "ten" },
+  { title: "Tổng tiết", dataIndex: "tong_tiet" },
+  { title: "Tiết chưa xếp", dataIndex: "tiet_chua_xep" },
+  { title: "Tiết đã xếp", dataIndex: "tiet_da_xep" },
+];
+const classRowSelection = computed(() => ({
+  selectedRowKeys: classModal.selectedRowKeys,
+  onChange: keys => (classModal.selectedRowKeys = keys),
+}));
+
 const fetchSubjectLessons = async () => {
   subjectModal.loading = true;
   try {
@@ -76,6 +93,46 @@ const confirmArrangeSubject = async () => {
     subjectModal.loading = false;
   }
 };
+
+const fetchClassLessons = async () => {
+  classModal.loading = true;
+  try {
+    const { data } = await RestApi.timetable.class_list({
+      params: { idtkb: props.timetableId },
+    });
+    classModal.data = data.value?.data || [];
+  } catch (err) {
+    console.error("Fetch class lessons error", err);
+  } finally {
+    classModal.loading = false;
+  }
+};
+const openClassModal = async () => {
+  await fetchClassLessons();
+  classModal.visible = true;
+};
+const confirmArrangeClass = async () => {
+  if (!classModal.selectedRowKeys.length) {
+    classModal.visible = false;
+    return;
+  }
+  classModal.loading = true;
+  try {
+    const { data } = await RestApi.timetable.arrange_class({
+      body: { id_tkb: props.timetableId, ids: classModal.selectedRowKeys },
+    });
+    if (data.value?.status === "success") {
+      message.success(data.value.message || data.value.data || "");
+    }
+    classModal.visible = false;
+    classModal.selectedRowKeys = [];
+    await fetchInfo();
+  } catch (err) {
+    console.error("Arrange classes error", err);
+  } finally {
+    classModal.loading = false;
+  }
+};
 const arrangeAll = async () => {
   settingStore.setLoading(true);
   try {
@@ -113,7 +170,7 @@ const arrangePartial = type => {
       console.log("Thực hiện xếp Nhóm");
       break;
     case "Xếp Lớp":
-      console.log("Thực hiện xếp Lớp");
+      openClassModal();
       break;
     case "Xếp Lớp - Môn":
       console.log("Thực hiện xếp Lớp - Môn");
@@ -231,6 +288,9 @@ defineExpose({ refresh, reset });
     </div>
     <a-modal v-model:open="subjectModal.visible" title="Xếp Môn học" :confirm-loading="subjectModal.loading" @ok="confirmArrangeSubject" @cancel="subjectModal.visible = false" width="800px">
       <a-table :columns="subjectColumns" :data-source="subjectModal.data" :row-selection="subjectRowSelection" row-key="id" :pagination="false" :scroll="{ y: 600 }" size="small" />
+    </a-modal>
+    <a-modal v-model:open="classModal.visible" title="Xếp Lớp" :confirm-loading="classModal.loading" @ok="confirmArrangeClass" @cancel="classModal.visible = false" width="800px">
+      <a-table :columns="classColumns" :data-source="classModal.data" :row-selection="classRowSelection" row-key="id" :pagination="false" :scroll="{ y: 600 }" size="small" />
     </a-modal>
   </div>
 </template>

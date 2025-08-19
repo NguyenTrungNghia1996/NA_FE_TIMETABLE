@@ -90,6 +90,8 @@ let ENDPOINTS = {
   TIMETABLE_ARRANGE_ALL: "/api/tkb",
   TIMETABLE_SUBJECT_LIST: "/api/sotiet/monhoc",
   TIMETABLE_ARRANGE_SUBJECT: "/api/tkb/xeptheomon",
+  TIMETABLE_CLASS_LIST: "/api/sotiet/lophoc",
+  TIMETABLE_ARRANGE_CLASS: "/api/tkb/xeptheolop",
 
   S3: "/api/presigned_url",
 };
@@ -781,6 +783,12 @@ class Timetable {
   }
   async arrange_subject(data) {
     return await this.request.post(ENDPOINTS.TIMETABLE_ARRANGE_SUBJECT, data);
+  }
+  async class_list(data) {
+    return await this.request.get(ENDPOINTS.TIMETABLE_CLASS_LIST, data);
+  }
+  async arrange_class(data) {
+    return await this.request.post(ENDPOINTS.TIMETABLE_ARRANGE_CLASS, data);
   }
 }
 export default () => {
