@@ -452,7 +452,8 @@ defineExpose({ refresh, reset });
       <div class="bg-white p-4 rounded-md shadow-lg col-span-2">
         <h2 class="text-lg font-semibold mb-4 text-gray-700">Xếp cục bộ <span class="text-sm text-gray-500">(Xếp từng phần)</span></h2>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-          <a-button v-for="btn in ['Xếp Phòng chức năng', 'Xếp GVCN', 'Xếp Môn học', 'Xếp Giáo viên', 'Xếp Nhóm', 'Xếp Lớp', 'Xếp Lớp - Môn', 'Xếp Khối - Môn', 'Xếp Phòng học']" :key="btn" type="primary" class="bg-blue-500 border-blue-500" @click="arrangePartial(btn)">
+          <!-- , 'Xếp Lớp - Môn', 'Xếp Khối - Môn','Xếp Nhóm' -->
+          <a-button v-for="btn in ['Xếp Phòng chức năng', 'Xếp GVCN', 'Xếp Môn học', 'Xếp Giáo viên', 'Xếp Lớp', 'Xếp Phòng học']" :key="btn" type="primary" class="bg-blue-500 border-blue-500" @click="arrangePartial(btn)">
             {{ btn }}
           </a-button>
         </div>
