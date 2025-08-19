@@ -38,11 +38,56 @@ const arrangeAll = async () => {
 };
 
 const arrangePartial = type => {
-  console.log("Xếp cục bộ:", type);
+  // 'Xếp Phòng chức năng', 'Xếp GVCN', 'Xếp Môn học', 'Xếp Giáo viên', 'Xếp Nhóm', 'Xếp Lớp', 'Xếp Lớp - Môn', 'Xếp Khối - Môn', 'Xếp Phòng học'
+  // console.log("Xếp cục bộ:", type);
+  switch (type) {
+    case "Xếp Phòng chức năng":
+      console.log("Thực hiện xếp Phòng chức năng");
+      break;
+    case "Xếp GVCN":
+      console.log("Thực hiện xếp Giáo viên chủ nhiệm");
+      break;
+    case "Xếp Môn học":
+      console.log("Thực hiện xếp Môn học");
+      break;
+    case "Xếp Giáo viên":
+      console.log("Thực hiện xếp Giáo viên");
+      break;
+    case "Xếp Nhóm":
+      console.log("Thực hiện xếp Nhóm");
+      break;
+    case "Xếp Lớp":
+      console.log("Thực hiện xếp Lớp");
+      break;
+    case "Xếp Lớp - Môn":
+      console.log("Thực hiện xếp Lớp - Môn");
+      break;
+    case "Xếp Khối - Môn":
+      console.log("Thực hiện xếp Khối - Môn");
+      break;
+    case "Xếp Phòng học":
+      console.log("Thực hiện xếp Phòng học");
+      break;
+    default:
+      console.log("Chức năng không hợp lệ");
+  }
 };
 
-const cancelArrange = () => {
-  console.log("Hủy kết quả xếp");
+const cancelArrange = async () => {
+  settingStore.setLoading(true);
+  try {
+    const { data } = await RestApi.timetable.cancel_result({
+      params: { Id: props.timetableId },
+    });
+    if (data.value?.status === "success") {
+      message.success(data.value.data || "");
+    }
+  } catch (err) {
+    console.error("Cancel arrange error", err);
+  } finally {
+    await fetchInfo();
+    settingStore.setLoading(false);
+  }
 };
 
 async function fetchInfo() {

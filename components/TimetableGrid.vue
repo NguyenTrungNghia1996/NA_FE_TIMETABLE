@@ -1,6 +1,6 @@
 <template>
   <div @click="contextMenu.show = false" class="grid grid-cols-1 gap-5">
-    <SelectClass v-model="selectedClassId" class="mb-2" />
+    <SelectClass v-model="selectedClassId" class="mb-2" :autoSelectFirst="true" />
     <div class="grid grid-cols-4 gap-2">
       <div class="col-span-3 h-75 overflow-auto" type="card" size="small">
         <div v-for="ca in dsCa" :key="ca.id" :tab="ca.id == 1 ? 'Ca Sáng' : 'Ca Chiều'" class="p-2">
@@ -37,9 +37,9 @@
       <UnscheduledTable :data="props.rawUnscheduled" class="overflow-auto h-75" />
     </div>
 
-    <SelectTeacher v-model="selectedTeacherId" />
-    <div v-if="teacherDsCa.length" class="grid grid-cols-4 gap-2">
-      <div class="col-span-3 h-75 overflow-auto" type="card" size="small">
+    <SelectTeacher v-model="selectedTeacherId" :autoSelectFirst="true" />
+    <div v-if="teacherDsCa.length" class="grid grid-cols-4 gap-2 h-75">
+      <div class="col-span-3 overflow-auto" type="card" size="small">
         <div v-for="ca in teacherDsCa" :key="ca.id" :tab="ca.id == 1 ? 'Ca Sáng' : 'Ca Chiều'" class="p-2">
           <div class="overflow-x-auto">
             <table class="min-w-full border-collapse select-none">
@@ -74,7 +74,7 @@
           </div>
         </div>
       </div>
-      <TeacherUnscheduledTable v-if="teacherUnscheduled.length" :data="teacherUnscheduled" class="overflow-auto h-75" />
+      <TeacherUnscheduledTable v-if="teacherUnscheduled.length" :data="teacherUnscheduled" class="overflow-auto" />
     </div>
 
     <!-- Context Menu -->
@@ -669,12 +669,12 @@ async function addLesson() {
   }
 }
 
-function confirmAdd() {
+async function confirmAdd() {
   if (selectedIdx.value == null || !targetCell.value) return;
   const lesson = lessonOptions.value[selectedIdx.value];
   if (!lesson) return;
+  const cell = targetCell.value;
   if (contextMenu.isTeacher) {
-    const cell = targetCell.value;
     cell.id_mon = lesson.id_mon;
     cell.ten_mon = lesson.ten_mon;
     cell.id_lop = lesson.id_lop;
@@ -682,12 +682,7 @@ function confirmAdd() {
     cell.id_phong = lesson.id_phong;
     cell.ten_phong = lesson.ten_phong;
     cell.tiet_thu_may = lesson.tiet_thu_may;
-    showAddModal.value = false;
-    targetCell.value = null;
-    lessonOptions.value = [];
-    console.log("Lesson added", { cell: { ...cell }, lesson });
   } else {
-    const cell = targetCell.value;
     cell.id_mon = lesson.id_mon;
     cell.ten_mon = lesson.ten_mon;
     cell.id_giao_vien = lesson.id_giao_vien;
@@ -695,11 +690,67 @@ function confirmAdd() {
     cell.id_phong = lesson.id_phong;
     cell.ten_phong = lesson.ten_phong;
     cell.tiet_thu_may = lesson.tiet_thu_may;
-    showAddModal.value = false;
-    targetCell.value = null;
-    lessonOptions.value = [];
-    console.log("Lesson added", { cell: { ...cell }, lesson });
-    updateRawTimetable();
   }
+
+  const body = {
+    id: cell.id_chitiet,
+    id_don_vi: cell.id_don_vi,
+    id_tkb: cell.id_tkb,
+    id_lop: lesson.id_lop,
+    ten_lop: lesson.ten_lop,
+    id_mon: cell.id_mon,
+    ten_mon: cell.ten_mon,
+    id_giao_vien: cell.id_giao_vien,
+    ten_giao_vien: cell.ten_giao_vien,
+    id_phong: cell.id_phong,
+    ten_phong: cell.ten_phong,
+    tiet_thu_may: cell.tiet_thu_may,
+    id_ca: contextMenu.ca,
+    ngay: contextMenu.ngay,
+    tiet: contextMenu.pIdx + 1,
+    khoa: !!cell.isLock,
+    ds_vi_tri_xep_duoc: [],
+  };
+
+  try {
+    const { data, error } = await RestApi.timetable.update_period({ body });
+    if (data.value?.status === "success") {
+      if (contextMenu.isTeacher) {
+        await fetchTeacherTimetable(selectedTeacherId.value);
+        if (selectedClassId.value && props.timetableId) {
+          const { data: listData, error: listError } = await RestApi.timetable.get_class({
+            params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
+          });
+          if (listData.value?.status === "success") {
+            emit("update:rawTimetable", listData.value.data.timetable);
+            emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+          } else {
+            message.error("Load timetable error", listError.value || listData.value);
+          }
+        }
+      } else {
+        const { data: listData, error: listError } = await RestApi.timetable.get_class({
+          params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
+        });
+        if (listData.value?.status === "success") {
+          emit("update:rawTimetable", listData.value.data.timetable);
+          emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+        } else {
+          message.error("Load timetable error", listError.value || listData.value);
+        }
+        if (selectedTeacherId.value && props.timetableId) {
+          await fetchTeacherTimetable(selectedTeacherId.value);
+        }
+      }
+    } else {
+      message.error("Update timetable error", error.value || data.value);
+    }
+  } catch (err) {
+    message.error("Update timetable error", err);
+  }
+
+  showAddModal.value = false;
+  targetCell.value = null;
+  lessonOptions.value = [];
 }
 </script>

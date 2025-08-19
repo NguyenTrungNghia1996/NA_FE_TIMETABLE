@@ -80,11 +80,13 @@ let ENDPOINTS = {
   TIMETABLE_FIND_TEACHER_LESSON: "/api/tkb/timtiet/giaovien",
   TIMETABLE_UPDATE_CLASS: "/api/tkb/update/lop",
   TIMETABLE_UPDATE_TEACHER: "/api/tkb/update/giaovien",
+  TIMETABLE_UPDATE: "/api/tkb/update",
   TIMETABLE_CLASS: "/api/tkb/lop",
   TIMETABLE_TEACHER: "/api/tkb/giaovien",
   TIMETABLE_LOCK_PERIOD: "/api/tkb/khoatiet",
   TIMETABLE_UNLOCK_PERIOD: "/api/tkb/huykhoa",
   TIMETABLE_CANCEL_PERIOD: "/api/tkb/huytiet",
+  TIMETABLE_CANCEL_RESULT: "/api/thoikhoabieu/huykq",
   TIMETABLE_ARRANGE_ALL: "/api/tkb",
 
   S3: "/api/presigned_url",
@@ -748,6 +750,9 @@ class Timetable {
   async update_teacher(data) {
     return await this.request.post(ENDPOINTS.TIMETABLE_UPDATE_TEACHER, data);
   }
+  async update_period(data) {
+    return await this.request.put(ENDPOINTS.TIMETABLE_UPDATE, data);
+  }
   async get_class(data) {
     return await this.request.get(ENDPOINTS.TIMETABLE_CLASS, data);
   }
@@ -762,6 +767,9 @@ class Timetable {
   }
   async cancel_period(data) {
     return await this.request.put(ENDPOINTS.TIMETABLE_CANCEL_PERIOD, data);
+  }
+  async cancel_result(data) {
+    return await this.request.put(ENDPOINTS.TIMETABLE_CANCEL_RESULT, data);
   }
   async arrange_all(data) {
     return await this.request.post(ENDPOINTS.TIMETABLE_ARRANGE_ALL, data);
