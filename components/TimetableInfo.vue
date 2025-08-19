@@ -73,8 +73,21 @@ const arrangePartial = type => {
   }
 };
 
-const cancelArrange = () => {
-  console.log("Hủy kết quả xếp");
+const cancelArrange = async () => {
+  settingStore.setLoading(true);
+  try {
+    const { data } = await RestApi.timetable.cancel_result({
+      params: { Id: props.timetableId },
+    });
+    if (data.value?.status === "success") {
+      message.success(data.value.data || "");
+    }
+  } catch (err) {
+    console.error("Cancel arrange error", err);
+  } finally {
+    await fetchInfo();
+    settingStore.setLoading(false);
+  }
 };
 
 async function fetchInfo() {
