@@ -31,6 +31,8 @@ const props = defineProps({
   placeholder: { type: String, default: 'Chọn giáo viên' },
   rules: { type: Array, default: () => [] },
   disabled: { type: Boolean, default: false },
+  /** Tự động chọn giáo viên đầu tiên nếu chưa chọn giá trị */
+  autoSelectFirst: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -49,8 +51,21 @@ const fetchTeachers = async (search = '') => {
         value: item.id,
       }))
 
-      if (props.modelValue === undefined || props.modelValue === null || props.modelValue === '') {
-        emit('update:modelValue', props.modelValue)
+      if (
+        props.autoSelectFirst &&
+        !search &&
+        (
+          props.modelValue === undefined ||
+          props.modelValue === null ||
+          props.modelValue === '' ||
+          (Array.isArray(props.modelValue) && props.modelValue.length === 0)
+        )
+      ) {
+        const firstOption = options.value[0]
+        if (firstOption) {
+          const defaultValue = props.multiple ? [firstOption.value] : firstOption.value
+          emit('update:modelValue', defaultValue)
+        }
       }
     }
   } catch (error) {
