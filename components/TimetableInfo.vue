@@ -243,6 +243,7 @@ defineExpose({ refresh, reset });
         :row-selection="subjectRowSelection"
         row-key="id"
         :pagination="false"
+        :scroll="{ y: 400 }"
       />
     </a-modal>
   </div>
