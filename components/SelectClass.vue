@@ -33,6 +33,8 @@ const props = defineProps({
   disabled: { type: Boolean, default: false },
   /** ID khối lớp để lọc danh sách lớp */
   id_khoi: { type: [Number, String], default: null },
+  /** Tự động chọn lớp đầu tiên nếu chưa chọn giá trị */
+  autoSelectFirst: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -56,11 +58,22 @@ const fetchClasses = async (search = '') => {
         value: item.id,
       }))
       if (
-        props.modelValue === undefined ||
-        props.modelValue === null ||
-        props.modelValue === ''
+        props.autoSelectFirst &&
+        !search &&
+        (
+          props.modelValue === undefined ||
+          props.modelValue === null ||
+          props.modelValue === '' ||
+          (Array.isArray(props.modelValue) && props.modelValue.length === 0)
+        )
       ) {
-        emit('update:modelValue', props.modelValue)
+        const firstOption = options.value[0]
+        if (firstOption) {
+          const defaultValue = props.multiple
+            ? [firstOption.value]
+            : firstOption.value
+          emit('update:modelValue', defaultValue)
+        }
       }
     }
   } catch (error) {
