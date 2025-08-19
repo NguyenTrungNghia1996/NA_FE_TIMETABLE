@@ -229,22 +229,8 @@ defineExpose({ refresh, reset });
         </div>
       </div>
     </div>
-    <a-modal
-      v-model:open="subjectModal.visible"
-      title="Xếp Môn học"
-      :confirm-loading="subjectModal.loading"
-      @ok="confirmArrangeSubject"
-      @cancel="subjectModal.visible = false"
-      width="800px"
-    >
-      <a-table
-        :columns="subjectColumns"
-        :data-source="subjectModal.data"
-        :row-selection="subjectRowSelection"
-        row-key="id"
-        :pagination="false"
-        :scroll="{ y: 400 }"
-      />
+    <a-modal v-model:open="subjectModal.visible" title="Xếp Môn học" :confirm-loading="subjectModal.loading" @ok="confirmArrangeSubject" @cancel="subjectModal.visible = false" width="800px">
+      <a-table :columns="subjectColumns" :data-source="subjectModal.data" :row-selection="subjectRowSelection" row-key="id" :pagination="false" :scroll="{ y: 600 }" size="small" />
     </a-modal>
   </div>
 </template>
