@@ -54,6 +54,23 @@ const classRowSelection = computed(() => ({
   onChange: keys => (classModal.selectedRowKeys = keys),
 }));
 
+const roomModal = reactive({
+  visible: false,
+  loading: false,
+  data: [],
+  selectedRowKeys: [],
+});
+const roomColumns = [
+  { title: "Tên phòng học", dataIndex: "ten" },
+  { title: "Tổng tiết", dataIndex: "tong_tiet" },
+  { title: "Tiết chưa xếp", dataIndex: "tiet_chua_xep" },
+  { title: "Tiết đã xếp", dataIndex: "tiet_da_xep" },
+];
+const roomRowSelection = computed(() => ({
+  selectedRowKeys: roomModal.selectedRowKeys,
+  onChange: keys => (roomModal.selectedRowKeys = keys),
+}));
+
 const fetchSubjectLessons = async () => {
   subjectModal.loading = true;
   try {
@@ -133,6 +150,46 @@ const confirmArrangeClass = async () => {
     classModal.loading = false;
   }
 };
+
+const fetchRoomLessons = async () => {
+  roomModal.loading = true;
+  try {
+    const { data } = await RestApi.timetable.room_list({
+      params: { idtkb: props.timetableId },
+    });
+    roomModal.data = data.value?.data || [];
+  } catch (err) {
+    console.error("Fetch room lessons error", err);
+  } finally {
+    roomModal.loading = false;
+  }
+};
+const openRoomModal = async () => {
+  await fetchRoomLessons();
+  roomModal.visible = true;
+};
+const confirmArrangeRoom = async () => {
+  if (!roomModal.selectedRowKeys.length) {
+    roomModal.visible = false;
+    return;
+  }
+  roomModal.loading = true;
+  try {
+    const { data } = await RestApi.timetable.arrange_room({
+      body: { id_tkb: props.timetableId, ids: roomModal.selectedRowKeys },
+    });
+    if (data.value?.status === "success") {
+      message.success(data.value.message || data.value.data || "");
+    }
+    roomModal.visible = false;
+    roomModal.selectedRowKeys = [];
+    await fetchInfo();
+  } catch (err) {
+    console.error("Arrange rooms error", err);
+  } finally {
+    roomModal.loading = false;
+  }
+};
 const arrangeAll = async () => {
   settingStore.setLoading(true);
   try {
@@ -179,7 +236,7 @@ const arrangePartial = type => {
       console.log("Thực hiện xếp Khối - Môn");
       break;
     case "Xếp Phòng học":
-      console.log("Thực hiện xếp Phòng học");
+      openRoomModal();
       break;
     default:
       console.log("Chức năng không hợp lệ");
@@ -291,6 +348,9 @@ defineExpose({ refresh, reset });
     </a-modal>
     <a-modal v-model:open="classModal.visible" title="Xếp Lớp" :confirm-loading="classModal.loading" @ok="confirmArrangeClass" @cancel="classModal.visible = false" width="800px">
       <a-table :columns="classColumns" :data-source="classModal.data" :row-selection="classRowSelection" row-key="id" :pagination="false" :scroll="{ y: 600 }" size="small" />
+    </a-modal>
+    <a-modal v-model:open="roomModal.visible" title="Xếp Phòng học" :confirm-loading="roomModal.loading" @ok="confirmArrangeRoom" @cancel="roomModal.visible = false" width="800px">
+      <a-table :columns="roomColumns" :data-source="roomModal.data" :row-selection="roomRowSelection" row-key="id" :pagination="false" :scroll="{ y: 600 }" size="small" />
     </a-modal>
   </div>
 </template>
