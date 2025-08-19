@@ -37,6 +37,23 @@ const subjectRowSelection = computed(() => ({
   onChange: keys => (subjectModal.selectedRowKeys = keys),
 }));
 
+const teacherModal = reactive({
+  visible: false,
+  loading: false,
+  data: [],
+  selectedRowKeys: [],
+});
+const teacherColumns = [
+  { title: "Tên giáo viên", dataIndex: "ho_ten" },
+  { title: "Tổng tiết", dataIndex: "tong_tiet" },
+  { title: "Tiết chưa xếp", dataIndex: "tiet_chua_xep" },
+  { title: "Tiết đã xếp", dataIndex: "tiet_da_xep" },
+];
+const teacherRowSelection = computed(() => ({
+  selectedRowKeys: teacherModal.selectedRowKeys,
+  onChange: keys => (teacherModal.selectedRowKeys = keys),
+}));
+
 const classModal = reactive({
   visible: false,
   loading: false,
@@ -112,6 +129,50 @@ const confirmArrangeSubject = async () => {
     message.error(err.message || "Xếp môn học không thành công");
   } finally {
     subjectModal.loading = false;
+  }
+};
+
+const fetchTeacherLessons = async () => {
+  teacherModal.loading = true;
+  try {
+    const { data, error } = await RestApi.timetable.teacher_list({
+      params: { idtkb: props.timetableId },
+    });
+    if (error.value) {
+      throw new Error(error.value?.data?.message || "Không thể tải danh sách giáo viên");
+    }
+    teacherModal.data = data.value?.data || [];
+  } catch (err) {
+    message.error(err.message || "Không thể tải danh sách giáo viên");
+  } finally {
+    teacherModal.loading = false;
+  }
+};
+const openTeacherModal = async () => {
+  await fetchTeacherLessons();
+  teacherModal.visible = true;
+};
+const confirmArrangeTeacher = async () => {
+  if (!teacherModal.selectedRowKeys.length) {
+    teacherModal.visible = false;
+    return;
+  }
+  teacherModal.loading = true;
+  try {
+    const { data, error } = await RestApi.timetable.arrange_teacher({
+      body: { id_tkb: props.timetableId, ids: teacherModal.selectedRowKeys },
+    });
+    if (error.value || data.value?.status !== "success") {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xếp giáo viên không thành công");
+    }
+    message.success(data.value.message || data.value.data || "");
+    teacherModal.visible = false;
+    teacherModal.selectedRowKeys = [];
+    await fetchInfo();
+  } catch (err) {
+    message.error(err.message || "Xếp giáo viên không thành công");
+  } finally {
+    teacherModal.loading = false;
   }
 };
 
@@ -269,7 +330,7 @@ const arrangePartial = type => {
       openSubjectModal();
       break;
     case "Xếp Giáo viên":
-      console.log("Thực hiện xếp Giáo viên");
+      openTeacherModal();
       break;
     case "Xếp Nhóm":
       console.log("Thực hiện xếp Nhóm");
@@ -399,6 +460,9 @@ defineExpose({ refresh, reset });
     </div>
     <a-modal v-model:open="subjectModal.visible" title="Xếp Môn học" :confirm-loading="subjectModal.loading" @ok="confirmArrangeSubject" @cancel="subjectModal.visible = false" width="800px">
       <a-table :columns="subjectColumns" :data-source="subjectModal.data" :row-selection="subjectRowSelection" row-key="id" :pagination="false" :scroll="{ y: 600 }" size="small" />
+    </a-modal>
+    <a-modal v-model:open="teacherModal.visible" title="Xếp Giáo viên" :confirm-loading="teacherModal.loading" @ok="confirmArrangeTeacher" @cancel="teacherModal.visible = false" width="800px">
+      <a-table :columns="teacherColumns" :data-source="teacherModal.data" :row-selection="teacherRowSelection" row-key="id" :pagination="false" :scroll="{ y: 600 }" size="small" />
     </a-modal>
     <a-modal v-model:open="classModal.visible" title="Xếp Lớp" :confirm-loading="classModal.loading" @ok="confirmArrangeClass" @cancel="classModal.visible = false" width="800px">
       <a-table :columns="classColumns" :data-source="classModal.data" :row-selection="classRowSelection" row-key="id" :pagination="false" :scroll="{ y: 600 }" size="small" />
