@@ -21,14 +21,19 @@ const columns = [
     customRender: ({ index }) => index + 1,
   },
   {
+    title: "Lớp",
+    dataIndex: "ten_lop",
+    key: "ten_lop",
+  },
+  {
     title: "Môn học",
     dataIndex: "ten_mon",
     key: "ten_mon",
   },
   {
-    title: "Lớp",
-    dataIndex: "ten_lop",
-    key: "ten_lop",
+    title: "Giáo viên",
+    dataIndex: "ten_giao_vien",
+    key: "ten_giao_vien",
   },
   {
     title: "Phòng",
