@@ -88,7 +88,7 @@
         <div class="flex justify-end gap-2 mt-6">
           <a-button @click="handleCancel">Hủy</a-button>
           <a-button type="primary" @click="handleOk" :loading="confirmLoading">
-            {{ isEdit ? 'Cập nhật' : 'Thêm mới' }}
+            {{ isEdit ? "Cập nhật" : "Thêm mới" }}
           </a-button>
         </div>
       </a-form>
@@ -102,167 +102,159 @@ const { RestApi } = useApi();
 const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
 const columns = [
   {
-    title: 'STT',
-    key: 'stt',
+    title: "STT",
+    key: "stt",
     width: 70,
-    align: 'center',
-    customRender: ({ index }) => (pagination.current - 1) * pagination.pageSize + index + 1
+    align: "center",
+    customRender: ({ index }) => (pagination.current - 1) * pagination.pageSize + index + 1,
   },
   {
-    title: 'Tên đơn vị',
-    dataIndex: 'tenDonvi',
-    key: 'tenDonvi',
-    width: 200
+    title: "Tên đơn vị",
+    dataIndex: "tenDonvi",
+    key: "tenDonvi",
+    width: 200,
   },
   {
-    title: 'Địa chỉ',
-    dataIndex: 'diachi',
-    key: 'diachi',
-    ellipsis: true
+    title: "Địa chỉ",
+    dataIndex: "diachi",
+    key: "diachi",
+    ellipsis: true,
   },
   {
-    title: 'Số điện thoại',
-    dataIndex: 'sodienthoai',
-    key: 'sodienthoai',
-    width: 120
-  },
-  {
-    title: 'Email',
-    dataIndex: 'email',
-    key: 'email',
-    width: 150
-  },
-  {
-    title: 'Cấp học',
-    dataIndex: 'tenCaphoc',
-    key: 'tenCaphoc',
-    width: 100
-  },
-  {
-    title: 'Thao tác',
-    key: 'action',
+    title: "Số điện thoại",
+    dataIndex: "sodienthoai",
+    key: "sodienthoai",
     width: 120,
-    align: 'center',
-    fixed: 'right'
-  }
-]
+  },
+  {
+    title: "Email",
+    dataIndex: "email",
+    key: "email",
+    width: 150,
+  },
+  {
+    title: "Cấp học",
+    dataIndex: "tenCaphoc",
+    key: "tenCaphoc",
+    width: 100,
+  },
+  {
+    title: "Thao tác",
+    key: "action",
+    width: 120,
+    align: "center",
+    fixed: "right",
+  },
+];
 
 // State
-const dataSource = ref([])
-const loading = ref(false)
-const searchText = ref('')
-const visible = ref(false)
-const confirmLoading = ref(false)
-const isEdit = ref(false)
-const formRef = ref()
+const dataSource = ref([]);
+const loading = ref(false);
+const searchText = ref("");
+const visible = ref(false);
+const confirmLoading = ref(false);
+const isEdit = ref(false);
+const formRef = ref();
 
 const pagination = reactive({
   current: 1,
   pageSize: 10,
   total: 0,
   showSizeChanger: true,
-  pageSizeOptions: ['1', '5', '10', '20', '50'],
-  showTotal: (total) => `Tổng ${total} bản ghi`
-})
+  pageSizeOptions: ["1", "5", "10", "20", "50"],
+  showTotal: total => `Tổng ${total} bản ghi`,
+});
 
 const formState = reactive({
-  tenDonvi: '',
-  diachi: '',
-  sodienthoai: '',
-  email: '',
+  tenDonvi: "",
+  diachi: "",
+  sodienthoai: "",
+  email: "",
   idCap: undefined,
-  id_cahoc: undefined
-})
+  id_cahoc: undefined,
+});
 
 const rules = {
-  idCap: [
-    { required: true, message: 'Vui lòng chọn cấp học', trigger: 'blur', type: 'array' }
-  ],
-  id_cahoc: [
-    { required: true, message: 'Vui lòng chọn ca học', trigger: 'blur' }
-  ],
-  tenDonvi: [
-    { required: true, message: 'Vui lòng chọn đơn vị', trigger: 'blur' }
-  ],
-  diachi: [
-    { required: true, message: 'Vui lòng nhập địa chỉ', trigger: 'blur' }
-  ],
+  idCap: [{ required: true, message: "Vui lòng chọn cấp học", trigger: "blur", type: "array" }],
+  id_cahoc: [{ required: true, message: "Vui lòng chọn ca học", trigger: "blur" }],
+  tenDonvi: [{ required: true, message: "Vui lòng chọn đơn vị", trigger: "blur" }],
+  diachi: [{ required: true, message: "Vui lòng nhập địa chỉ", trigger: "blur" }],
   email: [
-    { required: true, message: 'Vui lòng nhập địa chỉ email', trigger: 'blur' },
-    { type: 'email', message: 'Email không hợp lệ', trigger: 'blur' }
+    { required: true, message: "Vui lòng nhập địa chỉ email", trigger: "blur" },
+    { type: "email", message: "Email không hợp lệ", trigger: "blur" },
   ],
   sodienthoai: [
-    { required: true, message: 'Vui lòng nhập số điện thoại', trigger: 'blur' },
+    { required: true, message: "Vui lòng nhập số điện thoại", trigger: "blur" },
     {
       pattern: /^(0|\+84)[3|5|7|8|9]\d{8}$/,
-      message: 'Số điện thoại không hợp lệ (phải là số di động Việt Nam)',
-      trigger: 'blur'
-    }
-  ]
-}
+      message: "Số điện thoại không hợp lệ (phải là số di động Việt Nam)",
+      trigger: "blur",
+    },
+  ],
+};
 
 // Methods
-const fetchData = async (param) => {
+const fetchData = async param => {
   try {
-    loading.value = true
-    const { data } = await RestApi.unit.list({ params: param })
+    loading.value = true;
+    const { data } = await RestApi.unit.list({ params: param });
 
-    if (data.value?.status === 'success') {
-      dataSource.value = data.value.data.items
-      pagination.total = data.value.data.totalrecord
+    if (data.value?.status === "success") {
+      dataSource.value = data.value.data.items;
+      pagination.total = data.value.data.totalrecord;
     } else {
-      dataSource.value = []
-      pagination.total = 0
+      dataSource.value = [];
+      pagination.total = 0;
     }
   } catch (error) {
-    console.error('Error fetching data:', error)
-    message.error('Lỗi khi tải danh sách đơn vị')
+    console.error("Error fetching data:", error);
+    message.error("Lỗi khi tải danh sách đơn vị");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
-const handleTableChange = async (pag) => {
-  pagination.current = pag.current
-  pagination.pageSize = pag.pageSize
-  param.value.PageIndex = pag.current
-  param.value.PageSize = pag.pageSize
-  await fetchData({ ...param.value })
-}
+const handleTableChange = async pag => {
+  pagination.current = pag.current;
+  pagination.pageSize = pag.pageSize;
+  param.value.PageIndex = pag.current;
+  param.value.PageSize = pag.pageSize;
+  await fetchData({ ...param.value });
+};
 
 const handleSearch = async () => {
-  param.value.search = searchText.value
-  pagination.current = 1
-  param.value.PageIndex = 1
-  await fetchData({ ...param.value })
-}
+  param.value.search = searchText.value;
+  pagination.current = 1;
+  param.value.PageIndex = 1;
+  await fetchData({ ...param.value });
+};
 
 const resetSearch = async () => {
-  searchText.value = ''
-  pagination.current = 1
-  param.value.PageIndex = 1
-  await fetchData({ ...param.value })
-}
+  searchText.value = "";
+  pagination.current = 1;
+  param.value.PageIndex = 1;
+  await fetchData({ ...param.value });
+};
 
 const showModal = () => {
-  isEdit.value = false
+  isEdit.value = false;
   Object.assign(formState, {
-    tenDonvi: '',
-    diachi: '',
-    sodienthoai: '',
-    email: '',
+    tenDonvi: "",
+    diachi: "",
+    sodienthoai: "",
+    email: "",
     idCap: undefined,
-    id_cahoc: undefined
-  })
-  visible.value = true
-}
+    id_cahoc: undefined,
+  });
+  visible.value = true;
+};
 
-const editItem = async (record) => {
+const editItem = async record => {
   try {
-    loading.value = true
-    const { data, error } = await RestApi.unit.detail({ params: { id: record.id } })
-    if (data.value?.status === 'success') {
-      const unitData = data.value.data
+    loading.value = true;
+    const { data, error } = await RestApi.unit.detail({ params: { id: record.id } });
+    if (data.value?.status === "success") {
+      const unitData = data.value.data;
       Object.assign(formState, {
         id: unitData.id,
         tenDonvi: unitData.tenDonvi,
@@ -270,84 +262,128 @@ const editItem = async (record) => {
         sodienthoai: unitData.sodienthoai,
         email: unitData.email,
         idCap: unitData.idCap,
-        id_cahoc: unitData.id_Cahoc
-      })
-      isEdit.value = true
-      visible.value = true
+        id_cahoc: unitData.id_cahoc,
+      });
+      isEdit.value = true;
+      visible.value = true;
     } else {
-      throw new Error(error.value?.data?.message || 'Không thể tải thông tin đơn vị')
+      throw new Error(error.value?.data?.message || "Không thể tải thông tin đơn vị");
     }
   } catch (error) {
-    console.error('Error fetching unit detail:', error)
-    message.error(error.message || error.response?.data?.message || 'Không thể tải thông tin đơn vị')
+    console.error("Error fetching unit detail:", error);
+    message.error(error.message || error.response?.data?.message || "Không thể tải thông tin đơn vị");
   } finally {
-    loading.value = false
-    formRef.value?.clearValidate()
+    loading.value = false;
+    formRef.value?.clearValidate();
   }
-}
+};
 
+// const handleOk = async () => {
+//   try {
+//     await formRef.value.validate();
+//     confirmLoading.value = true;
+//     if (isEdit.value) {
+//       const { data, error } = await RestApi.unit.update({ body: { ...formState } });
+//       if (data.value?.status === "success") {
+//         message.success(data.value.message || "Cập nhật thành công");
+//       } else {
+//         throw new Error(error.value?.data?.message || "Cập nhật không thành công");
+//       }
+//     } else {
+//       if (formState) {
+//         delete formState.id;
+//       }
+//       const { data, error } = await RestApi.unit.create({ body: { ...formState } });
+//       if (data.value?.status === "success") {
+//         message.success(data.value.message || "Thêm mới thành công");
+//       } else {
+//         throw new Error(error.value?.data?.message || "Thêm mới không thành công");
+//       }
+//     }
+//   } catch (error) {
+//     message.error(error.message || error.response?.data?.message || "Đã xảy ra lỗi khi lưu thông tin");
+//   } finally {
+//     visible.value = false;
+//     await fetchData({ ...param.value });
+//     confirmLoading.value = false;
+//   }
+// };
 const handleOk = async () => {
+  // 1) VALIDATE TRƯỚC – nếu fail thì return sớm, không đóng modal, không fetch
   try {
-    await formRef.value.validate()
-    confirmLoading.value = true
+    await formRef.value?.validate();
+  } catch (e) {
+    // e của a-form có dạng { errorFields: [{ name, errors: [...] }, ...] }
+    const first = e?.errorFields?.[0];
+    const msg = first?.errors?.[0] || "Vui lòng kiểm tra lại các trường bắt buộc";
+    message.error(msg);
+    // cuộn tới field lỗi đầu tiên (nếu dùng a-form v4+)
+    try {
+      if (first?.name) await formRef.value?.scrollToField(first.name);
+    } catch {}
+    return; // DỪNG TẠI ĐÂY
+  }
 
+  // 2) VALIDATE PASS → gọi API
+  confirmLoading.value = true;
+  try {
     if (isEdit.value) {
-      const { data, error } = await RestApi.unit.update({ body: { ...formState } })
-      if (data.value?.status === 'success') {
-        message.success(data.value.message || 'Cập nhật thành công')
+      const payload = { ...formState };
+      const { data, error } = await RestApi.unit.update({ body: payload });
+      if (data.value?.status === "success") {
+        message.success(data.value?.message || "Cập nhật thành công");
       } else {
-        throw new Error(error.value?.data?.message || 'Cập nhật không thành công')
+        throw new Error(error.value?.data?.message || "Cập nhật không thành công");
       }
     } else {
-      if (formState) {
-        delete formState.id
-      }
-      const { data, error } = await RestApi.unit.create({ body: { ...formState } })
-      if (data.value?.status === 'success') {
-        message.success(data.value.message || 'Thêm mới thành công')
+      const payload = { ...formState };
+      if ("id" in payload) delete payload.id;
+      const { data, error } = await RestApi.unit.create({ body: payload });
+      if (data.value?.status === "success") {
+        message.success(data.value?.message || "Thêm mới thành công");
       } else {
-        throw new Error(error.value?.data?.message || 'Thêm mới không thành công')
+        throw new Error(error.value?.data?.message || "Thêm mới không thành công");
       }
     }
-  } catch (error) {
-    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin')
-  } finally {
-    visible.value = false
-    await fetchData({ ...param.value })
-    confirmLoading.value = false
-  }
-}
 
+    // 3) THÀNH CÔNG → đóng modal + reload data
+    visible.value = false;
+    await fetchData({ ...param.value });
+  } catch (err) {
+    message.error(err?.message || err?.response?.data?.message || "Đã xảy ra lỗi khi lưu thông tin");
+  } finally {
+    confirmLoading.value = false;
+  }
+};
 const handleCancel = () => {
-  formRef.value?.resetFields()
-  visible.value = false
-}
+  formRef.value?.resetFields();
+  visible.value = false;
+};
 
-const deleteItem = async (id) => {
+const deleteItem = async id => {
   try {
-    const { data, error } = await RestApi.unit.delete({ params: { id } })
-    if (data.value?.status === 'success') {
-      message.success(data.value?.message || 'Xóa người đơn vị thành công')
+    const { data, error } = await RestApi.unit.delete({ params: { id } });
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Xóa người đơn vị thành công");
     } else {
-      throw new Error(error.value?.data?.message || 'Xóa không thành công')
+      throw new Error(error.value?.data?.message || "Xóa không thành công");
     }
   } catch (error) {
-    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi xóa thông tin đơn vị')
+    message.error(error.message || error.response?.data?.message || "Đã xảy ra lỗi khi xóa thông tin đơn vị");
   } finally {
-    await fetchData({ ...param.value })
+    await fetchData({ ...param.value });
   }
-}
+};
 
 // Lifecycle
-await fetchData({ ...param.value })
+await fetchData({ ...param.value });
 </script>
 
 <style scoped>
 /* Responsive table */
 @media (max-width: 768px) {
-
-  .ant-table-thead>tr>th,
-  .ant-table-tbody>tr>td {
+  .ant-table-thead > tr > th,
+  .ant-table-tbody > tr > td {
     padding: 8px !important;
     font-size: 13px;
   }
