@@ -39,7 +39,7 @@
       </div>
     </div>
 
-    <div v-if="teacherDsCa.length">
+    <div>
       <p class="font-medium leading-tight text-xl">Giáo viên</p>
       <div class="grid grid-cols-4 gap-2">
         <div class="col-span-3 overflow-auto" type="card" size="small">
@@ -79,7 +79,7 @@
         </div>
         <div>
           <SelectTeacher v-model="selectedTeacherId" :autoSelectFirst="true" size="small" />
-          <TeacherUnscheduledTable v-if="teacherUnscheduled.length" :data="teacherUnscheduled" class="overflow-auto h-100" />
+          <TeacherUnscheduledTable :data="teacherUnscheduled" class="overflow-auto h-100" />
         </div>
       </div>
     </div>
