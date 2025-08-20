@@ -71,6 +71,24 @@ const classRowSelection = computed(() => ({
   onChange: keys => (classModal.selectedRowKeys = keys),
 }));
 
+const classSubjectModal = reactive({
+  visible: false,
+  loading: false,
+  data: [],
+  selectedRowKeys: [],
+});
+const classSubjectColumns = [
+  { title: "Tên lớp/Môn", dataIndex: "name" },
+  { title: "Tổng tiết", dataIndex: "tong_tiet" },
+  { title: "Tiết chưa xếp", dataIndex: "tiet_chua_xep" },
+  { title: "Tiết đã xếp", dataIndex: "tiet_da_xep" },
+];
+const classSubjectRowSelection = computed(() => ({
+  selectedRowKeys: classSubjectModal.selectedRowKeys,
+  onChange: keys => (classSubjectModal.selectedRowKeys = keys),
+  getCheckboxProps: record => ({ disabled: record.type === 'class' }),
+}));
+
 const roomModal = reactive({
   visible: false,
   loading: false,
@@ -220,6 +238,89 @@ const confirmArrangeClass = async () => {
   }
 };
 
+const fetchClassSubjectLessons = async () => {
+  classSubjectModal.loading = true;
+  try {
+    const { data, error } = await RestApi.timetable.class_subject_list({
+      params: { idtkb: props.timetableId },
+    });
+    if (error.value) {
+      throw new Error(error.value?.data?.message || "Không thể tải danh sách lớp - môn");
+    }
+    const resp = data.value?.data || [];
+    classSubjectModal.data = resp.map(cls => ({
+      key: `class-${cls.id_lop}`,
+      type: "class",
+      name: cls.ten_lop,
+      id_lop: cls.id_lop,
+      ten_lop: cls.ten_lop,
+      children:
+        cls.ds_mon?.map(sub => ({
+          key: `${cls.id_lop}-${sub.id_mon}`,
+          type: "subject",
+          name: sub.ten_mon,
+          id_lop: cls.id_lop,
+          ten_lop: cls.ten_lop,
+          id_mon: sub.id_mon,
+          ten_mon: sub.ten_mon,
+          tong_tiet: sub.tong_tiet,
+          tiet_chua_xep: sub.tiet_chua_xep,
+          tiet_da_xep: sub.tiet_da_xep,
+        })) || [],
+    }));
+  } catch (err) {
+    message.error(err.message || "Không thể tải danh sách lớp - môn");
+  } finally {
+    classSubjectModal.loading = false;
+  }
+};
+const openClassSubjectModal = async () => {
+  await fetchClassSubjectLessons();
+  classSubjectModal.visible = true;
+};
+const confirmArrangeClassSubject = async () => {
+  if (!classSubjectModal.selectedRowKeys.length) {
+    classSubjectModal.visible = false;
+    return;
+  }
+  classSubjectModal.loading = true;
+  try {
+    const selected = [];
+    classSubjectModal.data.forEach(cls => {
+      const selectedSubs =
+        cls.children?.filter(ch => classSubjectModal.selectedRowKeys.includes(ch.key)) || [];
+      if (selectedSubs.length) {
+        selected.push({
+          id_lop: cls.id_lop,
+          ten_lop: cls.ten_lop,
+          ds_mon: selectedSubs.map(({ id_mon, ten_mon, tong_tiet, tiet_chua_xep, tiet_da_xep }) => ({
+            id_mon,
+            ten_mon,
+            tong_tiet,
+            tiet_chua_xep,
+            tiet_da_xep,
+          })),
+        });
+      }
+    });
+    const { data, error } = await RestApi.timetable.arrange_class_subject({
+      params: { idtkb: props.timetableId },
+      body: selected,
+    });
+    if (error.value || data.value?.status !== "success") {
+      throw new Error(error.value?.data?.message || data.value?.message || "Xếp Lớp - Môn không thành công");
+    }
+    message.success(data.value.message || data.value.data || "");
+    classSubjectModal.visible = false;
+    classSubjectModal.selectedRowKeys = [];
+    await fetchInfo();
+  } catch (err) {
+    message.error(err.message || "Xếp Lớp - Môn không thành công");
+  } finally {
+    classSubjectModal.loading = false;
+  }
+};
+
 const fetchRoomLessons = async () => {
   roomModal.loading = true;
   try {
@@ -339,7 +440,7 @@ const arrangePartial = type => {
       openClassModal();
       break;
     case "Xếp Lớp - Môn":
-      console.log("Thực hiện xếp Lớp - Môn");
+      openClassSubjectModal();
       break;
     case "Xếp Khối - Môn":
       console.log("Thực hiện xếp Khối - Môn");
@@ -466,6 +567,24 @@ defineExpose({ refresh, reset });
     </a-modal>
     <a-modal v-model:open="classModal.visible" title="Xếp Lớp" :confirm-loading="classModal.loading" @ok="confirmArrangeClass" @cancel="classModal.visible = false" width="800px">
       <a-table :columns="classColumns" :data-source="classModal.data" :row-selection="classRowSelection" row-key="id" :pagination="false" :scroll="{ y: 600 }" size="small" />
+    </a-modal>
+    <a-modal
+      v-model:open="classSubjectModal.visible"
+      title="Xếp Lớp - Môn"
+      :confirm-loading="classSubjectModal.loading"
+      @ok="confirmArrangeClassSubject"
+      @cancel="classSubjectModal.visible = false"
+      width="800px"
+    >
+      <a-table
+        :columns="classSubjectColumns"
+        :data-source="classSubjectModal.data"
+        :row-selection="classSubjectRowSelection"
+        row-key="key"
+        :pagination="false"
+        :scroll="{ y: 600 }"
+        size="small"
+      />
     </a-modal>
     <a-modal v-model:open="roomModal.visible" title="Xếp Phòng học" :confirm-loading="roomModal.loading" @ok="confirmArrangeRoom" @cancel="roomModal.visible = false" width="800px">
       <a-table :columns="roomColumns" :data-source="roomModal.data" :row-selection="roomRowSelection" row-key="id" :pagination="false" :scroll="{ y: 600 }" size="small" />
