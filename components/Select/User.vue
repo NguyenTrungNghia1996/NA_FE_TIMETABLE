@@ -1,6 +1,6 @@
 <template>
   <a-form-item :label="label" :name="name" :rules="rules">
-    <a-select :value="modelValue" @update:value="val => $emit('update:modelValue', val)" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" :filter-option="false" />
+    <a-select :value="modelValue" @update:value="val => $emit('update:modelValue', val)" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" :filter-option="false" />
   </a-form-item>
 </template>
 
@@ -16,6 +16,7 @@ const props = defineProps({
   name: { type: String, default: 'nguoidung' },
   multiple: { type: Boolean, default: false },
   placeholder: { type: String, default: 'Chọn người dùng' },
+  size: { type: String, default: "middle" },
   rules: { type: Array, default: () => [] },
   disabled: { type: Boolean, default: false },
 })

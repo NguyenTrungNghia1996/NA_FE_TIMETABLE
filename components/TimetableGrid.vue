@@ -34,7 +34,7 @@
         </div>
       </div>
       <div>
-        <SelectClass v-model="selectedClassId" class="mb-2" :autoSelectFirst="true" />
+        <SelectClass v-model="selectedClassId" :autoSelectFirst="true" size="small" />
         <UnscheduledTable :data="props.rawUnscheduled" class="overflow-auto h-100" />
       </div>
     </div>
@@ -78,7 +78,7 @@
           </div>
         </div>
         <div>
-          <SelectTeacher v-model="selectedTeacherId" :autoSelectFirst="true" />
+          <SelectTeacher v-model="selectedTeacherId" :autoSelectFirst="true" size="small" />
           <TeacherUnscheduledTable v-if="teacherUnscheduled.length" :data="teacherUnscheduled" class="overflow-auto h-100" />
         </div>
       </div>
