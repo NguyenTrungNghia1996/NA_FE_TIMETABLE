@@ -63,7 +63,11 @@
         </div>
       </a-form>
     </a-modal>
+    <!-- <a-drawer v-model:open="drawerInfoOpen" title="Xếp thời khóa biểu" :footer="null" height="100vh" placement="bottom" @close="closeInfoDrawer"> -->
     <a-drawer v-model:open="drawerInfoOpen" title="Xếp thời khóa biểu" :footer="null" height="100vh" placement="bottom" @close="closeInfoDrawer">
+      <template #extra>
+        <a-button type="primary" @click="openAdjustFromInfo">Tinh chỉnh thời khóa biểu</a-button>
+      </template>
       <ClientOnly>
         <TimetableInfo ref="infoRef" :timetableId="infoTimetableId" />
       </ClientOnly>
@@ -132,6 +136,9 @@ const rules = {
   ten: [{ required: true, message: "Vui lòng nhập tên thời khóa biểu", trigger: "blur" }],
 };
 
+const openAdjustFromInfo = () => {
+  openAdjustDrawer({ id: infoTimetableId.value });
+};
 const fetchData = async p => {
   try {
     loading.value = true;
