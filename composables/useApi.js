@@ -100,6 +100,7 @@ let ENDPOINTS = {
   TIMETABLE_ARRANGE_TEACHER: "/api/tkb/xeptheogv",
   TIMETABLE_ARRANGE_GVCN: "/api/tkb/xeptheogvcn",
   TIMETABLE_ARRANGE_FUNCTION_ROOM: "/api/tkb/xeptheophongcn",
+  TIMETABLE_UNSCHEDULED: "/api/tkb/tietchuaxep",
 
   S3: "/api/presigned_url",
 };
@@ -821,6 +822,9 @@ class Timetable {
   }
   async arrange_function_room(data) {
     return await this.request.post(ENDPOINTS.TIMETABLE_ARRANGE_FUNCTION_ROOM, data);
+  }
+  async unscheduled(data) {
+    return await this.request.get(ENDPOINTS.TIMETABLE_UNSCHEDULED, data);
   }
 }
 export default () => {

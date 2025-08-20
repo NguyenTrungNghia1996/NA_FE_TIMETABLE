@@ -1,20 +1,20 @@
 <template>
-  <div @click="contextMenu.show = false" class="grid grid-cols-1 gap-5">
+  <div @click="contextMenu.show = false" class="grid grid-cols-1 gap-2">
     <div class="grid grid-cols-4 gap-2">
-      <div class="col-span-3 overflow-auto" type="card" size="small">
-        <div v-for="ca in dsCa" :key="ca.id" :tab="ca.id == 1 ? 'Ca Sáng' : 'Ca Chiều'">
+      <div class="col-span-3 overflow-auto">
+        <div v-for="ca in dsCa" :key="ca.id">
           <div class="overflow-x-auto">
             <table class="min-w-full border-collapse select-none">
               <thead>
                 <tr>
-                  <th class="border p-2 select-none">Tiết / Ngày</th>
-                  <th v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 select-none">{{ ngay.ten }}</th>
+                  <th class="border select-none">Tiết / Ngày</th>
+                  <th v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 select-none">{{ ngay.ten }}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
-                  <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
-                  <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] max-w-[120px] relative select-none" :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="isDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
+                  <td class="border p-0.5 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
+                  <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 text-xs align-top min-w-[100px] max-w-[100px] relative select-none" :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="isDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
                     <template v-if="ngay.ds_Tiet[pIdx].isRest">
                       <span class="italic text-red-500">Nghỉ</span>
                     </template>
@@ -32,30 +32,21 @@
             </table>
           </div>
         </div>
-      </div>
-      <div>
-        <SelectClass v-model="selectedClassId" :autoSelectFirst="true" size="small" />
-        <UnscheduledTable :data="props.rawUnscheduled" class="overflow-auto h-100" />
-      </div>
-    </div>
-
-    <div v-if="teacherDsCa.length">
-      <p class="font-medium leading-tight text-xl">Giáo viên</p>
-      <div class="grid grid-cols-4 gap-2">
-        <div class="col-span-3 overflow-auto" type="card" size="small">
-          <div v-for="ca in teacherDsCa" :key="ca.id" :tab="ca.id == 1 ? 'Ca Sáng' : 'Ca Chiều'">
+        <div v-if="teacherDsCa.length">
+          <p class="font-medium leading-tight text-xl">Giáo viên</p>
+          <div v-for="ca in teacherDsCa" :key="ca.id">
             <div class="overflow-x-auto">
               <table class="min-w-full border-collapse select-none">
                 <thead>
                   <tr>
-                    <th class="border p-2 select-none">Tiết / Ngày</th>
-                    <th v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 select-none">{{ ngay.ten }}</th>
+                    <th class="border p-0.5 select-none">Tiết / Ngày</th>
+                    <th v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 select-none">{{ ngay.ten }}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
-                    <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
-                    <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] max-w-[120px] relative select-none" :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)" @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)" @drop="onTeacherDrop(ca.id, ngay.id, pIdx)" @click="onTeacherCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx, true)">
+                    <td class="border p-0.5 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
+                    <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 text-xs align-top min-w-[100px] max-w-[100px] relative select-none" :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)" @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)" @drop="onTeacherDrop(ca.id, ngay.id, pIdx)" @click="onTeacherCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx, true)">
                       <template v-if="ngay.ds_Tiet[pIdx].isRest">
                         <span class="italic text-red-500">Nghỉ</span>
                       </template>
@@ -77,9 +68,21 @@
             </div>
           </div>
         </div>
-        <div>
-          <SelectTeacher v-model="selectedTeacherId" :autoSelectFirst="true" size="small" />
-          <TeacherUnscheduledTable v-if="teacherUnscheduled.length" :data="teacherUnscheduled" class="overflow-auto h-100" />
+      </div>
+      <div class="h-[calc(100vh-110px)] flex flex-col">
+        <SelectClass v-model="selectedClassId" :autoSelectFirst="true" size="small" />
+        <SelectTeacher v-model="selectedTeacherId" :autoSelectFirst="true" size="small" />
+        <div class="h-1/3 overflow-auto">
+          <h4 class="font-semibold">Tiết chưa xếp của lớp học</h4>
+          <UnscheduledTable :data="props.rawUnscheduled" class="w-full" />
+        </div>
+        <div class="h-1/3 overflow-auto">
+          <h4 class="font-semibold">Tiết chưa xếp của thời khóa biểu</h4>
+          <TimetableUnscheduledTable :data="timetableUnscheduled" class="w-full" />
+        </div>
+        <div class="h-1/3 overflow-auto">
+          <h4 class="font-semibold">Tiết chưa xếp của giáo viên</h4>
+          <TeacherUnscheduledTable :data="teacherUnscheduled" class="w-full" />
         </div>
       </div>
     </div>
@@ -140,6 +143,7 @@ const activeCa = ref(1);
 const teacherDsCa = ref([]);
 const teacherActiveCa = ref(1);
 const teacherUnscheduled = ref([]);
+const timetableUnscheduled = ref([]);
 const selectedTeacherId = ref(null);
 const selectedClassId = ref(props.classId);
 const emit = defineEmits(["cell-click", "update:rawTimetable", "update:rawUnscheduled", "update:classId"]);
@@ -149,6 +153,15 @@ const targetCell = ref(null);
 const selectedSubjectId = ref(null);
 const selectedCellPos = ref(null);
 const lessonOptions = ref([]);
+
+async function fetchAllUnscheduled() {
+  if (props.timetableId) {
+    const { data } = await RestApi.timetable.unscheduled({ params: { idtkb: props.timetableId } });
+    timetableUnscheduled.value = Array.isArray(data.value.data) ? data.value.data : [];
+  } else {
+    timetableUnscheduled.value = [];
+  }
+}
 
 watch(
   () => props.classId,
@@ -177,6 +190,7 @@ watch(
     });
     dsCa.value = ds_Ca;
     activeCa.value = ds_Ca[0]?.id || 1;
+    fetchAllUnscheduled();
   },
   { immediate: true, deep: true },
 );
@@ -189,6 +203,14 @@ watch(selectedTeacherId, async id => {
     teacherUnscheduled.value = [];
   }
 });
+
+watch(
+  () => props.timetableId,
+  () => {
+    fetchAllUnscheduled();
+  },
+  { immediate: true },
+);
 
 function updateRawTimetable(unscheduled = props.rawUnscheduled) {
   const flat = gridToFlat(dsCa.value, unscheduled);
