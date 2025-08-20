@@ -1,10 +1,7 @@
 <template>
-  <div>
-    <h4 class="font-semibold mb-2">Tiết chưa xếp của thời khóa biểu</h4>
-    <ClientOnly>
-      <a-table :columns="columns" :data-source="data" :pagination="false" bordered size="small" />
-    </ClientOnly>
-  </div>
+  <ClientOnly>
+    <a-table sticky :columns="columns" :data-source="data" :pagination="false" bordered size="small" />
+  </ClientOnly>
 </template>
 
 <script setup>
