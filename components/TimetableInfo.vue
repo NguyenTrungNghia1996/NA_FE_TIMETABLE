@@ -20,6 +20,8 @@ const arrangedLessons = computed(() => info.tong_tiet_da_xep);
 const unarrangedLessons = computed(() => info.tong_tiet_chua_xep);
 
 const settingStore = useSettingStore();
+const stringSorter = key => (a, b) => (a[key] || "").localeCompare(b[key] || "");
+const numberSorter = key => (a, b) => (a[key] ?? 0) - (b[key] ?? 0);
 const subjectModal = reactive({
   visible: false,
   loading: false,
@@ -27,10 +29,10 @@ const subjectModal = reactive({
   selectedRowKeys: [],
 });
 const subjectColumns = [
-  { title: "Tên môn học", dataIndex: "ten" },
-  { title: "Tổng tiết", dataIndex: "tong_tiet" },
-  { title: "Tiết chưa xếp", dataIndex: "tiet_chua_xep" },
-  { title: "Tiết đã xếp", dataIndex: "tiet_da_xep" },
+  { title: "Tên môn học", dataIndex: "ten", sorter: stringSorter("ten") },
+  { title: "Tổng tiết", dataIndex: "tong_tiet", sorter: numberSorter("tong_tiet") },
+  { title: "Tiết chưa xếp", dataIndex: "tiet_chua_xep", sorter: numberSorter("tiet_chua_xep") },
+  { title: "Tiết đã xếp", dataIndex: "tiet_da_xep", sorter: numberSorter("tiet_da_xep") },
 ];
 const subjectRowSelection = computed(() => ({
   selectedRowKeys: subjectModal.selectedRowKeys,
@@ -44,10 +46,10 @@ const teacherModal = reactive({
   selectedRowKeys: [],
 });
 const teacherColumns = [
-  { title: "Tên giáo viên", dataIndex: "ho_ten" },
-  { title: "Tổng tiết", dataIndex: "tong_tiet" },
-  { title: "Tiết chưa xếp", dataIndex: "tiet_chua_xep" },
-  { title: "Tiết đã xếp", dataIndex: "tiet_da_xep" },
+  { title: "Tên giáo viên", dataIndex: "ho_ten", sorter: stringSorter("ho_ten") },
+  { title: "Tổng tiết", dataIndex: "tong_tiet", sorter: numberSorter("tong_tiet") },
+  { title: "Tiết chưa xếp", dataIndex: "tiet_chua_xep", sorter: numberSorter("tiet_chua_xep") },
+  { title: "Tiết đã xếp", dataIndex: "tiet_da_xep", sorter: numberSorter("tiet_da_xep") },
 ];
 const teacherRowSelection = computed(() => ({
   selectedRowKeys: teacherModal.selectedRowKeys,
@@ -61,10 +63,10 @@ const classModal = reactive({
   selectedRowKeys: [],
 });
 const classColumns = [
-  { title: "Tên lớp", dataIndex: "ten" },
-  { title: "Tổng tiết", dataIndex: "tong_tiet" },
-  { title: "Tiết chưa xếp", dataIndex: "tiet_chua_xep" },
-  { title: "Tiết đã xếp", dataIndex: "tiet_da_xep" },
+  { title: "Tên lớp", dataIndex: "ten", sorter: stringSorter("ten") },
+  { title: "Tổng tiết", dataIndex: "tong_tiet", sorter: numberSorter("tong_tiet") },
+  { title: "Tiết chưa xếp", dataIndex: "tiet_chua_xep", sorter: numberSorter("tiet_chua_xep") },
+  { title: "Tiết đã xếp", dataIndex: "tiet_da_xep", sorter: numberSorter("tiet_da_xep") },
 ];
 const classRowSelection = computed(() => ({
   selectedRowKeys: classModal.selectedRowKeys,
@@ -78,10 +80,10 @@ const classSubjectModal = reactive({
   selectedRowKeys: [],
 });
 const classSubjectColumns = [
-  { title: "Tên lớp/Môn", dataIndex: "name" },
-  { title: "Tổng tiết", dataIndex: "tong_tiet" },
-  { title: "Tiết chưa xếp", dataIndex: "tiet_chua_xep" },
-  { title: "Tiết đã xếp", dataIndex: "tiet_da_xep" },
+  { title: "Tên lớp/Môn", dataIndex: "name", sorter: stringSorter("name") },
+  { title: "Tổng tiết", dataIndex: "tong_tiet", sorter: numberSorter("tong_tiet") },
+  { title: "Tiết chưa xếp", dataIndex: "tiet_chua_xep", sorter: numberSorter("tiet_chua_xep") },
+  { title: "Tiết đã xếp", dataIndex: "tiet_da_xep", sorter: numberSorter("tiet_da_xep") },
 ];
 const classSubjectRowSelection = computed(() => ({
   selectedRowKeys: classSubjectModal.selectedRowKeys,
@@ -96,10 +98,10 @@ const roomModal = reactive({
   selectedRowKeys: [],
 });
 const roomColumns = [
-  { title: "Tên phòng học", dataIndex: "ten" },
-  { title: "Tổng tiết", dataIndex: "tong_tiet" },
-  { title: "Tiết chưa xếp", dataIndex: "tiet_chua_xep" },
-  { title: "Tiết đã xếp", dataIndex: "tiet_da_xep" },
+  { title: "Tên phòng học", dataIndex: "ten", sorter: stringSorter("ten") },
+  { title: "Tổng tiết", dataIndex: "tong_tiet", sorter: numberSorter("tong_tiet") },
+  { title: "Tiết chưa xếp", dataIndex: "tiet_chua_xep", sorter: numberSorter("tiet_chua_xep") },
+  { title: "Tiết đã xếp", dataIndex: "tiet_da_xep", sorter: numberSorter("tiet_da_xep") },
 ];
 const roomRowSelection = computed(() => ({
   selectedRowKeys: roomModal.selectedRowKeys,
