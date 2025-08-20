@@ -5,7 +5,7 @@
       @update:value="val => $emit('update:modelValue', val)"
       :mode="multiple ? 'multiple' : undefined"
       show-search
-      :placeholder="placeholder"
+      :placeholder="placeholder" :size="size"
       :loading="loading"
       :disabled="disabled"
       allow-clear
@@ -29,6 +29,7 @@ const props = defineProps({
   name: { type: String, default: 'banhoc' },
   multiple: { type: Boolean, default: false },
   placeholder: { type: String, default: 'Chọn ban học' },
+  size: { type: String, default: "middle" },
   rules: { type: Array, default: () => [] },
   disabled: { type: Boolean, default: false },
 })
