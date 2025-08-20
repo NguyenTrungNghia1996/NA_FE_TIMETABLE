@@ -1,9 +1,8 @@
 <template>
   <div @click="contextMenu.show = false" class="grid grid-cols-1 gap-5">
-    <SelectClass v-model="selectedClassId" class="mb-2" :autoSelectFirst="true" />
     <div class="grid grid-cols-4 gap-2">
-      <div class="col-span-3 h-75 overflow-auto" type="card" size="small">
-        <div v-for="ca in dsCa" :key="ca.id" :tab="ca.id == 1 ? 'Ca Sáng' : 'Ca Chiều'" class="p-2">
+      <div class="col-span-3 overflow-auto" type="card" size="small">
+        <div v-for="ca in dsCa" :key="ca.id" :tab="ca.id == 1 ? 'Ca Sáng' : 'Ca Chiều'">
           <div class="overflow-x-auto">
             <table class="min-w-full border-collapse select-none">
               <thead>
@@ -15,7 +14,7 @@
               <tbody>
                 <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
                   <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
-                  <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] relative select-none" :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="isDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
+                  <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] max-w-[120px] relative select-none" :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="isDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
                     <template v-if="ngay.ds_Tiet[pIdx].isRest">
                       <span class="italic text-red-500">Nghỉ</span>
                     </template>
@@ -34,47 +33,55 @@
           </div>
         </div>
       </div>
-      <UnscheduledTable :data="props.rawUnscheduled" class="overflow-auto h-75" />
+      <div>
+        <SelectClass v-model="selectedClassId" class="mb-2" :autoSelectFirst="true" />
+        <UnscheduledTable :data="props.rawUnscheduled" class="overflow-auto h-100" />
+      </div>
     </div>
 
-    <SelectTeacher v-model="selectedTeacherId" :autoSelectFirst="true" />
-    <div v-if="teacherDsCa.length" class="grid grid-cols-4 gap-2 h-75">
-      <div class="col-span-3 overflow-auto" type="card" size="small">
-        <div v-for="ca in teacherDsCa" :key="ca.id" :tab="ca.id == 1 ? 'Ca Sáng' : 'Ca Chiều'" class="p-2">
-          <div class="overflow-x-auto">
-            <table class="min-w-full border-collapse select-none">
-              <thead>
-                <tr>
-                  <th class="border p-2 select-none">Tiết / Ngày</th>
-                  <th v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 select-none">{{ ngay.ten }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
-                  <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
-                  <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] relative select-none" :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)" @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)" @drop="onTeacherDrop(ca.id, ngay.id, pIdx)" @click="onTeacherCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx, true)">
-                    <template v-if="ngay.ds_Tiet[pIdx].isRest">
-                      <span class="italic text-red-500">Nghỉ</span>
-                    </template>
-                    <template v-else-if="ngay.ds_Tiet[pIdx].ten_mon">
-                      <div class="font-medium leading-tight">
-                        {{ ngay.ds_Tiet[pIdx].ten_mon }}
-                        <template v-if="ngay.ds_Tiet[pIdx].ten_lop"> - {{ ngay.ds_Tiet[pIdx].ten_lop }} </template>
-                      </div>
-                      <div class="text-gray-600">{{ ngay.ds_Tiet[pIdx].ten_phong }}</div>
-                    </template>
-                    <template v-else>
-                      <span class="text-gray-400">Trống</span>
-                    </template>
-                    <div v-if="ngay.ds_Tiet[pIdx].isLock" class="absolute top-1 right-1 text-[10px] text-red-600">Khóa</div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+    <div v-if="teacherDsCa.length">
+      <p class="font-medium leading-tight text-xl">Giáo viên</p>
+      <div class="grid grid-cols-4 gap-2">
+        <div class="col-span-3 overflow-auto" type="card" size="small">
+          <div v-for="ca in teacherDsCa" :key="ca.id" :tab="ca.id == 1 ? 'Ca Sáng' : 'Ca Chiều'">
+            <div class="overflow-x-auto">
+              <table class="min-w-full border-collapse select-none">
+                <thead>
+                  <tr>
+                    <th class="border p-2 select-none">Tiết / Ngày</th>
+                    <th v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 select-none">{{ ngay.ten }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
+                    <td class="border p-2 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
+                    <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-2 text-xs align-top min-w-[120px] max-w-[120px] relative select-none" :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)" @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)" @drop="onTeacherDrop(ca.id, ngay.id, pIdx)" @click="onTeacherCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx, true)">
+                      <template v-if="ngay.ds_Tiet[pIdx].isRest">
+                        <span class="italic text-red-500">Nghỉ</span>
+                      </template>
+                      <template v-else-if="ngay.ds_Tiet[pIdx].ten_mon">
+                        <div class="font-medium leading-tight">
+                          {{ ngay.ds_Tiet[pIdx].ten_mon }}
+                          <template v-if="ngay.ds_Tiet[pIdx].ten_lop"> - {{ ngay.ds_Tiet[pIdx].ten_lop }} </template>
+                        </div>
+                        <div class="text-gray-600">{{ ngay.ds_Tiet[pIdx].ten_phong }}</div>
+                      </template>
+                      <template v-else>
+                        <span class="text-gray-400">Trống</span>
+                      </template>
+                      <div v-if="ngay.ds_Tiet[pIdx].isLock" class="absolute top-1 right-1 text-[10px] text-red-600">Khóa</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
+        <div>
+          <SelectTeacher v-model="selectedTeacherId" :autoSelectFirst="true" />
+          <TeacherUnscheduledTable v-if="teacherUnscheduled.length" :data="teacherUnscheduled" class="overflow-auto h-100" />
+        </div>
       </div>
-      <TeacherUnscheduledTable v-if="teacherUnscheduled.length" :data="teacherUnscheduled" class="overflow-auto" />
     </div>
 
     <!-- Context Menu -->
