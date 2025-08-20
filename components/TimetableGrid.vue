@@ -36,6 +36,11 @@
       <div>
         <SelectClass v-model="selectedClassId" :autoSelectFirst="true" size="small" />
         <UnscheduledTable :data="props.rawUnscheduled" class="overflow-auto h-100" />
+        <TimetableUnscheduledTable
+          v-if="timetableUnscheduled.length"
+          :data="timetableUnscheduled"
+          class="mt-4 overflow-auto h-100"
+        />
       </div>
     </div>
 
@@ -140,6 +145,7 @@ const activeCa = ref(1);
 const teacherDsCa = ref([]);
 const teacherActiveCa = ref(1);
 const teacherUnscheduled = ref([]);
+const timetableUnscheduled = ref([]);
 const selectedTeacherId = ref(null);
 const selectedClassId = ref(props.classId);
 const emit = defineEmits(["cell-click", "update:rawTimetable", "update:rawUnscheduled", "update:classId"]);
@@ -149,6 +155,16 @@ const targetCell = ref(null);
 const selectedSubjectId = ref(null);
 const selectedCellPos = ref(null);
 const lessonOptions = ref([]);
+
+
+async function fetchAllUnscheduled() {
+  if (props.timetableId) {
+    const res = await RestApi.timetable.unscheduled({ params: { idtkb: props.timetableId } });
+    timetableUnscheduled.value = Array.isArray(res.data) ? res.data : [];
+  } else {
+    timetableUnscheduled.value = [];
+  }
+}
 
 watch(
   () => props.classId,
@@ -177,6 +193,7 @@ watch(
     });
     dsCa.value = ds_Ca;
     activeCa.value = ds_Ca[0]?.id || 1;
+    fetchAllUnscheduled();
   },
   { immediate: true, deep: true },
 );
@@ -189,6 +206,14 @@ watch(selectedTeacherId, async id => {
     teacherUnscheduled.value = [];
   }
 });
+
+watch(
+  () => props.timetableId,
+  () => {
+    fetchAllUnscheduled();
+  },
+  { immediate: true },
+);
 
 function updateRawTimetable(unscheduled = props.rawUnscheduled) {
   const flat = gridToFlat(dsCa.value, unscheduled);
