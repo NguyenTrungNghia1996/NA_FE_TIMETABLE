@@ -1,6 +1,6 @@
 <template>
   <ClientOnly>
-    <a-table sticky :columns="columns" :data-source="data" :pagination="false" bordered size="small" />
+    <a-table :columns="columns" :data-source="data" :pagination="false" bordered size="small" />
   </ClientOnly>
 </template>
 
