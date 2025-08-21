@@ -573,10 +573,12 @@ async function setLock(val) {
   if (!cell || !cell.id_chitiet) return;
   try {
     if (contextMenu.isTeacher) {
-      const api = val
-        ? RestApi.timetable.lock_teacher_period
-        : RestApi.timetable.unlock_teacher_period;
-      const { data, error } = await api({ params: { Id: cell.id_chitiet } });
+      let data, error;
+      if (val) {
+        ({ data, error } = await RestApi.timetable.lock_teacher_period({ params: { Id: cell.id_chitiet } }));
+      } else {
+        ({ data, error } = await RestApi.timetable.unlock_teacher_period({ params: { Id: cell.id_chitiet } }));
+      }
       if (data.value?.status === "success") {
         if (selectedClassId.value && props.timetableId) {
           const { data: listData, error: listError } = await RestApi.timetable.get_class({
@@ -594,10 +596,12 @@ async function setLock(val) {
         message.error("Set lock error", error.value || data.value);
       }
     } else {
-      const api = val
-        ? RestApi.timetable.lock_class_period
-        : RestApi.timetable.unlock_class_period;
-      const { data, error } = await api({ params: { Id: cell.id_chitiet } });
+      let data, error;
+      if (val) {
+        ({ data, error } = await RestApi.timetable.lock_class_period({ params: { Id: cell.id_chitiet } }));
+      } else {
+        ({ data, error } = await RestApi.timetable.unlock_class_period({ params: { Id: cell.id_chitiet } }));
+      }
       if (data.value?.status === "success") {
         const { data: listData, error: listError } = await RestApi.timetable.get_class({
           params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
