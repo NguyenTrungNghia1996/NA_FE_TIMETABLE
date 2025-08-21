@@ -85,6 +85,10 @@ let ENDPOINTS = {
   TIMETABLE_TEACHER: "/api/tkb/giaovien",
   TIMETABLE_LOCK_PERIOD: "/api/tkb/khoatiet",
   TIMETABLE_UNLOCK_PERIOD: "/api/tkb/huykhoa",
+  TIMETABLE_LOCK_CLASS_PERIOD: "/api/tkb/khoatiet/mon",
+  TIMETABLE_UNLOCK_CLASS_PERIOD: "/api/tkb/huykhoa/mon",
+  TIMETABLE_LOCK_TEACHER_PERIOD: "/api/tkb/khoatiet/giaovien",
+  TIMETABLE_UNLOCK_TEACHER_PERIOD: "/api/tkb/huykhoa/giaovien",
   TIMETABLE_CANCEL_PERIOD: "/api/tkb/huytiet",
   TIMETABLE_CANCEL_RESULT: "/api/thoikhoabieu/huykq",
   TIMETABLE_ARRANGE_ALL: "/api/tkb",
@@ -777,6 +781,18 @@ class Timetable {
   }
   async unlock_period(data) {
     return await this.request.put(ENDPOINTS.TIMETABLE_UNLOCK_PERIOD, data);
+  }
+  async lock_class_period(data) {
+    return await this.request.put(ENDPOINTS.TIMETABLE_LOCK_CLASS_PERIOD, data);
+  }
+  async unlock_class_period(data) {
+    return await this.request.put(ENDPOINTS.TIMETABLE_UNLOCK_CLASS_PERIOD, data);
+  }
+  async lock_teacher_period(data) {
+    return await this.request.put(ENDPOINTS.TIMETABLE_LOCK_TEACHER_PERIOD, data);
+  }
+  async unlock_teacher_period(data) {
+    return await this.request.put(ENDPOINTS.TIMETABLE_UNLOCK_TEACHER_PERIOD, data);
   }
   async cancel_period(data) {
     return await this.request.put(ENDPOINTS.TIMETABLE_CANCEL_PERIOD, data);
