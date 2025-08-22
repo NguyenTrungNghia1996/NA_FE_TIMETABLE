@@ -34,12 +34,12 @@
 
         <template #overlay>
           <a-menu class="min-w-[180px] bg-gray-800 border border-gray-700 rounded-lg py-1 shadow-xl">
-            <a-menu-item key="profile" class="hover:bg-gray-700/50 !px-4 !py-2.5 !mx-0 text-gray-200 hover:text-white" @click="navigateTo('/profile')">
+            <!-- <a-menu-item key="profile" class="hover:bg-gray-700/50 !px-4 !py-2.5 !mx-0 text-gray-200 hover:text-white" @click="navigateTo('/profile')">
               <div class="flex items-center gap-2">
                 <UserOutlined class="text-blue-400" />
                 <span>Hồ sơ cá nhân</span>
               </div>
-            </a-menu-item>
+            </a-menu-item> -->
             <a-menu-item key="change_password" class="hover:bg-gray-700/50 !px-4 !py-2.5 !mx-0 text-gray-200 hover:text-white" @click="showChangePasswordModal">
               <div class="flex items-center gap-2">
                 <KeyOutlined class="text-blue-400" />
