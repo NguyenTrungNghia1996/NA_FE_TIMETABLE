@@ -147,9 +147,7 @@ const props = defineProps({
 });
 
 const dsCa = ref([]);
-const activeCa = ref(1);
 const teacherDsCa = ref([]);
-const teacherActiveCa = ref(1);
 const teacherUnscheduled = ref([]);
 const timetableUnscheduled = ref([]);
 const selectedTeacherId = ref(null);
@@ -192,12 +190,11 @@ watch(
   () => {
     const { ds_Ca } = transformTimetable(props.rawTimetable, {
       daysCount: 7,
-      shifts: [1, 2],
-      periodsPerShift: 5,
+      shifts: [1],
+      periodsPerShift: 10,
       dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
     });
     dsCa.value = ds_Ca;
-    activeCa.value = ds_Ca[0]?.id || 1;
     fetchAllUnscheduled();
   },
   { immediate: true, deep: true },
@@ -259,12 +256,11 @@ async function fetchTeacherTimetable(teacherId) {
       const { timetable, ds_chua_xep } = data.value.data || {};
       const { ds_Ca } = transformTimetable(timetable || [], {
         daysCount: 7,
-        shifts: [1, 2],
-        periodsPerShift: 5,
+        shifts: [1],
+        periodsPerShift: 10,
         dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
       });
       teacherDsCa.value = ds_Ca;
-      teacherActiveCa.value = ds_Ca[0]?.id || 1;
       teacherUnscheduled.value = Array.isArray(ds_chua_xep)
         ? ds_chua_xep.map(({ id_mon, ten_mon, id_lop, ten_lop, id_phong, ten_phong, tiet_thu_may }) => ({
             id_mon,
@@ -534,16 +530,15 @@ async function onTeacherCellClick(caId, dayId, pIdx) {
     const { data, error } = await RestApi.timetable.find_teacher_position({ body });
     if (data.value?.status === "success") {
       const { timetable, ds_chua_xep } = data.value.data || {};
-      if (Array.isArray(timetable)) {
-        const { ds_Ca } = transformTimetable(timetable, {
-          daysCount: 7,
-          shifts: [1, 2],
-          periodsPerShift: 5,
-          dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-        });
-        teacherDsCa.value = ds_Ca;
-        teacherActiveCa.value = ds_Ca[0]?.id || 1;
-      }
+        if (Array.isArray(timetable)) {
+          const { ds_Ca } = transformTimetable(timetable, {
+            daysCount: 7,
+            shifts: [1],
+            periodsPerShift: 10,
+            dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+          });
+          teacherDsCa.value = ds_Ca;
+        }
       if (Array.isArray(ds_chua_xep)) {
         teacherUnscheduled.value = ds_chua_xep;
       }
