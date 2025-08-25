@@ -480,7 +480,11 @@ const exportFile = async apiFn => {
     if (error.value) {
       throw new Error(error.value?.data?.message || "Xuất file không thành công");
     }
-    const { data: blob, headers } = data.value || {};
+    const { data: blobData, headers } = data.value || {};
+    if (!blobData) {
+      throw new Error("Xuất file không thành công");
+    }
+    const blob = blobData instanceof Blob ? blobData : new Blob([blobData]);
     const disposition = headers?.["content-disposition"] || "";
     let filename = "export.xlsx";
     const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);

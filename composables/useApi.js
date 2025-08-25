@@ -200,8 +200,10 @@ class Request {
       onRequestError,
       onResponseError,
       onResponse({ response }) {
+        const data = response._data;
+        const blob = data instanceof Blob ? data : new Blob([data]);
         return {
-          data: response._data,
+          data: blob,
           headers: Object.fromEntries(response.headers.entries()),
         };
       },
