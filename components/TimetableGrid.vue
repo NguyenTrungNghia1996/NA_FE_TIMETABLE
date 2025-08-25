@@ -7,13 +7,17 @@
             <table class="min-w-full border-collapse select-none">
               <thead>
                 <tr>
-                  <th class="border select-none">Tiết / Ngày</th>
+                  <th class="border select-none">Ca</th>
+                  <th class="border select-none">Tiết</th>
                   <th v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 select-none">{{ ngay.ten }}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
-                  <td class="border p-0.5 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
+                  <td v-if="pIdx % 5 === 0" class="border p-0.5 text-center font-medium select-none align-middle" :rowspan="5">
+                    <span class="block [writing-mode:vertical-rl]">{{ pIdx < 5 ? "Ca sáng" : "Ca chiều" }}</span>
+                  </td>
+                  <td class="border p-0.5 text-center font-medium select-none">Tiết {{ (pIdx % 5) + 1 }}</td>
                   <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 text-xs align-top min-w-[100px] max-w-[100px] relative select-none" :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="isDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
                     <template v-if="ngay.ds_Tiet[pIdx].isRest">
                       <span class="italic text-red-500">Nghỉ</span>
@@ -39,13 +43,17 @@
               <table class="min-w-full border-collapse select-none">
                 <thead>
                   <tr>
-                    <th class="border p-0.5 select-none">Tiết / Ngày</th>
+                    <th class="border p-0.5 select-none">Ca</th>
+                    <th class="border p-0.5 select-none">Tiết</th>
                     <th v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 select-none">{{ ngay.ten }}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
-                    <td class="border p-0.5 text-center font-medium select-none">Tiết {{ pIdx + 1 }}</td>
+                    <td v-if="pIdx % 5 === 0" class="border p-0.5 text-center font-medium select-none align-middle" :rowspan="5">
+                      <span class="block [writing-mode:vertical-rl]">{{ pIdx < 5 ? "Ca sáng" : "Ca chiều" }}</span>
+                    </td>
+                    <td class="border p-0.5 text-center font-medium select-none">Tiết {{ (pIdx % 5) + 1 }}</td>
                     <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 text-xs align-top min-w-[100px] max-w-[100px] relative select-none" :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)" @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)" @drop="onTeacherDrop(ca.id, ngay.id, pIdx)" @click="onTeacherCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx, true)">
                       <template v-if="ngay.ds_Tiet[pIdx].isRest">
                         <span class="italic text-red-500">Nghỉ</span>
@@ -77,12 +85,12 @@
           <UnscheduledTable :data="props.rawUnscheduled" class="w-full" />
         </div>
         <div class="h-1/3 overflow-auto">
-          <h4 class="font-semibold">Tiết chưa xếp của thời khóa biểu</h4>
-          <TimetableUnscheduledTable :data="timetableUnscheduled" class="w-full" />
-        </div>
-        <div class="h-1/3 overflow-auto">
           <h4 class="font-semibold">Tiết chưa xếp của giáo viên</h4>
           <TeacherUnscheduledTable :data="teacherUnscheduled" class="w-full" />
+        </div>
+        <div class="h-1/3 overflow-auto">
+          <h4 class="font-semibold">Tiết chưa xếp của thời khóa biểu</h4>
+          <TimetableUnscheduledTable :data="timetableUnscheduled" class="w-full" />
         </div>
       </div>
     </div>
@@ -147,9 +155,7 @@ const props = defineProps({
 });
 
 const dsCa = ref([]);
-const activeCa = ref(1);
 const teacherDsCa = ref([]);
-const teacherActiveCa = ref(1);
 const teacherUnscheduled = ref([]);
 const timetableUnscheduled = ref([]);
 const selectedTeacherId = ref(null);
@@ -192,12 +198,11 @@ watch(
   () => {
     const { ds_Ca } = transformTimetable(props.rawTimetable, {
       daysCount: 7,
-      shifts: [1, 2],
-      periodsPerShift: 5,
+      shifts: [1],
+      periodsPerShift: 10,
       dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
     });
     dsCa.value = ds_Ca;
-    activeCa.value = ds_Ca[0]?.id || 1;
     fetchAllUnscheduled();
   },
   { immediate: true, deep: true },
@@ -259,12 +264,11 @@ async function fetchTeacherTimetable(teacherId) {
       const { timetable, ds_chua_xep } = data.value.data || {};
       const { ds_Ca } = transformTimetable(timetable || [], {
         daysCount: 7,
-        shifts: [1, 2],
-        periodsPerShift: 5,
+        shifts: [1],
+        periodsPerShift: 10,
         dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
       });
       teacherDsCa.value = ds_Ca;
-      teacherActiveCa.value = ds_Ca[0]?.id || 1;
       teacherUnscheduled.value = Array.isArray(ds_chua_xep)
         ? ds_chua_xep.map(({ id_mon, ten_mon, id_lop, ten_lop, id_phong, ten_phong, tiet_thu_may }) => ({
             id_mon,
@@ -537,12 +541,11 @@ async function onTeacherCellClick(caId, dayId, pIdx) {
       if (Array.isArray(timetable)) {
         const { ds_Ca } = transformTimetable(timetable, {
           daysCount: 7,
-          shifts: [1, 2],
-          periodsPerShift: 5,
+          shifts: [1],
+          periodsPerShift: 10,
           dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
         });
         teacherDsCa.value = ds_Ca;
-        teacherActiveCa.value = ds_Ca[0]?.id || 1;
       }
       if (Array.isArray(ds_chua_xep)) {
         teacherUnscheduled.value = ds_chua_xep;
@@ -722,7 +725,7 @@ async function unlockTeacherPeriods() {
       }
       if (selectedTeacherId.value && props.timetableId) {
         await fetchTeacherTimetable(selectedTeacherId.value);
-      };
+      }
     } else {
       message.error("Unlock teacher periods error", error.value || data.value);
     }
