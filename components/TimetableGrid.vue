@@ -15,7 +15,7 @@
               <tbody>
                 <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
                   <td v-if="pIdx % 5 === 0" class="border p-0.5 text-center font-medium select-none align-middle" :rowspan="5">
-                    <span class="block [writing-mode:vertical-rl]">{{ pIdx < 5 ? "Ca sáng" : "Ca chiều" }}</span>
+                    <span class="[writing-mode:vertical-rl] items-center justify-center">{{ pIdx < 5 ? "Ca sáng" : "Ca chiều" }}</span>
                   </td>
                   <td class="border p-0.5 text-center font-medium select-none">Tiết {{ (pIdx % 5) + 1 }}</td>
                   <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 text-xs align-top min-w-[100px] max-w-[100px] relative select-none" :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="isDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
@@ -51,7 +51,7 @@
                 <tbody>
                   <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
                     <td v-if="pIdx % 5 === 0" class="border p-0.5 text-center font-medium select-none align-middle" :rowspan="5">
-                      <span class="block [writing-mode:vertical-rl]">{{ pIdx < 5 ? "Ca sáng" : "Ca chiều" }}</span>
+                      <span class="[writing-mode:vertical-rl] items-center justify-center">{{ pIdx < 5 ? "Ca sáng" : "Ca chiều" }}</span>
                     </td>
                     <td class="border p-0.5 text-center font-medium select-none">Tiết {{ (pIdx % 5) + 1 }}</td>
                     <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 text-xs align-top min-w-[100px] max-w-[100px] relative select-none" :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)" @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)" @drop="onTeacherDrop(ca.id, ngay.id, pIdx)" @click="onTeacherCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx, true)">
