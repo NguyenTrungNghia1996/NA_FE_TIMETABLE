@@ -116,8 +116,8 @@ import { useUserStore } from "~~/stores/userStore";
 class Request {
   constructor() {
     this.handler = {
-      onRequest({ request, options }) {},
-      onRequestError({ request, options, error }) {},
+      onRequest({ request, options }) { },
+      onRequestError({ request, options, error }) { },
       onResponse({ request, response, options }) {
         return response._data;
       },
@@ -200,12 +200,9 @@ class Request {
       onRequestError,
       onResponseError,
       onResponse({ response }) {
-        const data = response._data;
-        const blob = data instanceof Blob ? data : new Blob([data]);
-        return {
-          data: blob,
-          headers: Object.fromEntries(response.headers.entries()),
-        };
+        const headers = Object.fromEntries(response.headers);
+        const blob = response._data instanceof Blob ? response._data : new Blob([response._data]);
+        response._data = { blob, headers };
       },
       ...options,
     });
@@ -871,12 +868,15 @@ class Timetable {
 
   async export(data) {
     return await this.request.download(ENDPOINTS.TIMETABLE_EXPORT, data);
+    // return await this.request.get(ENDPOINTS.TIMETABLE_EXPORT, data)
   }
   async export_class(data) {
     return await this.request.download(ENDPOINTS.TIMETABLE_EXPORT_CLASS, data);
+    // return await this.request.get(ENDPOINTS.TIMETABLE_EXPORT_CLASS, data)
   }
   async export_teacher(data) {
     return await this.request.download(ENDPOINTS.TIMETABLE_EXPORT_TEACHER, data);
+    // return await this.request.get(ENDPOINTS.TIMETABLE_EXPORT_TEACHER, data)
   }
 }
 export default () => {

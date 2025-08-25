@@ -88,7 +88,7 @@ const classSubjectColumns = [
 const classSubjectRowSelection = computed(() => ({
   selectedRowKeys: classSubjectModal.selectedRowKeys,
   onChange: keys => (classSubjectModal.selectedRowKeys = keys),
-  getCheckboxProps: record => ({ disabled: record.type === 'class' }),
+  getCheckboxProps: record => ({ disabled: record.type === "class" }),
 }));
 
 const roomModal = reactive({
@@ -289,8 +289,7 @@ const confirmArrangeClassSubject = async () => {
   try {
     const selected = [];
     classSubjectModal.data.forEach(cls => {
-      const selectedSubs =
-        cls.children?.filter(ch => classSubjectModal.selectedRowKeys.includes(ch.key)) || [];
+      const selectedSubs = cls.children?.filter(ch => classSubjectModal.selectedRowKeys.includes(ch.key)) || [];
       if (selectedSubs.length) {
         selected.push({
           id_lop: cls.id_lop,
@@ -480,17 +479,13 @@ const exportFile = async apiFn => {
     if (error.value) {
       throw new Error(error.value?.data?.message || "Xuất file không thành công");
     }
-    const { data: blobData, headers } = data.value || {};
+    const { blob: blobData, headers } = data.value || {};
     if (!blobData) {
       throw new Error("Xuất file không thành công");
     }
     const blob = blobData instanceof Blob ? blobData : new Blob([blobData]);
-    const disposition = headers?.["content-disposition"] || "";
-    let filename = "export.xlsx";
-    const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
-    if (match && match[1]) {
-      filename = decodeURIComponent(match[1].replace(/['"]/g, ""));
-    }
+    const cd = headers["content-disposition"] || headers["Content-Disposition"];
+    const filename = (cd && (decodeURIComponent(/filename\*=UTF-8''([^;]+)/.exec(cd)?.[1] || "") || /filename="([^"]+)"/.exec(cd)?.[1])) || "export.xlsx";
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -506,12 +501,9 @@ const exportFile = async apiFn => {
   }
 };
 
-const exportClass = () =>
-  exportFile(() => RestApi.timetable.export_class({ params: { idtkb: props.timetableId } }));
-const exportTeacher = () =>
-  exportFile(() => RestApi.timetable.export_teacher({ params: { idtkb: props.timetableId } }));
-const exportTkb = () =>
-  exportFile(() => RestApi.timetable.export({ params: { idtkb: props.timetableId } }));
+const exportClass = () => exportFile(() => RestApi.timetable.export_class({ params: { idtkb: props.timetableId } }));
+const exportTeacher = () => exportFile(() => RestApi.timetable.export_teacher({ params: { idtkb: props.timetableId } }));
+const exportTkb = () => exportFile(() => RestApi.timetable.export({ params: { idtkb: props.timetableId } }));
 
 async function fetchInfo() {
   // if (!props.timetableId) return;
@@ -561,12 +553,12 @@ defineExpose({ refresh, reset });
     <div class="flex justify-end items-center mb-6">
       <!-- <h1 class="text-xl font-bold text-gray-700">THÔNG TIN THỜI KHÓA BIỂU</h1> -->
       <a-dropdown class="mr-2">
-        <a-button> Export XLSX </a-button>
+        <a-button> Xuất dữ liệu XLSX </a-button>
         <template #overlay>
           <a-menu>
-            <a-menu-item key="export-class" @click="exportClass">Export Lớp</a-menu-item>
-            <a-menu-item key="export-teacher" @click="exportTeacher">Export Giáo viên</a-menu-item>
-            <a-menu-item key="export-tkb" @click="exportTkb">Export Tkb</a-menu-item>
+            <a-menu-item key="export-class" @click="exportClass">Lớp</a-menu-item>
+            <a-menu-item key="export-teacher" @click="exportTeacher">Giáo viên</a-menu-item>
+            <a-menu-item key="export-tkb" @click="exportTkb">Thời khóa biểu</a-menu-item>
           </a-menu>
         </template>
       </a-dropdown>
@@ -620,23 +612,8 @@ defineExpose({ refresh, reset });
     <a-modal v-model:open="classModal.visible" title="Xếp Lớp" :confirm-loading="classModal.loading" @ok="confirmArrangeClass" @cancel="classModal.visible = false" width="800px">
       <a-table :columns="classColumns" :data-source="classModal.data" :row-selection="classRowSelection" row-key="id" :pagination="false" :scroll="{ y: 600 }" size="small" />
     </a-modal>
-    <a-modal
-      v-model:open="classSubjectModal.visible"
-      title="Xếp Lớp - Môn"
-      :confirm-loading="classSubjectModal.loading"
-      @ok="confirmArrangeClassSubject"
-      @cancel="classSubjectModal.visible = false"
-      width="800px"
-    >
-      <a-table
-        :columns="classSubjectColumns"
-        :data-source="classSubjectModal.data"
-        :row-selection="classSubjectRowSelection"
-        row-key="key"
-        :pagination="false"
-        :scroll="{ y: 600 }"
-        size="small"
-      />
+    <a-modal v-model:open="classSubjectModal.visible" title="Xếp Lớp - Môn" :confirm-loading="classSubjectModal.loading" @ok="confirmArrangeClassSubject" @cancel="classSubjectModal.visible = false" width="800px">
+      <a-table :columns="classSubjectColumns" :data-source="classSubjectModal.data" :row-selection="classSubjectRowSelection" row-key="key" :pagination="false" :scroll="{ y: 600 }" size="small" />
     </a-modal>
     <a-modal v-model:open="roomModal.visible" title="Xếp Phòng học" :confirm-loading="roomModal.loading" @ok="confirmArrangeRoom" @cancel="roomModal.visible = false" width="800px">
       <a-table :columns="roomColumns" :data-source="roomModal.data" :row-selection="roomRowSelection" row-key="id" :pagination="false" :scroll="{ y: 600 }" size="small" />
