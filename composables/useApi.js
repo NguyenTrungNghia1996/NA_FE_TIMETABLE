@@ -106,6 +106,10 @@ let ENDPOINTS = {
   TIMETABLE_ARRANGE_FUNCTION_ROOM: "/api/tkb/xeptheophongcn",
   TIMETABLE_UNSCHEDULED: "/api/tkb/tietchuaxep",
 
+  TIMETABLE_EXPORT: "/api/export",
+  TIMETABLE_EXPORT_CLASS: "/api/export/lop",
+  TIMETABLE_EXPORT_TEACHER: "/api/export/giaovien",
+
   S3: "/api/presigned_url",
 };
 import { useUserStore } from "~~/stores/userStore";
@@ -182,6 +186,26 @@ class Request {
       headers: this.createHeaders(),
       ...options,
       ...this.handler,
+    });
+  }
+
+  download(url, options) {
+    const { onRequest, onRequestError, onResponseError } = this.handler;
+    return useFetch(url, {
+      baseURL: this.base_url,
+      method: "GET",
+      headers: this.createHeaders(),
+      responseType: "blob",
+      onRequest,
+      onRequestError,
+      onResponseError,
+      onResponse({ response }) {
+        return {
+          data: response._data,
+          headers: Object.fromEntries(response.headers.entries()),
+        };
+      },
+      ...options,
     });
   }
 }
@@ -841,6 +865,16 @@ class Timetable {
   }
   async unscheduled(data) {
     return await this.request.get(ENDPOINTS.TIMETABLE_UNSCHEDULED, data);
+  }
+
+  async export(data) {
+    return await this.request.download(ENDPOINTS.TIMETABLE_EXPORT, data);
+  }
+  async export_class(data) {
+    return await this.request.download(ENDPOINTS.TIMETABLE_EXPORT_CLASS, data);
+  }
+  async export_teacher(data) {
+    return await this.request.download(ENDPOINTS.TIMETABLE_EXPORT_TEACHER, data);
   }
 }
 export default () => {

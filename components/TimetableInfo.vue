@@ -473,6 +473,42 @@ const cancelArrange = async () => {
   }
 };
 
+const exportFile = async apiFn => {
+  settingStore.setLoading(true);
+  try {
+    const { data, error } = await apiFn();
+    if (error.value) {
+      throw new Error(error.value?.data?.message || "Xuất file không thành công");
+    }
+    const { data: blob, headers } = data.value || {};
+    const disposition = headers?.["content-disposition"] || "";
+    let filename = "export.xlsx";
+    const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+    if (match && match[1]) {
+      filename = decodeURIComponent(match[1].replace(/['"]/g, ""));
+    }
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    message.error(err.message || "Xuất file không thành công");
+  } finally {
+    settingStore.setLoading(false);
+  }
+};
+
+const exportClass = () =>
+  exportFile(() => RestApi.timetable.export_class({ params: { idtkb: props.timetableId } }));
+const exportTeacher = () =>
+  exportFile(() => RestApi.timetable.export_teacher({ params: { idtkb: props.timetableId } }));
+const exportTkb = () =>
+  exportFile(() => RestApi.timetable.export({ params: { idtkb: props.timetableId } }));
+
 async function fetchInfo() {
   // if (!props.timetableId) return;
   // settingStore.setLoading(true);
@@ -520,6 +556,16 @@ defineExpose({ refresh, reset });
     <!-- Header -->
     <div class="flex justify-end items-center mb-6">
       <!-- <h1 class="text-xl font-bold text-gray-700">THÔNG TIN THỜI KHÓA BIỂU</h1> -->
+      <a-dropdown class="mr-2">
+        <a-button> Export XLSX </a-button>
+        <template #overlay>
+          <a-menu>
+            <a-menu-item key="export-class" @click="exportClass">Export Lớp</a-menu-item>
+            <a-menu-item key="export-teacher" @click="exportTeacher">Export Giáo viên</a-menu-item>
+            <a-menu-item key="export-tkb" @click="exportTkb">Export Tkb</a-menu-item>
+          </a-menu>
+        </template>
+      </a-dropdown>
       <a-button type="primary" danger @click="cancelArrange"> Hủy kết quả xếp </a-button>
     </div>
 
