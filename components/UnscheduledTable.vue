@@ -1,6 +1,13 @@
 <template>
   <ClientOnly>
-    <a-table :columns="columns" :data-source="data" :pagination="false" bordered size="small" />
+    <a-table
+      :columns="columns"
+      :data-source="data"
+      :pagination="false"
+      bordered
+      size="small"
+      :customRow="customRow"
+    />
   </ClientOnly>
 </template>
 
@@ -11,6 +18,14 @@ const props = defineProps({
     default: () => [],
   },
 });
+
+const emit = defineEmits(["row-click"]);
+
+const customRow = record => {
+  return {
+    onClick: () => emit("row-click", record),
+  };
+};
 
 const columns = [
   {

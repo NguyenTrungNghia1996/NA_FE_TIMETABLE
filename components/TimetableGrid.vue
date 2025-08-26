@@ -82,7 +82,7 @@
         <SelectTeacher v-model="selectedTeacherId" :autoSelectFirst="true" size="small" />
         <div class="h-1/3 overflow-auto">
           <h4 class="font-semibold">Tiết chưa xếp của lớp học</h4>
-          <UnscheduledTable :data="props.rawUnscheduled" class="w-full" />
+          <UnscheduledTable :data="props.rawUnscheduled" class="w-full" @row-click="onUnscheduledClick" />
         </div>
         <div class="h-1/3 overflow-auto">
           <h4 class="font-semibold">Tiết chưa xếp của giáo viên</h4>
@@ -269,17 +269,7 @@ async function fetchTeacherTimetable(teacherId) {
         dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
       });
       teacherDsCa.value = ds_Ca;
-      teacherUnscheduled.value = Array.isArray(ds_chua_xep)
-        ? ds_chua_xep.map(({ id_mon, ten_mon, id_lop, ten_lop, id_phong, ten_phong, tiet_thu_may }) => ({
-            id_mon,
-            ten_mon,
-            id_lop,
-            ten_lop,
-            id_phong,
-            ten_phong,
-            tiet_thu_may,
-          }))
-        : [];
+      teacherUnscheduled.value = Array.isArray(ds_chua_xep) ?ds_chua_xep:[];
     } else {
       message.error("Get teacher timetable error", error.value || data.value);
       teacherDsCa.value = [];
@@ -504,6 +494,34 @@ async function onCellClick(caId, dayId, pIdx) {
     const { data, error } = await RestApi.timetable.find_class_position({ body });
     if (data.value?.status === "success") {
       // message.log("Find position response", data.value);
+      const { timetable, ds_chua_xep } = data.value.data || {};
+      if (Array.isArray(timetable)) {
+        emit("update:rawTimetable", timetable);
+      }
+      if (Array.isArray(ds_chua_xep)) {
+        emit("update:rawUnscheduled", ds_chua_xep);
+      }
+    } else {
+      message.error("Find position error", error.value || data.value);
+    }
+  } catch (err) {
+    message.error("Find position error", err);
+  }
+}
+
+async function onUnscheduledClick(lesson) {
+  if (!lesson) return;
+  selectedTeacherId.value = lesson.id_giao_vien || null;
+  selectedSubjectId.value = lesson.id_mon || null;
+  selectedCellPos.value = null;
+  console.log(lesson);
+  try {
+    const body = {
+      id_lop: selectedClassId.value,
+      ds_chua_xep: [lesson],
+    };
+    const { data, error } = await RestApi.timetable.find_class_unscheduled_position({ body });
+    if (data.value?.status === "success") {
       const { timetable, ds_chua_xep } = data.value.data || {};
       if (Array.isArray(timetable)) {
         emit("update:rawTimetable", timetable);
