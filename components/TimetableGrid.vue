@@ -80,15 +80,19 @@
       <div class="h-[calc(100vh-110px)] flex flex-col">
         <SelectClass v-model="selectedClassId" :autoSelectFirst="true" size="small" />
         <SelectTeacher v-model="selectedTeacherId" :autoSelectFirst="true" size="small" />
-        <div class="h-1/3 overflow-auto">
+        <div class="h-1/3 overflow-auto m-3 shadow-xl">
           <h4 class="font-semibold">Tiết chưa xếp của lớp học</h4>
           <UnscheduledTable :data="props.rawUnscheduled" class="w-full" @row-click="onUnscheduledClick" />
         </div>
-        <div class="h-1/3 overflow-auto">
+        <div class="h-1/3 overflow-auto m-3 shadow-xl">
           <h4 class="font-semibold">Tiết chưa xếp của giáo viên</h4>
-          <TeacherUnscheduledTable :data="teacherUnscheduled" class="w-full" />
+          <TeacherUnscheduledTable
+            :data="teacherUnscheduled"
+            class="w-full"
+            @row-click="onTeacherUnscheduledClick"
+          />
         </div>
-        <div class="h-1/3 overflow-auto">
+        <div class="h-1/3 overflow-auto m-3 shadow-xl">
           <h4 class="font-semibold">Tiết chưa xếp của thời khóa biểu</h4>
           <TimetableUnscheduledTable :data="timetableUnscheduled" class="w-full" />
         </div>
@@ -534,6 +538,39 @@ async function onUnscheduledClick(lesson) {
     }
   } catch (err) {
     message.error("Find position error", err);
+  }
+}
+
+async function onTeacherUnscheduledClick(lesson) {
+  if (!lesson || !selectedTeacherId.value) return;
+  selectedClassId.value = lesson.id_lop || null;
+  selectedSubjectId.value = lesson.id_mon || null;
+  selectedCellPos.value = null;
+  try {
+    const body = {
+      id_giao_vien: selectedTeacherId.value,
+      ds_chua_xep: [lesson],
+    };
+    const { data, error } = await RestApi.timetable.find_teacher_unscheduled_position({ body });
+    if (data.value?.status === "success") {
+      const { timetable, ds_chua_xep } = data.value.data || {};
+      if (Array.isArray(timetable)) {
+        const { ds_Ca } = transformTimetable(timetable, {
+          daysCount: 7,
+          shifts: [1],
+          periodsPerShift: 10,
+          dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+        });
+        teacherDsCa.value = ds_Ca;
+      }
+      if (Array.isArray(ds_chua_xep)) {
+        teacherUnscheduled.value = ds_chua_xep;
+      }
+    } else {
+      message.error("Find teacher position error", error.value || data.value);
+    }
+  } catch (err) {
+    message.error("Find teacher position error", err);
   }
 }
 
