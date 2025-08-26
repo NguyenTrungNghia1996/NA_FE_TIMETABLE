@@ -80,11 +80,11 @@
       <div class="h-[calc(100vh-110px)] flex flex-col">
         <SelectClass v-model="selectedClassId" :autoSelectFirst="true" size="small" />
         <SelectTeacher v-model="selectedTeacherId" :autoSelectFirst="true" size="small" />
-        <div class="h-1/3 overflow-auto">
+        <div class="h-1/3 overflow-auto m-3 shadow-xl">
           <h4 class="font-semibold">Tiết chưa xếp của lớp học</h4>
           <UnscheduledTable :data="props.rawUnscheduled" class="w-full" @row-click="onUnscheduledClick" />
         </div>
-        <div class="h-1/3 overflow-auto">
+        <div class="h-1/3 overflow-auto m-3 shadow-xl">
           <h4 class="font-semibold">Tiết chưa xếp của giáo viên</h4>
           <TeacherUnscheduledTable
             :data="teacherUnscheduled"
@@ -92,7 +92,7 @@
             @row-click="onTeacherUnscheduledClick"
           />
         </div>
-        <div class="h-1/3 overflow-auto">
+        <div class="h-1/3 overflow-auto m-3 shadow-xl">
           <h4 class="font-semibold">Tiết chưa xếp của thời khóa biểu</h4>
           <TimetableUnscheduledTable :data="timetableUnscheduled" class="w-full" />
         </div>
