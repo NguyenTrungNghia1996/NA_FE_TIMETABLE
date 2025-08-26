@@ -275,15 +275,17 @@ const fetchAdjustData = async () => {
     if (data.value?.status === "success") {
       const raw = data.value.data;
       adjustRawTimetable.value = raw.timetable;
-      adjustRawUnscheduled.value = raw.ds_chua_xep.map(({ id_mon, ten_mon, id_giao_vien, ten_giao_vien, id_phong, ten_phong, tiet_thu_may }) => ({
-        id_mon,
-        ten_mon,
-        id_giao_vien,
-        ten_giao_vien,
-        id_phong,
-        ten_phong,
-        tiet_thu_may,
-      }));
+      // adjustRawUnscheduled.value = raw.ds_chua_xep.map(({ id_mon, ten_mon, id_giao_vien, ten_giao_vien, id_phong, ten_phong, tiet_thu_may }) => ({
+      //   id_mon,
+      //   ten_mon,
+      //   id_giao_vien,
+      //   ten_giao_vien,
+      //   id_phong,
+      //   ten_phong,
+      //   tiet_thu_may,
+      // }));
+
+      adjustRawUnscheduled.value = raw.ds_chua_xep
     } else {
       adjustRawTimetable.value = [];
       adjustRawUnscheduled.value = [];
