@@ -82,7 +82,11 @@
         <SelectTeacher v-model="selectedTeacherId" :autoSelectFirst="true" size="small" />
         <div class="h-1/3 overflow-auto">
           <h4 class="font-semibold">Tiết chưa xếp của lớp học</h4>
-          <UnscheduledTable :data="props.rawUnscheduled" class="w-full" />
+          <UnscheduledTable
+            :data="props.rawUnscheduled"
+            class="w-full"
+            @row-click="onUnscheduledClick"
+          />
         </div>
         <div class="h-1/3 overflow-auto">
           <h4 class="font-semibold">Tiết chưa xếp của giáo viên</h4>
@@ -504,6 +508,33 @@ async function onCellClick(caId, dayId, pIdx) {
     const { data, error } = await RestApi.timetable.find_class_position({ body });
     if (data.value?.status === "success") {
       // message.log("Find position response", data.value);
+      const { timetable, ds_chua_xep } = data.value.data || {};
+      if (Array.isArray(timetable)) {
+        emit("update:rawTimetable", timetable);
+      }
+      if (Array.isArray(ds_chua_xep)) {
+        emit("update:rawUnscheduled", ds_chua_xep);
+      }
+    } else {
+      message.error("Find position error", error.value || data.value);
+    }
+  } catch (err) {
+    message.error("Find position error", err);
+  }
+}
+
+async function onUnscheduledClick(lesson) {
+  if (!lesson) return;
+  selectedTeacherId.value = lesson.id_giao_vien || null;
+  selectedSubjectId.value = lesson.id_mon || null;
+  selectedCellPos.value = null;
+  try {
+    const body = {
+      id_lop: selectedClassId.value,
+      ds_chua_xep: [lesson],
+    };
+    const { data, error } = await RestApi.timetable.find_class_unscheduled_position({ body });
+    if (data.value?.status === "success") {
       const { timetable, ds_chua_xep } = data.value.data || {};
       if (Array.isArray(timetable)) {
         emit("update:rawTimetable", timetable);
