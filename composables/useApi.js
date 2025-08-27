@@ -115,7 +115,8 @@ let ENDPOINTS = {
   S3: "/api/presigned_url",
 };
 import { useUserStore } from "~~/stores/userStore";
-const unitStore = useUnitStore();
+import { useUnitStore } from "~~/stores/unitStore";
+
 class Request {
   constructor() {
     this.handler = {
@@ -135,6 +136,7 @@ class Request {
         return response._data;
       },
     };
+    const unitStore = useUnitStore();
     // this.base_url = useRuntimeConfig().public.baseURL;
     this.base_url = unitStore.baseUrl
   }
