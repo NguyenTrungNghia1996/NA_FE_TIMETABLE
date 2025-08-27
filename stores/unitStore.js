@@ -19,7 +19,7 @@ export const useUnitStore = defineStore("unit", {
     // subdomain: (state) => state.unit?.subdomain || null,
     // isActive: (state) => state.unit?.active === true,
     baseUrl: (state) => {
-      switch (state) {
+      switch (state.unit) {
         case "tkb":
           return "https://api.tkb.nguyenanh-est.com";
         case "dungthutkb":
