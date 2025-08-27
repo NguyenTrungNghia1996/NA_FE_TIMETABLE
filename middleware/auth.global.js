@@ -1,11 +1,18 @@
 import { useUserStore } from "~~/stores/userStore";
 import { useSettingStore } from "~~/stores/settingStore";
+import { useUnitStore } from "~~/stores/unitStore";
 import { useJwt } from "@vueuse/integrations/useJwt";
 import { useMenu } from "~~/composables/useMenu";
 export default defineNuxtRouteMiddleware(async to => {
+  const unitStore = useUnitStore();
+  const reqHeaders = useRequestHeaders();
+  const host = reqHeaders['host'] || '';
+  const subdomain = host.split('.')[0];
+  unitStore.setUnit(subdomain)
+  console.log(subdomain);
   // Bỏ qua middleware nếu đang ở trang login
   // if (to.path === "/login" || to.path.startsWith("/test/")) return;
-  if (to.path === "/login" || to.path === "/timetable") return;
+  if (to.path === "/login") return;
   const userStore = useUserStore();
   const settingStore = useSettingStore();
   const { loadMenu } = useMenu();
