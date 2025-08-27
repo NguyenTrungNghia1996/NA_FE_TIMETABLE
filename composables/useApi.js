@@ -115,6 +115,7 @@ let ENDPOINTS = {
   S3: "/api/presigned_url",
 };
 import { useUserStore } from "~~/stores/userStore";
+const unitStore = useUnitStore();
 class Request {
   constructor() {
     this.handler = {
@@ -134,7 +135,8 @@ class Request {
         return response._data;
       },
     };
-    this.base_url = useRuntimeConfig().public.baseURL;
+    // this.base_url = useRuntimeConfig().public.baseURL;
+    this.base_url = unitStore.baseUrl
   }
 
   createHeaders() {
