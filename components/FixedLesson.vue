@@ -4,7 +4,7 @@
       <a-form layout="vertical">
         <SelectSubject v-model="form.id_mon" />
         <SelectSchoolDay v-model="form.id_ngay" />
-        <SelectSchoolShift v-model="form.id_ca" />
+        <SelectSchoolShiftByUnit v-model="form.id_ca" />
         <SelectSchoolPeriod v-model="form.id_tiet" />
         <SelectGradeLevel v-if="!form.ap_dung_cho_tat_ca_cac_khoi" v-model="form.id_khoi_lop" />
         <a-form-item>

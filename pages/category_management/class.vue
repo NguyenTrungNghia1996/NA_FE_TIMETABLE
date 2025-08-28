@@ -46,7 +46,7 @@
         <a-form-item label="Sĩ số" name="si_so">
           <a-input-number v-model:value="formState.si_so" :min="1" style="width: 100%" />
         </a-form-item>
-        <SelectSchoolShift v-model="formState.id_ca" name="id_ca" :rules="rules.id_ca" />
+        <SelectSchoolShiftByUnit v-model="formState.id_ca" name="id_ca" :rules="rules.id_ca" />
         <SelectTeacher v-model="formState.id_gvcn" name="id_gvcn" :rules="rules.id_gvcn" />
         <SelectClassroom v-model="formState.id_phong" name="id_phong" :rules="rules.id_phong" />
         <SelectSchoolship v-model="formState.id_ban" name="id_ban" :rules="rules.id_ban" />

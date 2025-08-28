@@ -13,6 +13,7 @@ let ENDPOINTS = {
   //SCHOOL_SHIFT
   SCHOOL_SHIFT: "/api/cahoc",
   SCHOOL_SHIFT_DETAIL: "/api/cahoc/detail",
+  SCHOOL_SHIFT_BY_UNIT: "/api/cahoc/catheodonvi",
   //UNIT
   UNIT: "/api/donvi",
   UNIT_DETAIL: "/api/donvi/detail",
@@ -351,6 +352,9 @@ class SchoolShift {
   }
   async list(data) {
     return await this.request.get(ENDPOINTS.SCHOOL_SHIFT, data);
+  }
+  async list_by_unit(data) {
+    return await this.request.get(ENDPOINTS.SCHOOL_SHIFT_BY_UNIT, data);
   }
   async detail(data) {
     return await this.request.get(ENDPOINTS.SCHOOL_SHIFT_DETAIL, data);
