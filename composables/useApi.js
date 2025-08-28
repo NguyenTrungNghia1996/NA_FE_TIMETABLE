@@ -1,6 +1,9 @@
 let ENDPOINTS = {
   LOGIN: "/api/users/login",
   PERMISSION: "/api/users/permission",
+  REGISTER: "/api/users/register",
+  //PROVINCE
+  PROVINCE: "/api/tinh",
   //SCHOOL_LEVEL
   SCHOOL_LEVEL: "/api/caphoc",
   SCHOOL_LEVEL_DETAIL: "/api/caphoc/detail",
@@ -218,6 +221,7 @@ class RestApi {
   constructor() {
     this.request = new Request();
     this.user = new User(this.request);
+    this.province = new Province(this.request);
     this.school_level = new SchoolLevel(this.request);
     this.school_shift = new SchoolShift(this.request);
     this.school_ship = new SchoolShip(this.request);
@@ -291,6 +295,9 @@ class User {
   async login(data) {
     return await this.request.post(ENDPOINTS.LOGIN, data);
   }
+  async register(data) {
+    return await this.request.post(ENDPOINTS.REGISTER, data);
+  }
   async list(data) {
     return await this.request.get(ENDPOINTS.USER, data);
   }
@@ -308,6 +315,14 @@ class User {
   }
   async permission(data) {
     return await this.request.get(ENDPOINTS.PERMISSION, data);
+  }
+}
+class Province {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.PROVINCE, data);
   }
 }
 class SchoolLevel {
