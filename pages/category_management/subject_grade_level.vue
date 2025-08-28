@@ -3,12 +3,8 @@
     <!-- Header Section -->
     <div class="flex justify-end">
       <div class="flex space-x-3">
-        <a-button type="primary" class="bg-orange-500 border-orange-500 hover:bg-orange-600" @click="handleAvoid">
-          Tiết tránh xếp
-        </a-button>
-        <a-button type="primary" class="bg-blue-600 border-blue-600 hover:bg-blue-700" @click="handleUpdate">
-          Cập nhật
-        </a-button>
+        <a-button type="primary" class="bg-orange-500 border-orange-500 hover:bg-orange-600" @click="handleAvoid"> Tiết tránh xếp </a-button>
+        <a-button type="primary" class="bg-blue-600 border-blue-600 hover:bg-blue-700" @click="handleUpdate"> Cập nhật </a-button>
       </div>
     </div>
 
@@ -36,7 +32,7 @@
       <a-form ref="filterForm" :model="filters" layout="vertical" :rules="rules" class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <SelectGradeLevel v-model="filters.grade" name="grade" :rules="rules.grade" placeholder="Chọn khối lớp" />
         <SelectSchoolship v-model="filters.major" name="major" :rules="rules.major" placeholder="Chọn ban học" />
-        <SelectSchoolShift v-model="filters.shift" name="shift" placeholder="Chọn ca học" />
+        <SelectSchoolShiftByUnit v-model="filters.shift" name="shift" placeholder="Chọn ca học" />
       </a-form>
       <ClientOnly>
         <a-table row-key="id" :columns="displayColumns" :data-source="subjects" bordered size="middle" :pagination="false" :scroll="{ x: 'max-content' }" class="custom-table">
@@ -49,19 +45,19 @@
             </template>
             <template v-if="column.key === 'morningPeriod'">
               <a-input-number v-if="record.editable" v-model:value="record.morning.period" :min="0" size="small" class="w-full" />
-              <span v-else>{{ record.morning.period || '-' }}</span>
+              <span v-else>{{ record.morning.period || "-" }}</span>
             </template>
             <template v-if="column.key === 'morningGroup'">
               <a-input-number v-if="record.editable" v-model:value="record.morning.group" :min="0" size="small" class="w-full" />
-              <span v-else>{{ record.morning.group || '-' }}</span>
+              <span v-else>{{ record.morning.group || "-" }}</span>
             </template>
             <template v-if="column.key === 'afternoonPeriod'">
               <a-input-number v-if="record.editable" v-model:value="record.afternoon.period" :min="0" size="small" class="w-full" />
-              <span v-else>{{ record.afternoon.period || '-' }}</span>
+              <span v-else>{{ record.afternoon.period || "-" }}</span>
             </template>
             <template v-if="column.key === 'afternoonGroup'">
               <a-input-number v-if="record.editable" v-model:value="record.afternoon.group" :min="0" size="small" class="w-full" />
-              <span v-else>{{ record.afternoon.group || '-' }}</span>
+              <span v-else>{{ record.afternoon.group || "-" }}</span>
             </template>
             <template v-if="column.key === 'action'">
               <div class="flex justify-center space-x-2">
@@ -71,18 +67,11 @@
           </template>
         </a-table>
       </ClientOnly>
-    <a-drawer
-      v-model:open="drawerAvoidOpen"
-      title="Thiết lập tiết tránh xếp của môn học theo khối"
-      :footer="null"
-      height="100vh"
-      placement="bottom"
-      @close="closeDrawerAvoid"
-    >
-      <ClientOnly>
-        <GradeSubjectAvoid ref="avoidRef" />
-      </ClientOnly>
-    </a-drawer>
+      <a-drawer v-model:open="drawerAvoidOpen" title="Thiết lập tiết tránh xếp của môn học theo khối" :footer="null" height="100vh" placement="bottom" @close="closeDrawerAvoid">
+        <ClientOnly>
+          <GradeSubjectAvoid ref="avoidRef" />
+        </ClientOnly>
+      </a-drawer>
     </div>
   </div>
 </template>
@@ -93,108 +82,107 @@ const filterForm = ref();
 const filters = reactive({
   grade: undefined,
   major: undefined,
-  shift: undefined
+  shift: undefined,
 });
 
 const rules = {
-  grade: [{ required: true, message: 'Vui lòng chọn khối lớp' }],
-  major: [{ required: true, message: 'Vui lòng chọn ban học' }],
+  grade: [{ required: true, message: "Vui lòng chọn khối lớp" }],
+  major: [{ required: true, message: "Vui lòng chọn ban học" }],
 };
 
 const summary = reactive({
   total: 0,
   morning: 0,
-  afternoon: 0
+  afternoon: 0,
 });
 
 const subjects = ref([]);
 
-const drawerAvoidOpen = ref(false)
-const avoidRef = ref(null)
+const drawerAvoidOpen = ref(false);
+const avoidRef = ref(null);
 
 const closeDrawerAvoid = () => {
-  avoidRef.value?.reset?.()
-}
+  avoidRef.value?.reset?.();
+};
 
 watch(drawerAvoidOpen, val => {
   if (val) {
-    avoidRef.value?.refresh?.()
+    avoidRef.value?.refresh?.();
   }
-})
-
+});
 
 const baseColumns = [
   {
-    title: 'STT',
-    key: 'stt',
+    title: "STT",
+    key: "stt",
     width: 60,
-    align: 'center',
-    fixed: 'left'
+    align: "center",
+    fixed: "left",
   },
   {
-    title: 'Tên môn học',
-    dataIndex: 'name',
-    key: 'name',
+    title: "Tên môn học",
+    dataIndex: "name",
+    key: "name",
     width: 150,
-    fixed: 'left'
+    fixed: "left",
   },
   {
-    title: 'Số tiết/tuần',
-    dataIndex: 'weekly',
-    key: 'weekly',
-    align: 'center',
-    width: 120
-  },
-  {
-    title: 'Ca sáng',
-    children: [
-      {
-        title: 'Số tiết',
-        key: 'morningPeriod',
-        align: 'center',
-        width: 120
-      },
-      {
-        title: 'Số nhóm',
-        key: 'morningGroup',
-        align: 'center',
-        width: 120
-      }
-    ]
-  },
-  {
-    title: 'Ca chiều',
-    children: [
-      {
-        title: 'Số tiết',
-        key: 'afternoonPeriod',
-        align: 'center',
-        width: 120
-      },
-      {
-        title: 'Số nhóm',
-        key: 'afternoonGroup',
-        align: 'center',
-        width: 120
-      }
-    ]
-  },
-  {
-    title: 'Thao tác',
-    key: 'action',
-    align: 'center',
+    title: "Số tiết/tuần",
+    dataIndex: "weekly",
+    key: "weekly",
+    align: "center",
     width: 120,
-    fixed: 'right'
-  }
+  },
+  {
+    title: "Ca sáng",
+    children: [
+      {
+        title: "Số tiết",
+        key: "morningPeriod",
+        align: "center",
+        width: 120,
+      },
+      {
+        title: "Số nhóm",
+        key: "morningGroup",
+        align: "center",
+        width: 120,
+      },
+    ],
+  },
+  {
+    title: "Ca chiều",
+    children: [
+      {
+        title: "Số tiết",
+        key: "afternoonPeriod",
+        align: "center",
+        width: 120,
+      },
+      {
+        title: "Số nhóm",
+        key: "afternoonGroup",
+        align: "center",
+        width: 120,
+      },
+    ],
+  },
+  {
+    title: "Thao tác",
+    key: "action",
+    align: "center",
+    width: 120,
+    fixed: "right",
+  },
 ];
 
 const displayColumns = computed(() => {
   const id = Number(filters.shift);
   if (id === 1) {
-    return baseColumns.filter(col => col.title !== 'Ca chiều');
+    return baseColumns.filter(col => col.title !== "Ca chiều");
   }
   if (id === 2) {
-    return baseColumns.filter(col => col.title !== 'Ca sáng');
+    return baseColumns.filter(col => col.title !== "Ca sáng");
   }
   return baseColumns;
 });
@@ -202,18 +190,18 @@ const displayColumns = computed(() => {
 // Keep summary totals regardless of selected shift
 watch(
   subjects,
-  (val) => {
-    val.forEach((r) => {
+  val => {
+    val.forEach(r => {
       r.weekly = (r.morning.period || 0) + (r.afternoon.period || 0);
     });
     summary.morning = val.reduce((s, r) => s + (r.morning.period || 0), 0);
     summary.afternoon = val.reduce((s, r) => s + (r.afternoon.period || 0), 0);
     summary.total = summary.morning + summary.afternoon;
   },
-  { deep: true, immediate: true }
+  { deep: true, immediate: true },
 );
 
-const onEditableChange = (record) => {
+const onEditableChange = record => {
   if (record.editable == false) {
     record.morning.period = 0;
     record.morning.group = 0;
@@ -222,28 +210,26 @@ const onEditableChange = (record) => {
   }
 };
 
-
 const handleAvoid = () => {
-  drawerAvoidOpen.value = true
-}
-
+  drawerAvoidOpen.value = true;
+};
 
 const handleUpdate = async () => {
   try {
     await filterForm.value.validate();
     const payload = convertToApi();
     const { data, error } = await RestApi.subject_grade_level.create({ body: payload });
-    if (data.value?.status === 'success') {
-      message.success(data.value.message || 'Cập nhật thành công');
+    if (data.value?.status === "success") {
+      message.success(data.value.message || "Cập nhật thành công");
     } else {
-      throw new Error(error.value?.data?.message || 'Cập nhật không thành công');
+      throw new Error(error.value?.data?.message || "Cập nhật không thành công");
     }
   } catch (err) {
-    message.error(err.message || err.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật');
+    message.error(err.message || err.response?.data?.message || "Đã xảy ra lỗi khi cập nhật");
   }
 };
 
-const convertFromApi = (data) => {
+const convertFromApi = data => {
   const list = data.ds_Mon || data.ds_mon || [];
   return list.map(mon => {
     const findById = (arr, id) => arr.find(c => (c.id ?? c.id_ca) === id) || {};
@@ -285,22 +271,22 @@ const convertToApi = () => {
         },
       ],
       trang_thai: mon.editable,
-    }))
+    })),
   };
 };
 
 const fetchSubjects = async () => {
   try {
     const { data } = await RestApi.subject_grade_level.list({
-      params: { idKhoi: filters.grade, idBan: filters.major }
-    })
-    if (data.value?.status === 'success' && data.value.data.length) {
+      params: { idKhoi: filters.grade, idBan: filters.major },
+    });
+    if (data.value?.status === "success" && data.value.data.length) {
       subjects.value = convertFromApi(data.value.data[0]);
     } else {
-      subjects.value = []
+      subjects.value = [];
     }
   } catch (e) {
-    console.error('Failed to fetch subjects', e);
+    console.error("Failed to fetch subjects", e);
   }
 };
 
@@ -311,7 +297,7 @@ watch(
       await fetchSubjects();
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 </script>
 
