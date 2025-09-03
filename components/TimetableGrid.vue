@@ -5,7 +5,7 @@
         <div v-for="ca in dsCa" :key="ca.id">
           <div class="overflow-x-auto">
             <table class="min-w-full border-collapse select-none">
-              <thead>
+              <thead v-if="ca.id == 1">
                 <tr>
                   <th class="border select-none">Ca</th>
                   <th class="border select-none">Tiết</th>
@@ -41,7 +41,7 @@
           <div v-for="ca in teacherDsCa" :key="ca.id">
             <div class="overflow-x-auto">
               <table class="min-w-full border-collapse select-none">
-                <thead>
+                <thead v-if="ca.id == 1">
                   <tr>
                     <th class="border p-0.5 select-none">Ca</th>
                     <th class="border p-0.5 select-none">Tiết</th>
@@ -86,11 +86,7 @@
         </div>
         <div class="h-1/3 overflow-auto m-3 shadow-xl">
           <h4 class="font-semibold">Tiết chưa xếp của giáo viên</h4>
-          <TeacherUnscheduledTable
-            :data="teacherUnscheduled"
-            class="w-full"
-            @row-click="onTeacherUnscheduledClick"
-          />
+          <TeacherUnscheduledTable :data="teacherUnscheduled" class="w-full" @row-click="onTeacherUnscheduledClick" />
         </div>
         <div class="h-1/3 overflow-auto m-3 shadow-xl">
           <h4 class="font-semibold">Tiết chưa xếp của thời khóa biểu</h4>
@@ -202,8 +198,8 @@ watch(
   () => {
     const { ds_Ca } = transformTimetable(props.rawTimetable, {
       daysCount: 7,
-      shifts: [1],
-      periodsPerShift: 10,
+      shifts: [1, 2],
+      periodsPerShift: 5,
       dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
     });
     dsCa.value = ds_Ca;
@@ -268,12 +264,12 @@ async function fetchTeacherTimetable(teacherId) {
       const { timetable, ds_chua_xep } = data.value.data || {};
       const { ds_Ca } = transformTimetable(timetable || [], {
         daysCount: 7,
-        shifts: [1],
-        periodsPerShift: 10,
+        shifts: [1, 2],
+        periodsPerShift: 5,
         dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
       });
       teacherDsCa.value = ds_Ca;
-      teacherUnscheduled.value = Array.isArray(ds_chua_xep) ?ds_chua_xep:[];
+      teacherUnscheduled.value = Array.isArray(ds_chua_xep) ? ds_chua_xep : [];
     } else {
       message.error("Get teacher timetable error", error.value || data.value);
       teacherDsCa.value = [];
@@ -557,8 +553,8 @@ async function onTeacherUnscheduledClick(lesson) {
       if (Array.isArray(timetable)) {
         const { ds_Ca } = transformTimetable(timetable, {
           daysCount: 7,
-          shifts: [1],
-          periodsPerShift: 10,
+          shifts: [1, 2],
+          periodsPerShift: 5,
           dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
         });
         teacherDsCa.value = ds_Ca;
@@ -596,8 +592,8 @@ async function onTeacherCellClick(caId, dayId, pIdx) {
       if (Array.isArray(timetable)) {
         const { ds_Ca } = transformTimetable(timetable, {
           daysCount: 7,
-          shifts: [1],
-          periodsPerShift: 10,
+          shifts: [1, 2],
+          periodsPerShift: 5,
           dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
         });
         teacherDsCa.value = ds_Ca;
