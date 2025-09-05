@@ -11,7 +11,7 @@ variables:
   IMAGE_NAME: "$CI_REGISTRY/$CI_PROJECT_PATH"
   IMAGE_TAG: "$IMAGE_NAME:$CI_COMMIT_SHORT_SHA"
   GIT_DEPTH: 0
-  GIT_STRATEGY: clone     
+  GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: none
 
 docker-build-and-push:
@@ -59,7 +59,7 @@ docker-cleanup:
     - if: '$CI_COMMIT_BRANCH == "deploy"'
       when: on_success
   before_script:
-  - git config --global http.postBuffer 524288000
+    - git config --global http.postBuffer 524288000
   script:
     - |
       TAG_LATEST="latest"
@@ -86,4 +86,4 @@ docker-deploy:
     - sudo docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
     - echo "Deploying frontend service using Docker Compose as root..."
-    - sudo bash -c "cd /root/docker/fe_timetable && docker compose pull frontend && docker compose up -d frontend"
+    - sudo bash -c "cd /root/docker/fe_timetable && docker compose pull && docker compose up -d"
