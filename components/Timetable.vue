@@ -4,6 +4,7 @@
       <table class="w-full border-collapse">
         <thead>
           <tr class="bg-gray-50 text-center text-sm font-medium text-gray-600 tracking-wider">
+            <th class="border p-3 w-12">Ca</th>
             <th class="border p-3 w-20">Tiết / Ngày</th>
             <th v-for="ngay in block.ds_Ngay" :key="ngay.id" class="border p-3 min-w-[100px]">
               {{ getDayName(ngay.id - 1) }}
@@ -12,6 +13,9 @@
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
           <tr v-for="(tiet, tietIndex) in block.ds_Ngay[0].ds_Tiet" :key="tiet.id">
+            <td v-if="tietIndex % 5 === 0" class="border p-0.5 text-center font-medium select-none align-middle" :rowspan="5">
+              <span class="[writing-mode:vertical-rl] items-center justify-center">{{ props.block.id == 1 ? "Ca sáng" : "Ca chiều" }}</span>
+            </td>
             <td class="border text-center text-sm font-medium bg-gray-50 p-2">
               Tiết {{ tietIndex + 1 }}
             </td>
