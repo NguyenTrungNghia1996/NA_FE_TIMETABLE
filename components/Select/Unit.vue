@@ -43,7 +43,7 @@ const fetchUnits = async (search = "") => {
     }
   } catch (error) {
     options.value = [];
-    message.error(err.message);
+    message.error(error?.message || error?.value?.data?.message || "Không thể tải dữ liệu đơn vị");
   } finally {
     loading.value = false;
   }

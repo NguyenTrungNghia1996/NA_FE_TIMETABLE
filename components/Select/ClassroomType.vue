@@ -5,56 +5,59 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import debounce from 'lodash/debounce'
+import { ref } from "vue";
+import debounce from "lodash/debounce";
 
-const { RestApi } = useApi()
+const { RestApi } = useApi();
 
 const props = defineProps({
   modelValue: [Array, Number, String],
-  label: { type: String, default: 'Loại phòng học' },
-  name: { type: String, default: 'loaiphonghoc' },
+  label: { type: String, default: "Loại phòng học" },
+  name: { type: String, default: "loaiphonghoc" },
   multiple: { type: Boolean, default: false },
-  placeholder: { type: String, default: 'Chọn loại phòng học' },
+  placeholder: { type: String, default: "Chọn loại phòng học" },
   size: { type: String, default: "middle" },
   rules: { type: Array, default: () => [] },
   disabled: { type: Boolean, default: false },
-})
+});
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(["update:modelValue"]);
 
-const options = ref([])
-const loading = ref(false)
+const options = ref([]);
+const loading = ref(false);
 
-const fetchClassroomTypes = async (search = '') => {
-  loading.value = true
+const fetchClassroomTypes = async (search = "") => {
+  loading.value = true;
   try {
-    const { data } = await RestApi.classroom_type.list({ params: { search } })
+    const { data } = await RestApi.classroom_type.list({ params: { search } });
 
     if (data.value?.data?.items) {
       options.value = data.value.data.items.map(item => ({
         label: item.ten,
         value: item.id,
-      }))
+      }));
 
       if (props.modelValue === undefined || props.modelValue === null || props.modelValue === "") {
-        emit('update:modelValue', props.modelValue)
+        emit("update:modelValue", props.modelValue);
       }
+    } else {
+      throw new Error(error.value?.data?.message);
     }
   } catch (error) {
-    console.error('❌ Lỗi fetch loại phòng học:', error)
+    options.value = [];
+    message.error(error?.message || error?.value?.data?.message || "Không thể tải danh sách loại phòng học");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
-const debouncedFetch = debounce((val) => {
-  fetchClassroomTypes(val.trim())
-}, 300)
+const debouncedFetch = debounce(val => {
+  fetchClassroomTypes(val.trim());
+}, 300);
 
-const onSearch = (val) => {
-  debouncedFetch(val)
-}
+const onSearch = val => {
+  debouncedFetch(val);
+};
 
-await fetchClassroomTypes()
+await fetchClassroomTypes();
 </script>
