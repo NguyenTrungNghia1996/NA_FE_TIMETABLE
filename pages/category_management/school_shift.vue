@@ -133,13 +133,14 @@ const rules = reactive({
 const fetchData = async param => {
   try {
     loading.value = true;
-    const { data, status } = await RestApi.school_shift.list({ params: param });
+    const { data, error } = await RestApi.school_shift.list({ params: param });
     if (data.value?.status === "success") {
       dataSource.value = data.value.data.items || [];
       pagination.total = data.value.data.totalrecord;
     } else {
-      dataSource.value = [];
-      pagination.total = 0;
+      throw new Error(error.value?.data?.message);
+      // dataSource.value = [];
+      // pagination.total = 0;
     }
   } catch (error) {
     console.error("Error fetching data:", error);

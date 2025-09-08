@@ -47,7 +47,7 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa khối kiến thức' : 'Thêm mới khối kiến thức'" @cancel="handleCancel" :width="600">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <a-form-item label="Tên khối kiến thức" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
-          <a-input v-model:value="formState.ten" placeholder="Nhập tên khối kiến thức" :maxlength="200" show-count />
+          <a-input v-model:value="formState.ten" placeholder="Nhập tên khối kiến thức" :maxlength="50" show-count />
         </a-form-item>
 
         <a-form-item label="Ghi chú" name="ghi_chu" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
@@ -131,17 +131,17 @@ const rules = reactive({
 const fetchData = async param => {
   try {
     loading.value = true;
-    const { data, status } = await RestApi.knowledge.list({ params: param });
+    const { data, error } = await RestApi.knowledge.list({ params: param });
     if (data.value?.status === "success") {
       dataSource.value = data.value.data.items || [];
       pagination.total = data.value.data.totalrecord;
     } else {
-      dataSource.value = [];
-      pagination.total = 0;
+      throw new Error(error.value?.data?.message);
     }
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    message.error("Lỗi khi tải dữ liệu");
+  } catch (err) {
+    dataSource.value = [];
+    pagination.total = 0;
+    message.error(err.message);
   } finally {
     loading.value = false;
   }
@@ -239,6 +239,7 @@ const resetForm = async () => {
   if (formRef.value) {
     formRef.value.resetFields();
   }
+  searchText.value = "";
   param.value.PageIndex = 1;
   param.value.PageSize = 10;
   param.value.search = "";

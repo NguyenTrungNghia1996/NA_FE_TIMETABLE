@@ -110,13 +110,17 @@ const dataSource = ref([]);
 const fetchData = async param => {
   try {
     loading.value = true;
-    const { data } = await RestApi.school_ship.list({ params: param });
+    const { data, error } = await RestApi.school_ship.list({ params: param });
     if (data.value?.status === "success") {
       dataSource.value = data.value.data.items || [];
       pagination.total = data.value.data.totalrecord;
+    } else {
+      throw new Error(error.value?.data?.message);
     }
   } catch (err) {
-    message.error("Không thể tải dữ liệu");
+    message.error(err.message);
+    dataSource.value = [];
+    pagination.total = 0;
   } finally {
     loading.value = false;
   }
@@ -205,6 +209,7 @@ const deleteItem = async id => {
 
 const resetForm = async () => {
   if (formRef.value) formRef.value.resetFields();
+  searchText.value = "";
   param.value = { PageIndex: 1, PageSize: 10, search: "" };
   pagination.current = 1;
   pagination.pageSize = 10;

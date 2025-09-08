@@ -1,73 +1,61 @@
 <template>
   <a-form-item :label="label" :name="name" :rules="rules">
-    <a-select
-      :value="modelValue"
-      @update:value="val => $emit('update:modelValue', val)"
-      :mode="multiple ? 'multiple' : undefined"
-      show-search
-      :placeholder="placeholder" :size="size"
-      :loading="loading"
-      :disabled="disabled"
-      allow-clear
-      class="w-full"
-      :options="options"
-      @search="onSearch"
-      :filter-option="false"
-    />
+    <a-select :value="modelValue" @update:value="val => $emit('update:modelValue', val)" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" :filter-option="false" />
   </a-form-item>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import debounce from 'lodash/debounce'
+import { ref } from "vue";
+import debounce from "lodash/debounce";
 
-const { RestApi } = useApi()
+const { RestApi } = useApi();
 
 const props = defineProps({
   modelValue: [Array, Number, String],
-  label: { type: String, default: 'Đơn vị' },
-  name: { type: String, default: 'donvi' },
+  label: { type: String, default: "Đơn vị" },
+  name: { type: String, default: "donvi" },
   multiple: { type: Boolean, default: false },
-  placeholder: { type: String, default: 'Chọn đơn vị' },
+  placeholder: { type: String, default: "Chọn đơn vị" },
   size: { type: String, default: "middle" },
   rules: { type: Array, default: () => [] },
   disabled: { type: Boolean, default: false },
-})
+});
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(["update:modelValue"]);
 
-const options = ref([])
-const loading = ref(false)
+const options = ref([]);
+const loading = ref(false);
 
-const fetchUnits = async (search = '') => {
-  loading.value = true
+const fetchUnits = async (search = "") => {
+  loading.value = true;
   try {
-    const { data } = await RestApi.unit.list({ params: { search } })
-
+    const { data, error } = await RestApi.unit.list({ params: { search } });
     if (data.value?.data?.items) {
       options.value = data.value.data.items.map(item => ({
         label: item.tenDonvi,
         value: item.id,
-      }))
-
+      }));
       if (props.modelValue === undefined || props.modelValue === null || props.modelValue === "") {
-        emit('update:modelValue', props.modelValue)
+        emit("update:modelValue", props.modelValue);
       }
+    } else {
+      throw new Error(error.value?.data?.message);
     }
   } catch (error) {
-    console.error('❌ Lỗi fetch đơn vị:', error)
+    options.value = [];
+    message.error(err.message);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
-const debouncedFetch = debounce((val) => {
-  fetchUnits(val.trim())
-}, 300)
+const debouncedFetch = debounce(val => {
+  fetchUnits(val.trim());
+}, 300);
 
-const onSearch = (val) => {
-  debouncedFetch(val)
-}
+const onSearch = val => {
+  debouncedFetch(val);
+};
 
-await fetchUnits()
+await fetchUnits();
 </script>

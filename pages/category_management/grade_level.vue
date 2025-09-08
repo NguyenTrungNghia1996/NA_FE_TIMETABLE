@@ -41,7 +41,7 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa Khối lớp' : 'Thêm mới Khối lớp'" @cancel="handleCancel" :width="600">
       <a-form ref="formRef" :model="formState" layout="vertical">
         <a-form-item label="Tên Khối lớp" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }" :rules="rules.ten">
-          <a-input v-model:value="formState.ten" placeholder="Nhập tên Khối lớp" :maxlength="200" show-count />
+          <a-input v-model:value="formState.ten" placeholder="Nhập tên Khối lớp" :maxlength="20" show-count />
         </a-form-item>
 
         <SelectSchoolLevel v-model="formState.id_Cap_hoc" name="id_Cap_hoc" :rules="rules.id_Cap_hoc" />
@@ -112,13 +112,17 @@ const dataSource = ref([]);
 const fetchData = async param => {
   try {
     loading.value = true;
-    const { data } = await RestApi.grade_level.list({ params: param });
+    const { data, error } = await RestApi.grade_level.list({ params: param });
     if (data.value?.status === "success") {
       dataSource.value = data.value.data.items || [];
       pagination.total = data.value.data.totalrecord;
+    } else {
+      throw new Error(error.value?.data?.message);
     }
   } catch (err) {
-    message.error("Không thể tải dữ liệu");
+    dataSource.value = [];
+    pagination.total = 0;
+    message.error(err.message);
   } finally {
     loading.value = false;
   }
@@ -214,6 +218,7 @@ const deleteItem = async id => {
 
 const resetForm = async () => {
   if (formRef.value) formRef.value.resetFields();
+  searchText.value = "";
   param.value = { PageIndex: 1, PageSize: 10, search: "" };
   pagination.current = 1;
   pagination.pageSize = 10;
