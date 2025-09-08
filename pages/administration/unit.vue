@@ -187,7 +187,10 @@ const rules = {
     { required: true, message: "Vui lòng chọn đơn vị", trigger: "blur" },
     { max: 100, message: "Tên đơn vị không quá 100 kí tự", trigger: "blur" },
   ],
-  diachi: [{ required: true, message: "Vui lòng nhập địa chỉ", trigger: "blur" }],
+  diachi: [
+    { required: true, message: "Vui lòng nhập địa chỉ", trigger: "blur" },
+    { max: 200, message: "Địa chỉ không quá 200 ký tự", trigger: "blur" },
+  ],
   email: [
     { required: true, message: "Vui lòng nhập địa chỉ email", trigger: "blur" },
     { type: "email", message: "Email không hợp lệ", trigger: "blur" },
