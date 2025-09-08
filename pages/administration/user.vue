@@ -346,9 +346,7 @@ const resetForm = async () => {
     formRef.value.resetFields();
   }
   searchText.value = "";
-  param.value.PageIndex = 1;
-  param.value.PageSize = 10;
-  param.value.search = "";
+  param.value = { PageIndex: 1, PageSize: 10, search: "" };
   pagination.current = 1;
   pagination.pageSize = 10;
   await fetchData({ ...param.value });

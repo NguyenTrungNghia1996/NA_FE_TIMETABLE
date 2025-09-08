@@ -47,7 +47,7 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa ca học' : 'Thêm mới ca học'" @cancel="handleCancel" :width="600">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <a-form-item label="Tên ca học" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
-          <a-input v-model:value="formState.ten" placeholder="Nhập tên ca học" :maxlength="200" show-count />
+          <a-input v-model:value="formState.ten" placeholder="Nhập tên ca học" :maxlength="20" show-count />
         </a-form-item>
 
         <a-form-item label="Ghi chú" name="ghichu" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
@@ -139,12 +139,11 @@ const fetchData = async param => {
       pagination.total = data.value.data.totalrecord;
     } else {
       throw new Error(error.value?.data?.message);
-      // dataSource.value = [];
-      // pagination.total = 0;
     }
   } catch (error) {
-    console.error("Error fetching data:", error);
-    message.error("Lỗi khi tải dữ liệu");
+    message.error(error.message);
+    dataSource.value = [];
+    pagination.total = 0;
   } finally {
     loading.value = false;
   }
@@ -241,9 +240,8 @@ const resetForm = async () => {
   if (formRef.value) {
     formRef.value.resetFields();
   }
-  param.value.PageIndex = 1;
-  param.value.PageSize = 10;
-  param.value.search = "";
+  searchText.value = "";
+  param.value = { PageIndex: 1, PageSize: 10, search: "" };
   pagination.current = 1;
   pagination.pageSize = 10;
   await fetchData({ ...param.value });
