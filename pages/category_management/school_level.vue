@@ -47,7 +47,7 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa cấp học' : 'Thêm mới cấp học'" @cancel="handleCancel" :width="600">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <a-form-item label="Tên cấp học" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
-          <a-input v-model:value="formState.ten" placeholder="Nhập tên cấp học" :maxlength="200" show-count />
+          <a-input v-model:value="formState.ten" placeholder="Nhập tên cấp học" :maxlength="20" show-count />
         </a-form-item>
 
         <a-form-item label="Ghi chú" name="ghichu" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
@@ -126,6 +126,7 @@ const rules = reactive({
   ten: [
     { required: true, message: "Vui lòng nhập tên cấp học", trigger: "blur" },
     { min: 2, message: "Tên cấp học phải có ít nhất 2 ký tự", trigger: "blur" },
+    { max: 20, message: "Tên cấp học nhiều nhất có 20 ký tự", trigger: "blur" },
   ],
 });
 

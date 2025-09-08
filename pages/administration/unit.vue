@@ -134,9 +134,15 @@ const columns = [
   },
   {
     title: "Cấp học",
-    dataIndex: "tenCaphoc",
-    key: "tenCaphoc",
-    width: 100,
+    dataIndex: "ten_cap",
+    key: "ten_cap",
+    width: 150,
+  },
+  {
+    title: "Ca Học",
+    dataIndex: "ten_ca",
+    key: "ten_ca",
+    width: 150,
   },
   {
     title: "Thao tác",
