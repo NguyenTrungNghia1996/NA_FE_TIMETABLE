@@ -85,7 +85,7 @@ const columns = [
   { title: "STT", key: "stt", width: 50, align: "center" },
   { title: "Tên ban học", dataIndex: "ten", key: "ten", ellipsis: true },
   { title: "Tên cấp học", dataIndex: "ten_cap", key: "ten_cap", ellipsis: true },
-  { title: "Ghi chú", dataIndex: "ghi_chu", key: "ghi_chu", ellipsis: true },
+  { title: "Ghi chú", dataIndex: "ghichu", key: "ghi_chu", ellipsis: true },
   { title: "Thao tác", key: "action", width: 80, align: "center", fixed: "right" },
 ];
 

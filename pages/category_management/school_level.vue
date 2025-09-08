@@ -143,7 +143,7 @@ const fetchData = async param => {
   } catch (error) {
     dataSource.value = [];
     pagination.total = 0;
-    message.error(err.message);
+    message.error(error.message);
   } finally {
     loading.value = false;
   }
