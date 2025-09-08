@@ -14,7 +14,7 @@
           </template>
           <template v-if="column.key === 'isActive'">
             <a-tag :color="record.isActive ? 'green' : 'red'">
-              {{ record.isActive ? 'Hoạt động' : 'Không hoạt động' }}
+              {{ record.isActive ? "Hoạt động" : "Không hoạt động" }}
             </a-tag>
           </template>
 
@@ -93,18 +93,18 @@
 
         <div class="flex gap-4 mt-4">
           <a-form-item label="Trạng thái" name="isActive">
-            <a-switch v-model:checked="formState.isActive" checked-children="Hoạt động" un-checked-children="Khóa" />
+            <a-switch v-model:checked="formState.isActive" checked-children="Hoạt động" un-checked-children="Không hoạt động" />
           </a-form-item>
 
           <a-form-item label="Quyền quản trị" name="isAdmin">
-            <a-switch v-model:checked="formState.isAdmin" checked-children="Admin" un-checked-children="User" />
+            <a-switch v-model:checked="formState.isAdmin" checked-children="Quản trị" un-checked-children="Người dùng" />
           </a-form-item>
         </div>
 
         <div class="flex justify-end gap-2 mt-6">
           <a-button @click="handleCancel">Hủy</a-button>
           <a-button type="primary" @click="handleOk" :loading="confirmLoading">
-            {{ isEdit ? 'Cập nhật' : 'Thêm mới' }}
+            {{ isEdit ? "Cập nhật" : "Thêm mới" }}
           </a-button>
         </div>
       </a-form>
@@ -118,155 +118,153 @@ const { RestApi } = useApi();
 const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
 const columns = [
   {
-    title: 'STT',
-    key: 'stt',
+    title: "STT",
+    key: "stt",
     width: 70,
-    align: 'center'
+    align: "center",
   },
   {
-    title: 'Tên đăng nhập',
-    dataIndex: 'username',
-    key: 'username',
-    width: 150
+    title: "Tên đăng nhập",
+    dataIndex: "username",
+    key: "username",
+    width: 150,
   },
   {
-    title: 'Họ và tên',
-    dataIndex: 'hoten',
-    key: 'hoten',
-    width: 150
+    title: "Họ và tên",
+    dataIndex: "hoten",
+    key: "hoten",
+    width: 150,
   },
   {
-    title: 'Đơn vị',
-    dataIndex: 'tendonvi',
-    key: 'tendonvi',
+    title: "Đơn vị",
+    dataIndex: "tendonvi",
+    key: "tendonvi",
     width: 200,
-    ellipsis: true
+    ellipsis: true,
   },
   {
-    title: 'Trạng thái',
-    key: 'isActive',
+    title: "Trạng thái",
+    key: "isActive",
     width: 120,
-    align: 'center'
+    align: "center",
   },
   {
-    title: 'Quyền',
-    key: 'isAdmin',
+    title: "Quyền",
+    key: "isAdmin",
     width: 100,
-    align: 'center'
+    align: "center",
   },
   {
-    title: 'Thao tác',
-    key: 'action',
+    title: "Thao tác",
+    key: "action",
     width: 120,
-    align: 'center',
-    fixed: 'right'
-  }
-]
+    align: "center",
+    fixed: "right",
+  },
+];
 
 // State
-const dataSource = ref([])
-const loading = ref(false)
-const searchText = ref('')
-const visible = ref(false)
-const confirmLoading = ref(false)
-const isEdit = ref(false)
-const formRef = ref()
+const dataSource = ref([]);
+const loading = ref(false);
+const searchText = ref("");
+const visible = ref(false);
+const confirmLoading = ref(false);
+const isEdit = ref(false);
+const formRef = ref();
 
 const pagination = reactive({
   current: 1,
   pageSize: 10,
   total: 0,
   showSizeChanger: true,
-  pageSizeOptions: ['1', '10', '20', '50'],
-  showTotal: (total) => `Tổng ${total} bản ghi`
-})
+  pageSizeOptions: ["1", "10", "20", "50"],
+  showTotal: total => `Tổng ${total} bản ghi`,
+});
 
 const formState = reactive({
-  username: '',
-  hoten: '',
+  username: "",
+  hoten: "",
   id_Donvi: undefined,
   isActive: true,
   isAdmin: false,
-  idRoles: undefined
-})
+  idRoles: undefined,
+});
 
 const rules = {
   username: [
-    { required: true, message: 'Vui lòng nhập tên đăng nhập', trigger: 'blur' },
-    { min: 3, message: 'Tên đăng nhập ít nhất 3 ký tự', trigger: 'blur' },
+    { required: true, message: "Vui lòng nhập tên đăng nhập", trigger: "blur" },
+    { min: 3, message: "Tên đăng nhập ít nhất 3 ký tự", trigger: "blur" },
+    { max: 100, message: "Tên đăng nhập không quá 100 ký tự", trigger: "blur" },
     {
-      pattern: /^[a-z0-9]+$/,
-      message: 'Chỉ nhập chữ thường, viết liền, không dấu, không ký tự đặc biệt',
-      trigger: 'blur'
-    }
+      pattern: /^[a-z0-9.]+$/,
+      message: "Chỉ nhập chữ thường, viết liền, không dấu, không ký tự đặc biệt",
+      trigger: "blur",
+    },
   ],
   hoten: [
-    { required: true, message: 'Vui lòng nhập họ tên', trigger: 'blur' }
+    { required: true, message: "Vui lòng nhập họ tên", trigger: "blur" },
+    { max: 50, message: "Họ tên không quá 50 ký tự", trigger: "blur" },
   ],
-  id_Donvi: [
-    { required: true, message: 'Vui lòng chọn Đơn vị', trigger: 'blur' }
-  ],
-  idRoles: [
-    { required: true, message: 'Vui lòng Vai trò', trigger: 'blur' }
-  ]
-}
+  id_Donvi: [{ required: true, message: "Vui lòng chọn Đơn vị", trigger: "blur" }],
+  idRoles: [{ required: true, message: "Vui lòng chọn Vai trò", trigger: "blur" }],
+};
 
 // Methods
-const fetchData = async (param) => {
+const fetchData = async param => {
   try {
-    loading.value = true
-    const { data } = await RestApi.user.list({ params: param })
+    loading.value = true;
+    const { data } = await RestApi.user.list({ params: param });
 
-    if (data.value?.status === 'success') {
-      dataSource.value = data.value.data.items
-      pagination.total = data.value.data.totalrecord
+    if (data.value?.status === "success") {
+      dataSource.value = data.value.data.items;
+      pagination.total = data.value.data.totalrecord;
     } else {
-      dataSource.value = []
-      pagination.total = 0
+      dataSource.value = [];
+      pagination.total = 0;
     }
   } catch (error) {
-    console.error('Error fetching users:', error)
-    message.error('Lỗi khi tải danh sách người dùng')
+    console.error("Error fetching users:", error);
+    message.error("Lỗi khi tải danh sách người dùng");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
-const handleTableChange = async (pag) => {
-  pagination.current = pag.current
-  pagination.pageSize = pag.pageSize
-  param.value.PageIndex = pag.current
-  param.value.PageSize = pag.pageSize
-  await fetchData({ ...param.value })
-}
+};
+const handleTableChange = async pag => {
+  pagination.current = pag.current;
+  pagination.pageSize = pag.pageSize;
+  param.value.PageIndex = pag.current;
+  param.value.PageSize = pag.pageSize;
+  await fetchData({ ...param.value });
+};
 
 const handleSearch = async () => {
-  param.value.search = searchText.value
-  pagination.current = 1
-  param.value.PageIndex = 1
-  await fetchData({ ...param.value })
-}
+  param.value.search = searchText.value;
+  pagination.current = 1;
+  param.value.PageIndex = 1;
+  await fetchData({ ...param.value });
+};
 
 const showModal = async () => {
-  isEdit.value = false
+  isEdit.value = false;
   Object.assign(formState, {
-    username: '',
-    hoten: '',
+    username: "",
+    hoten: "",
     id_Donvi: [],
     isActive: true,
     isAdmin: false,
-    idRoles: []
-  })
-  await nextTick()
-  formRef.value?.clearValidate()
-  visible.value = true
-}
+    idRoles: [],
+  });
+  await nextTick();
+  formRef.value?.clearValidate();
+  visible.value = true;
+};
 
-const editItem = async (record) => {
+const editItem = async record => {
   try {
-    loading.value = true
-    const { data } = await RestApi.user.detail({ params: { id: record.id } })
-    if (data.value?.status === 'success') {
-      const userData = data.value.data
+    loading.value = true;
+    const { data } = await RestApi.user.detail({ params: { id: record.id } });
+    if (data.value?.status === "success") {
+      const userData = data.value.data;
       Object.assign(formState, {
         id: userData.id,
         username: userData.username,
@@ -274,98 +272,95 @@ const editItem = async (record) => {
         id_Donvi: userData.id_Donvi || undefined,
         isActive: userData.isActive,
         isAdmin: userData.isAdmin,
-        idRoles: userData.idRoles || undefined
-      })
-      isEdit.value = true
-      visible.value = true
+        idRoles: userData.idRoles || undefined,
+      });
+      isEdit.value = true;
+      visible.value = true;
     } else {
-      message.error(data.value?.message || 'Không thể tải thông tin người dùng')
+      message.error(data.value?.message || "Không thể tải thông tin người dùng");
     }
   } catch (error) {
-    console.error('Error fetching user detail:', error)
-    message.error('Lỗi khi tải thông tin người dùng')
+    console.error("Error fetching user detail:", error);
+    message.error("Lỗi khi tải thông tin người dùng");
   } finally {
-    loading.value = false
-    await nextTick()
-    formRef.value?.clearValidate()
+    loading.value = false;
+    await nextTick();
+    formRef.value?.clearValidate();
   }
-}
+};
 
 const handleOk = async () => {
   try {
-    await formRef.value.validate()
-    confirmLoading.value = true
+    await formRef.value.validate();
+    confirmLoading.value = true;
 
     if (isEdit.value) {
-      const { data, error } = await RestApi.user.update({ body: { ...formState } })
-      if (data.value?.status === 'success') {
-        message.success(data.value.message || 'Cập nhật người dùng thành công')
+      const { data, error } = await RestApi.user.update({ body: { ...formState } });
+      if (data.value?.status === "success") {
+        message.success(data.value.message || "Cập nhật người dùng thành công");
       } else {
-        throw new Error(error.value?.data?.message || 'Cập nhật không thành công')
+        throw new Error(error.value?.data?.message || "Cập nhật không thành công");
       }
     } else {
       if (formState) {
-        delete formState.id
+        delete formState.id;
       }
-      const { data, error } = await RestApi.user.create({ body: { ...formState } })
-      if (data.value?.status === 'success') {
-        message.success(data.value.message || 'Thêm mới người dùng thành công')
+      const { data, error } = await RestApi.user.create({ body: { ...formState } });
+      if (data.value?.status === "success") {
+        message.success(data.value.message || "Thêm mới người dùng thành công");
       } else {
-        throw new Error(error.value?.data?.message || 'Thêm mới không thành công')
+        throw new Error(error.value?.data?.message || "Thêm mới không thành công");
       }
     }
   } catch (error) {
-    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi lưu thông tin người dùng')
+    message.error(error.message || error.response?.data?.message || "Đã xảy ra lỗi khi lưu thông tin người dùng");
   } finally {
-    visible.value = false
-    await fetchData({ ...param.value })
-    confirmLoading.value = false
+    visible.value = false;
+    await fetchData({ ...param.value });
+    confirmLoading.value = false;
   }
-}
+};
 
 const handleCancel = () => {
-  formRef.value?.resetFields()
-  visible.value = false
-}
+  formRef.value?.resetFields();
+  visible.value = false;
+};
 
-const deleteItem = async (id) => {
+const deleteItem = async id => {
   try {
-    const { data, error } = await RestApi.user.delete({ params: { id } })
-    if (data.value?.status === 'success') {
-      message.success(data.value?.message || 'Xóa người dùng thành công')
+    const { data, error } = await RestApi.user.delete({ params: { id } });
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Xóa người dùng thành công");
     } else {
-      throw new Error(error.value?.data?.message || 'Xóa không thành công')
+      throw new Error(error.value?.data?.message || "Xóa không thành công");
     }
   } catch (error) {
-    message.error(error.message || error.response?.data?.message || 'Đã xảy ra lỗi khi xóa thông tin người dùng')
+    message.error(error.message || error.response?.data?.message || "Đã xảy ra lỗi khi xóa thông tin người dùng");
   } finally {
-    await fetchData({ ...param.value })
+    await fetchData({ ...param.value });
   }
-}
+};
 
 const resetForm = async () => {
   if (formRef.value) {
     formRef.value.resetFields();
   }
-  searchText.value = ""
-  param.value.PageIndex = 1;
-  param.value.PageSize = 10;
-  param.value.search = "";
+  searchText.value = "";
+  param.value = { PageIndex: 1, PageSize: 10, search: "" };
   pagination.current = 1;
   pagination.pageSize = 10;
-  await fetchData({ ...param.value })
-}
+  await fetchData({ ...param.value });
+};
 
 // Lifecycle
-await fetchData({ ...param.value })
+await fetchData({ ...param.value });
 </script>
 
 <style scoped>
 /* Responsive table */
 @media (max-width: 768px) {
-
-  .ant-table-thead>tr>th,
-  .ant-table-tbody>tr>td {
+  .ant-table-thead > tr > th,
+  .ant-table-tbody > tr > td {
     padding: 8px !important;
     font-size: 13px;
   }

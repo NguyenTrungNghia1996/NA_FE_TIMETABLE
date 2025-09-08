@@ -31,7 +31,7 @@ const loading = ref(false);
 const fetchTeachers = async (search = "") => {
   loading.value = true;
   try {
-    const { data } = await RestApi.teacher.list({ params: { search } });
+    const { data, error } = await RestApi.teacher.list({ params: { search } });
 
     if (data.value?.data?.items) {
       options.value = data.value.data.items.map(item => ({
@@ -46,9 +46,12 @@ const fetchTeachers = async (search = "") => {
           emit("update:modelValue", defaultValue);
         }
       }
+    } else {
+      throw new Error(error.value?.data?.message);
     }
   } catch (error) {
-    console.error("❌ Lỗi fetch giáo viên:", error);
+    options.value = [];
+    message.error(error?.message || error?.value?.data?.message || "Không thể tải danh sách giáo viên");
   } finally {
     loading.value = false;
   }

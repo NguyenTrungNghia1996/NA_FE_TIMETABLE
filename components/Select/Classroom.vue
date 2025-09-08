@@ -34,9 +34,7 @@ const fetchClassrooms = async (search = "") => {
     const params = {};
     if (search) params.search = search;
     if (props.idLoaiPhonghoc) params.idLoaiPhonghoc = props.idLoaiPhonghoc;
-    const { data } = await RestApi.classroom.list(
-      Object.keys(params).length ? { params } : {},
-    );
+    const { data } = await RestApi.classroom.list(Object.keys(params).length ? { params } : {});
     if (data.value?.data?.items) {
       options.value = data.value.data.items.map(item => ({
         label: item.ten,
@@ -45,9 +43,12 @@ const fetchClassrooms = async (search = "") => {
       if (props.modelValue === undefined || props.modelValue === null || props.modelValue === "") {
         emit("update:modelValue", props.modelValue);
       }
+    } else {
+      throw new Error(error.value?.data?.message);
     }
   } catch (error) {
-    console.error("❌ Lỗi fetch phòng học:", error);
+    options.value = [];
+    message.error(error?.message || error?.value?.data?.message || "Không thể tải danh sách phòng học");
   } finally {
     loading.value = false;
   }

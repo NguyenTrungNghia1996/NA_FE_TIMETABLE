@@ -177,11 +177,15 @@ const formState = reactive({
 const rules = {
   idCap: [{ required: true, message: "Vui lòng chọn cấp học", trigger: "blur", type: "array" }],
   id_cahoc: [{ required: true, message: "Vui lòng chọn ca học", trigger: "blur" }],
-  tenDonvi: [{ required: true, message: "Vui lòng chọn đơn vị", trigger: "blur" }],
+  tenDonvi: [
+    { required: true, message: "Vui lòng chọn đơn vị", trigger: "blur" },
+    { max: 100, message: "Tên đơn vị không quá 100 kí tự", trigger: "blur" },
+  ],
   diachi: [{ required: true, message: "Vui lòng nhập địa chỉ", trigger: "blur" }],
   email: [
     { required: true, message: "Vui lòng nhập địa chỉ email", trigger: "blur" },
     { type: "email", message: "Email không hợp lệ", trigger: "blur" },
+    { max: 200, message: "Email không quá 200 kí tự", trigger: "blur" },
   ],
   sodienthoai: [
     { required: true, message: "Vui lòng nhập số điện thoại", trigger: "blur" },
@@ -232,7 +236,7 @@ const handleSearch = async () => {
 const resetSearch = async () => {
   searchText.value = "";
   pagination.current = 1;
-  param.value.PageIndex = 1;
+  param.value = { PageIndex: 1, PageSize: 10, search: "" };
   await fetchData({ ...param.value });
 };
 
@@ -278,36 +282,6 @@ const editItem = async record => {
   }
 };
 
-// const handleOk = async () => {
-//   try {
-//     await formRef.value.validate();
-//     confirmLoading.value = true;
-//     if (isEdit.value) {
-//       const { data, error } = await RestApi.unit.update({ body: { ...formState } });
-//       if (data.value?.status === "success") {
-//         message.success(data.value.message || "Cập nhật thành công");
-//       } else {
-//         throw new Error(error.value?.data?.message || "Cập nhật không thành công");
-//       }
-//     } else {
-//       if (formState) {
-//         delete formState.id;
-//       }
-//       const { data, error } = await RestApi.unit.create({ body: { ...formState } });
-//       if (data.value?.status === "success") {
-//         message.success(data.value.message || "Thêm mới thành công");
-//       } else {
-//         throw new Error(error.value?.data?.message || "Thêm mới không thành công");
-//       }
-//     }
-//   } catch (error) {
-//     message.error(error.message || error.response?.data?.message || "Đã xảy ra lỗi khi lưu thông tin");
-//   } finally {
-//     visible.value = false;
-//     await fetchData({ ...param.value });
-//     confirmLoading.value = false;
-//   }
-// };
 const handleOk = async () => {
   // 1) VALIDATE TRƯỚC – nếu fail thì return sớm, không đóng modal, không fetch
   try {

@@ -111,17 +111,17 @@ const rules = reactive({
 const fetchData = async param => {
   try {
     loading.value = true;
-    const { data } = await RestApi.expertise.list({ params: param });
+    const { data, error } = await RestApi.expertise.list({ params: param });
     if (data.value?.status === "success") {
       dataSource.value = data.value.data.items || [];
       pagination.total = data.value.data.totalrecord;
     } else {
-      dataSource.value = [];
-      pagination.total = 0;
+      throw new Error(error.value?.data?.message);
     }
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    message.error("Lỗi khi tải dữ liệu");
+  } catch (err) {
+    dataSource.value = [];
+    pagination.total = 0;
+    message.error(err.message);
   } finally {
     loading.value = false;
   }
@@ -214,6 +214,7 @@ const resetForm = async () => {
   if (formRef.value) {
     formRef.value.resetFields();
   }
+  searchText.value = "";
   param.value.PageIndex = 1;
   param.value.PageSize = 10;
   param.value.search = "";
