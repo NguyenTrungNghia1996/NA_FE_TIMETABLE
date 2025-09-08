@@ -41,7 +41,7 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa ban học' : 'Thêm mới ban học'" @cancel="handleCancel" :width="600">
       <a-form ref="formRef" :model="formState" layout="vertical">
         <a-form-item label="Tên ban học" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }" :rules="rules.ten">
-          <a-input v-model:value="formState.ten" placeholder="Nhập tên ban học" :maxlength="200" show-count />
+          <a-input v-model:value="formState.ten" placeholder="Nhập tên ban học" :maxlength="50" show-count />
         </a-form-item>
         <SelectSchoolLevel v-model="formState.id_cap_hoc" name="id_cap_hoc" :rules="rules.id_cap_hoc" />
         <a-form-item label="Ghi chú" name="ghichu" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
@@ -100,6 +100,7 @@ const rules = reactive({
   ten: [
     { required: true, message: "Vui lòng nhập tên ban học", trigger: "blur" },
     { min: 2, message: "Tên phải có ít nhất 2 ký tự", trigger: "blur" },
+    { max: 50, message: "Tên nhiều nhất có 50 ký tự", trigger: "blur" },
   ],
   id_cap_hoc: [{ required: true, message: "Vui lòng chọn cấp học", trigger: "blur" }],
 });

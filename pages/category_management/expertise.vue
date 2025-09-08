@@ -47,7 +47,7 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa Tổ chuyên môn' : 'Thêm mới Tổ chuyên môn'" @cancel="handleCancel" :width="600">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <a-form-item label="Tên Tổ chuyên môn" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
-          <a-input v-model:value="formState.ten" placeholder="Nhập tên Tổ chuyên môn" :maxlength="200" show-count />
+          <a-input v-model:value="formState.ten" placeholder="Nhập tên Tổ chuyên môn" :maxlength="50" show-count />
         </a-form-item>
 
         <a-form-item label="Ghi chú" name="ghi_chu" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
@@ -105,6 +105,7 @@ const rules = reactive({
   ten: [
     { required: true, message: "Vui lòng nhập tên Tổ chuyên môn", trigger: "blur" },
     { min: 2, message: "Tên phải có ít nhất 2 ký tự", trigger: "blur" },
+    { max: 50, message: "Tên có nhiều nhất 2 ký tự", trigger: "blur" },
   ],
 });
 

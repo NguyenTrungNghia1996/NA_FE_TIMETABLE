@@ -68,7 +68,7 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa loại phòng học' : 'Thêm mới loại phòng học'" @cancel="handleCancel" :width="600" :footer="null">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <a-form-item label="Tên loại phòng học" name="ten" :rules="[{ required: true, message: 'Vui lòng nhập tên loại phòng học' }]">
-          <a-input v-model:value="formState.ten" placeholder="Nhập tên loại phòng học" :maxlength="200" show-count />
+          <a-input v-model:value="formState.ten" placeholder="Nhập tên loại phòng học" :maxlength="50" show-count />
         </a-form-item>
 
         <a-form-item label="Ghi chú" name="ghichu">
@@ -146,6 +146,7 @@ const rules = {
   ten: [
     { required: true, message: "Vui lòng nhập tên loại phòng học", trigger: "blur" },
     { min: 2, message: "Tên loại phòng học phải có ít nhất 2 ký tự", trigger: "blur" },
+    { max: 50, message: "Tên loại phòng học nhiều nhất có 50 ký tự", trigger: "blur" },
   ],
 };
 
