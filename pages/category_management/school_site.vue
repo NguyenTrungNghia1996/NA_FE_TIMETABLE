@@ -67,7 +67,7 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa điểm trường' : 'Thêm mới điểm trường'" @cancel="handleCancel" :width="600" :footer="null">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <a-form-item label="Tên điểm trường" name="ten" :rules="[{ required: true, message: 'Vui lòng nhập tên điểm trường' }]">
-          <a-input v-model:value="formState.ten" placeholder="Nhập tên điểm trường" :maxlength="200" show-count />
+          <a-input v-model:value="formState.ten" placeholder="Nhập tên điểm trường" :maxlength="50" show-count />
         </a-form-item>
 
         <a-form-item label="Ghi chú" name="ghichu">
@@ -186,8 +186,9 @@ const handleSearch = async () => {
 
 const resetSearch = async () => {
   searchText.value = "";
+  param.value = { PageIndex: 1, PageSize: 10, search: "" };
   pagination.current = 1;
-  param.value.PageIndex = 1;
+  pagination.pageSize = 10;
   await fetchData({ ...param.value });
 };
 
@@ -257,6 +258,8 @@ const deleteItem = async id => {
       throw new Error(error.value?.data?.message || "Xóa không thành công");
     }
   } catch (error) {
+    dataSource.value = [];
+    pagination.total = 0;
     message.error(error.message || error.response?.data?.message || "Đã xảy ra lỗi khi xóa thông tin điểm trường");
   } finally {
     await fetchData({ ...param.value });
