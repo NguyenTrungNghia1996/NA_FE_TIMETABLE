@@ -46,7 +46,7 @@
           </a-form-item>
 
           <a-form-item label="Mô tả" name="mota" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
-            <a-textarea v-model:value="formState.mota" :rows="4" placeholder="Nhập mô tả (nếu có)" :maxlength="200" show-count />
+            <a-textarea v-model:value="formState.mota" :rows="4" placeholder="Nhập mô tả (nếu có)" :maxlength="250" show-count />
           </a-form-item>
         </a-form>
         <PermissionEditor v-model="formState.permission" />
