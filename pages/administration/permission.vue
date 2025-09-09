@@ -42,7 +42,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
         <a-form ref="formRef" :model="formState" layout="vertical">
           <a-form-item label="Tên Nhóm quyền" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }" :rules="rules.ten">
-            <a-input v-model:value="formState.ten" placeholder="Nhập tên Nhóm quyền" :maxlength="200" show-count />
+            <a-input v-model:value="formState.ten" placeholder="Nhập tên Nhóm quyền" :maxlength="50" show-count />
           </a-form-item>
 
           <a-form-item label="Mô tả" name="mota" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
@@ -107,6 +107,7 @@ const rules = reactive({
   ten: [
     { required: true, message: "Vui lòng nhập tên Nhóm quyền", trigger: "blur" },
     { min: 2, message: "Tên phải có ít nhất 2 ký tự", trigger: "blur" },
+    { max: 50, message: "Tên nhiều nhất 50 ký tự", trigger: "blur" },
   ],
 });
 
