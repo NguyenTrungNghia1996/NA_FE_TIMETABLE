@@ -30,7 +30,7 @@
     <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
       <h2 class="text-lg font-semibold text-gray-700 mb-3">DANH SÁCH MÔN HỌC</h2>
       <a-form ref="filterForm" :model="filters" layout="vertical" :rules="rules" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <SelectGradeLevel v-model="filters.grade" name="grade" :rules="rules.grade" placeholder="Chọn khối lớp" />
+        <SelectGradeLevelByUnit v-model="filters.grade" name="grade" :rules="rules.grade" placeholder="Chọn khối lớp" />
         <SelectSchoolship v-model="filters.major" name="major" :rules="rules.major" placeholder="Chọn ban học" />
         <SelectSchoolShiftByUnit v-model="filters.shift" name="shift" placeholder="Chọn ca học" />
       </a-form>

@@ -35,6 +35,7 @@ let ENDPOINTS = {
   //GRADE_LEVEL
   GRADE_LEVEL: "/api/khoilop",
   GRADE_LEVEL_DETAIL: "/api/khoilop/detail",
+  GRADE_LEVEL_BY_UNIT: "/api/khoilop/khoiloptheodonvi",
   //MENU
   MENU: "/api/menus",
   MENU_DETAIL: "/api/menus/detail",
@@ -515,6 +516,9 @@ class GradeLevel {
   }
   async list(data) {
     return await this.request.get(ENDPOINTS.GRADE_LEVEL, data);
+  }
+  async list_by_unit(data) {
+    return await this.request.get(ENDPOINTS.GRADE_LEVEL_BY_UNIT, data);
   }
   async detail(data) {
     return await this.request.get(ENDPOINTS.GRADE_LEVEL_DETAIL, data);
