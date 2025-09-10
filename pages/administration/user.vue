@@ -29,6 +29,15 @@
             <div class="flex justify-center gap-2">
               <!-- Desktop view - full buttons -->
               <div class="hidden md:flex space-x-2">
+                <a-tooltip title="Đặt lại mật khẩu">
+                  <a-popconfirm title="Đặt lại mật khẩu cho tài khoản này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="resetPassword(record.id)">
+                    <a-button type="link" size="small" :disabled="!settingStore.currentPermission">
+                      <template #icon>
+                        <KeyOutlined />
+                      </template>
+                    </a-button>
+                  </a-popconfirm>
+                </a-tooltip>
                 <a-tooltip title="Sửa">
                   <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission">
                     <template #icon>
@@ -55,6 +64,12 @@
                   </a-button>
                   <template #overlay>
                     <a-menu>
+                      <a-menu-item key="0" @click="() => confirmReset(record.id)" :disabled="!settingStore.currentPermission">
+                        <template #icon>
+                          <KeyOutlined />
+                        </template>
+                        Đặt lại mật khẩu
+                      </a-menu-item>
                       <a-menu-item key="1" @click="editItem(record)" :disabled="!settingStore.currentPermission">
                         <template #icon>
                           <EditOutlined />
@@ -324,6 +339,25 @@ const handleOk = async () => {
 const handleCancel = () => {
   formRef.value?.resetFields();
   visible.value = false;
+};
+
+const resetPassword = async id => {
+  try {
+    const { data, error } = await RestApi.user.reset_password({ params: { id } });
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Đặt lại mật khẩu thành công");
+    } else {
+      throw new Error(error.value?.data?.message || "Đặt lại mật khẩu không thành công");
+    }
+  } catch (error) {
+    message.error(error.message || error.response?.data?.message || "Đã xảy ra lỗi khi đặt lại mật khẩu");
+  }
+};
+
+const confirmReset = id => {
+  if (confirm("Đặt lại mật khẩu thành 12345 cho tài khoản này?")) {
+    return resetPassword(id);
+  }
 };
 
 const deleteItem = async id => {
