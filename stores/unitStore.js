@@ -27,7 +27,7 @@ export const useUnitStore = defineStore("unit", {
         case "testtkb":
           return "https://api.testtkb.nguyenanh-est.com";
         default:
-          return "https://api.tkb.nguyenanh-est.com";
+          return "https://api.dungthutkb.nguyenanh-est.com";
       }
     }
   },

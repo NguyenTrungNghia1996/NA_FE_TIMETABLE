@@ -2,6 +2,8 @@ let ENDPOINTS = {
   LOGIN: "/api/users/login",
   PERMISSION: "/api/users/permission",
   REGISTER: "/api/users/register",
+  CHANGE_PASSWORD: "/api/users/changePassword",
+  RESET_PASSWORD: "/api/users/resetPassword",
   //PROVINCE
   PROVINCE: "/api/tinh",
   //SCHOOL_LEVEL
@@ -317,6 +319,12 @@ class User {
   }
   async permission(data) {
     return await this.request.get(ENDPOINTS.PERMISSION, data);
+  }
+  async change_password(data) {
+    return await this.request.post(ENDPOINTS.CHANGE_PASSWORD, data);
+  }
+  async reset_password(data) {
+    return await this.request.post(ENDPOINTS.RESET_PASSWORD, data);
   }
 }
 class Province {

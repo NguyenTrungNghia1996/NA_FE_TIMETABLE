@@ -125,12 +125,12 @@ const handleChangePassword = async () => {
   try {
     await passwordFormRef.value.validate();
     confirmLoading.value = true;
-    const { data, status } = await RestApi.user.change_pasword({
-      body: JSON.stringify({
-        confirmNewPassword: passwordForm.value.confirmPassword,
-        currentPassword: passwordForm.value.currentPassword,
-        newPassword: passwordForm.value.newPassword,
-      }),
+    const { data, status } = await RestApi.user.change_password({
+      body: {
+        mat_khau_cu: passwordForm.value.currentPassword,
+        mat_khau_moi: passwordForm.value.newPassword,
+        xac_nhan_mat_khau: passwordForm.value.confirmPassword,
+      },
     });
     if (status.value === "success") {
       message.success("Thay đổi mật khẩu thành công");
