@@ -30,7 +30,7 @@
               <!-- Desktop view - full buttons -->
               <div class="hidden md:flex space-x-2">
                 <a-tooltip title="Đặt lại mật khẩu">
-                  <a-popconfirm title="Đặt lại mật khẩu cho tài khoản này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="resetPassword(record.id)">
+                  <a-popconfirm title="Đặt lại mật khẩu thành 12345 cho tài khoản này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="resetPassword(record.id)">
                     <a-button type="link" size="small" :disabled="!settingStore.currentPermission">
                       <template #icon>
                         <KeyOutlined />
