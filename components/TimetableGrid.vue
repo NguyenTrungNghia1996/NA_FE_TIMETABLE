@@ -2,6 +2,7 @@
   <div @click="contextMenu.show = false" class="grid grid-cols-1 gap-2">
     <div class="grid grid-cols-4 gap-2">
       <div class="col-span-3 overflow-auto">
+        <SelectClass class="m-3" v-model="selectedClassId" :autoSelectFirst="true" size="small" :noFormItem="true" :inlineLabel="true" />
         <div v-for="ca in dsCa" :key="ca.id">
           <div class="overflow-x-auto">
             <table class="min-w-full border-collapse select-none">
@@ -37,7 +38,8 @@
           </div>
         </div>
         <div v-if="teacherDsCa.length">
-          <p class="font-medium leading-tight text-xl">Giáo viên</p>
+          <!-- <p class="font-medium leading-tight text-xl">Giáo viên</p> -->
+          <SelectTeacher v-model="selectedTeacherId" :autoSelectFirst="true" size="small" :noFormItem="true" :inlineLabel="true" />
           <div v-for="ca in teacherDsCa" :key="ca.id">
             <div class="overflow-x-auto">
               <table class="min-w-full border-collapse select-none">
@@ -78,8 +80,6 @@
         </div>
       </div>
       <div class="h-[calc(100vh-110px)] flex flex-col">
-        <SelectClass v-model="selectedClassId" :autoSelectFirst="true" size="small" />
-        <SelectTeacher v-model="selectedTeacherId" :autoSelectFirst="true" size="small" />
         <div class="h-1/3 overflow-auto m-3 shadow-xl">
           <h4 class="font-semibold">Tiết chưa xếp của lớp học</h4>
           <UnscheduledTable :data="props.rawUnscheduled" class="w-full" @row-click="onUnscheduledClick" />
