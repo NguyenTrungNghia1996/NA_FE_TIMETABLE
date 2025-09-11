@@ -199,9 +199,6 @@ const rules = {
     { required: true, type: "number", message: "Nhập sức chứa", trigger: "blur" },
     {
       validator: (rule, value) => {
-        if (value === undefined || value === null || value === "") {
-          return Promise.reject("Nhập sức chứa");
-        }
         if (!/^[1-9][0-9]*$/.test(value)) {
           return Promise.reject("Chỉ được nhập số nguyên dương");
         }
