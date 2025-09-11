@@ -20,25 +20,27 @@
             {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
           </template>
           <template v-if="column.key === 'bool'">
-            <span>{{ record[column.dataIndex] ? "✔️" : "❌" }}</span>
+            <!-- <span>{{ record[column.dataIndex] ? "✔️" : "❌" }}</span> -->
+            <Icon v-if="record[column.dataIndex]" name="ant-design:check-outlined" class="text-green-600" />
+            <Icon v-else name="ant-design:close-outlined" class="text-red-500" />
           </template>
           <template v-if="column.key === 'action'">
             <div class="flex justify-center">
               <div class="md:flex space-x-2">
                 <a-button type="link" size="small" @click="editBusy(record)" :disabled="!settingStore.currentPermission">
                   <template #icon>
-                    <CalendarOutlined />
+                    <Icon name="ant-design:calendar-outlined" />
                   </template>
                 </a-button>
                 <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission">
                   <template #icon>
-                    <EditOutlined />
+                    <Icon name="ant-design:edit-outlined" />
                   </template>
                 </a-button>
                 <a-popconfirm placement="topRight" title="Bạn chắc chắn muốn xóa?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
                   <a-button type="link" danger size="small" :disabled="!settingStore.currentPermission">
                     <template #icon>
-                      <DeleteOutlined />
+                      <Icon name="ant-design:delete-outlined" />
                     </template>
                   </a-button>
                 </a-popconfirm>

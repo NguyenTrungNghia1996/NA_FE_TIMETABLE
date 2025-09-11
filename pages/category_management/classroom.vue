@@ -13,7 +13,9 @@
       <a-table size="small" :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" @change="handleTableChange" bordered :scroll="{ x: 1000 }">
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'khong_kiem_tra_xung_dot'">
-            {{ record.khong_kiem_tra_xung_dot ? "✔️" : "❌" }}
+            <!-- {{ record.khong_kiem_tra_xung_dot ? "✔️" : "❌" }} -->
+            <Icon v-if="record.khong_kiem_tra_xung_dot" name="ant-design:check-outlined" class="text-green-600" />
+            <Icon v-else name="ant-design:close-outlined" class="text-red-500" />
           </template>
 
           <template v-if="column.key === 'action'">
@@ -51,19 +53,13 @@
                   <template #overlay>
                     <a-menu>
                       <a-menu-item @click="editBusy(record)" :disabled="!settingStore.currentPermission">
-                        <template #icon>
-                          <CalendarOutlined /> </template
-                        >Sửa tiết bận
+                        <template #icon> <CalendarOutlined /> </template>Sửa tiết bận
                       </a-menu-item>
                       <a-menu-item @click="editItem(record)" :disabled="!settingStore.currentPermission">
-                        <template #icon>
-                          <EditOutlined /> </template
-                        >Sửa
+                        <template #icon> <EditOutlined /> </template>Sửa
                       </a-menu-item>
                       <a-menu-item danger @click="deleteItem(record.id)" :disabled="!settingStore.currentPermission">
-                        <template #icon>
-                          <DeleteOutlined /> </template
-                        >Xóa
+                        <template #icon> <DeleteOutlined /> </template>Xóa
                       </a-menu-item>
                     </a-menu>
                   </template>
