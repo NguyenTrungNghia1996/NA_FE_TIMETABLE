@@ -75,7 +75,7 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa phòng học' : 'Thêm mới phòng học'" @cancel="handleCancel" :width="600" :footer="null">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <a-form-item label="Tên phòng học" name="ten">
-          <a-input v-model:value="formState.ten" placeholder="Nhập tên phòng học" />
+          <a-input v-model:value="formState.ten" placeholder="Nhập tên phòng học" :maxlength="50" showCount />
         </a-form-item>
         <a-form-item label="Sức chứa" name="suc_chua">
           <a-input-number v-model:value="formState.suc_chua" :min="1" style="width: 100%" />
@@ -191,8 +191,28 @@ const formState = reactive({
 });
 
 const rules = {
-  ten: [{ required: true, message: "Nhập tên phòng học", trigger: "blur" }],
-  suc_chua: [{ required: true, type: "number", message: "Nhập sức chứa", trigger: "blur" }],
+  ten: [
+    { required: true, message: "Nhập tên phòng học", trigger: "blur" },
+    { max: 50, message: "Tên nhiều nhất 50 ký tự", trigger: "blur" },
+  ],
+  suc_chua: [
+    { required: true, type: "number", message: "Nhập sức chứa", trigger: "blur" },
+    {
+      validator: (rule, value) => {
+        if (value === undefined || value === null || value === "") {
+          return Promise.reject("Nhập sức chứa");
+        }
+        if (!/^[1-9][0-9]*$/.test(value)) {
+          return Promise.reject("Chỉ được nhập số nguyên dương");
+        }
+        if (String(value).length > 5) {
+          return Promise.reject("Tối đa 5 ký tự số");
+        }
+        return Promise.resolve();
+      },
+      trigger: "blur",
+    },
+  ],
   id_Loai_phong_hoc: [{ required: true, message: "Chọn loại phòng học", trigger: "change" }],
   id_Diem_truong: [{ required: true, message: "Chọn điểm trường", trigger: "change" }],
 };

@@ -3,9 +3,9 @@
     <a-card title="Thông tin tiết học cố định" class="md:col-span-1">
       <a-form layout="vertical">
         <SelectSubject v-model="form.id_mon" />
-        <SelectSchoolDay v-model="form.id_ngay" />
+        <SelectSchoolDay v-model="form.ngay" />
         <SelectSchoolShiftByUnit v-model="form.id_ca" />
-        <SelectSchoolPeriod v-model="form.id_tiet" />
+        <SelectSchoolPeriod v-model="form.tiet" />
         <SelectGradeLevel v-if="!form.ap_dung_cho_tat_ca_cac_khoi" v-model="form.id_khoi_lop" />
         <a-form-item>
           <a-checkbox v-model:checked="form.ap_dung_cho_tat_ca_cac_khoi">Áp dụng cho tất cả các khối</a-checkbox>
@@ -73,9 +73,9 @@ const pagination = reactive({
 const form = reactive({
   id: null,
   id_mon: undefined,
-  id_ngay: undefined,
+  ngay: undefined,
   id_ca: undefined,
-  id_tiet: undefined,
+  tiet: undefined,
   id_khoi_lop: undefined,
   ap_dung_cho_tat_ca_cac_khoi: false,
 });
@@ -112,15 +112,24 @@ const handleTableChange = async pag => {
 const handleSave = async () => {
   try {
     saving.value = true;
+    let send_data = {
+      id: form.id,
+      id_mon: form.id_mon,
+      id_ngay: form.ngay,
+      id_ca: form.id_ca,
+      id_tiet: form.tiet,
+      id_khoi_lop: form.id_khoi_lop,
+      ap_dung_cho_tat_ca_cac_khoi: form.ap_dung_cho_tat_ca_cac_khoi,
+    };
     if (isEdit.value) {
-      const { data, error } = await RestApi.fixed_lesson.update({ body: { ...form } });
+      const { data, error } = await RestApi.fixed_lesson.update({ body: { ...send_data } });
       if (data.value?.status === "success") {
         message.success(data.value.message || "Cập nhật thành công");
       } else {
         throw new Error(error.value?.data?.message || "Cập nhật không thành công");
       }
     } else {
-      const payload = { ...form };
+      const payload = { ...send_data };
       delete payload.id;
       const { data, error } = await RestApi.fixed_lesson.create({ body: payload });
       if (data.value?.status === "success") {
@@ -175,9 +184,9 @@ const reset = () => {
   Object.assign(form, {
     id: null,
     id_mon: undefined,
-    id_ngay: undefined,
+    ngay: undefined,
     id_ca: undefined,
-    id_tiet: undefined,
+    tiet: undefined,
     id_khoi_lop: undefined,
     ap_dung_cho_tat_ca_cac_khoi: false,
   });
