@@ -20,7 +20,7 @@
 
           <template v-if="column.key === 'action'">
             <div class="flex justify-center gap-2">
-              <div class="hidden md:flex space-x-2">
+              <div class="md:flex space-x-2">
                 <a-tooltip title="Tiết bận">
                   <a-button type="link" size="small" @click="editBusy(record)" :disabled="!settingStore.currentPermission">
                     <template #icon>
@@ -45,7 +45,7 @@
                   </a-tooltip>
                 </a-popconfirm>
               </div>
-              <div class="md:hidden">
+              <!-- <div class="md:hidden">
                 <a-dropdown :trigger="['click']">
                   <a-button type="text" size="small">
                     <MoreOutlined />
@@ -64,7 +64,7 @@
                     </a-menu>
                   </template>
                 </a-dropdown>
-              </div>
+              </div> -->
             </div>
           </template>
         </template>
@@ -383,15 +383,17 @@ const handleBusyCancel = () => {
 };
 const deleteItem = async id => {
   try {
-    const { data } = await RestApi.classroom.delete({ params: { id } });
+    const { data, error } = await RestApi.classroom.delete({ params: { id } });
     if (data.value?.status === "success") {
       message.success(data.value.message || "Đã xoá");
       pagination.current = 1;
       param.value.PageIndex = 1;
       await fetchData({ ...param.value });
+    } else {
+      throw new Error(error.value?.data?.message);
     }
-  } catch {
-    message.error("Lỗi khi xoá");
+  } catch (error) {
+    message.error(error?.message || error?.value?.data?.message || "Xóa không thành công ");
   }
 };
 

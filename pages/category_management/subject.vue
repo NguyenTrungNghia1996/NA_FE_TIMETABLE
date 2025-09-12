@@ -425,6 +425,7 @@ const deleteItem = async id => {
 
 const resetForm = async () => {
   if (formRef.value) formRef.value.resetFields();
+  searchText.value = "";
   param.value = { PageIndex: 1, PageSize: 10, search: "" };
   pagination.current = 1;
   pagination.pageSize = 10;
