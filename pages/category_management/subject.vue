@@ -55,19 +55,19 @@
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <a-form-item label="Mã môn học" name="ma">
-            <a-input v-model:value="formState.ma" placeholder="Nhập mã môn học" :maxlength="20" show-count />
+            <a-input v-model:value="formState.ma" placeholder="Nhập mã môn học" :maxlength="30" show-count />
           </a-form-item>
           <a-form-item label="Tên môn học" name="ten">
-            <a-input v-model:value="formState.ten" placeholder="Nhập tên môn học" :maxlength="200" show-count />
+            <a-input v-model:value="formState.ten" placeholder="Nhập tên môn học" :maxlength="30" show-count />
           </a-form-item>
           <!-- <SelectClassroomType v-model="formState.Id_loai_phong_hoc" name="Id_loai_phong_hoc" :rules="rules.Id_loai_phong_hoc" /> -->
           <SelectClassroomType v-model="formState.Id_loai_phong_hoc" name="Id_loai_phong_hoc" :rules="rules.Id_loai_phong_hoc" />
           <SelectKnowledge v-model="formState.Id_khoi_kien_thuc" name="Id_khoi_kien_thuc" :multiple="true" />
           <a-form-item label="Số tiết tối đa một ca" name="So_tiet_toi_da_mot_ca">
-            <a-input-number v-model:value="formState.So_tiet_toi_da_mot_ca" :min="1" style="width: 100%" />
+            <a-input-number v-model:value="formState.So_tiet_toi_da_mot_ca" :min="1" :max="9" style="width: 100%" />
           </a-form-item>
           <a-form-item label="Số tiết tối đa hai ca" name="So_tiet_toi_da_hai_ca">
-            <a-input-number v-model:value="formState.So_tiet_toi_da_hai_ca" :min="1" style="width: 100%" />
+            <a-input-number v-model:value="formState.So_tiet_toi_da_hai_ca" :min="1" :max="9" style="width: 100%" />
           </a-form-item>
           <SelectClassroom v-if="formState.Id_loai_phong_hoc" v-model="formState.id_phong" name="classroomByType" :idLoaiPhonghoc="formState.Id_loai_phong_hoc" :multiple="true" />
         </div>
@@ -205,17 +205,46 @@ const formState = reactive({
   id_phong: [],
 });
 
+const isPosInt = v => Number.isInteger(v) && v > 0;
 const rules = reactive({
   ma: [
     { required: true, message: "Vui lòng nhập mã môn học", trigger: "blur" },
-    { max: 20, message: "Mã môn học tối đa 20 ký tự", trigger: "blur" },
+    { max: 30, message: "Mã môn học tối đa 30 ký tự", trigger: "blur" },
   ],
-  ten: [{ required: true, message: "Vui lòng nhập tên môn học", trigger: "blur" }],
-  // Id_loai_phong_hoc: [
-  //   { required: true, message: 'Vui lòng chọn loại phòng học', trigger: 'blur' }
-  // ],
-  So_tiet_toi_da_mot_ca: [{ required: true, message: "Vui lòng nhập số tiết", trigger: "blur", type: "number" }],
-  So_tiet_toi_da_hai_ca: [{ required: true, message: "Vui lòng nhập số tiết", trigger: "blur", type: "number" }],
+  ten: [
+    { required: true, message: "Vui lòng nhập tên môn học", trigger: "blur" },
+    { max: 30, message: "Tên môn học tối đa 30 ký tự", trigger: "blur" },
+  ],
+  So_tiet_toi_da_mot_ca: [
+    { required: true, message: "Vui lòng nhập số tiết", trigger: ["blur", "change"] },
+    {
+      validator: (_, value) => {
+        if (!isPosInt(value)) return Promise.reject("Số tiết tối đa phải là số nguyên dương");
+        const haiCa = formState.So_tiet_toi_da_hai_ca;
+        if (isPosInt(haiCa) && !(haiCa < value)) {
+          // tức là hai_ca >= mot_ca → lỗi phía mot_ca
+          return Promise.reject("Số tiết tối đa 1 ca phải lớn hơn số tiết tối đa 2 ca");
+        }
+        return Promise.resolve();
+      },
+      trigger: ["blur", "change"],
+    },
+  ],
+
+  So_tiet_toi_da_hai_ca: [
+    { required: true, message: "Vui lòng nhập số tiết", trigger: ["blur", "change"] },
+    {
+      validator: (_, value) => {
+        if (!isPosInt(value)) return Promise.reject("Số tiết tối đa phải là số nguyên dương");
+        const motCa = formState.So_tiet_toi_da_mot_ca;
+        if (isPosInt(motCa) && !(value < motCa)) {
+          return Promise.reject("Số tiết tối đa 2 ca phải nhỏ hơn số tiết tối đa 1 ca");
+        }
+        return Promise.resolve();
+      },
+      trigger: ["blur", "change"],
+    },
+  ],
 });
 
 watch(

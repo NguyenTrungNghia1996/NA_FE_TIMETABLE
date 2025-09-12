@@ -34,7 +34,7 @@ const fetchClassrooms = async (search = "") => {
     const params = {};
     if (search) params.search = search;
     if (props.idLoaiPhonghoc) params.idLoaiPhonghoc = props.idLoaiPhonghoc;
-    const { data } = await RestApi.classroom.list(Object.keys(params).length ? { params } : {});
+    const { data, error } = await RestApi.classroom.list(Object.keys(params).length ? { params } : {});
     if (data.value?.data?.items) {
       options.value = data.value.data.items.map(item => ({
         label: item.ten,
