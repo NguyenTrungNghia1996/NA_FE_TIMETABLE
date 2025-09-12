@@ -383,15 +383,17 @@ const handleBusyCancel = () => {
 };
 const deleteItem = async id => {
   try {
-    const { data } = await RestApi.classroom.delete({ params: { id } });
+    const { data, error } = await RestApi.classroom.delete({ params: { id } });
     if (data.value?.status === "success") {
       message.success(data.value.message || "Đã xoá");
       pagination.current = 1;
       param.value.PageIndex = 1;
       await fetchData({ ...param.value });
+    } else {
+      throw new Error(error.value?.data?.message);
     }
-  } catch {
-    message.error("Lỗi khi xoá");
+  } catch (error) {
+    message.error(error?.message || error?.value?.data?.message || "Xóa không thành công ");
   }
 };
 
