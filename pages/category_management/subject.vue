@@ -248,6 +248,20 @@ const rules = reactive({
 });
 
 watch(
+  () => formState.So_tiet_toi_da_mot_ca,
+  () => {
+    formRef.value?.validateFields(["So_tiet_toi_da_hai_ca"]).catch(() => {});
+  },
+);
+
+watch(
+  () => formState.So_tiet_toi_da_hai_ca,
+  () => {
+    formRef.value?.validateFields(["So_tiet_toi_da_mot_ca"]).catch(() => {});
+  },
+);
+
+watch(
   () => formState.Id_loai_phong_hoc,
   (val, oldVal) => {
     if (oldVal !== undefined && val !== oldVal) {
