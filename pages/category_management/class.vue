@@ -42,7 +42,7 @@
         <a-form-item label="Tên lớp" name="ten">
           <a-input v-model:value="formState.ten" placeholder="Nhập tên lớp" />
         </a-form-item>
-        <SelectGradeLevel v-model="formState.id_khoi" name="id_khoi" :rules="rules.id_khoi" />
+        <SelectSchoolShiftByUnit v-model="formState.id_khoi" name="id_khoi" :rules="rules.id_khoi" />
         <a-form-item label="Sĩ số" name="si_so">
           <a-input-number v-model:value="formState.si_so" :min="1" style="width: 100%" />
         </a-form-item>
