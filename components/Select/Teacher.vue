@@ -47,7 +47,8 @@ const loading = ref(false);
 const fetchTeachers = async (search = "") => {
   loading.value = true;
   try {
-    const { data, error } = await RestApi.teacher.list({ params: { search } });
+    const searchTerm = (search || "").trim();
+    const { data, error } = await RestApi.teacher.list({ params: { search: searchTerm } });
 
     if (data.value?.data?.items) {
       options.value = data.value.data.items.map(item => ({
@@ -55,7 +56,7 @@ const fetchTeachers = async (search = "") => {
         value: item.id,
       }));
 
-      if (props.autoSelectFirst && !search && (props.modelValue === undefined || props.modelValue === null || props.modelValue === "" || (Array.isArray(props.modelValue) && props.modelValue.length === 0))) {
+      if (props.autoSelectFirst && !searchTerm && (props.modelValue === undefined || props.modelValue === null || props.modelValue === "" || (Array.isArray(props.modelValue) && props.modelValue.length === 0))) {
         const firstOption = options.value[0];
         if (firstOption) {
           const defaultValue = props.multiple ? [firstOption.value] : firstOption.value;

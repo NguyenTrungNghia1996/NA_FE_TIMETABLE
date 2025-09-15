@@ -29,8 +29,9 @@ const loading = ref(false);
 const fetchCaphoc = async (search = "") => {
   loading.value = true;
   try {
+    const searchTerm = (search || "").trim();
     const { data, error } = await RestApi.school_level.list({
-      params: { search },
+      params: { search: searchTerm },
     });
 
     if (data.value?.data?.items) {
@@ -56,12 +57,12 @@ const fetchCaphoc = async (search = "") => {
 
 // Debounced search
 const debouncedFetch = debounce(val => {
-  fetchCaphoc(val);
+  fetchCaphoc((val || "").trim());
 }, 200);
 
 // Xử lý input trim khi người dùng tìm kiếm
 const onSearch = val => {
-  debouncedFetch(val.trim());
+  debouncedFetch(val);
 };
 
 // Fetch ban đầu

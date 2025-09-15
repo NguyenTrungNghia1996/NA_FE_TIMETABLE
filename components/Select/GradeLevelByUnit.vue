@@ -29,7 +29,8 @@ const loading = ref(false);
 const fetchGradeLevelsByUnit = async (search = "") => {
   loading.value = true;
   try {
-    const { data, error } = await RestApi.grade_level.list_by_unit({ params: { search } });
+    const searchTerm = (search || "").trim();
+    const { data, error } = await RestApi.grade_level.list_by_unit({ params: { search: searchTerm } });
     console.log(data);
 
     const raw = data.value?.data;

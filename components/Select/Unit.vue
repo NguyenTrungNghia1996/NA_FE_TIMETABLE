@@ -29,7 +29,8 @@ const loading = ref(false);
 const fetchUnits = async (search = "") => {
   loading.value = true;
   try {
-    const { data, error } = await RestApi.unit.list({ params: { search } });
+    const searchTerm = (search || "").trim();
+    const { data, error } = await RestApi.unit.list({ params: { search: searchTerm } });
     if (data.value?.data?.items) {
       options.value = data.value.data.items.map(item => ({
         label: item.tenDonvi,

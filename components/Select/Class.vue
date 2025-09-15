@@ -50,7 +50,8 @@ const fetchClasses = async (search = "") => {
   loading.value = true;
   try {
     const params = {};
-    if (search) params.search = search;
+    const searchTerm = (search || "").trim();
+    if (searchTerm) params.search = searchTerm;
     if (props.id_khoi) params.id_khoilop = props.id_khoi;
     const { data, error } = await RestApi.class.list({ params });
     if (data.value?.data?.items) {
@@ -58,7 +59,7 @@ const fetchClasses = async (search = "") => {
         label: item.ten,
         value: item.id,
       }));
-      if (props.autoSelectFirst && !search && (props.modelValue === undefined || props.modelValue === null || props.modelValue === "" || (Array.isArray(props.modelValue) && props.modelValue.length === 0))) {
+      if (props.autoSelectFirst && !searchTerm && (props.modelValue === undefined || props.modelValue === null || props.modelValue === "" || (Array.isArray(props.modelValue) && props.modelValue.length === 0))) {
         const firstOption = options.value[0];
         if (firstOption) {
           const defaultValue = props.multiple ? [firstOption.value] : firstOption.value;
