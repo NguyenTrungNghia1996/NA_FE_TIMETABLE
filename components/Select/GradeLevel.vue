@@ -29,7 +29,7 @@ const loading = ref(false);
 const fetchGradeLevels = async (search = "") => {
   loading.value = true;
   try {
-    const { data } = await RestApi.grade_level.list({ params: { search } });
+    const { data, error } = await RestApi.grade_level.list({ params: { search } });
 
     if (data.value?.data?.items) {
       options.value = data.value.data.items.map(item => ({
