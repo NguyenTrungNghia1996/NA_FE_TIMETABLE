@@ -15,10 +15,10 @@
           </div>
           <div class="grid grid-cols-2">
             <a-form-item label="Số tiết 1 ca" name="maxPeriod" :rules="rules.maxPeriod">
-              <a-input-number v-model:value="form.maxPeriod" class="w-full" :min="1" :max="9" />
+              <a-input-number v-model:value="form.maxPeriod" class="w-full" :min="1" :max="9" :precision="0" :step="1" />
             </a-form-item>
-            <a-form-item label="Số tiết 2 ca">
-              <a-input-number v-model:value="form.period2" class="w-full" :min="0" :max="9" />
+            <a-form-item label="Số tiết 2 ca" name="period2" :rules="rules.period2">
+              <a-input-number v-model:value="form.period2" class="w-full" :min="0" :max="9" :precision="0" :step="1" />
             </a-form-item>
           </div>
           <div class="flex flex-wrap gap-2 mt-4">
@@ -77,9 +77,22 @@ const isEdit = ref(false);
 const loading = ref(false);
 const saving = ref(false);
 
+const integerValidator = async (_rule, value) => {
+  if (value === undefined || value === null || value === "") return Promise.resolve();
+  return Number.isInteger(value)
+    ? Promise.resolve()
+    : Promise.reject("Vui lòng nhập số nguyên (không thập phân)");
+};
+
 const rules = {
   name: [{ required: true, message: "Vui lòng nhập tên tổ hợp" }],
-  maxPeriod: [{ required: true, message: "Vui lòng nhập số tiết tối đa" }],
+  maxPeriod: [
+    { required: true, message: "Vui lòng nhập số tiết tối đa" },
+    { validator: integerValidator },
+  ],
+  period2: [
+    { validator: integerValidator },
+  ],
   grade: [{ required: true, message: "Vui lòng chọn khối lớp" }],
   major: [{ required: true, message: "Vui lòng chọn ban học" }],
   subject1: [{ required: true, message: "Vui lòng chọn môn học" }],
