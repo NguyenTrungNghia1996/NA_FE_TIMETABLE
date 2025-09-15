@@ -15,10 +15,10 @@
           </div>
           <div class="grid grid-cols-2">
             <a-form-item label="Số tiết 1 ca" name="maxPeriod" :rules="rules.maxPeriod">
-              <a-input-number v-model:value="form.maxPeriod" class="w-full" :min="1" />
+              <a-input-number v-model:value="form.maxPeriod" class="w-full" :min="1" :max="9" />
             </a-form-item>
             <a-form-item label="Số tiết 2 ca">
-              <a-input-number v-model:value="form.period2" class="w-full" :min="0" />
+              <a-input-number v-model:value="form.period2" class="w-full" :min="0" :max="9" />
             </a-form-item>
           </div>
           <div class="flex flex-wrap gap-2 mt-4">
