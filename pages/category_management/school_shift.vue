@@ -158,7 +158,12 @@ const handleTableChange = async pag => {
 };
 
 const handleSearch = async () => {
-  param.value.search = searchText.value;
+  const search = (searchText.value || "").trim();
+  if (search) {
+    param.value.search = search;
+  } else {
+    delete param.value.search;
+  }
   pagination.current = 1;
   await fetchData({ ...param.value });
 };
