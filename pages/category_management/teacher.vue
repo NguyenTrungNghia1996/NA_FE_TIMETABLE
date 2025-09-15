@@ -52,7 +52,7 @@
         <a-form-item label="Tên" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
           <a-input v-model:value="formState.ten" placeholder="Nhập tên" :maxlength="200" show-count />
         </a-form-item>
-        <SelectExpertise v-model="formState.id_to_chuyen_mon" name="id_to_chuyen_mon" :rules="rules.id_to_chuyen_mon" />
+        <SelectExpertise v-model="formState.id_to_chuyen_mon" name="id_to_chuyen_mon" :multiple="true" :rules="rules.id_to_chuyen_mon" />
         <SelectSchoolSite v-model="formState.id_diem_truong" name="id_diem_truong" :multiple="true" :rules="rules.id_diem_truong" />
       </a-form>
 
@@ -109,7 +109,7 @@ const formState = reactive({
   id: null,
   ho_va_ho_dem: "",
   ten: "",
-  id_to_chuyen_mon: undefined,
+  id_to_chuyen_mon: [],
   id_diem_truong: [],
 });
 
@@ -161,7 +161,7 @@ const handleSearch = async () => {
 
 const showModal = () => {
   isEdit.value = false;
-  Object.assign(formState, { id: null, ho_va_ho_dem: "", ten: "", id_to_chuyen_mon: undefined, id_diem_truong: [] });
+  Object.assign(formState, { id: null, ho_va_ho_dem: "", ten: "", id_to_chuyen_mon: [], id_diem_truong: [] });
   visible.value = true;
 };
 

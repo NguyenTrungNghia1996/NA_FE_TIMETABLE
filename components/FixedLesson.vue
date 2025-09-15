@@ -1,12 +1,12 @@
 <template>
   <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
     <a-card title="Thông tin tiết học cố định" class="md:col-span-1">
-      <a-form layout="vertical">
-        <SelectSubject v-model="form.id_mon" />
-        <SelectSchoolDay v-model="form.ngay" />
-        <SelectSchoolShiftByUnit v-model="form.id_ca" />
-        <SelectSchoolPeriod v-model="form.tiet" />
-        <SelectGradeLevel v-if="!form.ap_dung_cho_tat_ca_cac_khoi" v-model="form.id_khoi_lop" />
+      <a-form ref="formRef" :model="form" layout="vertical">
+        <SelectSubject v-model="form.id_mon" name="id_mon" label="Môn học" :rules="[{ required: true, message: 'Vui lòng chọn Môn học' }]" />
+        <SelectSchoolDay v-model="form.ngay" name="ngay" label="Ngày học" :rules="[{ required: true, message: 'Vui lòng chọn Ngày học' }]" />
+        <SelectSchoolShiftByUnit v-model="form.id_ca" name="id_ca" label="Ca học" :rules="[{ required: true, message: 'Vui lòng chọn Ca học' }]" />
+        <SelectSchoolPeriod v-model="form.tiet" name="tiet" label="Tiết học" :rules="[{ required: true, message: 'Vui lòng chọn Tiết học' }]" />
+        <SelectGradeLevel v-if="!form.ap_dung_cho_tat_ca_cac_khoi" v-model="form.id_khoi_lop" name="id_khoi_lop" label="Khối lớp" :rules="[{ required: true, message: 'Vui lòng chọn Khối lớp' }]" />
         <a-form-item>
           <a-checkbox v-model:checked="form.ap_dung_cho_tat_ca_cac_khoi">Áp dụng cho tất cả các khối</a-checkbox>
         </a-form-item>
@@ -46,6 +46,7 @@
 </template>
 <script setup>
 const { RestApi } = useApi();
+const formRef = ref();
 
 const columns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
@@ -111,6 +112,8 @@ const handleTableChange = async pag => {
 
 const handleSave = async () => {
   try {
+    // Validate required fields before submit
+    await formRef.value?.validate();
     saving.value = true;
     let send_data = {
       id: form.id,

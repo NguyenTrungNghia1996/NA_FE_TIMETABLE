@@ -52,7 +52,7 @@ const fetchClasses = async (search = "") => {
     const params = {};
     if (search) params.search = search;
     if (props.id_khoi) params.id_khoilop = props.id_khoi;
-    const { data } = await RestApi.class.list({ params });
+    const { data, error } = await RestApi.class.list({ params });
     if (data.value?.data?.items) {
       options.value = data.value.data.items.map(item => ({
         label: item.ten,
@@ -65,9 +65,13 @@ const fetchClasses = async (search = "") => {
           emit("update:modelValue", defaultValue);
         }
       }
+    } else {
+      throw new Error(error.value?.data?.message);
     }
   } catch (error) {
-    console.error("❌ Lỗi fetch lớp học:", error);
+    // console.error("❌ Lỗi fetch lớp học:", error);
+    options.value = [];
+    message.error(error?.message || error?.value?.data?.message || "Không thể tải danh sách  lớp");
   } finally {
     loading.value = false;
   }
