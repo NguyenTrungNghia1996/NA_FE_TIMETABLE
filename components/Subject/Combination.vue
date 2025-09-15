@@ -6,7 +6,7 @@
           <SelectGradeLevel v-model="form.grade" class="mb-3" name="grade" :rules="rules.grade" label="Khối lớp" />
           <SelectSchoolship v-model="form.major" class="mb-3" name="major" :rules="rules.major" label="Ban học" />
           <a-form-item label="Tên tổ hợp" name="name" class="mb-3" :rules="rules.name">
-            <a-input v-model:value="form.name" class="w-full h-8" />
+            <a-input v-model:value="form.name" class="w-full" :maxlength="30" showCount />
           </a-form-item>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <SelectSubject v-model="form.subject1" label="Môn 1" :rules="rules.subject1" name="subject1" />
@@ -15,14 +15,14 @@
           </div>
           <div class="grid grid-cols-2">
             <a-form-item label="Số tiết 1 ca" name="maxPeriod" :rules="rules.maxPeriod">
-              <a-input-number v-model:value="form.maxPeriod" class="w-full h-8" :min="0" />
+              <a-input-number v-model:value="form.maxPeriod" class="w-full" :min="1" />
             </a-form-item>
             <a-form-item label="Số tiết 2 ca">
-              <a-input-number v-model:value="form.period2" class="w-full h-8" :min="0" />
+              <a-input-number v-model:value="form.period2" class="w-full" :min="0" />
             </a-form-item>
           </div>
           <div class="flex flex-wrap gap-2 mt-4">
-            <a-button type="primary" class="bg-green-500 border-green-500 hover:bg-green-600" @click="handleSave" :loading="saving">{{ isEdit ? 'Cập nhật' : 'Lưu' }}</a-button>
+            <a-button type="primary" class="bg-green-500 border-green-500 hover:bg-green-600" @click="handleSave" :loading="saving">{{ isEdit ? "Cập nhật" : "Lưu" }}</a-button>
             <a-button danger @click="reset">Hủy</a-button>
           </div>
         </a-form>
@@ -57,92 +57,90 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { message } from 'ant-design-vue'
-const { RestApi } = useApi()
+import { ref, reactive, onMounted } from "vue";
+import { message } from "ant-design-vue";
+const { RestApi } = useApi();
 
-const formRef = ref()
+const formRef = ref();
 const form = reactive({
   id: null,
   grade: undefined,
   major: undefined,
-  name: '',
+  name: "",
   subject1: undefined,
   subject2: undefined,
   subject3: undefined,
   maxPeriod: undefined,
   period2: undefined,
-})
-const isEdit = ref(false)
-const loading = ref(false)
-const saving = ref(false)
+});
+const isEdit = ref(false);
+const loading = ref(false);
+const saving = ref(false);
 
 const rules = {
-  name: [{ required: true, message: 'Vui lòng nhập tên tổ hợp' }],
-  maxPeriod: [{ required: true, message: 'Vui lòng nhập số tiết tối đa' }],
-  grade: [{ required: true, message: 'Vui lòng chọn khối lớp' }],
-  major: [{ required: true, message: 'Vui lòng chọn ban học' }],
-  subject1: [{ required: true, message: 'Vui lòng chọn môn học' }],
-  subject2: [{ required: true, message: 'Vui lòng chọn môn học' }],
-}
+  name: [{ required: true, message: "Vui lòng nhập tên tổ hợp" }],
+  maxPeriod: [{ required: true, message: "Vui lòng nhập số tiết tối đa" }],
+  grade: [{ required: true, message: "Vui lòng chọn khối lớp" }],
+  major: [{ required: true, message: "Vui lòng chọn ban học" }],
+  subject1: [{ required: true, message: "Vui lòng chọn môn học" }],
+  subject2: [{ required: true, message: "Vui lòng chọn môn học" }],
+};
 
 const columns = [
-  { title: 'STT', key: 'stt', width: 60, align: 'center' },
-  { title: 'Khối lớp', dataIndex: 'ten_khoi', key: 'ten_khoi', align: 'center' },
-  { title: 'Ban học', dataIndex: 'ten_ban', key: 'ten_ban', align: 'center' },
-  { title: 'Tên tổ hợp', dataIndex: 'ten', key: 'ten' },
-  { title: 'Môn 1', dataIndex: 'ten_mon_hoc_1', key: 'ten_mon_hoc_1' },
-  { title: 'Môn 2', dataIndex: 'ten_mon_hoc_2', key: 'ten_mon_hoc_2' },
-  { title: 'Môn 3', dataIndex: 'ten_mon_hoc_3', key: 'ten_mon_hoc_3' },
-  { title: 'Số tiết 1 ca', dataIndex: 'so_tiet_toi_da_1_ca', key: 'so_tiet_toi_da_1_ca', align: 'center' },
-  { title: 'Số tiết 2 ca', dataIndex: 'so_tiet_toi_da_2_ca', key: 'so_tiet_toi_da_2_ca', align: 'center' },
-  { title: 'Thao tác', key: 'action', width: 100, align: 'center' }
-]
+  { title: "STT", key: "stt", width: 60, align: "center" },
+  { title: "Khối lớp", dataIndex: "ten_khoi", key: "ten_khoi", align: "center" },
+  { title: "Ban học", dataIndex: "ten_ban", key: "ten_ban", align: "center" },
+  { title: "Tên tổ hợp", dataIndex: "ten", key: "ten" },
+  { title: "Môn 1", dataIndex: "ten_mon_hoc_1", key: "ten_mon_hoc_1" },
+  { title: "Môn 2", dataIndex: "ten_mon_hoc_2", key: "ten_mon_hoc_2" },
+  { title: "Môn 3", dataIndex: "ten_mon_hoc_3", key: "ten_mon_hoc_3" },
+  { title: "Số tiết 1 ca", dataIndex: "so_tiet_toi_da_1_ca", key: "so_tiet_toi_da_1_ca", align: "center" },
+  { title: "Số tiết 2 ca", dataIndex: "so_tiet_toi_da_2_ca", key: "so_tiet_toi_da_2_ca", align: "center" },
+  { title: "Thao tác", key: "action", width: 100, align: "center" },
+];
 
-const dataSource = ref([])
+const dataSource = ref([]);
 
 const pagination = reactive({
   current: 1,
   pageSize: 10,
   total: 0,
   showSizeChanger: true,
-  pageSizeOptions: ['1', '10', '20', '50'],
-  showTotal: (total) => `Tổng ${total} bản ghi`
-})
+  pageSizeOptions: ["1", "10", "20", "50"],
+  showTotal: total => `Tổng ${total} bản ghi`,
+});
 
 const fetchData = async () => {
   try {
-    loading.value = true
+    loading.value = true;
     const { data: resp } = await RestApi.subject_combination.list({
-      params: { pageIndex: pagination.current, pageSize: pagination.pageSize }
-    })
-    if (resp.value?.status === 'success') {
-      resp.value?.data?.items
-        ? (dataSource.value = resp.value.data.items)
-        : (dataSource.value = [])
-      pagination.total = resp.value.data.totalrecord || 0
+      params: { pageIndex: pagination.current, pageSize: pagination.pageSize },
+    });
+    if (resp.value?.status === "success") {
+      resp.value?.data?.items ? (dataSource.value = resp.value.data.items) : (dataSource.value = []);
+      pagination.total = resp.value.data.totalrecord || 0;
     } else {
-      dataSource.value = []
-      pagination.total = 0
+      dataSource.value = [];
+      pagination.total = 0;
     }
   } catch (err) {
-    console.error('fetch subject combination error:', err)
-    message.error('Không thể tải dữ liệu')
+    console.error("fetch subject combination error:", err);
+    message.error("Không thể tải dữ liệu");
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
-const handleTableChange = async (pag) => {
-  pagination.current = pag.current
-  pagination.pageSize = pag.pageSize
-  await fetchData()
-}
+const handleTableChange = async pag => {
+  pagination.current = pag.current;
+  pagination.pageSize = pag.pageSize;
+  await fetchData();
+};
 
 const handleSave = async () => {
   try {
-    await formRef.value.validate()
-    saving.value = true
+    await formRef.value.validate();
+    saving.value = true;
     const payload = {
       id: form.id,
       ten: form.name,
@@ -152,31 +150,31 @@ const handleSave = async () => {
       so_tiet_toi_da_1_ca: form.maxPeriod,
       so_tiet_toi_da_2_ca: form.period2 || 0,
       id_ban: form.major,
-      id_khoi: form.grade
-    }
-    let res
+      id_khoi: form.grade,
+    };
+    let res;
     if (isEdit.value) {
-      res = await RestApi.subject_combination.update({ body: payload })
+      res = await RestApi.subject_combination.update({ body: payload });
     } else {
-      delete payload.id
-      res = await RestApi.subject_combination.create({ body: payload })
+      delete payload.id;
+      res = await RestApi.subject_combination.create({ body: payload });
     }
-    if (res.data.value?.status === 'success') {
-      message.success(res.data.value?.message || 'Thành công')
-      await fetchData()
-      reset()
+    if (res.data.value?.status === "success") {
+      message.success(res.data.value?.message || "Thành công");
+      await fetchData();
+      reset();
     } else {
-      throw new Error(res.error?.value?.data?.message || 'Có lỗi xảy ra')
+      throw new Error(res.error?.value?.data?.message || "Có lỗi xảy ra");
     }
   } catch (err) {
-    message.error(err.message || 'Không thể lưu thông tin')
+    message.error(err.message || "Không thể lưu thông tin");
   } finally {
-    saving.value = false
+    saving.value = false;
   }
-}
+};
 
-const editItem = (record) => {
-  isEdit.value = true
+const editItem = record => {
+  isEdit.value = true;
   Object.assign(form, {
     id: record.id,
     grade: record.id_khoi,
@@ -186,42 +184,42 @@ const editItem = (record) => {
     subject2: record.id_mon_2,
     subject3: record.id_mon_3,
     maxPeriod: record.so_tiet_toi_da_1_ca,
-    period2: record.so_tiet_toi_da_2_ca
-  })
-}
+    period2: record.so_tiet_toi_da_2_ca,
+  });
+};
 
-const deleteItem = async (id) => {
+const deleteItem = async id => {
   try {
-    const { data, error } = await RestApi.subject_combination.delete({ params: { Id: id } })
-    if (data.value?.status === 'success') {
-      message.success(data.value?.message || 'Xóa thành công')
-      await fetchData()
+    const { data, error } = await RestApi.subject_combination.delete({ params: { Id: id } });
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Xóa thành công");
+      await fetchData();
     } else {
-      throw new Error(error.value?.data?.message || 'Xóa không thành công')
+      throw new Error(error.value?.data?.message || "Xóa không thành công");
     }
   } catch (err) {
-    message.error(err.message || 'Không thể xóa')
+    message.error(err.message || "Không thể xóa");
   }
-}
+};
 
 const reset = () => {
   Object.assign(form, {
     id: null,
     grade: undefined,
     major: undefined,
-    name: '',
+    name: "",
     subject1: undefined,
     subject2: undefined,
     subject3: undefined,
     maxPeriod: undefined,
     period2: undefined,
-  })
-  isEdit.value = false
-}
+  });
+  isEdit.value = false;
+};
 defineExpose({
-  reset
-})
-onMounted(fetchData)
+  reset,
+});
+onMounted(fetchData);
 </script>
 
 <style scoped></style>
