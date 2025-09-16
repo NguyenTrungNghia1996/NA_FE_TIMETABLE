@@ -92,13 +92,19 @@ const period2GteMaxPeriodValidator = async (_rule, value) => {
 };
 
 const rules = {
-  name: [{ required: true, message: "Vui lòng nhập tên tổ hợp" }],
-  maxPeriod: [{ required: true, message: "Vui lòng nhập số tiết tối đa" }, { validator: integerValidator }],
-  period2: [{ validator: integerValidator }, { validator: period2GteMaxPeriodValidator }],
-  grade: [{ required: true, message: "Vui lòng chọn khối lớp" }],
-  major: [{ required: true, message: "Vui lòng chọn ban học" }],
-  subject1: [{ required: true, message: "Vui lòng chọn môn học" }],
-  subject2: [{ required: true, message: "Vui lòng chọn môn học" }],
+  name: [{ required: true, message: "Vui lòng nhập tên tổ hợp", trigger: "blur" }],
+  maxPeriod: [
+    { required: true, message: "Vui lòng nhập số tiết tối đa", trigger: "blur" },
+    { validator: integerValidator, trigger: "blur" },
+  ],
+  period2: [
+    { validator: integerValidator, trigger: "blur" },
+    { validator: period2GteMaxPeriodValidator, trigger: "blur" },
+  ],
+  grade: [{ required: true, message: "Vui lòng chọn khối lớp", trigger: "blur" }],
+  major: [{ required: true, message: "Vui lòng chọn ban học", trigger: "blur" }],
+  subject1: [{ required: true, message: "Vui lòng chọn môn học", trigger: "blur" }],
+  subject2: [{ required: true, message: "Vui lòng chọn môn học", trigger: "blur" }],
 };
 
 const columns = [
