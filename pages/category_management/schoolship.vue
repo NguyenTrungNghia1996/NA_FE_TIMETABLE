@@ -43,7 +43,7 @@
         <a-form-item label="Tên ban học" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }" :rules="rules.ten">
           <a-input v-model:value="formState.ten" placeholder="Nhập tên ban học" :maxlength="50" show-count />
         </a-form-item>
-        <SelectSchoolLevel v-model="formState.id_cap_hoc" name="id_cap_hoc" :rules="rules.id_cap_hoc" />
+        <SelectSchoolLevelByUnit v-model="formState.id_cap_hoc" name="id_cap_hoc" :rules="rules.id_cap_hoc" />
         <a-form-item label="Ghi chú" name="ghichu" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
           <a-textarea v-model:value="formState.ghichu" :rows="4" placeholder="Nhập ghi chú (nếu có)" :maxlength="200" show-count />
         </a-form-item>

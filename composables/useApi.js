@@ -9,6 +9,7 @@ let ENDPOINTS = {
   //SCHOOL_LEVEL
   SCHOOL_LEVEL: "/api/caphoc",
   SCHOOL_LEVEL_DETAIL: "/api/caphoc/detail",
+  SCHOOL_LEVEL_BY_UNIT: "/api/caphoc/captheodonvi",
   //USER
   USER: "/api/users",
   USER_DETAIL: "/api/users/detail",
@@ -341,6 +342,9 @@ class SchoolLevel {
   }
   async list(data) {
     return await this.request.get(ENDPOINTS.SCHOOL_LEVEL, data);
+  }
+  async list_by_unit(data) {
+    return await this.request.get(ENDPOINTS.SCHOOL_LEVEL_BY_UNIT, data);
   }
   async detail(data) {
     return await this.request.get(ENDPOINTS.SCHOOL_LEVEL_DETAIL, data);
