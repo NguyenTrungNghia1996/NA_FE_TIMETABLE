@@ -83,7 +83,7 @@ const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
 const columns = [
   { title: "STT", key: "stt", width: 50, align: "center" },
   { title: "Mã giáo viên", dataIndex: "ma_giao_vien", key: "ma_giao_vien", ellipsis: true },
-  { title: "Họ và Họ đệm", dataIndex: "ho_va_ho_dem", key: "ho_va_ho_dem", ellipsis: true },
+  { title: "Họ và tên", dataIndex: "ho_va_ho_dem", key: "ho_va_ho_dem", ellipsis: true },
   // { title: "Tên", dataIndex: "ten", key: "ten", ellipsis: true },
   { title: "Tổ chuyên môn", dataIndex: "ten_to_chuyen_mon", key: "ten_to_chuyen_mon", ellipsis: true },
   { title: "Thao tác", key: "action", width: 80, align: "center", fixed: "right" },
