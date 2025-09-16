@@ -88,7 +88,7 @@ const period2GteMaxPeriodValidator = async (_rule, value) => {
   if (value === undefined || value === null || value === "") return Promise.resolve();
   // If maxPeriod not set yet, skip comparison (maxPeriod has its own required rule)
   if (form.maxPeriod === undefined || form.maxPeriod === null || form.maxPeriod === "" || form.maxPeriod === 0) return Promise.resolve();
-  return value >= form.maxPeriod ? Promise.resolve() : Promise.reject("Số tiết 2 ca phải lớn hơn hoặc bằng số tiết 1 ca");
+  return value <= form.maxPeriod ? Promise.resolve() : Promise.reject("Số tiết 2 ca phải lớn hơn hoặc bằng số tiết 1 ca");
 };
 
 const rules = {
