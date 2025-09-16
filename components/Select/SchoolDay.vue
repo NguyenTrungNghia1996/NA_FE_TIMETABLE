@@ -8,8 +8,6 @@
 import { ref } from "vue";
 import debounce from "lodash/debounce";
 
-const { RestApi } = useApi();
-
 const props = defineProps({
   modelValue: [Array, Number, String],
   label: { type: String, default: "Ngày học" },
@@ -29,20 +27,31 @@ const loading = ref(false);
 const fetchDays = async (search = "") => {
   loading.value = true;
   try {
-    const searchTerm = (search || "").trim();
-    const { data, error } = await RestApi.school_day.list({ params: { search: searchTerm } });
+    const searchTerm = (search || "").trim().toLowerCase();
+    const dayNames = [
+      "Thứ 2",
+      "Thứ 3",
+      "Thứ 4",
+      "Thứ 5",
+      "Thứ 6",
+      "Thứ 7",
+      "Chủ nhật",
+    ];
 
-    if (data.value?.data?.items) {
-      options.value = data.value.data.items.map(item => ({
-        label: item.ten,
-        value: item.id,
-      }));
+    const baseOptions = dayNames.map((label, idx) => ({ label, value: idx + 1 }));
 
-      if (props.modelValue === undefined || props.modelValue === null || props.modelValue === "") {
-        emit("update:modelValue", props.modelValue);
-      }
-    } else {
-      throw new Error(error.value?.data?.message);
+    const filtered = baseOptions.filter(opt => {
+      if (!searchTerm) return true;
+      return (
+        opt.label.toLowerCase().includes(searchTerm) ||
+        String(opt.value).includes(searchTerm)
+      );
+    });
+
+    options.value = filtered;
+
+    if (props.modelValue === undefined || props.modelValue === null || props.modelValue === "") {
+      emit("update:modelValue", props.modelValue);
     }
   } catch (error) {
     options.value = [];

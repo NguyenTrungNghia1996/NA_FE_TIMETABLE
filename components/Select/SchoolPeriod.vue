@@ -8,8 +8,6 @@
 import { ref } from "vue";
 import debounce from "lodash/debounce";
 
-const { RestApi } = useApi();
-
 const props = defineProps({
   modelValue: [Array, Number, String],
   label: { type: String, default: "Tiết học" },
@@ -29,20 +27,24 @@ const loading = ref(false);
 const fetchPeriods = async (search = "") => {
   loading.value = true;
   try {
-    const searchTerm = (search || "").trim();
-    const { data, error } = await RestApi.school_period.list({ params: { search: searchTerm } });
+    const searchTerm = (search || "").trim().toLowerCase();
+    const baseOptions = Array.from({ length: 5 }, (_, i) => ({
+      label: `Tiết ${i + 1}`,
+      value: i + 1,
+    }));
 
-    if (data.value?.data?.items) {
-      options.value = data.value.data.items.map(item => ({
-        label: item.ten,
-        value: item.id,
-      }));
+    const filtered = baseOptions.filter(opt => {
+      if (!searchTerm) return true;
+      return (
+        opt.label.toLowerCase().includes(searchTerm) ||
+        String(opt.value).includes(searchTerm)
+      );
+    });
 
-      if (props.modelValue === undefined || props.modelValue === null || props.modelValue === "") {
-        emit("update:modelValue", props.modelValue);
-      }
-    } else {
-      throw new Error(error.value?.data?.message);
+    options.value = filtered;
+
+    if (props.modelValue === undefined || props.modelValue === null || props.modelValue === "") {
+      emit("update:modelValue", props.modelValue);
     }
   } catch (error) {
     options.value = [];
