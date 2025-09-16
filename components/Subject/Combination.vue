@@ -79,20 +79,22 @@ const saving = ref(false);
 
 const integerValidator = async (_rule, value) => {
   if (value === undefined || value === null || value === "") return Promise.resolve();
-  return Number.isInteger(value)
-    ? Promise.resolve()
-    : Promise.reject("Vui lòng nhập số nguyên (không thập phân)");
+  return Number.isInteger(value) ? Promise.resolve() : Promise.reject("Vui lòng nhập số nguyên (không thập phân)");
+};
+
+// period2 must be >= maxPeriod
+const period2GteMaxPeriodValidator = async (_rule, value) => {
+  // Allow empty and let required rule handle if needed
+  if (value === undefined || value === null || value === "") return Promise.resolve();
+  // If maxPeriod not set yet, skip comparison (maxPeriod has its own required rule)
+  if (form.maxPeriod === undefined || form.maxPeriod === null || form.maxPeriod === "" || form.maxPeriod === 0) return Promise.resolve();
+  return value >= form.maxPeriod ? Promise.resolve() : Promise.reject("Số tiết 2 ca phải lớn hơn hoặc bằng số tiết 1 ca");
 };
 
 const rules = {
   name: [{ required: true, message: "Vui lòng nhập tên tổ hợp" }],
-  maxPeriod: [
-    { required: true, message: "Vui lòng nhập số tiết tối đa" },
-    { validator: integerValidator },
-  ],
-  period2: [
-    { validator: integerValidator },
-  ],
+  maxPeriod: [{ required: true, message: "Vui lòng nhập số tiết tối đa" }, { validator: integerValidator }],
+  period2: [{ validator: integerValidator }, { validator: period2GteMaxPeriodValidator }],
   grade: [{ required: true, message: "Vui lòng chọn khối lớp" }],
   major: [{ required: true, message: "Vui lòng chọn ban học" }],
   subject1: [{ required: true, message: "Vui lòng chọn môn học" }],
