@@ -4,7 +4,7 @@
       <div class="w-full">
         <a-form ref="formRef" layout="vertical" :model="form" :rules="rules">
           <SelectGradeLevel v-model="form.grade" class="mb-3" name="grade" :rules="rules.grade" label="Khối lớp" />
-          <SelectSchoolShiftByUnit v-model="form.major" class="mb-3" name="major" :rules="rules.major" label="Ban học" />
+          <SelectSchoolship v-model="form.major" class="mb-3" name="major" :rules="rules.major" label="Ban học" />
           <a-form-item label="Tên tổ hợp" name="name" class="mb-3" :rules="rules.name">
             <a-input v-model:value="form.name" class="w-full" :maxlength="30" showCount />
           </a-form-item>
