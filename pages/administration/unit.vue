@@ -71,7 +71,7 @@
           <a-form-item label="Tên đơn vị" name="tenDonvi">
             <a-input v-model:value="formState.tenDonvi" placeholder="Nhập tên đơn vị" />
           </a-form-item>
-          <SelectSchoolLevel v-model="formState.idCap" name="idCap" :rules="rules.idCap" :multiple="true" />
+          <SelectSchoolLevelByUnit v-model="formState.idCap" name="idCap" :rules="rules.idCap" :multiple="true" />
 
           <a-form-item label="Địa chỉ" name="diachi">
             <a-input v-model:value="formState.diachi" placeholder="Nhập địa chỉ" />
@@ -83,7 +83,7 @@
           <a-form-item label="Email" name="email">
             <a-input v-model:value="formState.email" placeholder="Nhập email" />
           </a-form-item>
-          <SelectSchoolShift v-model="formState.id_cahoc" name="id_cahoc" :rules="rules.id_cahoc" :multiple="true" />
+          <SelectSchoolShiftByUnit v-model="formState.id_cahoc" name="id_cahoc" :rules="rules.id_cahoc" :multiple="true" />
         </div>
         <div class="flex justify-end gap-2 mt-6">
           <a-button @click="handleCancel">Hủy</a-button>
