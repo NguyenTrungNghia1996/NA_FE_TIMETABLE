@@ -54,7 +54,7 @@ const fetchClasses = async (search = "") => {
     if (searchTerm) params.search = searchTerm;
     if (props.id_khoi) params.id_khoilop = props.id_khoi;
     const { data, error } = await RestApi.class.list({ params });
-    if (data.value?.data?.items) {
+    if (data.value?.status === "success") {
       options.value = data.value.data.items.map(item => ({
         label: item.ten,
         value: item.id,

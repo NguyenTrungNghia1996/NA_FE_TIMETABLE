@@ -31,12 +31,10 @@ const fetchGradeLevelsByUnit = async (search = "") => {
   try {
     const searchTerm = (search || "").trim();
     const { data, error } = await RestApi.grade_level.list_by_unit({ params: { search: searchTerm } });
-    console.log(data);
-
     const raw = data.value?.data;
     const items = Array.isArray(raw?.items) ? raw.items : Array.isArray(raw) ? raw : [];
 
-    if (Array.isArray(items)) {
+    if (data.value?.status === "success" && Array.isArray(items)) {
       options.value = items.map(item => ({ label: item.ten, value: item.id }));
       // giữ nguyên giá trị đang chọn
       emit("update:modelValue", props.modelValue);

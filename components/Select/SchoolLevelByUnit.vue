@@ -1,20 +1,6 @@
 <template>
   <a-form-item :label="label" :name="name" :rules="rules">
-    <a-select
-      :value="modelValue"
-      @update:value="val => $emit('update:modelValue', val)"
-      :mode="multiple ? 'multiple' : undefined"
-      show-search
-      :placeholder="placeholder"
-      :size="size"
-      :loading="loading"
-      :disabled="disabled"
-      allow-clear
-      class="w-full"
-      :options="options"
-      @search="onSearch"
-      :filter-option="false"
-    />
+    <a-select :value="modelValue" @update:value="val => $emit('update:modelValue', val)" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" :filter-option="false" />
   </a-form-item>
 </template>
 
@@ -48,7 +34,7 @@ const fetchCapHocTheoDonVi = async (search = "") => {
 
     const items = data.value?.data?.items;
 
-    if (Array.isArray(items)) {
+    if (Array.isArray(items) && data.value?.status === "success") {
       options.value = items.map(item => ({
         label: item.ten,
         value: item.id,
