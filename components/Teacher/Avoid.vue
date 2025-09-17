@@ -14,18 +14,15 @@
       </a-table>
     </a-card>
 
-    <a-card
-      v-if="selectedId"
-      title="CÁC TIẾT HỌC TRÁNH XẾP"
-      class="md:col-span-1"
-    >
+    <a-card v-if="selectedId" title="CÁC TIẾT HỌC TRÁNH XẾP" class="md:col-span-1">
+      <p class="text-lg">Giáo viên: {{ teachers_name }}</p>
       <div class="grid grid-cols-2 gap-2">
         <div class="flex items-center">
           <a-checkbox v-model:checked="onlyOneShift">Chỉ dạy 1 buổi/ngày</a-checkbox>
         </div>
         <div class="flex items-center gap-5">
           <span>Số tiết tối đa/ngày:</span>
-          <a-input-number v-model:value="maxPeriod" :min="1" />
+          <a-input-number v-model:value="maxPeriod" :min="1" :precision="0" />
         </div>
       </div>
       <div v-if="schedule && !onlyOneShift" class="space-y-4">
@@ -45,6 +42,7 @@
 const { RestApi } = useApi();
 
 const teachers = ref([]);
+const teachers_name = ref("");
 const loading = ref(false);
 const selectedId = ref(null);
 const schedule = ref();
@@ -52,6 +50,8 @@ const onlyOneShift = ref(false);
 const maxPeriod = ref(0);
 const teaching_session = ref(null);
 const saving = ref(false);
+
+const isPositiveInteger = value => Number.isInteger(value) && value > 0;
 
 const columns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
@@ -92,6 +92,7 @@ async function fetchTeachers() {
 }
 
 async function selectTeacher(record) {
+  teachers_name.value = record.ho_va_ho_dem + " " + record.ten;
   if (!record) return;
   selectedId.value = record.id;
   try {
@@ -99,7 +100,8 @@ async function selectTeacher(record) {
     if (data.value?.status === "success") {
       schedule.value = data.value.data;
       onlyOneShift.value = !!data.value.data.chi_day_mot_buoi;
-      maxPeriod.value = data.value.data.so_tiet_toi_da || 0;
+      const fetchedMaxPeriod = Number(data.value.data.so_tiet_toi_da);
+      maxPeriod.value = Number.isFinite(fetchedMaxPeriod) ? fetchedMaxPeriod : 0;
       teaching_session.value = data.value.data.id_buoi_day || 0;
     }
   } catch (err) {
@@ -108,27 +110,33 @@ async function selectTeacher(record) {
 }
 
 async function handleSave() {
-  if (!selectedId.value) return
+  if (!selectedId.value) return;
+  const normalizedMaxPeriod = Number(maxPeriod.value);
+  if (!isPositiveInteger(normalizedMaxPeriod)) {
+    message.warning("Số tiết tối đa/ngày phải là số tự nhiên dương");
+    return;
+  }
+  maxPeriod.value = normalizedMaxPeriod;
   try {
-    saving.value = true
+    saving.value = true;
     const payload = {
       id_giao_vien: selectedId.value,
       chi_day_mot_buoi: onlyOneShift.value,
-      so_tiet_toi_da: maxPeriod.value,
+      so_tiet_toi_da: normalizedMaxPeriod,
       id_buoi_day: teaching_session.value,
       ds_Ca: schedule.value?.ds_Ca || [],
-    }
-    const { data, error } = await RestApi.teacher.update_avoid({ body: payload })
-    if (data.value?.status === 'success') {
-      message.success(data.value.message || 'Cập nhật thành công')
+    };
+    const { data, error } = await RestApi.teacher.update_avoid({ body: payload });
+    if (data.value?.status === "success") {
+      message.success(data.value.message || "Cập nhật thành công");
     } else {
-      throw new Error(error.value?.data?.message || data.value?.message || 'Cập nhật không thành công')
+      throw new Error(error.value?.data?.message || data.value?.message || "Cập nhật không thành công");
     }
   } catch (err) {
-    console.error('Update teacher error', err)
-    message.error(err.message || 'Lỗi cập nhật')
+    console.error("Update teacher error", err);
+    message.error(err.message || "Lỗi cập nhật");
   } finally {
-    saving.value = false
+    saving.value = false;
   }
 }
 
