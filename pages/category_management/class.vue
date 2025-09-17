@@ -44,7 +44,7 @@
         </a-form-item>
         <SelectGradeLevelByUnit v-model="formState.id_khoi" name="id_khoi" :rules="rules.id_khoi" />
         <a-form-item label="Sĩ số" name="si_so">
-          <a-input-number v-model:value="formState.si_so" :min="1" style="width: 100%" />
+          <a-input-number v-model:value="formState.si_so" style="width: 100%" :max="99" :precision="0" :min="1" />
         </a-form-item>
         <SelectSchoolShiftByUnit v-model="formState.id_ca" name="id_ca" :rules="rules.id_ca" />
         <SelectTeacher v-model="formState.id_gvcn" name="id_gvcn" :rules="rules.id_gvcn" />
@@ -158,9 +158,12 @@ const formState = reactive({
 });
 
 const rules = reactive({
-  ten: [{ required: true, message: "Vui lòng nhập tên lớp", trigger: "blur" }],
+  ten: [
+    { required: true, message: "Vui lòng nhập tên lớp", trigger: "blur" },
+    { max: 20, message: "Tên lớp học không quá 20 kí tự", trigger: "blur" },
+  ],
   id_khoi: [{ required: true, message: "Vui lòng chọn khối", trigger: "change" }],
-  si_so: [{ required: true, type: "number", message: "Vui lòng nhập sĩ số", trigger: "change" }],
+  // si_so: [{ required: true, type: "number", message: "Vui lòng nhập sĩ số", trigger: "change" }],
   id_ca: [{ required: true, message: "Vui lòng chọn ca", trigger: "change" }],
   id_gvcn: [{ required: true, message: "Vui lòng chọn giáo viên", trigger: "change" }],
   id_phong: [{ required: true, message: "Vui lòng chọn phòng học", trigger: "change" }],
