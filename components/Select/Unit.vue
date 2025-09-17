@@ -31,7 +31,7 @@ const fetchUnits = async (search = "") => {
   try {
     const searchTerm = (search || "").trim();
     const { data, error } = await RestApi.unit.list({ params: { search: searchTerm } });
-    if (data.value?.data?.items) {
+    if (data.value?.status === "success") {
       options.value = data.value.data.items.map(item => ({
         label: item.tenDonvi,
         value: item.id,
