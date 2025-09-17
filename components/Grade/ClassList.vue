@@ -1,7 +1,7 @@
 <template>
   <div class="grid grid-cols-1 md:grid-cols-3 gap-1 space-y-4">
     <div>
-      <SelectGradeLevel v-model="gradeId" />
+      <SelectGradeLevelByUnit v-model="gradeId" />
       <a-card title="DANH SÁCH LỚP">
         <a-table :columns="columns" :data-source="classes" :loading="loading" :pagination="pagination" size="small" row-key="id" @change="handleTableChange" :customRow="onRow">
           <template #bodyCell="{ column, record, index }">
@@ -24,11 +24,7 @@
               <template v-else-if="column.key === 'teacher'">
                 <div class="flex items-center justify-between w-full">
                   <span>{{ record.ten_giao_vien }}</span>
-                  <button
-                    v-if="record.trang_thai"
-                    class="text-blue-600 hover:text-blue-800 cursor-pointer"
-                    @click="openTeacherModal(record)"
-                  >
+                  <button v-if="record.trang_thai" class="text-blue-600 hover:text-blue-800 cursor-pointer" @click="openTeacherModal(record)">
                     <Icon name="ant-design:edit-outlined" />
                   </button>
                 </div>
@@ -36,25 +32,21 @@
               <template v-else-if="column.key === 'tradRoom'">
                 <div class="flex items-center justify-between w-full">
                   <span>{{ record.ten_phong_truyen_thong }}</span>
-                  <button
-                    v-if="record.trang_thai"
-                    class="text-blue-600 hover:text-blue-800 cursor-pointer"
-                    @click="openRoomModal(record, 'trad')"
-                  >
+                  <button v-if="record.trang_thai" class="text-blue-600 hover:text-blue-800 cursor-pointer" @click="openRoomModal(record, 'trad')">
                     <Icon name="ant-design:edit-outlined" />
                   </button>
                 </div>
               </template>
 
               <template v-else-if="column.key === 'weekly'">
-                {{ record.so_tiet_tuan > 0? record.so_tiet_tuan : "-" }}
+                {{ record.so_tiet_tuan > 0 ? record.so_tiet_tuan : "-" }}
               </template>
               <template v-else-if="column.key === 'tradMorning'">
                 <template v-if="record.trang_thai">
                   <a-input-number v-model:value="record.so_tiet_ca_sang_truyen_thong" :min="0" size="small" style="width: 80px" @change="updateWeekly(record)" />
                 </template>
                 <template v-else>
-                  {{ record.so_tiet_ca_sang_truyen_thong > 0 ? record.so_tiet_ca_sang_truyen_thong : '-' }}
+                  {{ record.so_tiet_ca_sang_truyen_thong > 0 ? record.so_tiet_ca_sang_truyen_thong : "-" }}
                 </template>
               </template>
               <template v-else-if="column.key === 'tradAfternoon'">
@@ -62,17 +54,13 @@
                   <a-input-number v-model:value="record.so_tiet_ca_chieu_truyen_thong" :min="0" size="small" style="width: 80px" @change="updateWeekly(record)" />
                 </template>
                 <template v-else>
-                  {{ record.so_tiet_ca_chieu_truyen_thong > 0 ? record.so_tiet_ca_chieu_truyen_thong : '-' }}
+                  {{ record.so_tiet_ca_chieu_truyen_thong > 0 ? record.so_tiet_ca_chieu_truyen_thong : "-" }}
                 </template>
               </template>
               <template v-else-if="column.key === 'specRoom'">
                 <div class="flex items-center justify-between w-full">
                   <span>{{ record.ten_phong_chuyen_dung }}</span>
-                  <button
-                    v-if="record.trang_thai"
-                    class="text-blue-600 hover:text-blue-800 cursor-pointer"
-                    @click="openRoomModal(record, 'spec')"
-                  >
+                  <button v-if="record.trang_thai" class="text-blue-600 hover:text-blue-800 cursor-pointer" @click="openRoomModal(record, 'spec')">
                     <Icon name="ant-design:edit-outlined" />
                   </button>
                 </div>
@@ -82,7 +70,7 @@
                   <a-input-number v-model:value="record.so_tiet_ca_sang_phong_chuyen_dung" :min="0" size="small" style="width: 80px" @change="updateWeekly(record)" />
                 </template>
                 <template v-else>
-                  {{ record.so_tiet_ca_sang_phong_chuyen_dung > 0 ? record.so_tiet_ca_sang_phong_chuyen_dung : '-' }}
+                  {{ record.so_tiet_ca_sang_phong_chuyen_dung > 0 ? record.so_tiet_ca_sang_phong_chuyen_dung : "-" }}
                 </template>
               </template>
               <template v-else-if="column.key === 'specAfternoon'">
@@ -90,7 +78,7 @@
                   <a-input-number v-model:value="record.so_tiet_ca_chieu_phong_chuyen_dung" :min="0" size="small" style="width: 80px" @change="updateWeekly(record)" />
                 </template>
                 <template v-else>
-                  {{ record.so_tiet_ca_chieu_phong_chuyen_dung > 0 ? record.so_tiet_ca_chieu_phong_chuyen_dung : '-' }}
+                  {{ record.so_tiet_ca_chieu_phong_chuyen_dung > 0 ? record.so_tiet_ca_chieu_phong_chuyen_dung : "-" }}
                 </template>
               </template>
               <template v-else-if="column.key === 'action'">
@@ -384,7 +372,7 @@ function openRoomModal(record, type) {
   roomModal.record = record;
   roomModal.type = type;
   roomModal.visible = true;
-  roomModal.selectedId = type === 'trad' ? record.id_phong_truyen_thong : record.id_phong_chuyen_dung;
+  roomModal.selectedId = type === "trad" ? record.id_phong_truyen_thong : record.id_phong_chuyen_dung;
   roomModal.filter = type;
   loadRooms();
 }
@@ -393,16 +381,16 @@ async function loadRooms() {
   try {
     roomModal.loading = true;
     const params = {};
-    if (roomModal.filter === 'trad') params.idLoaiPhonghoc = 1;
-    else if (roomModal.filter === 'spec') params.idLoaiPhonghoc = 2;
+    if (roomModal.filter === "trad") params.idLoaiPhonghoc = 1;
+    else if (roomModal.filter === "spec") params.idLoaiPhonghoc = 2;
     const { data } = await RestApi.classroom.list({ params });
-    if (data.value?.status === 'success') {
+    if (data.value?.status === "success") {
       roomModal.rooms = data.value.data.items || [];
     } else {
       roomModal.rooms = [];
     }
   } catch (err) {
-    console.error('Fetch classrooms error', err);
+    console.error("Fetch classrooms error", err);
   } finally {
     roomModal.loading = false;
   }
@@ -419,12 +407,12 @@ function cancelRoom() {
 function confirmRoom() {
   if (!roomModal.record) return;
   const r = roomModal.rooms.find(rr => rr.id === roomModal.selectedId);
-  if (roomModal.type === 'trad') {
+  if (roomModal.type === "trad") {
     roomModal.record.id_phong_truyen_thong = r ? r.id : null;
-    roomModal.record.ten_phong_truyen_thong = r ? r.ten : '';
+    roomModal.record.ten_phong_truyen_thong = r ? r.ten : "";
   } else {
     roomModal.record.id_phong_chuyen_dung = r ? r.id : null;
-    roomModal.record.ten_phong_chuyen_dung = r ? r.ten : '';
+    roomModal.record.ten_phong_chuyen_dung = r ? r.ten : "";
   }
   roomModal.visible = false;
 }

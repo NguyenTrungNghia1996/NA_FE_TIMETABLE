@@ -6,7 +6,7 @@
         <SelectSchoolDay v-model="form.ngay" name="ngay" label="Ngày học" :rules="[{ required: true, message: 'Vui lòng chọn Ngày học' }]" />
         <SelectSchoolShiftByUnit v-model="form.id_ca" name="id_ca" label="Ca học" :rules="[{ required: true, message: 'Vui lòng chọn Ca học' }]" />
         <SelectSchoolPeriod v-model="form.tiet" name="tiet" label="Tiết học" :rules="[{ required: true, message: 'Vui lòng chọn Tiết học' }]" />
-        <SelectGradeLevel v-if="!form.ap_dung_cho_tat_ca_cac_khoi" v-model="form.id_khoi_lop" name="id_khoi_lop" label="Khối lớp" :rules="[{ required: true, message: 'Vui lòng chọn Khối lớp' }]" />
+        <SelectGradeLevelByUnit v-if="!form.ap_dung_cho_tat_ca_cac_khoi" v-model="form.id_khoi_lop" name="id_khoi_lop" label="Khối lớp" :rules="[{ required: true, message: 'Vui lòng chọn Khối lớp' }]" />
         <a-form-item>
           <a-checkbox v-model:checked="form.ap_dung_cho_tat_ca_cac_khoi">Áp dụng cho tất cả các khối</a-checkbox>
         </a-form-item>

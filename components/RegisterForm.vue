@@ -18,8 +18,8 @@
         <a-form-item label="Email" name="email">
           <a-input v-model:value="form.email" placeholder="Nhập email" />
         </a-form-item>
-        <SelectSchoolShift v-model="form.id_ca" name="id_ca" :rules="rules.id_ca" :multiple="true" />
-        <SelectSchoolLevel v-model="form.id_cap" name="id_cap" :rules="rules.id_cap" :multiple="true" />
+        <SelectSchoolShiftByUnit v-model="form.id_ca" name="id_ca" :rules="rules.id_ca" :multiple="true" />
+        <SelectSchoolLevelByUnit v-model="form.id_cap" name="id_cap" :rules="rules.id_cap" :multiple="true" />
       </a-card>
       <a-card title="Thông tin tài khoản" size="small">
         <a-form-item label="Tên tài khoản" name="ten_tai_khoan">
