@@ -221,9 +221,8 @@ const rules = reactive({
       validator: (_, value) => {
         if (!isPosInt(value)) return Promise.reject("Số tiết tối đa phải là số nguyên dương");
         const haiCa = formState.So_tiet_toi_da_hai_ca;
-        if (isPosInt(haiCa) && !(haiCa <= value)) {
-          // tức là hai_ca >= mot_ca → lỗi phía mot_ca
-          return Promise.reject("Số tiết tối đa 1 ca phải lớn hơn hoặc bằng số tiết tối đa 2 ca");
+        if (isPosInt(haiCa) && !(haiCa >= value)) {
+          return Promise.reject("Số tiết tối đa 1 ca phải nhỏ hơn hoặc bằng số tiết tối đa 2 ca");
         }
         return Promise.resolve();
       },
@@ -237,8 +236,8 @@ const rules = reactive({
       validator: (_, value) => {
         if (!isPosInt(value)) return Promise.reject("Số tiết tối đa phải là số nguyên dương");
         const motCa = formState.So_tiet_toi_da_mot_ca;
-        if (isPosInt(motCa) && !(value <= motCa)) {
-          return Promise.reject("Số tiết tối đa 2 ca phải nhỏ hơn hoặc bằng số tiết tối đa 1 ca");
+        if (isPosInt(motCa) && !(value >= motCa)) {
+          return Promise.reject("Số tiết tối đa 2 ca phải lớn hơn hoặc bằng số tiết tối đa 1 ca");
         }
         return Promise.resolve();
       },

@@ -48,10 +48,10 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa giáo viên' : 'Thêm mới giáo viên'" @cancel="handleCancel" :width="600">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <a-form-item label="Họ và Họ đệm" name="ho_va_ho_dem" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
-          <a-input v-model:value="formState.ho_va_ho_dem" placeholder="Nhập họ và họ đệm" :maxlength="200" show-count />
+          <a-input v-model:value="formState.ho_va_ho_dem" placeholder="Nhập họ và họ đệm" :maxlength="20" show-count />
         </a-form-item>
         <a-form-item label="Tên" name="ten" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
-          <a-input v-model:value="formState.ten" placeholder="Nhập tên" :maxlength="200" show-count />
+          <a-input v-model:value="formState.ten" placeholder="Nhập tên" :maxlength="20" show-count />
         </a-form-item>
         <SelectExpertise v-model="formState.id_to_chuyen_mon" name="id_to_chuyen_mon" :multiple="true" :rules="rules.id_to_chuyen_mon" />
         <SelectSchoolSite v-model="formState.id_diem_truong" name="id_diem_truong" :multiple="true" :rules="rules.id_diem_truong" />
@@ -117,11 +117,11 @@ const formState = reactive({
 const rules = reactive({
   ho_va_ho_dem: [
     { required: true, message: "Vui lòng nhập họ và họ đệm", trigger: "blur" },
-    { max: 200, message: "Tối đa 200 ký tự", trigger: "blur" },
+    { max: 20, message: "Tối đa 200 ký tự", trigger: "blur" },
   ],
   ten: [
     { required: true, message: "Vui lòng nhập tên", trigger: "blur" },
-    { max: 200, message: "Tối đa 200 ký tự", trigger: "blur" },
+    { max: 20, message: "Tối đa 200 ký tự", trigger: "blur" },
   ],
   id_to_chuyen_mon: [{ required: true, message: "Vui lòng chọn tổ chuyên môn", trigger: "change" }],
   id_diem_truong: [{ required: true, message: "Vui lòng chọn điểm trường", trigger: "change" }],
@@ -244,6 +244,7 @@ const resetForm = async () => {
   if (formRef.value) {
     formRef.value.resetFields();
   }
+  searchText.value = "";
   param.value.PageIndex = 1;
   param.value.PageSize = 10;
   param.value.search = "";
