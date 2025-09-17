@@ -15,13 +15,8 @@
     </a-card>
 
     <a-card v-if="selectedTeacher" title="MÔN HỌC GIẢNG DẠY" class="md:col-span-1">
-      <a-table
-        :columns="subjectColumns"
-        :data-source="subjects"
-        :pagination="false"
-        size="small"
-        row-key="id_mon"
-      >
+      <p class="text-lg">Giáo viên: {{ selectedTeacher.ho_va_ho_dem }} {{ selectedTeacher.ten }}</p>
+      <a-table :columns="subjectColumns" :data-source="subjects" :pagination="false" size="small" row-key="id_mon">
         <template #bodyCell="{ column, record, index }">
           <template v-if="column.key === 'stt'">{{ index + 1 }}</template>
           <template v-if="column.key === 'active'">
@@ -147,7 +142,6 @@ async function handleSave() {
     saving.value = false;
   }
 }
-
 
 const refresh = async () => {
   await fetchTeachers();
