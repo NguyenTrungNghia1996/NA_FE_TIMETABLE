@@ -43,21 +43,15 @@
             <template v-if="column.key === 'weekly'">
               <span>{{ record.weekly }}</span>
             </template>
-            <template v-if="column.key === 'morningPeriod'">
-              <a-input-number v-if="record.editable" v-model:value="record.morning.period" :min="0" size="small" class="w-full" />
-              <span v-else>{{ record.morning.period || "-" }}</span>
-            </template>
-            <template v-if="column.key === 'morningGroup'">
-              <a-input-number v-if="record.editable" v-model:value="record.morning.group" :min="0" size="small" class="w-full" />
-              <span v-else>{{ record.morning.group || "-" }}</span>
-            </template>
-            <template v-if="column.key === 'afternoonPeriod'">
-              <a-input-number v-if="record.editable" v-model:value="record.afternoon.period" :min="0" size="small" class="w-full" />
-              <span v-else>{{ record.afternoon.period || "-" }}</span>
-            </template>
-            <template v-if="column.key === 'afternoonGroup'">
-              <a-input-number v-if="record.editable" v-model:value="record.afternoon.group" :min="0" size="small" class="w-full" />
-              <span v-else>{{ record.afternoon.group || "-" }}</span>
+            <template v-else-if="isShiftColumn(column.key)">
+              <template v-if="getShiftField(column.key) === 'period'">
+                <a-input-number v-if="record.editable" v-model:value="record.shifts[getShiftId(column.key)].period" :min="0" size="small" class="w-full" />
+                <span v-else>{{ record.shifts[getShiftId(column.key)]?.period ?? "-" }}</span>
+              </template>
+              <template v-else>
+                <a-input-number v-if="record.editable" v-model:value="record.shifts[getShiftId(column.key)].group" :min="0" size="small" class="w-full" />
+                <span v-else>{{ record.shifts[getShiftId(column.key)]?.group ?? "-" }}</span>
+              </template>
             </template>
             <template v-if="column.key === 'action'">
               <div class="flex justify-center space-x-2">
@@ -97,6 +91,7 @@ const summary = reactive({
 });
 
 const subjects = ref([]);
+const availableShifts = ref([]);
 
 const drawerAvoidOpen = ref(false);
 const avoidRef = ref(null);
@@ -133,80 +128,82 @@ const baseColumns = [
     align: "center",
     width: 120,
   },
-  {
-    title: "Ca sáng",
-    children: [
-      {
-        title: "Số tiết",
-        key: "morningPeriod",
-        align: "center",
-        width: 120,
-      },
-      {
-        title: "Số nhóm",
-        key: "morningGroup",
-        align: "center",
-        width: 120,
-      },
-    ],
-  },
-  {
-    title: "Ca chiều",
-    children: [
-      {
-        title: "Số tiết",
-        key: "afternoonPeriod",
-        align: "center",
-        width: 120,
-      },
-      {
-        title: "Số nhóm",
-        key: "afternoonGroup",
-        align: "center",
-        width: 120,
-      },
-    ],
-  },
-  {
-    title: "Thao tác",
-    key: "action",
-    align: "center",
-    width: 120,
-    fixed: "right",
-  },
 ];
 
+const actionColumn = {
+  title: "Thao tác",
+  key: "action",
+  align: "center",
+  width: 120,
+  fixed: "right",
+};
+
 const displayColumns = computed(() => {
-  const id = Number(filters.shift);
-  if (id === 1) {
-    return baseColumns.filter(col => col.title !== "Ca chiều");
-  }
-  if (id === 2) {
-    return baseColumns.filter(col => col.title !== "Ca sáng");
-  }
-  return baseColumns;
+  const selectedShiftId = filters.shift !== undefined && filters.shift !== null ? String(filters.shift) : undefined;
+  const shiftColumnsSource = selectedShiftId
+    ? availableShifts.value.filter(shift => String(shift.id) === selectedShiftId)
+    : availableShifts.value;
+
+  const shiftColumns = shiftColumnsSource.map(shift => ({
+    title: shift.name || `Ca ${shift.id}`,
+    key: `shift-${shift.id}`,
+    children: [
+      {
+        title: "Số tiết",
+        key: `shift-${shift.id}-period`,
+        align: "center",
+        width: 120,
+      },
+      {
+        title: "Số nhóm",
+        key: `shift-${shift.id}-group`,
+        align: "center",
+        width: 120,
+      },
+    ],
+  }));
+
+  return [...baseColumns, ...shiftColumns, actionColumn];
 });
+
+const isShiftColumn = key => {
+  const value = key ?? "";
+  return value.startsWith("shift-") && (value.endsWith("-period") || value.endsWith("-group"));
+};
+
+const getShiftField = key => {
+  if ((key ?? "").endsWith("-period")) return "period";
+  if ((key ?? "").endsWith("-group")) return "group";
+  return undefined;
+};
+
+const getShiftId = key => {
+  if (!isShiftColumn(key)) return undefined;
+  const value = key ?? "";
+  return value.slice(6, value.lastIndexOf("-"));
+};
 
 // Keep summary totals regardless of selected shift
 watch(
   subjects,
   val => {
     val.forEach(r => {
-      r.weekly = (r.morning.period || 0) + (r.afternoon.period || 0);
+      const total = Object.values(r.shifts || {}).reduce((sum, shift) => sum + (Number(shift.period) || 0), 0);
+      r.weekly = total;
     });
-    summary.morning = val.reduce((s, r) => s + (r.morning.period || 0), 0);
-    summary.afternoon = val.reduce((s, r) => s + (r.afternoon.period || 0), 0);
-    summary.total = summary.morning + summary.afternoon;
+    summary.morning = val.reduce((s, r) => s + (Number(r.shifts?.["1"]?.period) || 0), 0);
+    summary.afternoon = val.reduce((s, r) => s + (Number(r.shifts?.["2"]?.period) || 0), 0);
+    summary.total = val.reduce((s, r) => s + (Number(r.weekly) || 0), 0);
   },
   { deep: true, immediate: true },
 );
 
 const onEditableChange = record => {
   if (record.editable == false) {
-    record.morning.period = 0;
-    record.morning.group = 0;
-    record.afternoon.period = 0;
-    record.afternoon.group = 0;
+    Object.values(record.shifts || {}).forEach(shift => {
+      shift.period = 0;
+      shift.group = 0;
+    });
   }
 };
 
@@ -231,23 +228,63 @@ const handleUpdate = async () => {
 
 const convertFromApi = data => {
   const list = data.ds_Mon || data.ds_mon || [];
-  return list.map(mon => {
-    const findById = (arr, id) => arr.find(c => (c.id ?? c.id_ca) === id) || {};
+  const shiftMap = new Map();
+
+  const records = list.map(mon => {
+    const shifts = {};
+    const shiftOrder = [];
+
+    (mon.ds_Ca || mon.ds_ca || []).forEach(ca => {
+      const shiftId = String(ca.id_ca ?? ca.id);
+      shiftOrder.push(shiftId);
+      shifts[shiftId] = {
+        id: shiftId,
+        name: ca.ten_ca || shiftMap.get(shiftId) || `Ca ${shiftId}`,
+        period: Number(ca.so_tiet) || 0,
+        group: Number(ca.so_nhom) || 0,
+      };
+      if (!shiftMap.has(shiftId)) {
+        shiftMap.set(shiftId, ca.ten_ca || `Ca ${shiftId}`);
+      }
+    });
+
     return {
-      id: mon.id_mon,
+      id: mon.id_mon ?? mon.id,
       name: mon.ten_mon,
-      weekly: (mon.ds_Ca[0]?.so_tiet || 0) + (mon.ds_Ca[1]?.so_tiet || 0),
-      morning: {
-        period: findById(mon.ds_Ca, 1).so_tiet || 0,
-        group: findById(mon.ds_Ca, 1).so_nhom || 0,
-      },
-      afternoon: {
-        period: findById(mon.ds_Ca, 2).so_tiet || 0,
-        group: findById(mon.ds_Ca, 2).so_nhom || 0,
-      },
-      editable: mon.trang_thai,
+      weekly: Object.values(shifts).reduce((sum, shift) => sum + (Number(shift.period) || 0), 0),
+      shifts,
+      shiftOrder,
+      editable: Boolean(mon.trang_thai),
     };
   });
+
+  const shiftList = Array.from(shiftMap, ([id, name]) => ({ id, name }));
+
+  records.forEach(record => {
+    shiftList.forEach(({ id, name }) => {
+      if (!record.shifts[id]) {
+        record.shifts[id] = {
+          id,
+          name,
+          period: 0,
+          group: 0,
+        };
+      }
+    });
+    if (!record.shiftOrder.length) {
+      record.shiftOrder = shiftList.map(shift => shift.id);
+    } else {
+      const missing = shiftList
+        .map(shift => shift.id)
+        .filter(id => !record.shiftOrder.includes(id));
+      record.shiftOrder.push(...missing);
+    }
+    record.weekly = Object.values(record.shifts).reduce((sum, shift) => sum + (Number(shift.period) || 0), 0);
+  });
+
+  availableShifts.value = shiftList;
+
+  return records;
 };
 const convertToApi = () => {
   return {
@@ -256,20 +293,18 @@ const convertToApi = () => {
     ds_Mon: subjects.value.map(mon => ({
       id_Mon: mon.id,
       ten_mon: mon.name,
-      ds_Ca: [
-        {
-          id_ca: 1,
-          ten_ca: "Ca sáng",
-          so_tiet: mon.morning.period,
-          so_nhom: mon.morning.group,
-        },
-        {
-          id_ca: 2,
-          ten_ca: "Ca chiều",
-          so_tiet: mon.afternoon.period,
-          so_nhom: mon.afternoon.group,
-        },
-      ],
+      ds_Ca: (mon.shiftOrder?.length ? mon.shiftOrder : availableShifts.value.map(shift => shift.id))
+        .map(id => mon.shifts?.[id])
+        .filter(Boolean)
+        .map(shift => {
+          const parsedId = Number(shift.id);
+          return {
+            id_ca: Number.isNaN(parsedId) ? shift.id : parsedId,
+            ten_ca: shift.name,
+            so_tiet: shift.period,
+            so_nhom: shift.group,
+          };
+        }),
       trang_thai: mon.editable,
     })),
   };
@@ -284,11 +319,18 @@ const fetchSubjects = async () => {
       subjects.value = convertFromApi(data.value.data[0]);
     } else {
       subjects.value = [];
+      availableShifts.value = [];
     }
   } catch (e) {
     console.error("Failed to fetch subjects", e);
   }
 };
+
+watch(availableShifts, list => {
+  if (!list.some(shift => String(shift.id) === String(filters.shift))) {
+    filters.shift = undefined;
+  }
+});
 
 watch(
   () => [filters.grade, filters.major],
