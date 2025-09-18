@@ -205,17 +205,17 @@ const handleCancel = () => {
 
 const deleteItem = async id => {
   try {
-    const { data } = await RestApi.grade_level.delete({ params: { id } });
+    const { data, error } = await RestApi.grade_level.delete({ params: { id } });
     if (data.value?.status === "success") {
       message.success(data.value?.message || "Đã xóa");
       param.value.PageIndex = 1;
       pagination.current = 1;
       await fetchData({ ...param.value });
     } else {
-      message.error(data.value?.message || "Không thể xóa");
+      throw new Error(error.value?.data?.message || "Xóa không thành công");
     }
-  } catch (err) {
-    message.error("Lỗi khi xóa");
+  } catch (error) {
+    message.error(error?.message || error?.value?.data?.message || "Xóa không thành công ");
   }
 };
 

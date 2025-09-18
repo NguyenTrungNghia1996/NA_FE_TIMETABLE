@@ -231,12 +231,16 @@ const handleCancel = () => {
 
 const deleteItem = async id => {
   try {
-    await RestApi.timetable.delete({ params: { Id: id } });
-    pagination.current = 1;
-    param.value.pageIndex = 1;
-    message.success("Xóa thành công");
+    const { data, error } = await RestApi.timetable.delete({ params: { Id: id } });
+    if (data.value?.status === "success") {
+      pagination.current = 1;
+      param.value.pageIndex = 1;
+      message.success("Xóa thành công");
+    } else {
+      throw new Error(error.value?.data?.message || "Xóa không thành công");
+    }
   } catch (error) {
-    message.error("Đã xảy ra lỗi khi xóa");
+    message.error(error?.message || error?.value?.data?.message || "Xóa không thành công ");
   } finally {
     await fetchData({ ...param.value });
   }
@@ -285,7 +289,7 @@ const fetchAdjustData = async () => {
       //   tiet_thu_may,
       // }));
 
-      adjustRawUnscheduled.value = raw.ds_chua_xep
+      adjustRawUnscheduled.value = raw.ds_chua_xep;
     } else {
       adjustRawTimetable.value = [];
       adjustRawUnscheduled.value = [];
