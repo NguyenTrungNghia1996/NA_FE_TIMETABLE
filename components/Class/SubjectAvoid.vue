@@ -1,12 +1,10 @@
 <template>
   <div class="grid grid-cols-1 md:grid-cols-4 gap-1">
-    <a-card title="DANH SÁCH LỚP HỌC" class="md:col-span-1">
+    <a-card title="Danh sách lớp học" class="md:col-span-1">
       <ClassList ref="classRef" @select="handleSelectClass" />
     </a-card>
-    <a-card v-if="selectedClassId" title="DANH SÁCH MÔN HỌC THEO LỚP" class="md:col-span-1">
-      <SubjectList ref="subjectRef" :class-id="selectedClassId" @select="handleSubjectClass" />
-    </a-card>
-    <a-card v-if="selectedClassId && selectedSubjectId" title="CÁC TIẾT NGHỈ CỦA LỚP" class="md:col-span-2">
+    <a-card v-if="selectedClassId" :title="'Danh sách môn học lớp ' + selectedClass.ten" class="md:col-span-1"> <SubjectList ref="subjectRef" :class-id="selectedClassId" @select="handleSubjectClass" /> </a-card>
+    <a-card v-if="selectedClassId && selectedSubjectId" :title="'Các tiết nghỉ của lớp ' + selectedClass.ten + ' - ' + selectedSubject.ten" class="md:col-span-2">
       <div v-if="schedule" class="space-y-4">
         <div v-for="block in schedule.ds_Ca" :key="block.id">
           <Timetable :block="block" />
@@ -29,6 +27,9 @@ const { RestApi } = useApi();
 const selectedClassId = ref(null);
 const selectedSubjectId = ref(null);
 
+const selectedClass = ref();
+const selectedSubject = ref();
+
 const classRef = ref(null);
 const subjectRef = ref(null);
 
@@ -37,9 +38,11 @@ const saving = ref(false);
 
 const handleSelectClass = record => {
   selectedClassId.value = record.id;
+  selectedClass.value = record;
 };
 const handleSubjectClass = record => {
   selectedSubjectId.value = record.id;
+  selectedSubject.value = record;
 };
 
 watch(

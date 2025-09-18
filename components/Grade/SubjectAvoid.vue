@@ -11,7 +11,7 @@
         </template>
       </a-table>
     </a-card>
-    <a-card v-if="gradeId && shipId && selectedId" title="CÁC TIẾT HỌC TRÁNH XẾP" class="md:col-span-2">
+    <a-card v-if="gradeId && shipId && selectedId" :title="'Các tiết học tránh xếp của môn: ' + grade.ten" class="md:col-span-2">
       <div v-if="schedule" class="space-y-4">
         <div v-for="block in schedule.ds_Ca" :key="block.id">
           <Timetable :block="block" />
@@ -30,6 +30,7 @@ import { message } from "ant-design-vue";
 const { RestApi } = useApi();
 
 const gradeId = ref(null);
+const grade = ref();
 const shipId = ref(null);
 const subjects = ref([]);
 const loading = ref(false);
@@ -139,6 +140,7 @@ const onRow = record => {
   return {
     onClick: () => {
       selectedId.value = record.id;
+      grade.value = record;
     },
     style: { cursor: "pointer" },
   };
