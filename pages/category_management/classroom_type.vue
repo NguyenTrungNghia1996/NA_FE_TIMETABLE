@@ -15,7 +15,7 @@
           <template v-if="column.key === 'action'">
             <div class="flex justify-center gap-2">
               <!-- Desktop view - full buttons -->
-              <div class="hidden md:flex space-x-2">
+              <div class="md:flex space-x-2">
                 <a-tooltip title="Sửa">
                   <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission">
                     <template #icon>
@@ -35,7 +35,7 @@
               </div>
 
               <!-- Mobile view - dropdown -->
-              <div class="md:hidden">
+              <!-- <div class="md:hidden">
                 <a-dropdown :trigger="['click']">
                   <a-button type="text" size="small">
                     <MoreOutlined />
@@ -57,7 +57,7 @@
                     </a-menu>
                   </template>
                 </a-dropdown>
-              </div>
+              </div> -->
             </div>
           </template>
         </template>
