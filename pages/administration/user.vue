@@ -28,7 +28,7 @@
           <template v-if="column.key === 'action'">
             <div class="flex justify-center gap-2">
               <!-- Desktop view - full buttons -->
-              <div class="hidden md:flex space-x-2">
+              <div class="md:flex space-x-2">
                 <a-tooltip title="Đặt lại mật khẩu">
                   <a-popconfirm title="Đặt lại mật khẩu thành 12345 cho tài khoản này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="resetPassword(record.id)">
                     <a-button type="link" size="small" :disabled="!settingStore.currentPermission">
@@ -57,7 +57,7 @@
               </div>
 
               <!-- Mobile view - dropdown -->
-              <div class="md:hidden">
+              <!-- <div class="md:hidden">
                 <a-dropdown :trigger="['click']">
                   <a-button type="text" size="small">
                     <MoreOutlined />
@@ -85,7 +85,7 @@
                     </a-menu>
                   </template>
                 </a-dropdown>
-              </div>
+              </div> -->
             </div>
           </template>
         </template>
