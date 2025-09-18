@@ -17,7 +17,7 @@
     </div>
     <div class="col-span-2">
       <div class="overflow-x-auto">
-        <a-card title="DANH SÁCH MÔN HỌC">
+        <a-card :title="'Danh sách môn học lớp: ' + selectedClass.ten">
           <a-table :columns="subjectColumns" :data-source="subjects" :loading="subjectLoading" :pagination="false" size="small" row-key="id_mon" :scroll="{ x: 'max-content' }">
             <template #bodyCell="{ column, record, index }">
               <template v-if="column.key === 'stt'">{{ index + 1 }}</template>
@@ -125,7 +125,6 @@
 </template>
 
 <script setup>
-import { message } from "ant-design-vue";
 const { RestApi } = useApi();
 
 const gradeId = ref(null);
@@ -459,12 +458,13 @@ async function handleSave() {
     saving.value = false;
   }
 }
-
+const selectedClass = ref();
 defineExpose({ reset, refresh });
 const onRow = record => {
   return {
     onClick: () => {
       selectedClassId.value = record.id;
+      selectedClass.value = record;
       fetchSubjects(record.id);
     },
     style: {
