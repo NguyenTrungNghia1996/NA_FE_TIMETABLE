@@ -14,7 +14,7 @@
           <template v-if="column.key === 'action'">
             <div class="flex justify-center gap-2">
               <!-- Desktop view - full buttons -->
-              <div class="hidden md:flex space-x-2">
+              <div class="md:flex space-x-2">
                 <a-tooltip title="Sửa">
                   <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission">
                     <template #icon>
@@ -31,31 +31,6 @@
                     </a-button>
                   </a-tooltip>
                 </a-popconfirm>
-              </div>
-
-              <!-- Mobile view - dropdown -->
-              <div class="md:hidden">
-                <a-dropdown :trigger="['click']">
-                  <a-button type="text" size="small">
-                    <MoreOutlined />
-                  </a-button>
-                  <template #overlay>
-                    <a-menu>
-                      <a-menu-item key="1" @click="editItem(record)" :disabled="!settingStore.currentPermission">
-                        <template #icon>
-                          <EditOutlined />
-                        </template>
-                        Sửa
-                      </a-menu-item>
-                      <a-menu-item key="2" danger @click="deleteItem(record.id)" :disabled="!settingStore.currentPermission">
-                        <template #icon>
-                          <DeleteOutlined />
-                        </template>
-                        Xóa
-                      </a-menu-item>
-                    </a-menu>
-                  </template>
-                </a-dropdown>
               </div>
             </div>
           </template>
