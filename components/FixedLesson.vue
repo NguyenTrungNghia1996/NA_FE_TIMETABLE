@@ -176,8 +176,8 @@ const deleteItem = async id => {
     } else {
       throw new Error(error.value?.data?.message || "Xóa không thành công");
     }
-  } catch (err) {
-    message.error(err.message || "Có lỗi xảy ra");
+  } catch (error) {
+    message.error(error.message || "Có lỗi xảy ra");
   } finally {
     await fetchData();
   }

@@ -227,17 +227,18 @@ const handleCancel = () => {
 
 const deleteItem = async id => {
   try {
-    const { data } = await RestApi.school_level.delete({ params: { id: id } });
+    const { data, error } = await RestApi.school_level.delete({ params: { id: id } });
     if (data.value?.status === "success") {
       message.success(data.value?.message || "Xóa thành công");
       param.value.PageIndex = 1;
       pagination.current = 1;
     } else {
-      message.error(data.value?.message || "Có lỗi xảy ra");
+      throw new Error(error.value?.data?.message || "Xóa không thành công");
     }
   } catch (error) {
-    console.error("Error deleting data:", error);
-    message.error("Có lỗi xảy ra khi xóa dữ liệu");
+    // console.error("Error deleting data:", error);
+    // message.error("Có lỗi xảy ra khi xóa dữ liệu");
+    message.error(error?.message || error?.value?.data?.message || "Xóa không thành công ");
   } finally {
     await fetchData({ ...param.value });
   }

@@ -456,17 +456,17 @@ const handleBusyCancel = () => {
 
 const deleteItem = async id => {
   try {
-    const { data } = await RestApi.subject.delete({ params: { Id: id } });
+    const { data, error } = await RestApi.subject.delete({ params: { Id: id } });
     if (data.value?.status === "success") {
       message.success(data.value?.message || "Xóa thành công");
       pagination.current = 1;
       param.value.PageIndex = 1;
       await fetchData({ ...param.value });
     } else {
-      message.error(data.value?.message || "Không thể xóa");
+      throw new Error(error.value?.data?.message || "Xóa không thành công");
     }
-  } catch (err) {
-    message.error("Lỗi khi xóa");
+  } catch (error) {
+    message.error(error?.message || error?.value?.data?.message || "Xóa không thành công ");
   }
 };
 

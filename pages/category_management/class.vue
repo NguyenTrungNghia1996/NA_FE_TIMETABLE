@@ -260,16 +260,16 @@ const handleCancel = () => {
 
 const deleteItem = async id => {
   try {
-    const { data } = await RestApi.class.delete({ params: { Id: id } });
+    const { data, error } = await RestApi.class.delete({ params: { Id: id } });
     if (data.value?.status === "success") {
       message.success(data.value?.message || "Xóa thành công");
       pagination.current = 1;
       param.value.PageIndex = 1;
     } else {
-      message.error(data.value?.message || "Có lỗi xảy ra");
+      throw new Error(error.value?.data?.message || "Xóa không thành công");
     }
-  } catch {
-    message.error("Có lỗi xảy ra khi xóa dữ liệu");
+  } catch (error) {
+    message.error(error?.message || error?.value?.data?.message || "Xóa không thành công ");
   } finally {
     await fetchData({ ...param.value });
   }

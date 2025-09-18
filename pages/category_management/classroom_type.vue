@@ -258,18 +258,19 @@ const handleCancel = () => {
 
 const deleteItem = async id => {
   try {
-    const { data } = await RestApi.classroom_type.delete({ params: { id: id } });
+    const { data, error } = await RestApi.classroom_type.delete({ params: { id: id } });
     if (data.value?.status === "success") {
       message.success("Xóa loại phòng học thành công");
       pagination.current = 1;
       param.value.PageIndex = 1;
       await fetchData({ ...param.value });
     } else {
-      message.error(data.value?.message || "Có lỗi xảy ra");
+      throw new Error(error.value?.data?.message || "Xóa không thành công");
     }
   } catch (error) {
-    console.error("Error deleting data:", error);
-    message.error("Có lỗi xảy ra khi xóa dữ liệu");
+    // console.error("Error deleting data:", error);
+    // message.error("Có lỗi xảy ra khi xóa dữ liệu");
+    message.error(error.message || "Xóa không thành công");
   }
 };
 
