@@ -71,7 +71,7 @@
           <a-form-item label="Tên đơn vị" name="tenDonvi">
             <a-input v-model:value="formState.tenDonvi" placeholder="Nhập tên đơn vị" />
           </a-form-item>
-          <SelectSchoolLevelByUnit v-model="formState.idCap" name="idCap" :rules="rules.idCap" :multiple="true" />
+          <SelectSchoolLevel v-model="formState.idCap" name="idCap" :rules="rules.idCap" :multiple="true" />
 
           <a-form-item label="Địa chỉ" name="diachi">
             <a-input v-model:value="formState.diachi" placeholder="Nhập địa chỉ" />
