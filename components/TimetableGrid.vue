@@ -952,6 +952,12 @@ async function confirmAdd() {
     cell.id_phong = lesson.id_phong;
     cell.ten_phong = lesson.ten_phong;
     cell.tiet_thu_may = lesson.tiet_thu_may;
+    const resolvedTeacherId = selectedTeacherId.value ?? lesson.id_giao_vien ?? cell.id_giao_vien ?? null;
+    cell.id_giao_vien = resolvedTeacherId;
+    const resolvedTeacherName = lesson.ten_giao_vien || cell.ten_giao_vien || selectedTeacherName.value || "";
+    if (resolvedTeacherName) {
+      cell.ten_giao_vien = resolvedTeacherName;
+    }
   } else {
     cell.id_mon = lesson.id_mon;
     cell.ten_mon = lesson.ten_mon;
@@ -970,7 +976,7 @@ async function confirmAdd() {
     ten_lop: lesson.ten_lop,
     id_mon: cell.id_mon,
     ten_mon: cell.ten_mon,
-    id_giao_vien: cell.id_giao_vien,
+    id_giao_vien: cell.id_giao_vien ?? (contextMenu.isTeacher ? selectedTeacherId.value ?? lesson.id_giao_vien : lesson.id_giao_vien),
     ten_giao_vien: cell.ten_giao_vien,
     id_phong: cell.id_phong,
     ten_phong: cell.ten_phong,
