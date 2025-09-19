@@ -40,7 +40,7 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa lớp học' : 'Thêm mới lớp học'" @cancel="handleCancel" :width="700">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <a-form-item label="Tên lớp" name="ten">
-          <a-input v-model:value="formState.ten" placeholder="Nhập tên lớp" />
+          <a-input v-model:value="formState.ten" placeholder="Nhập tên lớp" showCount :maxlength="10" />
         </a-form-item>
         <SelectGradeLevelByUnit v-model="formState.id_khoi" name="id_khoi" :rules="rules.id_khoi" />
         <a-form-item label="Sĩ số" name="si_so">
