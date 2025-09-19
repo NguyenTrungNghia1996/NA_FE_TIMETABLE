@@ -81,11 +81,17 @@
       </div>
       <div class="h-[calc(100vh-110px)] flex flex-col">
         <div class="h-1/3 overflow-auto m-3 shadow-xl">
-          <h4 class="font-semibold">Tiết chưa xếp của lớp học</h4>
+          <h4 class="font-semibold">
+            Tiết chưa xếp của lớp học
+            <span v-if="selectedClassName">: {{ selectedClassName }}</span>
+          </h4>
           <UnscheduledTable :data="props.rawUnscheduled" class="w-full" @row-click="onUnscheduledClick" />
         </div>
         <div class="h-1/3 overflow-auto m-3 shadow-xl">
-          <h4 class="font-semibold">Tiết chưa xếp của giáo viên</h4>
+          <h4 class="font-semibold">
+            Tiết chưa xếp của giáo viên
+            <span v-if="selectedTeacherName">: {{ selectedTeacherName }}</span>
+          </h4>
           <TeacherUnscheduledTable :data="teacherUnscheduled" class="w-full" @row-click="onTeacherUnscheduledClick" />
         </div>
         <div class="h-1/3 overflow-auto m-3 shadow-xl">
@@ -159,7 +165,11 @@ const teacherDsCa = ref([]);
 const teacherUnscheduled = ref([]);
 const timetableUnscheduled = ref([]);
 const selectedTeacherId = ref(null);
+const selectedTeacherName = ref("");
 const selectedClassId = ref(props.classId);
+const selectedClassName = ref("");
+let classNameFetchToken = 0;
+let teacherNameFetchToken = 0;
 const emit = defineEmits(["cell-click", "update:rawTimetable", "update:rawUnscheduled", "update:classId"]);
 const showAddModal = ref(false);
 const selectedIdx = ref(0);
@@ -186,6 +196,7 @@ watch(
 
 watch(selectedClassId, async id => {
   emit("update:classId", id);
+  await fetchClassName(id);
   if (id && selectedTeacherId.value && props.timetableId) {
     await fetchTeacherTimetable(selectedTeacherId.value);
     selectedSubjectId.value = null;
@@ -209,6 +220,7 @@ watch(
 );
 
 watch(selectedTeacherId, async id => {
+  await fetchTeacherName(id);
   if (id && props.timetableId) {
     await fetchTeacherTimetable(id);
   } else {
@@ -216,6 +228,61 @@ watch(selectedTeacherId, async id => {
     teacherUnscheduled.value = [];
   }
 });
+
+if (selectedClassId.value !== null && selectedClassId.value !== undefined) {
+  fetchClassName(selectedClassId.value);
+}
+
+async function fetchClassName(id) {
+  const currentToken = ++classNameFetchToken;
+  if (!id) {
+    selectedClassName.value = "";
+    return;
+  }
+
+  try {
+    const { data } = await RestApi.class.detail({ params: { id } });
+    if (currentToken !== classNameFetchToken) return;
+    if (data.value?.status === "success") {
+      selectedClassName.value = data.value.data?.ten || "";
+    } else {
+      selectedClassName.value = "";
+    }
+  } catch {
+    if (currentToken === classNameFetchToken) {
+      selectedClassName.value = "";
+    }
+  }
+}
+
+async function fetchTeacherName(id) {
+  const currentToken = ++teacherNameFetchToken;
+  if (!id) {
+    selectedTeacherName.value = "";
+    return;
+  }
+
+  try {
+    const { data } = await RestApi.teacher.detail({ params: { Id: id } });
+    if (currentToken !== teacherNameFetchToken) return;
+    if (data.value?.status === "success") {
+      const info = data.value.data || {};
+      const fullName = [info.ho_va_ho_dem, info.ten].filter(Boolean).join(" ").trim();
+      const baseName = fullName || "";
+      if (info.ma_giao_vien) {
+        selectedTeacherName.value = baseName ? `${baseName} (${info.ma_giao_vien})` : info.ma_giao_vien;
+      } else {
+        selectedTeacherName.value = baseName;
+      }
+    } else {
+      selectedTeacherName.value = "";
+    }
+  } catch {
+    if (currentToken === teacherNameFetchToken) {
+      selectedTeacherName.value = "";
+    }
+  }
+}
 
 watch(
   () => props.timetableId,
