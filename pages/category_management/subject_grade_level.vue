@@ -45,11 +45,27 @@
             </template>
             <template v-else-if="isShiftColumn(column.key)">
               <template v-if="getShiftField(column.key) === 'period'">
-                <a-input-number v-if="record.editable" v-model:value="record.shifts[getShiftId(column.key)].period" :min="0" size="small" class="w-full" />
+                <a-input-number
+                  v-if="record.editable"
+                  v-model:value="record.shifts[getShiftId(column.key)].period"
+                  :min="0"
+                  :max="MAX_NATURAL_VALUE"
+                  size="small"
+                  class="w-full"
+                  @change="value => onShiftNumberChange(record, getShiftId(column.key), 'period', value)"
+                />
                 <span v-else>{{ record.shifts[getShiftId(column.key)]?.period ?? "-" }}</span>
               </template>
               <template v-else>
-                <a-input-number v-if="record.editable" v-model:value="record.shifts[getShiftId(column.key)].group" :min="0" size="small" class="w-full" />
+                <a-input-number
+                  v-if="record.editable"
+                  v-model:value="record.shifts[getShiftId(column.key)].group"
+                  :min="0"
+                  :max="MAX_NATURAL_VALUE"
+                  size="small"
+                  class="w-full"
+                  @change="value => onShiftNumberChange(record, getShiftId(column.key), 'group', value)"
+                />
                 <span v-else>{{ record.shifts[getShiftId(column.key)]?.group ?? "-" }}</span>
               </template>
             </template>
@@ -92,6 +108,7 @@ const summary = reactive({
 
 const subjects = ref([]);
 const availableShifts = ref([]);
+const MAX_NATURAL_VALUE = 99;
 
 const drawerAvoidOpen = ref(false);
 const avoidRef = ref(null);
@@ -140,9 +157,7 @@ const actionColumn = {
 
 const displayColumns = computed(() => {
   const selectedShiftId = filters.shift !== undefined && filters.shift !== null ? String(filters.shift) : undefined;
-  const shiftColumnsSource = selectedShiftId
-    ? availableShifts.value.filter(shift => String(shift.id) === selectedShiftId)
-    : availableShifts.value;
+  const shiftColumnsSource = selectedShiftId ? availableShifts.value.filter(shift => String(shift.id) === selectedShiftId) : availableShifts.value;
 
   const shiftColumns = shiftColumnsSource.map(shift => ({
     title: shift.name || `Ca ${shift.id}`,
@@ -181,6 +196,19 @@ const getShiftId = key => {
   if (!isShiftColumn(key)) return undefined;
   const value = key ?? "";
   return value.slice(6, value.lastIndexOf("-"));
+};
+
+const sanitizeNaturalNumber = value => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) return 0;
+  const natural = Math.floor(parsed);
+  return natural > MAX_NATURAL_VALUE ? MAX_NATURAL_VALUE : natural;
+};
+
+const onShiftNumberChange = (record, shiftId, field, value) => {
+  if (!shiftId || !record?.shifts?.[shiftId]) return;
+  const sanitized = sanitizeNaturalNumber(value);
+  record.shifts[shiftId][field] = sanitized;
 };
 
 // Keep summary totals regardless of selected shift
@@ -274,9 +302,7 @@ const convertFromApi = data => {
     if (!record.shiftOrder.length) {
       record.shiftOrder = shiftList.map(shift => shift.id);
     } else {
-      const missing = shiftList
-        .map(shift => shift.id)
-        .filter(id => !record.shiftOrder.includes(id));
+      const missing = shiftList.map(shift => shift.id).filter(id => !record.shiftOrder.includes(id));
       record.shiftOrder.push(...missing);
     }
     record.weekly = Object.values(record.shifts).reduce((sum, shift) => sum + (Number(shift.period) || 0), 0);
