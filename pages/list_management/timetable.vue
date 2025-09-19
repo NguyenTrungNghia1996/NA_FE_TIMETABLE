@@ -50,7 +50,7 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa thời khóa biểu' : 'Thêm mới thời khóa biểu'" @cancel="handleCancel" :footer="null">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <a-form-item label="Tên thời khóa biểu" name="ten">
-          <a-input v-model:value="formState.ten" placeholder="Nhập tên thời khóa biểu" />
+          <a-input v-model:value="formState.ten" placeholder="Nhập tên thời khóa biểu" showCount :maxlength="100" />
         </a-form-item>
         <a-form-item label="Đang sử dụng" name="dang_su_dung">
           <a-switch v-model:checked="formState.dang_su_dung" />
@@ -133,7 +133,10 @@ const confirmLoading = ref(false);
 const formState = reactive({ id: null, ten: "", dang_su_dung: true });
 
 const rules = {
-  ten: [{ required: true, message: "Vui lòng nhập tên thời khóa biểu", trigger: "blur" }],
+  ten: [
+    { required: true, message: "Vui lòng nhập tên thời khóa biểu", trigger: "blur" },
+    { max: 100, message: "Tên thời khóa biểu không quá 100 kí tự" },
+  ],
 };
 
 const openAdjustFromInfo = () => {
@@ -208,7 +211,9 @@ const handleOk = async () => {
     confirmLoading.value = true;
 
     if (isEdit.value) {
-      await RestApi.timetable.update({ body: { ...formState } });
+      const { data } = await RestApi.timetable.update({ body: { ...formState } });
+      // status: "success"
+      // console.log(data.value.message);
       message.success("Cập nhật thành công");
     } else {
       const { id, ...body } = formState;
