@@ -224,7 +224,7 @@ const handleCancel = () => {
 
 const deleteItem = async id => {
   try {
-    const { data } = await RestApi.knowledge.delete({ params: { id: id } });
+    const { data, error } = await RestApi.knowledge.delete({ params: { id: id } });
     if (data.value?.status === "success") {
       message.success(data.value?.message || "Xóa thành công");
       pagination.current = 1;
