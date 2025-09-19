@@ -26,6 +26,8 @@ export const useUnitStore = defineStore("unit", {
           return "https://api.dungthutkb.nguyenanh-est.com";
         case "testtkb":
           return "https://api.testtkb.nguyenanh-est.com";
+        case "dungthu":
+          return "https://api.dungthutkb.nguyenanh-est.com";
         default:
           return useRuntimeConfig().public.baseURL;
       }
