@@ -15,9 +15,9 @@
         </a-table>
       </a-card>
     </div>
-    <div class="col-span-2">
+    <div v-if="selectedClass" class="col-span-2">
       <div class="overflow-x-auto">
-        <a-card :title="'Danh sách môn học lớp: ' + selectedClass.ten">
+        <a-card :title="'Danh sách môn học lớp: ' + (selectedClass?.ten ? selectedClass?.ten : '')">
           <a-table :columns="subjectColumns" :data-source="subjects" :loading="subjectLoading" :pagination="false" size="small" row-key="id_mon" :scroll="{ x: 'max-content' }">
             <template #bodyCell="{ column, record, index }">
               <template v-if="column.key === 'stt'">{{ index + 1 }}</template>

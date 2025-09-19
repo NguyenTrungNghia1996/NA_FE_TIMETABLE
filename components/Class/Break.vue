@@ -12,11 +12,7 @@
       </a-table>
     </a-card>
 
-    <a-card v-if="selectedId" title="CÁC TIẾT NGHỈ" class="md:col-span-1">
-      <div class="grid grid-cols-2">
-        <div class="text-lg">Khối: {{ classes_select.ten_khoi }}</div>
-        <div class="text-lg">Lớp: {{ classes_select.ten }}</div>
-      </div>
+    <a-card v-if="selectedId" :title="'Các tiết nghỉ ' + classes_select.ten_khoi + ' - ' + classes_select.ten" class="md:col-span-1">
       <div v-if="schedule" class="space-y-4">
         <div v-for="block in schedule.ds_Ca" :key="block.id">
           <Timetable :block="block" />
