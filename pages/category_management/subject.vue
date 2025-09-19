@@ -110,7 +110,15 @@
     </a-modal>
     <a-drawer v-model:open="busy_manager_modal" title="Cài đặt tiết tránh xếp" @close="closeBusyManager" placement="bottom" height="100vh">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <a-table :columns="busyColumns" :data-source="dataSource" :pagination="false" bordered size="small" />
+        <a-table
+          :columns="busyColumns"
+          :data-source="dataSource"
+          :pagination="pagination"
+          :loading="loading"
+          bordered
+          size="small"
+          @change="handleTableChange"
+        />
         <div v-if="selectedSubject && busy_data" class="flex flex-col">
           <h3 class="font-medium mb-2">{{ selectedSubject.ten }}</h3>
           <div v-for="block in busy_data.ds_Ca" :key="block.id" class="mb-8">
@@ -177,7 +185,7 @@ const busyColumns = [
     key: "stt",
     width: 60,
     align: "center",
-    customRender: ({ index }) => index + 1,
+    customRender: ({ index }) => (pagination.current - 1) * pagination.pageSize + index + 1,
   },
   {
     title: "Tên môn học",
