@@ -360,15 +360,7 @@ function isSameSubject(caId, dayId, pIdx) {
 }
 
 function isDraggable(cell) {
-  if (!cell) return false;
-  const hasData =
-    !!cell.ten_mon ||
-    !!cell.id_mon ||
-    !!cell.ten_giao_vien ||
-    !!cell.id_giao_vien ||
-    !!cell.id_phong ||
-    !!cell.id_chitiet;
-  return (cell.isDrag || hasData) && !cell.isRest && !cell.isLock;
+  return cell?.isDrag && !cell.isRest && !cell.isLock;
 }
 
 function canReceiveDrop(cell) {
