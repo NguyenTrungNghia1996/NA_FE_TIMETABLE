@@ -360,7 +360,19 @@ function isSameSubject(caId, dayId, pIdx) {
 }
 
 function isDraggable(cell) {
-  return cell?.isDrag && !cell.isRest && !cell.isLock;
+  if (!cell) return false;
+  const hasData =
+    !!cell.ten_mon ||
+    !!cell.id_mon ||
+    !!cell.ten_giao_vien ||
+    !!cell.id_giao_vien ||
+    !!cell.id_phong ||
+    !!cell.id_chitiet;
+  return (cell.isDrag || hasData) && !cell.isRest && !cell.isLock;
+}
+
+function canReceiveDrop(cell) {
+  return !!cell && !cell.isRest && !cell.isLock;
 }
 
 function teacherIsDraggable(cell) {
@@ -403,7 +415,7 @@ async function onDrop(caId, dayId, pIdx) {
   if (!src || !dst) return;
   const srcClone = { ...src };
   const dstClone = { ...dst };
-  if (!isDraggable(src) || !isDraggable(dst)) return;
+  if (!isDraggable(src) || !canReceiveDrop(dst)) return;
 
   const keys = Object.keys(src).filter(k => !["id_ca", "ngay", "tiet"].includes(k));
   const temp = {};
@@ -510,7 +522,7 @@ function onTeacherDragOver(event, caId, dayId, pIdx) {
 
 function onDragOver(event, caId, dayId, pIdx) {
   const cell = getCell(caId, dayId, pIdx);
-  if (isDraggable(cell)) {
+  if (canReceiveDrop(cell)) {
     event.preventDefault();
   }
 }
