@@ -96,7 +96,7 @@
         </div>
         <div class="h-1/3 overflow-auto m-3 shadow-xl">
           <h4 class="font-semibold">Tiết chưa xếp của thời khóa biểu</h4>
-          <TimetableUnscheduledTable :data="timetableUnscheduled" class="w-full" />
+          <TimetableUnscheduledTable :data="timetableUnscheduled" class="w-full" @row-click="onTimetableUnscheduledClick" />
         </div>
       </div>
     </div>
@@ -364,7 +364,7 @@ function isDraggable(cell) {
 }
 
 function canReceiveDrop(cell) {
-  return !!cell && !cell.isRest && !cell.isLock;
+  return !!cell && cell.isDrag && !cell.isRest && !cell.isLock;
 }
 
 function teacherIsDraggable(cell) {
@@ -638,6 +638,71 @@ async function onTeacherUnscheduledClick(lesson) {
     }
   } catch (err) {
     message.error("Find teacher position error", err);
+  }
+}
+
+async function onTimetableUnscheduledClick(lesson) {
+  if (!lesson) return;
+  console.log(lesson);
+
+  // Sync selections based on the clicked lesson
+  selectedClassId.value = lesson.id_lop || null;
+  selectedTeacherId.value = lesson.id_giao_vien || null;
+  selectedSubjectId.value = lesson.id_mon || null;
+  selectedCellPos.value = null;
+
+  // Load class timetable suggestions/positions
+  if (lesson.id_lop) {
+    try {
+      const body = {
+        id_lop: lesson.id_lop,
+        ds_chua_xep: [lesson],
+      };
+      const { data, error } = await RestApi.timetable.find_class_unscheduled_position({ body });
+      if (data.value?.status === "success") {
+        const { timetable, ds_chua_xep } = data.value.data || {};
+        if (Array.isArray(timetable)) {
+          emit("update:rawTimetable", timetable);
+        }
+        if (Array.isArray(ds_chua_xep)) {
+          emit("update:rawUnscheduled", ds_chua_xep);
+        }
+      } else {
+        message.error("Find class position error", error.value || data.value);
+      }
+    } catch (err) {
+      message.error("Find class position error", err);
+    }
+  }
+
+  // Load teacher timetable suggestions/positions
+  if (lesson.id_giao_vien) {
+    try {
+      const body = {
+        id_giao_vien: lesson.id_giao_vien,
+        ds_chua_xep: [lesson],
+      };
+      const { data, error } = await RestApi.timetable.find_teacher_unscheduled_position({ body });
+      if (data.value?.status === "success") {
+        const { timetable, ds_chua_xep } = data.value.data || {};
+        if (Array.isArray(timetable)) {
+          const { ds_Ca } = transformTimetable(timetable, {
+            daysCount: 7,
+            shifts: [1, 2],
+            periodsPerShift: 5,
+            dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+          });
+          teacherDsCa.value = ds_Ca;
+        }
+        if (Array.isArray(ds_chua_xep)) {
+          teacherUnscheduled.value = ds_chua_xep;
+        }
+      } else {
+        message.error("Find teacher position error", error.value || data.value);
+      }
+    } catch (err) {
+      message.error("Find teacher position error", err);
+    }
   }
 }
 
