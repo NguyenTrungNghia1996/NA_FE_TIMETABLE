@@ -28,7 +28,7 @@
                       <div class="text-gray-600">{{ ngay.ds_Tiet[pIdx].ten_phong }}</div>
                     </template>
                     <template v-else>
-                      <span class="text-gray-400">Trống</span>
+                      <!-- <span class="text-gray-400">Trống</span> -->
                     </template>
                     <div v-if="ngay.ds_Tiet[pIdx].isLock" class="absolute top-1 right-1 text-[10px] text-red-600">Khóa</div>
                   </td>
@@ -68,7 +68,7 @@
                         <div class="text-gray-600">{{ ngay.ds_Tiet[pIdx].ten_phong }}</div>
                       </template>
                       <template v-else>
-                        <span class="text-gray-400">Trống</span>
+                        <!-- <span class="text-gray-400">Trống</span> -->
                       </template>
                       <div v-if="ngay.ds_Tiet[pIdx].isLock" class="absolute top-1 right-1 text-[10px] text-red-600">Khóa</div>
                     </td>
