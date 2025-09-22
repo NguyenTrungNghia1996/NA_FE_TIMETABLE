@@ -211,17 +211,23 @@ const handleOk = async () => {
     confirmLoading.value = true;
 
     if (isEdit.value) {
-      const { data } = await RestApi.timetable.update({ body: { ...formState } });
-      // status: "success"
-      // console.log(data.value.message);
-      message.success("Cập nhật thành công");
+      const { data, error } = await RestApi.timetable.update({ body: { ...formState } });
+      if (data.value?.status === "success") {
+        message.success(data.value.message || "Cập nhật thành công");
+      } else {
+        throw new Error(error.value?.data?.message || "Cập nhật không thành công");
+      }
     } else {
       const { id, ...body } = formState;
-      await RestApi.timetable.create({ body });
-      message.success("Thêm mới thành công");
+      const { data, error } = await RestApi.timetable.create({ body });
+      if (data.value?.status === "success") {
+        message.success(data.value.message || "Thêm mới thành công");
+      } else {
+        throw new Error(error.value?.data?.message || "Thêm mới không thành công");
+      }
     }
   } catch (error) {
-    message.error("Đã xảy ra lỗi khi lưu thông tin");
+    message.error(error?.message || error?.value?.data?.message || "Có lỗi ");
   } finally {
     visible.value = false;
     await fetchData({ ...param.value });
