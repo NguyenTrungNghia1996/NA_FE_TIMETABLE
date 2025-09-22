@@ -585,7 +585,7 @@ async function onUnscheduledClick(lesson) {
   selectedTeacherId.value = lesson.id_giao_vien || null;
   selectedSubjectId.value = lesson.id_mon || null;
   selectedCellPos.value = null;
-  console.log(lesson);
+  console.log(">>>>", lesson);
   try {
     const body = {
       id_lop: selectedClassId.value,
@@ -613,7 +613,7 @@ async function onTeacherUnscheduledClick(lesson) {
   selectedClassId.value = lesson.id_lop || null;
   selectedSubjectId.value = lesson.id_mon || null;
   selectedCellPos.value = null;
-  lesson.id_chitiet = lesson.id || null;
+  // lesson.id_chitiet = lesson.id || null;
   try {
     const body = {
       id_giao_vien: selectedTeacherId.value,
