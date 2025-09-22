@@ -649,6 +649,7 @@ async function onTimetableUnscheduledClick(lesson) {
   selectedClassId.value = lesson.id_lop || null;
   selectedTeacherId.value = lesson.id_giao_vien || null;
   selectedSubjectId.value = lesson.id_mon || null;
+  lesson.id_chitiet = lesson.id || null;
   selectedCellPos.value = null;
 
   // Load class timetable suggestions/positions
