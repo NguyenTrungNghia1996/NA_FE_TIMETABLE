@@ -2,7 +2,6 @@
   <div>
     {{ data }}
     <TinyMCE v-model="data" class="w-full" />
-
     <div>{{ now }}</div>
   </div>
 </template>
