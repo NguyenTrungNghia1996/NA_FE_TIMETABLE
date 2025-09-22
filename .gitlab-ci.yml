@@ -6,10 +6,13 @@ stages:
 variables:
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_CERTDIR: "/certs"
+  # GIỮ domain registry của bạn
   CI_REGISTRY: registry.nguyenanh-est.com
   CI_REGISTRY_URL: https://registry.nguyenanh-est.com
+
+  # GitLab tự cấp CI_REGISTRY_IMAGE nếu dùng registry tích hợp;
+  # nhưng vì bạn tự khai báo domain, ta định nghĩa IMAGE_NAME thủ công theo project path:
   IMAGE_NAME: "$CI_REGISTRY/$CI_PROJECT_PATH"
-  IMAGE_TAG: "$IMAGE_NAME:$CI_COMMIT_SHORT_SHA"
   GIT_DEPTH: 0
   GIT_STRATEGY: clone
   GIT_SUBMODULE_STRATEGY: none
@@ -25,31 +28,33 @@ docker-build-and-push:
     - if: '$CI_COMMIT_BRANCH == "deploy" && $CI_PIPELINE_SOURCE == "push"'
       when: on_success
   before_script:
-    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
-  script:
-    - |
-      export DOCKER_BUILDKIT=1
-      export BUILDKIT_INLINE_CACHE=1
+    # 🔐 Login đúng chuẩn JWT của GitLab Registry
+    - echo "$CI_JOB_TOKEN" | docker login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
+  script: |
+    export DOCKER_BUILDKIT=1
+    export BUILDKIT_INLINE_CACHE=1
 
-      TAG_LATEST="latest"
-      TAG_SHA="$CI_COMMIT_SHA"
-      TAG_BRANCH="$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
-      TAG_CACHE="cache"
+    TAG_LATEST="latest"
+    TAG_SHA="$CI_COMMIT_SHA"
+    TAG_BRANCH="$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
+    TAG_CACHE="cache"
 
-      echo "Building and tagging Docker image..."
-      docker build \
-        --build-arg BUILDKIT_INLINE_CACHE=1 \
-        --cache-from=type=registry,ref=$IMAGE_NAME:$TAG_CACHE \
-        -t $IMAGE_NAME:$TAG_LATEST \
-        -t $IMAGE_NAME:$TAG_SHA \
-        -t $IMAGE_NAME:$TAG_BRANCH \
-        -t $IMAGE_NAME:$TAG_CACHE \
-        .
+    echo "Building and tagging Docker image..."
+    docker build \
+      --build-arg BUILDKIT_INLINE_CACHE=1 \
+      --cache-from=type=registry,ref=$IMAGE_NAME:$TAG_CACHE \
+      -t $IMAGE_NAME:$TAG_LATEST \
+      -t $IMAGE_NAME:$TAG_SHA \
+      -t $IMAGE_NAME:$TAG_BRANCH \
+      -t $IMAGE_NAME:$TAG_CACHE \
+      .
 
-      echo "Pushing Docker image..."
-      docker push $IMAGE_NAME:$TAG_LATEST
-      docker push $IMAGE_NAME:$TAG_BRANCH
-      docker push $IMAGE_NAME:$TAG_CACHE
+    echo "Pushing Docker image..."
+    docker push $IMAGE_NAME:$TAG_LATEST
+    docker push $IMAGE_NAME:$TAG_BRANCH
+    docker push $IMAGE_NAME:$TAG_CACHE
+  after_script:
+    - docker logout "$CI_REGISTRY" || true
 
 docker-cleanup:
   stage: cleanup
@@ -58,22 +63,19 @@ docker-cleanup:
   rules:
     - if: '$CI_COMMIT_BRANCH == "deploy"'
       when: on_success
-  before_script:
-    - git config --global http.postBuffer 524288000
-  script:
-    - |
-      TAG_LATEST="latest"
-      TAG_BRANCH="$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
-      TAG_CACHE="cache"
+  script: |
+    TAG_LATEST="latest"
+    TAG_BRANCH="$CI_COMMIT_REF_NAME-$CI_PIPELINE_ID"
+    TAG_CACHE="cache"
 
-      echo "Cleaning up local Docker images..."
-      docker rmi $IMAGE_NAME:$TAG_LATEST $IMAGE_NAME:$TAG_BRANCH $IMAGE_NAME:$TAG_CACHE || true
+    echo "Cleaning up local Docker images..."
+    docker rmi $IMAGE_NAME:$TAG_LATEST $IMAGE_NAME:$TAG_BRANCH $IMAGE_NAME:$TAG_CACHE || true
 
-      echo "Pruning dangling images..."
-      docker image prune -f
+    echo "Pruning dangling images..."
+    docker image prune -f
 
-      echo "Pruning build cache (intermediate layers)..."
-      docker builder prune -f
+    echo "Pruning build cache (intermediate layers)..."
+    docker builder prune -f
 
 docker-deploy:
   stage: deploy
@@ -83,7 +85,10 @@ docker-deploy:
     - if: '$CI_COMMIT_BRANCH == "deploy"'
       when: on_success
   before_script:
-    - sudo docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    # Nếu deploy host cần pull từ registry private → cũng login bằng job token
+    - echo "$CI_JOB_TOKEN" | sudo docker login -u gitlab-ci-token --password-stdin "$CI_REGISTRY"
   script:
     - echo "Deploying frontend service using Docker Compose as root..."
     - sudo bash -c "cd /root/docker/fe_timetable && docker compose pull && docker compose up -d"
+  after_script:
+    - sudo docker logout "$CI_REGISTRY" || true
