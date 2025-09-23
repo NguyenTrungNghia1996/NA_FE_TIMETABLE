@@ -15,10 +15,10 @@
           </div>
           <div class="grid grid-cols-2">
             <a-form-item label="Số tiết 1 ca" name="maxPeriod" :rules="rules.maxPeriod">
-              <a-input-number v-model:value="form.maxPeriod" class="w-full" :min="1" :max="9" :precision="0" :step="1" />
+              <a-input-number v-model:value="form.maxPeriod" class="w-full" :min="1" :precision="0" :step="1" />
             </a-form-item>
             <a-form-item label="Số tiết 2 ca" name="period2" :rules="rules.period2">
-              <a-input-number v-model:value="form.period2" class="w-full" :min="0" :max="9" :precision="0" :step="1" />
+              <a-input-number v-model:value="form.period2" class="w-full" :min="1" :precision="0" :step="1" :parser="period2Parser" />
             </a-form-item>
           </div>
           <div class="flex flex-wrap gap-2 mt-4">
@@ -89,7 +89,21 @@ const period2GteMaxPeriodValidator = async (_rule, value) => {
   if (value === undefined || value === null || value === "") return Promise.resolve();
   // If maxPeriod not set yet, skip comparison (maxPeriod has its own required rule)
   if (form.maxPeriod === undefined || form.maxPeriod === null || form.maxPeriod === "" || form.maxPeriod === 0) return Promise.resolve();
-  return value <= form.maxPeriod ? Promise.resolve() : Promise.reject("Số tiết 2 ca phải lớn hơn hoặc bằng số tiết 1 ca");
+  return value >= form.maxPeriod ? Promise.resolve() : Promise.reject("Số tiết 2 ca phải lớn hơn hoặc bằng số tiết 1 ca");
+};
+
+// Ensure value between 1 and 9 when provided
+const oneToNineValidator = async (_rule, value) => {
+  if (value === undefined || value === null || value === "") return Promise.resolve();
+  return value >= 1 && value <= 9 ? Promise.resolve() : Promise.reject("Chỉ cho phép giá trị 1 đến 9");
+};
+
+// Parser to restrict period2 input to a single digit 1-9
+const period2Parser = value => {
+  const s = String(value ?? "")
+    .replace(/[^0-9]/g, "")
+    .replace(/^0+/, "");
+  return s.slice(0, 1);
 };
 
 const rules = {
@@ -97,9 +111,11 @@ const rules = {
   maxPeriod: [
     { required: true, message: "Vui lòng nhập số tiết tối đa", trigger: "blur" },
     { validator: integerValidator, trigger: "blur" },
+    { validator: oneToNineValidator, trigger: "blur" },
   ],
   period2: [
     { validator: integerValidator, trigger: "blur" },
+    { validator: oneToNineValidator, trigger: "blur" },
     { validator: period2GteMaxPeriodValidator, trigger: "blur" },
   ],
   grade: [{ required: true, message: "Vui lòng chọn khối lớp", trigger: "blur" }],
@@ -206,7 +222,7 @@ const editItem = record => {
     subject2: record.id_mon_2,
     subject3: record.id_mon_3,
     maxPeriod: record.so_tiet_toi_da_1_ca,
-    period2: record.so_tiet_toi_da_2_ca,
+    period2: record.so_tiet_toi_da_2_ca || undefined,
   });
 };
 
