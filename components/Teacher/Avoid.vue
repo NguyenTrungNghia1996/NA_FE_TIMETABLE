@@ -21,7 +21,7 @@
         </div>
         <div class="flex items-center gap-5">
           <span>Số tiết tối đa/ngày:</span>
-          <a-input-number v-model:value="maxPeriod" :min="1" :precision="0" />
+          <a-input-number v-model:value="maxPeriod" :min="0" :precision="0" />
         </div>
       </div>
       <div v-if="schedule && !onlyOneShift" class="space-y-4">
@@ -50,7 +50,7 @@ const maxPeriod = ref(0);
 const teaching_session = ref(null);
 const saving = ref(false);
 
-const isPositiveInteger = value => Number.isInteger(value) && value > 0;
+const isPositiveInteger = value => Number.isInteger(value) && value >= 0;
 
 const columns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
