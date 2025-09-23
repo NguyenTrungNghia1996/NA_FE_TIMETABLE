@@ -184,6 +184,7 @@ const deleteItem = async id => {
 };
 
 const reset = () => {
+  formRef.value?.resetFields?.();
   Object.assign(form, {
     id: null,
     id_mon: undefined,

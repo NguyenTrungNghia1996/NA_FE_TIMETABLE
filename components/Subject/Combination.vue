@@ -62,6 +62,7 @@ import { message } from "ant-design-vue";
 const { RestApi } = useApi();
 
 const formRef = ref();
+const emit = defineEmits(["reset"]);
 const form = reactive({
   id: null,
   grade: undefined,
@@ -224,6 +225,8 @@ const deleteItem = async id => {
 };
 
 const reset = () => {
+  // Reset AntD form validation state and fields
+  formRef.value?.resetFields?.();
   Object.assign(form, {
     id: null,
     grade: undefined,
@@ -236,9 +239,15 @@ const reset = () => {
     period2: undefined,
   });
   isEdit.value = false;
+  emit("reset");
 };
 defineExpose({
   reset,
+  // Expose a dedicated method to just reset validation if needed
+  resetValidate: () => {
+    formRef.value?.resetFields?.();
+    emit("reset");
+  },
 });
 onMounted(fetchData);
 </script>
