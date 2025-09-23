@@ -38,11 +38,12 @@ const columns = [
     dataIndex: "ten_lop",
     key: "ten_lop",
   },
-  // {
-  //   title: "Phòng",
-  //   dataIndex: "ten_phong",
-  //   key: "ten_phong",
-  // },
+  {
+    title: "Số tiết",
+    dataIndex: "so_tiet",
+    key: "so_tiet",
+    align: "center",
+  },
   // {
   //   title: "Tiết thứ",
   //   dataIndex: "tiet_thu_may",
