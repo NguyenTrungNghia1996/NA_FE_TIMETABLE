@@ -43,12 +43,11 @@ const columns = [
     dataIndex: "ten_phong",
     key: "ten_phong",
   },
-  // {
-  //   title: "Tiết thứ",
-  //   dataIndex: "tiet_thu_may",
-  //   key: "tiet_thu_may",
-  //   align: "center",
-  //   width: 120,
-  // },
+  {
+    title: "Số tiết",
+    dataIndex: "so_tiet",
+    key: "so_tiet",
+    align: "center",
+  },
 ];
 </script>
