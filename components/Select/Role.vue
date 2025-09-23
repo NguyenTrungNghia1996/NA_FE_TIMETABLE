@@ -1,6 +1,6 @@
 <template>
   <a-form-item :label="label" :name="name" :rules="rules">
-    <a-select :value="modelValue" @update:value="val => $emit('update:modelValue', val)" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
+    <a-select :value="modelValue" @update:value="handleUpdateValue" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
   </a-form-item>
 </template>
 
@@ -33,7 +33,7 @@ const fetchRoles = async (search = "") => {
     const { data, error } = await RestApi.roles.list({ params: { search: searchTerm } });
 
     if (data.value?.status === "success") {
-      options.value = data.value.data.items.map(item => ({
+      options.value = data.value.data.items?.map(item => ({
         label: item.ten,
         value: item.id,
       }));
@@ -64,6 +64,12 @@ const onSearch = val => {
 const onClear = () => {
   fetchRoles("");
   emit("update:modelValue", props.multiple ? [] : null);
+};
+
+const handleUpdateValue = val => {
+  emit("update:modelValue", val);
+  const isCleared = val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0);
+  if (isCleared) fetchRoles("");
 };
 
 await fetchRoles();
