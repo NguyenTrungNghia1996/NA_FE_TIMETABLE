@@ -1,13 +1,6 @@
 <template>
   <ClientOnly>
-    <a-table
-      :columns="columns"
-      :data-source="data"
-      :pagination="false"
-      bordered
-      size="small"
-      :customRow="customRow"
-    />
+    <a-table :columns="columns" :data-source="data" :pagination="false" bordered size="small" :customRow="customRow" />
   </ClientOnly>
 </template>
 
@@ -50,12 +43,12 @@ const columns = [
     dataIndex: "ten_phong",
     key: "ten_phong",
   },
-  {
-    title: "Tiết thứ",
-    dataIndex: "tiet_thu_may",
-    key: "tiet_thu_may",
-    align: "center",
-    width: 120,
-  },
+  // {
+  //   title: "Tiết thứ",
+  //   dataIndex: "tiet_thu_may",
+  //   key: "tiet_thu_may",
+  //   align: "center",
+  //   width: 120,
+  // },
 ];
 </script>
