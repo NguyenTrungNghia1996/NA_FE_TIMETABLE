@@ -37,7 +37,7 @@
             </table>
           </div>
         </div>
-        <div v-if="teacherDsCa.length">
+        <div>
           <!-- <p class="font-medium leading-tight text-xl">Giáo viên</p> -->
           <SelectTeacher v-model="selectedTeacherId" :autoSelectFirst="true" size="small" :noFormItem="true" :inlineLabel="true" />
           <div v-for="ca in teacherDsCa" :key="ca.id">
