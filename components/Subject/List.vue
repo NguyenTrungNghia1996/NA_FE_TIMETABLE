@@ -6,6 +6,7 @@
     size="small"
     row-key="id"
     :customRow="onRow"
+    :row-class-name="rowClassName"
   >
     <template #bodyCell="{ column, record, index }">
       <template v-if="column.key === 'stt'">
@@ -25,7 +26,10 @@
 </template>
 
 <script setup>
-const props = defineProps({ classId: Number })
+const props = defineProps({
+  classId: Number,
+  selectedId: { type: Number, default: null },
+})
 const { RestApi } = useApi()
 const emit = defineEmits(['select'])
 
@@ -103,4 +107,13 @@ const onRow = record => {
   }
 }
 
+// Highlight active row
+const rowClassName = record => (record.id === props.selectedId ? 'active-row' : '')
+
 </script>
+
+<style scoped>
+:deep(.active-row > td) {
+  background-color: #e6f7ff !important;
+}
+</style>

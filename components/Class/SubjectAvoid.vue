@@ -1,9 +1,11 @@
 <template>
   <div class="grid grid-cols-1 md:grid-cols-4 gap-1">
     <a-card title="Danh sách lớp học" class="md:col-span-1">
-      <ClassList ref="classRef" @select="handleSelectClass" />
+      <ClassList ref="classRef" :selected-id="selectedClassId" @select="handleSelectClass" />
     </a-card>
-    <a-card v-if="selectedClassId" :title="'Danh sách môn học lớp ' + selectedClass.ten" class="md:col-span-1"> <SubjectList ref="subjectRef" :class-id="selectedClassId" @select="handleSubjectClass" /> </a-card>
+    <a-card v-if="selectedClassId" :title="'Danh sách môn học lớp ' + selectedClass.ten" class="md:col-span-1">
+      <SubjectList ref="subjectRef" :class-id="selectedClassId" :selected-id="selectedSubjectId" @select="handleSubjectClass" />
+    </a-card>
     <a-card v-if="selectedClassId && selectedSubjectId" :title="'Các tiết nghỉ của lớp ' + selectedClass.ten + ' - ' + selectedSubject.ten" class="md:col-span-2">
       <div v-if="schedule" class="space-y-4">
         <div v-for="block in schedule.ds_Ca" :key="block.id">

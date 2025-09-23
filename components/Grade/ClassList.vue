@@ -3,7 +3,17 @@
     <div>
       <SelectGradeLevelByUnit v-model="gradeId" />
       <a-card title="DANH SÁCH LỚP">
-        <a-table :columns="columns" :data-source="classes" :loading="loading" :pagination="pagination" size="small" row-key="id" @change="handleTableChange" :customRow="onRow">
+        <a-table
+          :columns="columns"
+          :data-source="classes"
+          :loading="loading"
+          :pagination="pagination"
+          size="small"
+          row-key="id"
+          @change="handleTableChange"
+          :customRow="onRow"
+          :row-class-name="rowClassName"
+        >
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'stt'">
               {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
@@ -506,6 +516,9 @@ const onRow = record => {
   };
 };
 
+// Highlight active selected class row
+const rowClassName = record => (record.id === selectedClassId.value ? 'active-row' : '');
+
 // Allow selecting by clicking the whole row in teacher modal and auto-save
 const onTeacherRow = record => {
   return {
@@ -528,3 +541,9 @@ const onRoomRow = record => {
   };
 };
 </script>
+
+<style scoped>
+:deep(.active-row > td) {
+  background-color: #e6f7ff !important;
+}
+</style>

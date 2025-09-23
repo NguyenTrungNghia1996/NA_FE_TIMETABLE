@@ -1,7 +1,17 @@
 <template>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <a-card title="DANH SÁCH GIÁO VIÊN" class="md:col-span-1">
-      <a-table :columns="columns" :data-source="teachers" :loading="loading" :pagination="pagination" size="small" row-key="id" @change="handleTableChange" :customRow="onRow">
+      <a-table
+        :columns="columns"
+        :data-source="teachers"
+        :loading="loading"
+        :pagination="pagination"
+        size="small"
+        row-key="id"
+        @change="handleTableChange"
+        :customRow="onRow"
+        :row-class-name="rowClassName"
+      >
         <template #bodyCell="{ column, record, index }">
           <template v-if="column.key === 'stt'">
             {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
@@ -111,6 +121,9 @@ const onRow = record => {
   };
 };
 
+// Highlight active row in teacher list
+const rowClassName = record => (record.id === (selectedTeacher.value && selectedTeacher.value.id) ? 'active-row' : '');
+
 const reset = () => {
   selectedTeacher.value = null;
   subjects.value = [];
@@ -153,3 +166,9 @@ defineExpose({
 
 onMounted(fetchTeachers);
 </script>
+
+<style scoped>
+:deep(.active-row > td) {
+  background-color: #e6f7ff !important;
+}
+</style>

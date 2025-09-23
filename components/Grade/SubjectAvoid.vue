@@ -5,7 +5,16 @@
         <SelectGradeLevelByUnit v-model="gradeId" />
         <SelectSchoolship v-model="shipId" />
       </div>
-      <a-table :columns="columns" :data-source="subjects" :loading="loading" :pagination="false" size="small" row-key="id" :customRow="onRow">
+      <a-table
+        :columns="columns"
+        :data-source="subjects"
+        :loading="loading"
+        :pagination="false"
+        size="small"
+        row-key="id"
+        :customRow="onRow"
+        :row-class-name="rowClassName"
+      >
         <template #bodyCell="{ column, index }">
           <template v-if="column.key === 'stt'">{{ index + 1 }}</template>
         </template>
@@ -145,6 +154,13 @@ const onRow = record => {
     style: { cursor: "pointer" },
   };
 };
+
+// Highlight active selected subject row
+const rowClassName = record => (record.id === selectedId.value ? 'active-row' : '');
 </script>
 
-<style scoped></style>
+<style scoped>
+:deep(.active-row > td) {
+  background-color: #e6f7ff !important;
+}
+</style>
