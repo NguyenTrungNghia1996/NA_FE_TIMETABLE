@@ -99,7 +99,16 @@
           >
           <a-radio-button value="all"><p class="uppercase">Tất cả giáo viên</p></a-radio-button>
         </a-radio-group>
-        <a-table :columns="teacherColumns" :data-source="teacherModal.teachers" :loading="teacherModal.loading" :pagination="false" size="small" row-key="id" :row-selection="teacherRowSelection" />
+        <a-table
+          :columns="teacherColumns"
+          :data-source="teacherModal.teachers"
+          :loading="teacherModal.loading"
+          :pagination="false"
+          size="small"
+          row-key="id"
+          :row-selection="teacherRowSelection"
+          :customRow="onTeacherRow"
+        />
         <div class="flex justify-end gap-2 mt-4">
           <a-button @click="cancelTeacher">Hủy</a-button>
           <a-button type="primary" @click="confirmTeacher">OK</a-button>
@@ -114,7 +123,16 @@
         <div class="mb-2">
           <a-button danger @click="noRoom">Không sử dụng phòng học</a-button>
         </div>
-        <a-table :columns="roomColumns" :data-source="roomModal.rooms" :loading="roomModal.loading" :pagination="false" size="small" row-key="id" :row-selection="roomRowSelection" />
+        <a-table
+          :columns="roomColumns"
+          :data-source="roomModal.rooms"
+          :loading="roomModal.loading"
+          :pagination="false"
+          size="small"
+          row-key="id"
+          :row-selection="roomRowSelection"
+          :customRow="onRoomRow"
+        />
         <div class="flex justify-end gap-2 mt-4">
           <a-button @click="cancelRoom">Hủy</a-button>
           <a-button type="primary" @click="confirmRoom">OK</a-button>
@@ -154,6 +172,19 @@ const roomModal = reactive({
   type: "trad",
   record: null,
 });
+
+// Guard to avoid double-trigger when both row click and radio change fire
+let selectionSaving = false;
+async function safeConfirmAndSave(confirmFn) {
+  if (selectionSaving) return;
+  selectionSaving = true;
+  try {
+    confirmFn && confirmFn();
+    await handleSave();
+  } finally {
+    selectionSaving = false;
+  }
+}
 
 function updateWeekly(sub) {
   sub.so_tiet_tuan = (sub.so_tiet_ca_sang_truyen_thong || 0) + (sub.so_tiet_ca_chieu_truyen_thong || 0) + (sub.so_tiet_ca_sang_phong_chuyen_dung || 0) + (sub.so_tiet_ca_chieu_phong_chuyen_dung || 0);
@@ -356,6 +387,7 @@ const teacherRowSelection = computed(() => ({
   selectedRowKeys: teacherModal.selectedId ? [teacherModal.selectedId] : [],
   onChange: keys => {
     teacherModal.selectedId = keys[0];
+    safeConfirmAndSave(() => confirmTeacher());
   },
 }));
 
@@ -364,6 +396,7 @@ const roomRowSelection = computed(() => ({
   selectedRowKeys: roomModal.selectedId ? [roomModal.selectedId] : [],
   onChange: keys => {
     roomModal.selectedId = keys[0];
+    safeConfirmAndSave(() => confirmRoom());
   },
 }));
 
@@ -470,6 +503,28 @@ const onRow = record => {
     style: {
       cursor: "pointer",
     },
+  };
+};
+
+// Allow selecting by clicking the whole row in teacher modal and auto-save
+const onTeacherRow = record => {
+  return {
+    onClick: () => {
+      teacherModal.selectedId = record.id;
+      safeConfirmAndSave(() => confirmTeacher());
+    },
+    style: { cursor: "pointer" },
+  };
+};
+
+// Allow selecting by clicking the whole row in room modal and auto-save
+const onRoomRow = record => {
+  return {
+    onClick: () => {
+      roomModal.selectedId = record.id;
+      safeConfirmAndSave(() => confirmRoom());
+    },
+    style: { cursor: "pointer" },
   };
 };
 </script>

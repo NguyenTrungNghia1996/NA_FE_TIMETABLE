@@ -64,10 +64,10 @@
           <SelectClassroomType v-model="formState.Id_loai_phong_hoc" name="Id_loai_phong_hoc" :rules="rules.Id_loai_phong_hoc" />
           <SelectKnowledge v-model="formState.Id_khoi_kien_thuc" name="Id_khoi_kien_thuc" :multiple="true" />
           <a-form-item label="Số tiết tối đa một ca" name="So_tiet_toi_da_mot_ca">
-            <a-input-number v-model:value="formState.So_tiet_toi_da_mot_ca" :min="1" :max="9" style="width: 100%" />
+            <a-input-number v-model:value="formState.So_tiet_toi_da_mot_ca" :min="1" :precision="0" style="width: 100%" />
           </a-form-item>
           <a-form-item label="Số tiết tối đa hai ca" name="So_tiet_toi_da_hai_ca">
-            <a-input-number v-model:value="formState.So_tiet_toi_da_hai_ca" :min="1" :max="9" style="width: 100%" />
+            <a-input-number v-model:value="formState.So_tiet_toi_da_hai_ca" :min="1" :precision="0" style="width: 100%" />
           </a-form-item>
           <SelectClassroom v-if="formState.Id_loai_phong_hoc" v-model="formState.id_phong" name="classroomByType" :idLoaiPhonghoc="formState.Id_loai_phong_hoc" :multiple="true" />
         </div>
@@ -109,17 +109,9 @@
       </div>
     </a-modal>
     <a-drawer v-model:open="busy_manager_modal" title="Cài đặt tiết tránh xếp" @close="closeBusyManager" placement="bottom" height="100vh">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <a-table
-          :columns="busyColumns"
-          :data-source="dataSource"
-          :pagination="pagination"
-          :loading="loading"
-          bordered
-          size="small"
-          @change="handleTableChange"
-        />
-        <div v-if="selectedSubject && busy_data" class="flex flex-col">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <a-table :columns="busyColumns" :data-source="dataSource" :pagination="pagination" :loading="loading" bordered size="small" @change="handleTableChange" />
+        <div v-if="selectedSubject && busy_data" class="flex flex-col col-span-2">
           <h3 class="font-medium mb-2">{{ selectedSubject.ten }}</h3>
           <div v-for="block in busy_data.ds_Ca" :key="block.id" class="mb-8">
             <Timetable :block="block" />
@@ -228,6 +220,7 @@ const rules = reactive({
     {
       validator: (_, value) => {
         if (!isPosInt(value)) return Promise.reject("Số tiết tối đa phải là số nguyên dương");
+        if (!/^[1-9]$/.test(String(value))) return Promise.reject("Chỉ có thể nhập 1 ký tự (1-9)");
         const haiCa = formState.So_tiet_toi_da_hai_ca;
         if (isPosInt(haiCa) && !(haiCa >= value)) {
           return Promise.reject("Số tiết tối đa 1 ca phải nhỏ hơn hoặc bằng số tiết tối đa 2 ca");
@@ -243,6 +236,7 @@ const rules = reactive({
     {
       validator: (_, value) => {
         if (!isPosInt(value)) return Promise.reject("Số tiết tối đa phải là số nguyên dương");
+        if (!/^[1-9]$/.test(String(value))) return Promise.reject("Chỉ có thể nhập 1 ký tự (1-9)");
         const motCa = formState.So_tiet_toi_da_mot_ca;
         if (isPosInt(motCa) && !(value >= motCa)) {
           return Promise.reject("Số tiết tối đa 2 ca phải lớn hơn hoặc bằng số tiết tối đa 1 ca");

@@ -1,6 +1,21 @@
 <template>
   <a-form-item :label="label" :name="name" :rules="rules">
-    <a-select :value="modelValue" @update:value="val => $emit('update:modelValue', val)" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" :filter-option="false" />
+    <a-select
+      :value="modelValue"
+      @update:value="handleUpdateValue"
+      :mode="multiple ? 'multiple' : undefined"
+      show-search
+      :placeholder="placeholder"
+      :size="size"
+      :loading="loading"
+      :disabled="disabled"
+      allow-clear
+      class="w-full"
+      :options="options"
+      @search="onSearch"
+      @clear="onClear"
+      :filter-option="false"
+    />
   </a-form-item>
 </template>
 
@@ -58,6 +73,20 @@ const debouncedFetch = debounce(val => {
 
 const onSearch = val => {
   debouncedFetch(val);
+};
+
+const onClear = () => {
+  // Reset selection and reload full list
+  emit("update:modelValue", props.multiple ? [] : null);
+  fetchClassroomTypes("");
+};
+
+const handleUpdateValue = val => {
+  emit("update:modelValue", val);
+  // If cleared via keyboard/backspace, also reload list
+  const isCleared =
+    val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0);
+  if (isCleared) fetchClassroomTypes("");
 };
 
 await fetchClassroomTypes();

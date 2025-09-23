@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <a-card title="DANH SÁCH LỚP" class="md:col-span-1">
       <a-table :columns="columns" :data-source="classes" :loading="loading" :pagination="pagination" size="small" row-key="id" @change="handleTableChange" :customRow="onRow">
         <template #bodyCell="{ column, record, index }">
@@ -12,7 +12,7 @@
       </a-table>
     </a-card>
 
-    <a-card v-if="selectedId" :title="'Các tiết nghỉ ' + classes_select.ten_khoi + ' - ' + classes_select.ten" class="md:col-span-1">
+    <a-card v-if="selectedId" :title="'Các tiết nghỉ ' + classes_select.ten_khoi + ' - ' + classes_select.ten" class="md:col-span-2">
       <div v-if="schedule" class="space-y-4">
         <div v-for="block in schedule.ds_Ca" :key="block.id">
           <Timetable :block="block" />

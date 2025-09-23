@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <a-card title="DANH SÁCH GIÁO VIÊN" class="md:col-span-1">
       <a-table :columns="columns" :data-source="teachers" :loading="loading" :pagination="pagination" size="small" row-key="id" @change="handleTableChange" :customRow="onRow">
         <template #bodyCell="{ column, record, index }">
@@ -14,7 +14,7 @@
       </a-table>
     </a-card>
 
-    <a-card v-if="selectedId" :title="'Các tiết tránh xếp của giáo viên: ' + teachers_name" class="md:col-span-1">
+    <a-card v-if="selectedId" :title="'Các tiết tránh xếp của giáo viên: ' + teachers_name" class="md:col-span-2">
       <div class="grid grid-cols-2 gap-2">
         <div class="flex items-center">
           <a-checkbox v-model:checked="onlyOneShift">Chỉ dạy 1 buổi/ngày</a-checkbox>
