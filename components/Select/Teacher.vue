@@ -48,7 +48,9 @@ const fetchTeachers = async (search = "") => {
   loading.value = true;
   try {
     const searchTerm = (search || "").trim();
-    const { data, error } = await RestApi.teacher.list({ params: { search: searchTerm } });
+    const params = {};
+    if (searchTerm) params.search = searchTerm;
+    const { data, error } = await RestApi.teacher.list({ params });
 
     if (data.value?.status === "success") {
       options.value = data.value.data.items?.map(item => ({

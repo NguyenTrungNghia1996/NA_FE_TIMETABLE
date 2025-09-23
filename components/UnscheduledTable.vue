@@ -33,11 +33,11 @@ const columns = [
     dataIndex: "ten_mon",
     key: "ten_mon",
   },
-  {
-    title: "Giáo viên",
-    dataIndex: "ten_giao_vien",
-    key: "ten_giao_vien",
-  },
+  // {
+  //   title: "Giáo viên",
+  //   dataIndex: "ten_giao_vien",
+  //   key: "ten_giao_vien",
+  // },
   {
     title: "Phòng",
     dataIndex: "ten_phong",
