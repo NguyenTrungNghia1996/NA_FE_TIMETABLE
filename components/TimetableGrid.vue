@@ -359,6 +359,17 @@ function isSameSubject(caId, dayId, pIdx) {
   return cell?.id_mon === selectedSubjectId.value && !isSelectedCell(caId, dayId, pIdx);
 }
 
+// Teacher table helpers
+function teacherIsSelectedCell(caId, dayId, pIdx) {
+  return selectedCellPos.value && selectedCellPos.value.ca === caId && selectedCellPos.value.ngay === dayId && selectedCellPos.value.pIdx === pIdx;
+}
+
+function teacherIsSameSubject(caId, dayId, pIdx) {
+  if (!selectedSubjectId.value) return false;
+  const cell = getTeacherCell(caId, dayId, pIdx);
+  return cell?.id_mon === selectedSubjectId.value && !teacherIsSelectedCell(caId, dayId, pIdx);
+}
+
 function isDraggable(cell) {
   return cell?.isDrag && !cell.isRest && !cell.isLock;
 }
@@ -388,6 +399,8 @@ function teacherCellClasses(caId, dayId, pIdx, cell) {
     "cursor-move": drag,
     "bg-green-100": drag,
     "bg-red-50": cell.isLock,
+    "bg-sky-200": teacherIsSameSubject(caId, dayId, pIdx),
+    "bg-sky-400": teacherIsSelectedCell(caId, dayId, pIdx),
   };
 }
 
@@ -711,6 +724,13 @@ async function onTimetableUnscheduledClick(lesson) {
 async function onTeacherCellClick(caId, dayId, pIdx) {
   const cell = getTeacherCell(caId, dayId, pIdx);
   selectedClassId.value = cell.id_lop;
+  if (cell?.id_mon) {
+    selectedSubjectId.value = cell.id_mon;
+    selectedCellPos.value = { ca: caId, ngay: dayId, pIdx };
+  } else {
+    selectedSubjectId.value = null;
+    selectedCellPos.value = null;
+  }
   if (!selectedTeacherId.value || !cell) return;
   try {
     const body = {
