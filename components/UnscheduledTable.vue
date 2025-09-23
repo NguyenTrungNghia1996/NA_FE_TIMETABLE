@@ -1,5 +1,6 @@
 <template>
   <ClientOnly>
+    {{ data }}
     <a-table :columns="columns" :data-source="data" :pagination="false" bordered size="small" :customRow="customRow" />
   </ClientOnly>
 </template>
