@@ -123,16 +123,20 @@
       </ul>
     </div>
 
-    <a-modal v-model:open="showAddModal" title="Chọn tiết học" ok-text="Thêm" cancel-text="Hủy" @ok="confirmAdd" @cancel="showAddModal = false">
-      <a-select v-model:value="selectedIdx" class="w-full mb-4">
-        <a-select-option v-for="(lesson, idx) in lessonOptions" :key="idx" :value="idx">
-          {{ lesson.ten_mon }}
-          <template v-if="contextMenu.isTeacher">
-            <template v-if="lesson.ten_lop"> - {{ lesson.ten_lop }} </template>
-          </template>
-          <template v-else> - {{ lesson.ten_giao_vien }} </template>
-        </a-select-option>
-      </a-select>
+    <a-modal
+      v-model:open="showAddModal"
+      title="Chọn tiết học"
+      :footer="null"
+      @cancel="showAddModal = false"
+    >
+      <a-table
+        :columns="lessonColumns"
+        :data-source="lessonOptions"
+        :pagination="false"
+        size="small"
+        bordered
+        :customRow="lessonRowProps"
+      />
     </a-modal>
   </div>
 </template>
@@ -177,6 +181,40 @@ const targetCell = ref(null);
 const selectedSubjectId = ref(null);
 const selectedCellPos = ref(null);
 const lessonOptions = ref([]);
+const lessonColumns = computed(() => [
+  {
+    title: "STT",
+    key: "stt",
+    width: 70,
+    align: "center",
+    customRender: ({ index }) => index + 1,
+  },
+  {
+    title: "Môn học",
+    dataIndex: "ten_mon",
+    key: "ten_mon",
+  },
+  {
+    title: contextMenu.isTeacher ? "Lớp" : "Giáo viên",
+    dataIndex: contextMenu.isTeacher ? "ten_lop" : "ten_giao_vien",
+    key: contextMenu.isTeacher ? "ten_lop" : "ten_giao_vien",
+  },
+  {
+    title: "Phòng",
+    dataIndex: "ten_phong",
+    key: "ten_phong",
+  },
+  {
+    title: "Tiết",
+    dataIndex: "tiet_thu_may",
+    key: "tiet_thu_may",
+    align: "center",
+    width: 120,
+  },
+]);
+const lessonRowProps = (record, index) => ({
+  onClick: () => onSelectLessonRow(index),
+});
 
 async function fetchAllUnscheduled() {
   if (props.timetableId) {
@@ -1119,5 +1157,11 @@ async function confirmAdd() {
   showAddModal.value = false;
   targetCell.value = null;
   lessonOptions.value = [];
+}
+
+function onSelectLessonRow(idx) {
+  selectedIdx.value = idx;
+  // Tự động lưu khi chọn 1 hàng
+  confirmAdd();
 }
 </script>
