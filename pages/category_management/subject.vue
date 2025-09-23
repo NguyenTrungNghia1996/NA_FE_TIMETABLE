@@ -110,7 +110,18 @@
     </a-modal>
     <a-drawer v-model:open="busy_manager_modal" title="Cài đặt tiết tránh xếp" @close="closeBusyManager" placement="bottom" height="100vh">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <a-table :columns="busyColumns" :data-source="dataSource" :pagination="pagination" :loading="loading" bordered size="small" @change="handleTableChange" />
+        <a-table
+          :columns="busyColumns"
+          :data-source="dataSource"
+          :pagination="pagination"
+          :loading="loading"
+          bordered
+          size="small"
+          row-key="id"
+          @change="handleTableChange"
+          :customRow="onBusyRow"
+          :row-class-name="busyRowClassName"
+        />
         <div v-if="selectedSubject && busy_data" class="flex flex-col col-span-2">
           <h3 class="font-medium mb-2">{{ selectedSubject.ten }}</h3>
           <div v-for="block in busy_data.ds_Ca" :key="block.id" class="mb-8">
@@ -183,7 +194,18 @@ const busyColumns = [
     title: "Tên môn học",
     dataIndex: "ten",
     key: "ten",
-    customRender: ({ record }) => h("a", { onClick: () => selectSubject(record), class: "text-blue-600 hover:underline" }, record.ten),
+    customRender: ({ record }) =>
+      h(
+        "a",
+        {
+          onClick: e => {
+            e?.stopPropagation?.()
+            selectSubject(record)
+          },
+          class: "text-blue-600 hover:underline",
+        },
+        record.ten,
+      ),
   },
 ];
 
@@ -331,6 +353,14 @@ const selectSubject = async record => {
     message.error("Không thể tải dữ liệu");
   }
 };
+
+// Row interactions for busy manager drawer
+const onBusyRow = record => ({
+  onClick: () => selectSubject(record),
+  style: { cursor: "pointer" },
+});
+
+const busyRowClassName = record => (selectedSubject.value && record.id === selectedSubject.value.id ? "active-row" : "");
 
 const showModal = () => {
   isEdit.value = false;
@@ -497,3 +527,9 @@ const onCloseSubjectCombinationDrawer = () => {
   subjectCombinationRef.value?.reset();
 };
 </script>
+
+<style scoped>
+:deep(.active-row > td) {
+  background-color: #e6f7ff !important;
+}
+</style>

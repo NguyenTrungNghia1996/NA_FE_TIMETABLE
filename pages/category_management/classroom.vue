@@ -103,7 +103,18 @@
     </a-modal>
     <a-drawer v-model:open="busy_manager_modal" title="Cài đặt tiết bận" @close="closeBusyManager" height="100vh" placement="bottom" :footer="null">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <a-table :columns="busyColumns" :data-source="dataSource" :pagination="pagination" :loading="loading" bordered size="small" @change="handleTableChange" />
+        <a-table
+          :columns="busyColumns"
+          :data-source="dataSource"
+          :pagination="pagination"
+          :loading="loading"
+          bordered
+          size="small"
+          row-key="id"
+          @change="handleTableChange"
+          :customRow="onBusyRow"
+          :row-class-name="busyRowClassName"
+        />
         <div v-if="selectedClassroom && busy_data" class="flex flex-col col-span-2">
           <h3 class="font-medium mb-2">{{ selectedClassroom.ten }}</h3>
           <div v-for="block in busy_data.ds_Ca" :key="block.id" class="mb-8">
@@ -175,7 +186,18 @@ const busyColumns = [
     title: "Tên phòng học",
     dataIndex: "ten",
     key: "ten",
-    customRender: ({ record }) => h("a", { onClick: () => selectClassroom(record), class: "text-blue-600 hover:underline" }, record.ten),
+    customRender: ({ record }) =>
+      h(
+        "a",
+        {
+          onClick: e => {
+            e?.stopPropagation?.()
+            selectClassroom(record)
+          },
+          class: "text-blue-600 hover:underline",
+        },
+        record.ten,
+      ),
   },
 ];
 
@@ -279,6 +301,14 @@ const selectClassroom = async record => {
     message.error("Không thể tải dữ liệu phòng học");
   }
 };
+
+// Enable selecting by clicking entire row and highlight selected
+const onBusyRow = record => ({
+  onClick: () => selectClassroom(record),
+  style: { cursor: 'pointer' },
+});
+
+const busyRowClassName = record => (selectedClassroom.value && record.id === selectedClassroom.value.id ? 'active-row' : '');
 
 const showModal = async () => {
   isEdit.value = false;
@@ -427,5 +457,9 @@ await fetchData({ ...param.value });
 
 .ant-table-cell-fix-right {
   box-shadow: -5px 0 5px -5px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.active-row > td) {
+  background-color: #e6f7ff !important;
 }
 </style>
