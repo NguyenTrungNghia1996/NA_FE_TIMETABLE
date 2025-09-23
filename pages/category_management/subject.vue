@@ -109,17 +109,9 @@
       </div>
     </a-modal>
     <a-drawer v-model:open="busy_manager_modal" title="Cài đặt tiết tránh xếp" @close="closeBusyManager" placement="bottom" height="100vh">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <a-table
-          :columns="busyColumns"
-          :data-source="dataSource"
-          :pagination="pagination"
-          :loading="loading"
-          bordered
-          size="small"
-          @change="handleTableChange"
-        />
-        <div v-if="selectedSubject && busy_data" class="flex flex-col">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <a-table :columns="busyColumns" :data-source="dataSource" :pagination="pagination" :loading="loading" bordered size="small" @change="handleTableChange" />
+        <div v-if="selectedSubject && busy_data" class="flex flex-col col-span-2">
           <h3 class="font-medium mb-2">{{ selectedSubject.ten }}</h3>
           <div v-for="block in busy_data.ds_Ca" :key="block.id" class="mb-8">
             <Timetable :block="block" />
