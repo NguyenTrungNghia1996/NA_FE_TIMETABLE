@@ -1,22 +1,6 @@
 <template>
   <a-form-item :label="label" :name="name" :rules="rules">
-    <a-select
-      :value="modelValue"
-      @update:value="handleUpdateValue"
-      v-model:searchValue="search"
-      :mode="multiple ? 'multiple' : undefined"
-      show-search
-      :placeholder="placeholder"
-      :size="size"
-      :loading="loading"
-      :disabled="disabled"
-      allow-clear
-      class="w-full"
-      :options="options"
-      @search="onSearch"
-      @clear="onClear"
-      :filter-option="false"
-    />
+    <a-select :value="modelValue" @update:value="handleUpdateValue" v-model:searchValue="search" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
   </a-form-item>
 </template>
 
@@ -50,7 +34,7 @@ const fetchClassroomTypes = async (search = "") => {
     const { data, error } = await RestApi.classroom_type.list({ params: { search: searchTerm } });
 
     if (data.value?.status === "success") {
-      options.value = data.value.data.items.map(item => ({
+      options.value = data.value.data.items?.map(item => ({
         label: item.ten,
         value: item.id,
       }));
@@ -88,8 +72,7 @@ const onClear = () => {
 const handleUpdateValue = val => {
   emit("update:modelValue", val);
   // If cleared via keyboard/backspace, also reload list
-  const isCleared =
-    val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0);
+  const isCleared = val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0);
   if (isCleared) {
     search.value = "";
     fetchClassroomTypes("");
