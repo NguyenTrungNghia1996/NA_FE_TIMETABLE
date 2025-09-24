@@ -24,7 +24,7 @@
           <a-input-number v-model:value="maxPeriod" :min="0" :precision="0" />
         </div>
       </div>
-      <div v-if="schedule && !onlyOneShift" class="space-y-4">
+      <div class="space-y-4">
         <div v-for="block in schedule.ds_Ca" :key="block.id">
           <Timetable :block="block" />
         </div>
@@ -50,7 +50,7 @@ const maxPeriod = ref(0);
 const teaching_session = ref(null);
 const saving = ref(false);
 
-const isPositiveInteger = value => Number.isInteger(value) && value > 0;
+const isPositiveInteger = value => Number.isInteger(value) && value >= 0;
 
 const columns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
