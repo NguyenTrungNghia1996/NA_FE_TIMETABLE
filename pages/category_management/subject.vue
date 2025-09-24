@@ -110,18 +110,7 @@
     </a-modal>
     <a-drawer v-model:open="busy_manager_modal" title="Cài đặt tiết tránh xếp" @close="closeBusyManager" placement="bottom" height="100vh">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <a-table
-          :columns="busyColumns"
-          :data-source="dataSource"
-          :pagination="pagination"
-          :loading="loading"
-          bordered
-          size="small"
-          row-key="id"
-          @change="handleTableChange"
-          :customRow="onBusyRow"
-          :row-class-name="busyRowClassName"
-        />
+        <a-table :columns="busyColumns" :data-source="dataSource" :pagination="pagination" :loading="loading" bordered size="small" row-key="id" @change="handleTableChange" :customRow="onBusyRow" :row-class-name="busyRowClassName" />
         <div v-if="selectedSubject && busy_data" class="flex flex-col col-span-2">
           <h3 class="font-medium mb-2">{{ selectedSubject.ten }}</h3>
           <div v-for="block in busy_data.ds_Ca" :key="block.id" class="mb-8">
@@ -199,8 +188,8 @@ const busyColumns = [
         "a",
         {
           onClick: e => {
-            e?.stopPropagation?.()
-            selectSubject(record)
+            e?.stopPropagation?.();
+            selectSubject(record);
           },
           class: "text-blue-600 hover:underline",
         },
@@ -390,7 +379,7 @@ const editItem = async record => {
         id: data.value.data.id,
         ma: data.value.data.ma,
         ten: data.value.data.ten,
-        Id_loai_phong_hoc: data.value.data.id_loai_phong_hoc,
+        Id_loai_phong_hoc: data.value.data.id_loai_phong_hoc != 0 ? data.value.data.id_loai_phong_hoc : undefined,
         Id_khoi_kien_thuc: data.value.data.id_khoi_kien_thuc,
         Do_GVCN_phu_trach: data.value.data.do_GVCN_phu_trach,
         // Khong_can_phong_hoc: data.value.data.khong_can_phong_hoc,
