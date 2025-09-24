@@ -123,20 +123,8 @@
       </ul>
     </div>
 
-    <a-modal
-      v-model:open="showAddModal"
-      title="Chọn tiết học"
-      :footer="null"
-      @cancel="showAddModal = false"
-    >
-      <a-table
-        :columns="lessonColumns"
-        :data-source="lessonOptions"
-        :pagination="false"
-        size="small"
-        bordered
-        :customRow="lessonRowProps"
-      />
+    <a-modal v-model:open="showAddModal" title="Chọn tiết học" :footer="null" @cancel="showAddModal = false">
+      <a-table :columns="lessonColumns" :data-source="lessonOptions" :pagination="false" size="small" bordered :customRow="lessonRowProps" />
     </a-modal>
   </div>
 </template>
@@ -406,11 +394,7 @@ function teacherIsSameSubject(caId, dayId, pIdx) {
   if (!selectedSubjectId.value) return false;
   const cell = getTeacherCell(caId, dayId, pIdx);
   // Cùng môn học và cùng lớp
-  return (
-    cell?.id_mon === selectedSubjectId.value &&
-    cell?.id_lop === selectedClassId.value &&
-    !teacherIsSelectedCell(caId, dayId, pIdx)
-  );
+  return cell?.id_mon === selectedSubjectId.value && cell?.id_lop === selectedClassId.value && !teacherIsSelectedCell(caId, dayId, pIdx);
 }
 
 function isDraggable(cell) {
@@ -427,23 +411,38 @@ function teacherIsDraggable(cell) {
 
 function cellClasses(caId, dayId, pIdx, cell) {
   const drag = isDraggable(cell);
+  // return {
+  //   "cursor-move": drag,
+  //   "bg-green-100": drag,
+  //   "bg-red-50": cell.isLock,
+  //   "bg-sky-200": isSameSubject(caId, dayId, pIdx),
+  //   "bg-sky-400": isSelectedCell(caId, dayId, pIdx),
+  // };
+
   return {
     "cursor-move": drag,
-    "bg-green-100": drag,
+    "bg-[#AFFF2C]": drag,
     "bg-red-50": cell.isLock,
-    "bg-sky-200": isSameSubject(caId, dayId, pIdx),
-    "bg-sky-400": isSelectedCell(caId, dayId, pIdx),
+    "bg-[#20B1AA]": isSameSubject(caId, dayId, pIdx),
+    "bg-blue-400": isSelectedCell(caId, dayId, pIdx),
   };
 }
 
 function teacherCellClasses(caId, dayId, pIdx, cell) {
   const drag = teacherIsDraggable(cell);
+  // return {
+  //   "cursor-move": drag,
+  //   "bg-green-100": drag,
+  //   "bg-red-50": cell.isLock,
+  //   "bg-sky-200": teacherIsSameSubject(caId, dayId, pIdx),
+  //   "bg-sky-400": teacherIsSelectedCell(caId, dayId, pIdx),
+  // };
   return {
     "cursor-move": drag,
-    "bg-green-100": drag,
+    "bg-[#AFFF2C]": drag,
     "bg-red-50": cell.isLock,
-    "bg-sky-200": teacherIsSameSubject(caId, dayId, pIdx),
-    "bg-sky-400": teacherIsSelectedCell(caId, dayId, pIdx),
+    "bg-[#20B1AA]": teacherIsSameSubject(caId, dayId, pIdx),
+    "bg-blue-400": teacherIsSelectedCell(caId, dayId, pIdx),
   };
 }
 

@@ -44,7 +44,7 @@
         </a-form-item>
         <SelectGradeLevelByUnit v-model="formState.id_khoi" name="id_khoi" :rules="rules.id_khoi" />
         <a-form-item label="Sĩ số" name="si_so">
-          <a-input-number v-model:value="formState.si_so" style="width: 100%" :precision="0" :min="1" />
+          <a-input-number v-model:value="formState.si_so" style="width: 100%" :precision="0" :min="0" />
         </a-form-item>
         <SelectSchoolShiftByUnit v-model="formState.id_ca" name="id_ca" :rules="rules.id_ca" />
         <SelectTeacher v-model="formState.id_gvcn" name="id_gvcn" :rules="rules.id_gvcn" />
@@ -142,7 +142,7 @@ const pagination = reactive({
   pageSize: 10,
   total: 0,
   showSizeChanger: true,
-  pageSizeOptions: ["1", "10", "20", "50"],
+  pageSizeOptions: ["10", "20", "50"],
   showTotal: total => `Tổng ${total} bản ghi`,
 });
 
@@ -150,7 +150,7 @@ const formState = reactive({
   id: null,
   ten: "",
   id_khoi: undefined,
-  si_so: null,
+  si_so: 0,
   id_ca: undefined,
   id_gvcn: undefined,
   id_phong: undefined,
@@ -166,11 +166,11 @@ const rules = reactive({
   si_so: [
     {
       validator: (_, value) => {
-        if (!Number.isInteger(value) || value < 1) {
+        if (!Number.isInteger(value)) {
           return Promise.reject("Sĩ số phải là số nguyên dương");
         }
-        if (!/^[1-9]\d?$/.test(String(value))) {
-          return Promise.reject("Chỉ có thể nhập 2 ký tự (1-99)");
+        if (!/^[0-9]\d?$/.test(String(value))) {
+          return Promise.reject("Chỉ có thể nhập 2 ký tự (0-99)");
         }
         return Promise.resolve();
       },
@@ -222,7 +222,7 @@ const handleSearch = async () => {
 
 const showModal = () => {
   isEdit.value = false;
-  Object.assign(formState, { id: null, ten: "", id_khoi: undefined, si_so: null, id_ca: undefined, id_gvcn: undefined, id_phong: undefined, id_ban: undefined });
+  Object.assign(formState, { id: null, ten: "", id_khoi: undefined, si_so: 0, id_ca: undefined, id_gvcn: undefined, id_phong: undefined, id_ban: undefined });
   visible.value = true;
 };
 
