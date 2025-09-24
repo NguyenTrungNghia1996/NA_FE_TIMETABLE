@@ -3,6 +3,7 @@
     <a-select
       :value="modelValue"
       @update:value="handleUpdateValue"
+      v-model:searchValue="search"
       :mode="multiple ? 'multiple' : undefined"
       show-search
       :placeholder="placeholder"
@@ -40,6 +41,7 @@ const emit = defineEmits(["update:modelValue"]);
 
 const options = ref([]);
 const loading = ref(false);
+const search = ref("");
 
 const fetchClassroomTypes = async (search = "") => {
   loading.value = true;
@@ -68,16 +70,18 @@ const fetchClassroomTypes = async (search = "") => {
 };
 
 const debouncedFetch = debounce(val => {
-  fetchClassroomTypes(val.trim());
+  fetchClassroomTypes((val || "").trim());
 }, 300);
 
 const onSearch = val => {
+  search.value = val;
   debouncedFetch(val);
 };
 
 const onClear = () => {
   // Reset selection and reload full list
   emit("update:modelValue", props.multiple ? [] : null);
+  search.value = "";
   fetchClassroomTypes("");
 };
 
@@ -86,7 +90,13 @@ const handleUpdateValue = val => {
   // If cleared via keyboard/backspace, also reload list
   const isCleared =
     val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0);
-  if (isCleared) fetchClassroomTypes("");
+  if (isCleared) {
+    search.value = "";
+    fetchClassroomTypes("");
+  } else if (search.value) {
+    search.value = "";
+    fetchClassroomTypes("");
+  }
 };
 
 await fetchClassroomTypes();

@@ -64,10 +64,10 @@
           <SelectClassroomType v-model="formState.Id_loai_phong_hoc" name="Id_loai_phong_hoc" :rules="rules.Id_loai_phong_hoc" />
           <SelectKnowledge v-model="formState.Id_khoi_kien_thuc" name="Id_khoi_kien_thuc" :multiple="true" />
           <a-form-item label="Số tiết tối đa một ca" name="So_tiet_toi_da_mot_ca">
-            <a-input-number v-model:value="formState.So_tiet_toi_da_mot_ca" :min="1" :precision="0" style="width: 100%" />
+            <a-input-number v-model:value="formState.So_tiet_toi_da_mot_ca" :precision="0" style="width: 100%" />
           </a-form-item>
           <a-form-item label="Số tiết tối đa hai ca" name="So_tiet_toi_da_hai_ca">
-            <a-input-number v-model:value="formState.So_tiet_toi_da_hai_ca" :min="1" :precision="0" style="width: 100%" />
+            <a-input-number v-model:value="formState.So_tiet_toi_da_hai_ca" :precision="0" style="width: 100%" />
           </a-form-item>
           <SelectClassroom v-if="formState.Id_loai_phong_hoc" v-model="formState.id_phong" name="classroomByType" :idLoaiPhonghoc="formState.Id_loai_phong_hoc" :multiple="true" />
         </div>
@@ -210,8 +210,8 @@ const formState = reactive({
   // Khong_can_phong_hoc: false,
   Hoc_cach_ngay: false,
   Xep_thanh_cap: false,
-  So_tiet_toi_da_mot_ca: 1,
-  So_tiet_toi_da_hai_ca: 2,
+  So_tiet_toi_da_mot_ca: undefined,
+  So_tiet_toi_da_hai_ca: undefined,
   La_mon_tu_chon: false,
   id_phong: [],
 });
@@ -362,8 +362,8 @@ const showModal = () => {
     // Khong_can_phong_hoc: false,
     Hoc_cach_ngay: false,
     Xep_thanh_cap: false,
-    So_tiet_toi_da_mot_ca: 1,
-    So_tiet_toi_da_hai_ca: 2,
+    So_tiet_toi_da_mot_ca: undefined,
+    So_tiet_toi_da_hai_ca: undefined,
     La_mon_tu_chon: false,
     id_phong: [],
   });

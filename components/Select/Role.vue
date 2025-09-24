@@ -1,6 +1,22 @@
 <template>
   <a-form-item :label="label" :name="name" :rules="rules">
-    <a-select :value="modelValue" @update:value="handleUpdateValue" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
+    <a-select
+      :value="modelValue"
+      @update:value="handleUpdateValue"
+      v-model:searchValue="search"
+      :mode="multiple ? 'multiple' : undefined"
+      show-search
+      :placeholder="placeholder"
+      :size="size"
+      :loading="loading"
+      :disabled="disabled"
+      allow-clear
+      class="w-full"
+      :options="options"
+      @search="onSearch"
+      @clear="onClear"
+      :filter-option="false"
+    />
   </a-form-item>
 </template>
 
@@ -25,6 +41,7 @@ const emit = defineEmits(["update:modelValue"]);
 
 const options = ref([]);
 const loading = ref(false);
+const search = ref("");
 
 const fetchRoles = async (search = "") => {
   loading.value = true;
@@ -54,14 +71,16 @@ const fetchRoles = async (search = "") => {
 };
 
 const debouncedFetch = debounce(val => {
-  fetchRoles(val.trim());
+  fetchRoles((val || "").trim());
 }, 300);
 
 const onSearch = val => {
+  search.value = val;
   debouncedFetch(val);
 };
 
 const onClear = () => {
+  search.value = "";
   fetchRoles("");
   emit("update:modelValue", props.multiple ? [] : null);
 };
@@ -69,7 +88,14 @@ const onClear = () => {
 const handleUpdateValue = val => {
   emit("update:modelValue", val);
   const isCleared = val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0);
-  if (isCleared) fetchRoles("");
+  if (isCleared) {
+    search.value = "";
+    fetchRoles("");
+  } else if (search.value) {
+    // Sau khi chọn khi đang có tìm kiếm, reset tìm kiếm và load lại options mặc định
+    search.value = "";
+    fetchRoles("");
+  }
 };
 
 await fetchRoles();

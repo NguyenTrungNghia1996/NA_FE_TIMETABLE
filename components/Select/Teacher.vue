@@ -1,17 +1,17 @@
 <template>
   <template v-if="!noFormItem">
     <a-form-item :label="label" :name="name" :rules="rules" :label-col="inlineLabel ? { span: 8 } : { span: 24 }" :wrapper-col="inlineLabel ? { span: 16 } : { span: 24 }">
-      <a-select :value="modelValue" @update:value="handleUpdateValue" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
+      <a-select :value="modelValue" @update:value="handleUpdateValue" v-model:searchValue="search" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
     </a-form-item>
   </template>
   <template v-else>
     <div v-if="inlineLabel" class="flex items-center gap-2 py-3">
       <label v-if="label" class="text-sm font-medium min-w-[50px]">{{ label }}</label>
-      <a-select :value="modelValue" @update:value="handleUpdateValue" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="flex-1" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
+      <a-select :value="modelValue" @update:value="handleUpdateValue" v-model:searchValue="search" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="flex-1" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
     </div>
     <template v-else>
       <label v-if="label" class="block text-sm font-medium mb-1">{{ label }}</label>
-      <a-select :value="modelValue" @update:value="handleUpdateValue" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
+      <a-select :value="modelValue" @update:value="handleUpdateValue" v-model:searchValue="search" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
     </template>
   </template>
 </template>
@@ -43,6 +43,7 @@ const emit = defineEmits(["update:modelValue"]);
 
 const options = ref([]);
 const loading = ref(false);
+const search = ref("");
 
 const fetchTeachers = async (search = "") => {
   loading.value = true;
@@ -77,22 +78,30 @@ const fetchTeachers = async (search = "") => {
 };
 
 const debouncedFetch = debounce(val => {
-  fetchTeachers(val.trim());
+  fetchTeachers((val || "").trim());
 }, 300);
 
 const onSearch = val => {
+  search.value = val;
   debouncedFetch(val);
 };
 
 const onClear = () => {
   emit("update:modelValue", props.multiple ? [] : null);
+  search.value = "";
   fetchTeachers("");
 };
 
 const handleUpdateValue = val => {
   emit("update:modelValue", val);
   const isCleared = val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0);
-  if (isCleared) fetchTeachers("");
+  if (isCleared) {
+    search.value = "";
+    fetchTeachers("");
+  } else if (search.value) {
+    search.value = "";
+    fetchTeachers("");
+  }
 };
 
 await fetchTeachers();

@@ -3,6 +3,7 @@
     <a-select
       :value="modelValue"
       @update:value="handleUpdateValue"
+      v-model:searchValue="search"
       :mode="multiple ? 'multiple' : undefined"
       show-search
       :placeholder="placeholder"
@@ -38,6 +39,7 @@ const emit = defineEmits(["update:modelValue"]);
 
 const options = ref([]);
 const loading = ref(false);
+const search = ref("");
 
 const fetchPeriods = async (search = "") => {
   loading.value = true;
@@ -70,22 +72,30 @@ const fetchPeriods = async (search = "") => {
 };
 
 const debouncedFetch = debounce(val => {
-  fetchPeriods(val.trim());
+  fetchPeriods((val || "").trim());
 }, 300);
 
 const onSearch = val => {
+  search.value = val;
   debouncedFetch(val);
 };
 
 const onClear = () => {
   emit("update:modelValue", props.multiple ? [] : null);
+  search.value = "";
   fetchPeriods("");
 };
 
 const handleUpdateValue = val => {
   emit("update:modelValue", val);
   const isCleared = val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0);
-  if (isCleared) fetchPeriods("");
+  if (isCleared) {
+    search.value = "";
+    fetchPeriods("");
+  } else if (search.value) {
+    search.value = "";
+    fetchPeriods("");
+  }
 };
 
 await fetchPeriods();

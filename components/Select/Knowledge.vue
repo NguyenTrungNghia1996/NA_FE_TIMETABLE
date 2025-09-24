@@ -1,6 +1,6 @@
 <template>
   <a-form-item :label="label" :name="name" :rules="rules">
-    <a-select :value="modelValue" @update:value="handleUpdateValue" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
+    <a-select :value="modelValue" @update:value="handleUpdateValue" v-model:searchValue="search" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
   </a-form-item>
 </template>
 
@@ -25,6 +25,7 @@ const emit = defineEmits(["update:modelValue"]);
 
 const options = ref([]);
 const loading = ref(false);
+const search = ref("");
 
 const fetchKnowledge = async (search = "") => {
   loading.value = true;
@@ -54,22 +55,30 @@ const fetchKnowledge = async (search = "") => {
 };
 
 const debouncedFetch = debounce(val => {
-  fetchKnowledge(val.trim());
+  fetchKnowledge((val || "").trim());
 }, 300);
 
 const onSearch = val => {
+  search.value = val;
   debouncedFetch(val);
 };
 
 const onClear = () => {
   emit("update:modelValue", props.multiple ? [] : null);
+  search.value = "";
   fetchKnowledge("");
 };
 
 const handleUpdateValue = val => {
   emit("update:modelValue", val);
   const isCleared = val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0);
-  if (isCleared) fetchKnowledge("");
+  if (isCleared) {
+    search.value = "";
+    fetchKnowledge("");
+  } else if (search.value) {
+    search.value = "";
+    fetchKnowledge("");
+  }
 };
 
 await fetchKnowledge();
