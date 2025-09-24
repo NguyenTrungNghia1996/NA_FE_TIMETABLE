@@ -24,7 +24,7 @@
           <a-input-number v-model:value="maxPeriod" :min="0" :precision="0" />
         </div>
       </div>
-      <div v-if="schedule && !onlyOneShift" class="space-y-4">
+      <div class="space-y-4">
         <div v-for="block in schedule.ds_Ca" :key="block.id">
           <Timetable :block="block" />
         </div>
