@@ -1,17 +1,7 @@
 <template>
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <a-card title="DANH SÁCH GIÁO VIÊN" class="md:col-span-1">
-      <a-table
-        :columns="columns"
-        :data-source="teachers"
-        :loading="loading"
-        :pagination="pagination"
-        size="small"
-        row-key="id"
-        @change="handleTableChange"
-        :customRow="onRow"
-        :row-class-name="rowClassName"
-      >
+      <a-table :columns="columns" :data-source="teachers" :loading="loading" :pagination="pagination" size="small" row-key="id" @change="handleTableChange" :customRow="onRow" :row-class-name="rowClassName">
         <template #bodyCell="{ column, record, index }">
           <template v-if="column.key === 'stt'">
             {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
@@ -31,7 +21,7 @@
         </div>
         <div class="flex items-center gap-5">
           <span>Số tiết tối đa/ngày:</span>
-          <a-input-number v-model:value="maxPeriod" :min="0" :precision="0" />
+          <a-input-number v-model:value="maxPeriod" :min="1" :precision="0" />
         </div>
       </div>
       <div v-if="schedule && !onlyOneShift" class="space-y-4">
@@ -60,7 +50,7 @@ const maxPeriod = ref(0);
 const teaching_session = ref(null);
 const saving = ref(false);
 
-const isPositiveInteger = value => Number.isInteger(value) && value >= 0;
+const isPositiveInteger = value => Number.isInteger(value) && value > 0;
 
 const columns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
@@ -110,7 +100,7 @@ async function selectTeacher(record) {
       schedule.value = data.value.data;
       onlyOneShift.value = !!data.value.data.chi_day_mot_buoi;
       const fetchedMaxPeriod = Number(data.value.data.so_tiet_toi_da);
-      maxPeriod.value = Number.isFinite(fetchedMaxPeriod) ? fetchedMaxPeriod : 0;
+      maxPeriod.value = Number.isFinite(fetchedMaxPeriod) && fetchedMaxPeriod >= 1 ? Math.min(fetchedMaxPeriod, 9) : 1;
       teaching_session.value = data.value.data.id_buoi_day || 0;
     }
   } catch (err) {
@@ -122,7 +112,11 @@ async function handleSave() {
   if (!selectedId.value) return;
   const normalizedMaxPeriod = Number(maxPeriod.value);
   if (!isPositiveInteger(normalizedMaxPeriod)) {
-    message.warning("Số tiết tối đa/ngày phải là số tự nhiên dương");
+    message.warning("Số tiết tối đa/ngày phải là số nguyên dương");
+    return;
+  }
+  if (normalizedMaxPeriod < 1 || normalizedMaxPeriod > 9) {
+    message.warning("Số tiết tối đa/ngày chỉ nhập 1 ký tự (1-9)");
     return;
   }
   maxPeriod.value = normalizedMaxPeriod;
