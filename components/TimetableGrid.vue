@@ -405,7 +405,12 @@ function teacherIsSelectedCell(caId, dayId, pIdx) {
 function teacherIsSameSubject(caId, dayId, pIdx) {
   if (!selectedSubjectId.value) return false;
   const cell = getTeacherCell(caId, dayId, pIdx);
-  return cell?.id_mon === selectedSubjectId.value && !teacherIsSelectedCell(caId, dayId, pIdx);
+  // Cùng môn học và cùng lớp
+  return (
+    cell?.id_mon === selectedSubjectId.value &&
+    cell?.id_lop === selectedClassId.value &&
+    !teacherIsSelectedCell(caId, dayId, pIdx)
+  );
 }
 
 function isDraggable(cell) {
