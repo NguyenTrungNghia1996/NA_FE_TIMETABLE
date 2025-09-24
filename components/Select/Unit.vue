@@ -1,6 +1,6 @@
 <template>
   <a-form-item :label="label" :name="name" :rules="rules">
-    <a-select :value="modelValue" @update:value="handleUpdateValue" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
+    <a-select :value="modelValue" @update:value="handleUpdateValue" v-model:searchValue="search" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
   </a-form-item>
 </template>
 
@@ -25,6 +25,7 @@ const emit = defineEmits(["update:modelValue"]);
 
 const options = ref([]);
 const loading = ref(false);
+const search = ref("");
 
 const fetchUnits = async (search = "") => {
   loading.value = true;
@@ -51,22 +52,30 @@ const fetchUnits = async (search = "") => {
 };
 
 const debouncedFetch = debounce(val => {
-  fetchUnits(val.trim());
+  fetchUnits((val || "").trim());
 }, 300);
 
 const onSearch = val => {
+  search.value = val;
   debouncedFetch(val);
 };
 
 const onClear = () => {
   emit("update:modelValue", props.multiple ? [] : null);
+  search.value = "";
   fetchUnits("");
 };
 
 const handleUpdateValue = val => {
   emit("update:modelValue", val);
   const isCleared = val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0);
-  if (isCleared) fetchUnits("");
+  if (isCleared) {
+    search.value = "";
+    fetchUnits("");
+  } else if (search.value) {
+    search.value = "";
+    fetchUnits("");
+  }
 };
 
 await fetchUnits();

@@ -18,7 +18,7 @@
               <a-input-number v-model:value="form.maxPeriod" class="w-full" :min="1" :precision="0" :step="1" />
             </a-form-item>
             <a-form-item label="Số tiết 2 ca" name="period2" :rules="rules.period2">
-              <a-input-number v-model:value="form.period2" class="w-full" :min="1" :precision="0" :step="1" :parser="period2Parser" />
+              <a-input-number v-model:value="form.period2" class="w-full" :min="1" :precision="0" :step="1" />
             </a-form-item>
           </div>
           <div class="flex flex-wrap gap-2 mt-4">
@@ -96,14 +96,6 @@ const period2GteMaxPeriodValidator = async (_rule, value) => {
 const oneToNineValidator = async (_rule, value) => {
   if (value === undefined || value === null || value === "") return Promise.resolve();
   return value >= 1 && value <= 9 ? Promise.resolve() : Promise.reject("Chỉ cho phép giá trị 1 đến 9");
-};
-
-// Parser to restrict period2 input to a single digit 1-9
-const period2Parser = value => {
-  const s = String(value ?? "")
-    .replace(/[^0-9]/g, "")
-    .replace(/^0+/, "");
-  return s.slice(0, 1);
 };
 
 const rules = {
