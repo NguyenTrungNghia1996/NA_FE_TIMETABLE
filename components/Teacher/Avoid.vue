@@ -21,7 +21,7 @@
         </div>
         <div class="flex items-center gap-5">
           <span>Số tiết tối đa/ngày:</span>
-          <a-input-number v-model:value="maxPeriod" :min="1" :precision="0" />
+          <a-input-number v-model:value="maxPeriod" :min="0" :precision="0" />
         </div>
       </div>
       <div v-if="schedule && !onlyOneShift" class="space-y-4">
@@ -100,7 +100,7 @@ async function selectTeacher(record) {
       schedule.value = data.value.data;
       onlyOneShift.value = !!data.value.data.chi_day_mot_buoi;
       const fetchedMaxPeriod = Number(data.value.data.so_tiet_toi_da);
-      maxPeriod.value = Number.isFinite(fetchedMaxPeriod) && fetchedMaxPeriod >= 1 ? Math.min(fetchedMaxPeriod, 9) : 1;
+      maxPeriod.value = Number.isFinite(fetchedMaxPeriod) && fetchedMaxPeriod >= 1 ? Math.min(fetchedMaxPeriod, 9) : 0;
       teaching_session.value = data.value.data.id_buoi_day || 0;
     }
   } catch (err) {
@@ -115,7 +115,7 @@ async function handleSave() {
     message.warning("Số tiết tối đa/ngày phải là số nguyên dương");
     return;
   }
-  if (normalizedMaxPeriod < 1 || normalizedMaxPeriod > 9) {
+  if (normalizedMaxPeriod < 0 || normalizedMaxPeriod > 9) {
     message.warning("Số tiết tối đa/ngày chỉ nhập 1 ký tự (1-9)");
     return;
   }
