@@ -27,7 +27,7 @@
     </div>
     <div v-if="selectedClass" class="col-span-2">
       <div class="overflow-x-auto">
-        <a-card :title="'Danh sách môn học lớp: ' + (selectedClass?.ten ? selectedClass?.ten : '')">
+        <a-card :title="cardTitle">
           <a-table :columns="subjectColumns" :data-source="subjects" :loading="subjectLoading" :pagination="false" size="small" row-key="id_mon" :scroll="{ x: 'max-content' }">
             <template #bodyCell="{ column, record, index }">
               <template v-if="column.key === 'stt'">{{ index + 1 }}</template>
@@ -159,6 +159,7 @@ const gradeId = ref(null);
 const classes = ref([]);
 const loading = ref(false);
 const selectedClassId = ref(null);
+const selectedClass = ref();
 const subjects = ref([]);
 const subjectLoading = ref(false);
 const saving = ref(false);
@@ -217,6 +218,33 @@ watch(
   },
   { deep: true },
 );
+
+// Tổng số tiết theo ca và theo tuần (gộp cả 2 loại phòng)
+const totalMorning = computed(() =>
+  (subjects.value || []).reduce(
+    (sum, s) =>
+      sum + (Number(s.so_tiet_ca_sang_truyen_thong) || 0) + (Number(s.so_tiet_ca_sang_phong_chuyen_dung) || 0),
+    0,
+  ),
+);
+
+const totalAfternoon = computed(() =>
+  (subjects.value || []).reduce(
+    (sum, s) =>
+      sum + (Number(s.so_tiet_ca_chieu_truyen_thong) || 0) + (Number(s.so_tiet_ca_chieu_phong_chuyen_dung) || 0),
+    0,
+  ),
+);
+
+const totalWeekly = computed(() =>
+  (subjects.value || []).reduce((sum, s) => sum + (Number(s.so_tiet_tuan) || 0), 0),
+);
+
+// Tiêu đề thẻ: hiển thị tên lớp và tổng số tiết theo yêu cầu
+const cardTitle = computed(() => {
+  const name = selectedClass.value?.ten ? String(selectedClass.value.ten) : "";
+  return `Danh sách môn học lớp: ${name} (Tổng tiết sáng: ${totalMorning.value} | Tổng tiết chiều: ${totalAfternoon.value} | Tổng tiết tuần: ${totalWeekly.value})`;
+});
 
 const pagination = reactive({
   current: 1,
@@ -501,7 +529,6 @@ async function handleSave() {
     saving.value = false;
   }
 }
-const selectedClass = ref();
 defineExpose({ reset, refresh });
 const onRow = record => {
   return {
