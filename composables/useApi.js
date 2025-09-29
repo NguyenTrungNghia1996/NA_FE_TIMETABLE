@@ -72,6 +72,9 @@ let ENDPOINTS = {
   TEACHER_DETAIL: "/api/giaovien/detail",
   TEACHER_AVOID: "/api/giaovien/tiettranhxep",
   TEACHER_SUBJECT: "/api/giaovien/giaovienmonhoc",
+  // Teacher assignment by teacher
+  TEACHER_ASSIGNMENT: "/api/phanconggv",
+  TEACHER_ASSIGNMENT_CLASS: "/api/phanconggv/lop",
   // CLASS
   CLASS: "/api/lophoc",
   CLASS_DETAIL: "/api/lophoc/detail",
@@ -749,6 +752,18 @@ class Teacher {
   }
   async update_subjects(data) {
     return await this.request.post(ENDPOINTS.TEACHER_SUBJECT, data);
+  }
+  // Assignment overview for a teacher (by subject or all)
+  async get_assignment(data) {
+    return await this.request.get(ENDPOINTS.TEACHER_ASSIGNMENT, data);
+  }
+  // Assignment class list for a teacher/subject
+  async get_assignment_classes(data) {
+    return await this.request.get(ENDPOINTS.TEACHER_ASSIGNMENT_CLASS, data);
+  }
+  // Update assignments (body is subjectRows)
+  async update_assignment(data) {
+    return await this.request.post(ENDPOINTS.TEACHER_ASSIGNMENT, data);
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.TEACHER, data);
