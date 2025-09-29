@@ -38,7 +38,6 @@
               <a-radio value="all">Theo tất cả các môn</a-radio>
             </a-radio-group>
           </div>
-          {{ subjectRows }}
           <a-table :columns="subjectColumns" :data-source="subjectRows" :pagination="false" size="small" row-key="id_mon" bordered>
             <template #bodyCell="{ column, record, index }">
               <template v-if="column.key === 'stt'">{{ index + 1 }}</template>
