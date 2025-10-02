@@ -114,7 +114,7 @@ const pagination = reactive({
   pageSize: 10,
   total: 0,
   showSizeChanger: true,
-  pageSizeOptions: ["1", "5", "10", "20", "50"],
+  pageSizeOptions: ["10", "20", "50"],
   showTotal: total => `Tổng ${total} bản ghi`,
 });
 
