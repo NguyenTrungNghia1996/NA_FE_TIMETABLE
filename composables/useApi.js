@@ -85,6 +85,7 @@ let ENDPOINTS = {
   //TIMETABLE
   TIMETABLE: "/api/thoikhoabieu",
   TIMETABLE_DETAIL: "/api/thoikhoabieu/detail",
+  TIMETABLE_COPY: "/api/thoikhoabieu/copy",
   TIMETABLE_FIND_CLASS_POSITION: "/api/tkb/timvitri/lop",
   TIMETABLE_FIND_TEACHER_POSITION: "/api/tkb/timvitri/giaovien",
   TIMETABLE_FIND_TEACHER_UNSCHEDULED_POSITION: "/api/tkb/timvitri/chuaxep/giaovien",
@@ -821,6 +822,9 @@ class Timetable {
   }
   async create(data) {
     return await this.request.post(ENDPOINTS.TIMETABLE, data);
+  }
+  async copy(data) {
+    return await this.request.post(ENDPOINTS.TIMETABLE_COPY, data);
   }
   async update(data) {
     return await this.request.put(ENDPOINTS.TIMETABLE, data);

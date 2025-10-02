@@ -28,6 +28,11 @@
                   <template #icon><SettingOutlined /></template>
                 </a-button>
               </a-tooltip>
+              <a-tooltip title="Sao chép">
+                <a-button type="link" size="small" @click="openCloneModal(record)">
+                  <template #icon><CopyOutlined /></template>
+                </a-button>
+              </a-tooltip>
               <a-tooltip title="Sửa">
                 <a-button type="link" size="small" @click="editItem(record)">
                   <template #icon><EditOutlined /></template>
@@ -60,6 +65,22 @@
           <a-button type="primary" @click="handleOk" :loading="confirmLoading">
             {{ isEdit ? "Cập nhật" : "Thêm mới" }}
           </a-button>
+        </div>
+      </a-form>
+    </a-modal>
+
+    <!-- Clone Modal -->
+    <a-modal v-model:open="cloneVisible" :title="'Tạo bản sao thời khóa biểu: ' + cloneSourceName" @cancel="handleCloneCancel" :footer="null">
+      <a-form ref="cloneFormRef" :model="cloneForm" layout="vertical" :rules="rules">
+        <a-form-item label="Tên thời khóa biểu" name="ten" :required="true">
+          <a-input v-model:value="cloneForm.ten" placeholder="Nhập tên thời khóa biểu" showCount :maxlength="100" />
+        </a-form-item>
+        <a-form-item label="Trạng thái" name="dang_su_dung">
+          <a-switch v-model:checked="cloneForm.dang_su_dung" />
+        </a-form-item>
+        <div class="flex justify-end gap-2 mt-6">
+          <a-button @click="handleCloneCancel">Hủy</a-button>
+          <a-button type="primary" @click="handleCloneOk" :loading="cloneConfirmLoading">Tạo bản sao</a-button>
         </div>
       </a-form>
     </a-modal>
@@ -119,7 +140,7 @@ const columns = [
   {
     title: "Thao tác",
     key: "action",
-    width: 120,
+    width: 160,
     align: "center",
   },
 ];
@@ -132,10 +153,18 @@ const formRef = ref();
 const confirmLoading = ref(false);
 const formState = reactive({ id: null, ten: "", dang_su_dung: true });
 
+// Clone state
+const cloneVisible = ref(false);
+const cloneFormRef = ref();
+const cloneConfirmLoading = ref(false);
+const cloneSourceId = ref(null);
+const cloneSourceName = ref("");
+const cloneForm = reactive({ ten: "", dang_su_dung: true });
+
 const rules = {
   ten: [
-    { required: true, message: "Vui lòng nhập tên thời khóa biểu", trigger: "blur" },
-    { max: 100, message: "Tên thời khóa biểu không quá 100 kí tự" },
+    { required: true, message: "Vui lòng nhập tên thời khóa biểu", trigger: ["blur", "change"] },
+    { max: 100, message: "Tên thời khóa biểu không quá 100 kí tự", trigger: ["blur", "change"] },
   ],
 };
 
@@ -205,6 +234,14 @@ const editItem = record => {
   formRef.value?.clearValidate();
 };
 
+const openCloneModal = record => {
+  cloneSourceId.value = record.id;
+  cloneSourceName.value = record.ten;
+  Object.assign(cloneForm, { ten: `Bản sao ${record.ten}`, dang_su_dung: record?.dang_su_dung ?? true });
+  cloneVisible.value = true;
+  cloneFormRef.value?.clearValidate?.();
+};
+
 const handleOk = async () => {
   try {
     await formRef.value.validate();
@@ -238,6 +275,42 @@ const handleOk = async () => {
 const handleCancel = () => {
   formRef.value?.resetFields();
   visible.value = false;
+};
+
+const handleCloneOk = async () => {
+  // Validate first; if invalid, keep modal open
+  try {
+    await cloneFormRef.value.validate();
+  } catch (err) {
+    // Validation failed: do not close modal
+    return;
+  }
+
+  try {
+    cloneConfirmLoading.value = true;
+    const payload = {
+      id: cloneSourceId.value,
+      ten: cloneForm.ten,
+      dang_su_dung: cloneForm.dang_su_dung,
+    };
+    const { data, error } = await RestApi.timetable.copy({ body: payload });
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Tạo bản sao thành công");
+      cloneVisible.value = false;
+      await fetchData({ ...param.value });
+    } else {
+      throw new Error(error.value?.data?.message || data.value?.message || "Tạo bản sao không thành công");
+    }
+  } catch (err) {
+    message.error(err?.message || err?.value?.data?.message || "Có lỗi");
+  } finally {
+    cloneConfirmLoading.value = false;
+  }
+};
+
+const handleCloneCancel = () => {
+  cloneFormRef.value?.resetFields?.();
+  cloneVisible.value = false;
 };
 
 const deleteItem = async id => {
