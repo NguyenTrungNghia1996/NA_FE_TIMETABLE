@@ -74,7 +74,7 @@
     </a-drawer>
     <a-drawer v-model:open="drawerAdjustOpen" title="Tinh chỉnh thời khóa biểu" :footer="null" height="100vh" placement="bottom" :header-style="{ padding: '0px 0px' }" :body-style="{ padding: '4px 4px' }">
       <ClientOnly>
-        <TimetableGrid v-model:rawTimetable="adjustRawTimetable" v-model:rawUnscheduled="adjustRawUnscheduled" v-model:classId="adjustClassId" :timetableId="adjustTimetableId" />
+        <TimetableGrid v-model:classId="adjustClassId" :timetableId="adjustTimetableId" />
       </ClientOnly>
     </a-drawer>
   </div>
@@ -262,8 +262,6 @@ await fetchData({ ...param.value });
 const drawerInfoOpen = ref(false);
 const infoRef = ref(null);
 const drawerAdjustOpen = ref(false);
-const adjustRawTimetable = ref([]);
-const adjustRawUnscheduled = ref([]);
 const adjustClassId = ref(null);
 const adjustTimetableId = ref(null);
 const infoTimetableId = ref(null);
@@ -281,40 +279,8 @@ const openInfoDrawer = reg => {
   infoTimetableId.value = reg.id;
   drawerInfoOpen.value = true;
 };
-const fetchAdjustData = async () => {
-  if (!adjustClassId.value || !adjustTimetableId.value) return;
-  try {
-    const { data } = await RestApi.timetable.get_class({
-      params: { idLop: adjustClassId.value, idtkb: adjustTimetableId.value },
-    });
-    if (data.value?.status === "success") {
-      const raw = data.value.data;
-      adjustRawTimetable.value = raw.timetable;
-      // adjustRawUnscheduled.value = raw.ds_chua_xep.map(({ id_mon, ten_mon, id_giao_vien, ten_giao_vien, id_phong, ten_phong, tiet_thu_may }) => ({
-      //   id_mon,
-      //   ten_mon,
-      //   id_giao_vien,
-      //   ten_giao_vien,
-      //   id_phong,
-      //   ten_phong,
-      //   tiet_thu_may,
-      // }));
-
-      adjustRawUnscheduled.value = raw.ds_chua_xep;
-    } else {
-      adjustRawTimetable.value = [];
-      adjustRawUnscheduled.value = [];
-    }
-  } catch (error) {
-    message.error("Lỗi khi tải thời khóa biểu");
-  }
-};
-
-watch([adjustClassId, adjustTimetableId], fetchAdjustData);
-
 const openAdjustDrawer = record => {
   adjustTimetableId.value = record.id;
   drawerAdjustOpen.value = true;
-  fetchAdjustData();
 };
 </script>

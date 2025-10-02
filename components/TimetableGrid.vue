@@ -85,7 +85,7 @@
             Tiết chưa xếp của lớp học
             <span v-if="selectedClassName">: {{ selectedClassName }}</span>
           </h4>
-          <UnscheduledTable :data="props.rawUnscheduled" class="w-full" @row-click="onUnscheduledClick" />
+          <UnscheduledTable :data="classUnscheduled" class="w-full" @row-click="onUnscheduledClick" />
         </div>
         <div class="h-1/3 overflow-auto m-3 shadow-xl">
           <h4 class="font-semibold">
@@ -130,18 +130,10 @@
 </template>
 
 <script setup>
-import { transformTimetable, gridToFlat } from "@/composables/useTimetable";
+import { transformTimetable } from "@/composables/useTimetable";
 const { RestApi } = useApi();
 
 const props = defineProps({
-  rawTimetable: {
-    type: Array,
-    required: true,
-  },
-  rawUnscheduled: {
-    type: Array,
-    required: true,
-  },
   classId: {
     type: Number,
     default: null,
@@ -156,13 +148,14 @@ const dsCa = ref([]);
 const teacherDsCa = ref([]);
 const teacherUnscheduled = ref([]);
 const timetableUnscheduled = ref([]);
+const classUnscheduled = ref([]);
 const selectedTeacherId = ref(null);
 const selectedTeacherName = ref("");
 const selectedClassId = ref(props.classId);
 const selectedClassName = ref("");
 let classNameFetchToken = 0;
 let teacherNameFetchToken = 0;
-const emit = defineEmits(["cell-click", "update:rawTimetable", "update:rawUnscheduled", "update:classId"]);
+const emit = defineEmits(["cell-click", "update:classId"]);
 const showAddModal = ref(false);
 const selectedIdx = ref(0);
 const targetCell = ref(null);
@@ -213,6 +206,38 @@ async function fetchAllUnscheduled() {
   }
 }
 
+async function fetchClassTimetable() {
+  if (!selectedClassId.value || !props.timetableId) {
+    dsCa.value = [];
+    classUnscheduled.value = [];
+    return;
+  }
+  try {
+    const { data, error } = await RestApi.timetable.get_class({
+      params: { idLop: selectedClassId.value, idtkb: props.timetableId },
+    });
+    if (data.value?.status === "success") {
+      const { timetable, ds_chua_xep } = data.value.data || {};
+      const { ds_Ca } = transformTimetable(timetable || [], {
+        daysCount: 7,
+        shifts: [1, 2],
+        periodsPerShift: 5,
+        dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+      });
+      dsCa.value = ds_Ca;
+      classUnscheduled.value = Array.isArray(ds_chua_xep) ? ds_chua_xep : [];
+    } else {
+      message.error("Load class timetable error", error?.value || data.value);
+      dsCa.value = [];
+      classUnscheduled.value = [];
+    }
+  } catch (err) {
+    message.error("Load class timetable error", err);
+    dsCa.value = [];
+    classUnscheduled.value = [];
+  }
+}
+
 watch(
   () => props.classId,
   id => {
@@ -223,6 +248,9 @@ watch(
 watch(selectedClassId, async id => {
   emit("update:classId", id);
   await fetchClassName(id);
+  if (id && props.timetableId) {
+    await fetchClassTimetable();
+  }
   if (id && selectedTeacherId.value && props.timetableId) {
     await fetchTeacherTimetable(selectedTeacherId.value);
     selectedSubjectId.value = null;
@@ -230,20 +258,10 @@ watch(selectedClassId, async id => {
   }
 });
 
-watch(
-  () => props.rawTimetable,
-  () => {
-    const { ds_Ca } = transformTimetable(props.rawTimetable, {
-      daysCount: 7,
-      shifts: [1, 2],
-      periodsPerShift: 5,
-      dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-    });
-    dsCa.value = ds_Ca;
-    fetchAllUnscheduled();
-  },
-  { immediate: true, deep: true },
-);
+// Keep class timetable in sync when inputs change
+watch([selectedClassId, () => props.timetableId], async () => {
+  await fetchClassTimetable();
+});
 
 watch(selectedTeacherId, async id => {
   await fetchTeacherName(id);
@@ -314,14 +332,10 @@ watch(
   () => props.timetableId,
   () => {
     fetchAllUnscheduled();
+    fetchClassTimetable();
   },
   { immediate: true },
 );
-
-function updateRawTimetable(unscheduled = props.rawUnscheduled) {
-  const flat = gridToFlat(dsCa.value, unscheduled);
-  emit("update:rawTimetable", flat);
-}
 
 const dragSource = ref(null);
 const teacherDragSource = ref(null);
@@ -470,7 +484,6 @@ async function onDrop(caId, dayId, pIdx) {
   keys.forEach(k => (src[k] = dst[k]));
   keys.forEach(k => (dst[k] = temp[k]));
   dragSource.value = null;
-  updateRawTimetable();
 
   try {
     const body = {
@@ -486,8 +499,14 @@ async function onDrop(caId, dayId, pIdx) {
           params: { idLop: selectedClassId.value, idtkb: dstClone.id_tkb },
         });
         if (listData.value?.status === "success") {
-          emit("update:rawTimetable", listData.value.data.timetable);
-          emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
+            daysCount: 7,
+            shifts: [1, 2],
+            periodsPerShift: 5,
+            dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+          });
+          dsCa.value = ds_Ca;
+          classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
           selectedSubjectId.value = null;
           selectedCellPos.value = null;
           await fetchTeacherTimetable(srcClone.id_giao_vien);
@@ -545,8 +564,14 @@ async function onTeacherDrop(caId, dayId, pIdx) {
             params: { idLop: selectedClassId.value, idtkb: dstClone.id_tkb },
           });
           if (listData.value?.status === "success") {
-            emit("update:rawTimetable", listData.value.data.timetable);
-            emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+            const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
+              daysCount: 7,
+              shifts: [1, 2],
+              periodsPerShift: 5,
+              dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+            });
+            dsCa.value = ds_Ca;
+            classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
           } else {
             message.error("Load timetable error", listError.value || listData.value);
           }
@@ -622,10 +647,16 @@ async function onCellClick(caId, dayId, pIdx) {
       // message.log("Find position response", data.value);
       const { timetable, ds_chua_xep } = data.value.data || {};
       if (Array.isArray(timetable)) {
-        emit("update:rawTimetable", timetable);
+        const { ds_Ca } = transformTimetable(timetable || [], {
+          daysCount: 7,
+          shifts: [1, 2],
+          periodsPerShift: 5,
+          dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+        });
+        dsCa.value = ds_Ca;
       }
       if (Array.isArray(ds_chua_xep)) {
-        emit("update:rawUnscheduled", ds_chua_xep);
+        classUnscheduled.value = ds_chua_xep;
       }
     } else {
       message.error("Find position error", error.value || data.value);
@@ -650,10 +681,16 @@ async function onUnscheduledClick(lesson) {
     if (data.value?.status === "success") {
       const { timetable, ds_chua_xep } = data.value.data || {};
       if (Array.isArray(timetable)) {
-        emit("update:rawTimetable", timetable);
+        const { ds_Ca } = transformTimetable(timetable || [], {
+          daysCount: 7,
+          shifts: [1, 2],
+          periodsPerShift: 5,
+          dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+        });
+        dsCa.value = ds_Ca;
       }
       if (Array.isArray(ds_chua_xep)) {
-        emit("update:rawUnscheduled", ds_chua_xep);
+        classUnscheduled.value = ds_chua_xep;
       }
     } else {
       message.error("Find position error", error.value || data.value);
@@ -719,10 +756,16 @@ async function onTimetableUnscheduledClick(lesson) {
       if (data.value?.status === "success") {
         const { timetable, ds_chua_xep } = data.value.data || {};
         if (Array.isArray(timetable)) {
-          emit("update:rawTimetable", timetable);
+          const { ds_Ca } = transformTimetable(timetable || [], {
+            daysCount: 7,
+            shifts: [1, 2],
+            periodsPerShift: 5,
+            dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+          });
+          dsCa.value = ds_Ca;
         }
         if (Array.isArray(ds_chua_xep)) {
-          emit("update:rawUnscheduled", ds_chua_xep);
+          classUnscheduled.value = ds_chua_xep;
         }
       } else {
         message.error("Find class position error", error.value || data.value);
@@ -826,7 +869,7 @@ function setRest(val) {
   }
   contextMenu.show = false;
   if (!contextMenu.isTeacher) {
-    updateRawTimetable();
+    // no-op: UI-only toggle; persistence handled elsewhere
   }
 }
 
@@ -841,8 +884,14 @@ async function setLock(val) {
           params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
         });
         if (listData.value?.status === "success") {
-          emit("update:rawTimetable", listData.value.data.timetable);
-          emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
+            daysCount: 7,
+            shifts: [1, 2],
+            periodsPerShift: 5,
+            dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+          });
+          dsCa.value = ds_Ca;
+          classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
           selectedSubjectId.value = null;
           selectedCellPos.value = null;
         } else {
@@ -859,8 +908,14 @@ async function setLock(val) {
           params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
         });
         if (listData.value?.status === "success") {
-          emit("update:rawTimetable", listData.value.data.timetable);
-          emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
+            daysCount: 7,
+            shifts: [1, 2],
+            periodsPerShift: 5,
+            dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+          });
+          dsCa.value = ds_Ca;
+          classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
         } else {
           message.error("Load timetable error", listError.value || listData.value);
         }
@@ -884,8 +939,14 @@ async function lockSubjectPeriods() {
         params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
       });
       if (listData.value?.status === "success") {
-        emit("update:rawTimetable", listData.value.data.timetable);
-        emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+        const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
+          daysCount: 7,
+          shifts: [1, 2],
+          periodsPerShift: 5,
+          dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+        });
+        dsCa.value = ds_Ca;
+        classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
       } else {
         message.error("Load timetable error", listError.value || listData.value);
       }
@@ -911,8 +972,14 @@ async function unlockSubjectPeriods() {
         params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
       });
       if (listData.value?.status === "success") {
-        emit("update:rawTimetable", listData.value.data.timetable);
-        emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+        const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
+          daysCount: 7,
+          shifts: [1, 2],
+          periodsPerShift: 5,
+          dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+        });
+        dsCa.value = ds_Ca;
+        classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
       } else {
         message.error("Load timetable error", listError.value || listData.value);
       }
@@ -939,8 +1006,14 @@ async function lockTeacherPeriods() {
           params: { idLop: selectedClassId.value, idtkb: props.timetableId },
         });
         if (listData.value?.status === "success") {
-          emit("update:rawTimetable", listData.value.data.timetable);
-          emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
+            daysCount: 7,
+            shifts: [1, 2],
+            periodsPerShift: 5,
+            dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+          });
+          dsCa.value = ds_Ca;
+          classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
         } else {
           message.error("Load timetable error", listError.value || listData.value);
         }
@@ -968,8 +1041,14 @@ async function unlockTeacherPeriods() {
           params: { idLop: selectedClassId.value, idtkb: props.timetableId },
         });
         if (listData.value?.status === "success") {
-          emit("update:rawTimetable", listData.value.data.timetable);
-          emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
+            daysCount: 7,
+            shifts: [1, 2],
+            periodsPerShift: 5,
+            dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+          });
+          dsCa.value = ds_Ca;
+          classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
         } else {
           message.error("Load timetable error", listError.value || listData.value);
         }
@@ -996,8 +1075,14 @@ async function clearCell() {
         params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
       });
       if (listData.value?.status === "success") {
-        emit("update:rawTimetable", listData.value.data.timetable);
-        emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+        const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
+          daysCount: 7,
+          shifts: [1, 2],
+          periodsPerShift: 5,
+          dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+        });
+        dsCa.value = ds_Ca;
+        classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
         selectedSubjectId.value = null;
         selectedCellPos.value = null;
       } else {
@@ -1131,8 +1216,14 @@ async function confirmAdd() {
             params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
           });
           if (listData.value?.status === "success") {
-            emit("update:rawTimetable", listData.value.data.timetable);
-            emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+            const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
+              daysCount: 7,
+              shifts: [1, 2],
+              periodsPerShift: 5,
+              dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+            });
+            dsCa.value = ds_Ca;
+            classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
           } else {
             message.error("Load timetable error", listError.value || listData.value);
           }
@@ -1142,8 +1233,14 @@ async function confirmAdd() {
           params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
         });
         if (listData.value?.status === "success") {
-          emit("update:rawTimetable", listData.value.data.timetable);
-          emit("update:rawUnscheduled", listData.value.data.ds_chua_xep);
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
+            daysCount: 7,
+            shifts: [1, 2],
+            periodsPerShift: 5,
+            dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+          });
+          dsCa.value = ds_Ca;
+          classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
         } else {
           message.error("Load timetable error", listError.value || listData.value);
         }
