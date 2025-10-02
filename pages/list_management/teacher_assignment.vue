@@ -23,11 +23,11 @@
 
       <!-- Right: Assignment result -->
       <a-card :title="'KẾT QUẢ PHÂN CÔNG'">
-        <template #extra>
+        <!-- <template #extra>
           <a-space>
             <a-button type="primary" :loading="saving" @click="handleUpdate" :disabled="!selectedTeacher">Cập nhật</a-button>
           </a-space>
-        </template>
+        </template> -->
 
         <div v-if="!selectedTeacher" class="text-gray-500">Vui lòng chọn một giáo viên bên trái.</div>
 
@@ -70,7 +70,7 @@
       </a-table>
       <div class="flex justify-end gap-2 mt-3">
         <a-button @click="cancelClassModal">Hủy</a-button>
-        <a-button type="primary" @click="confirmClassSelection">OK</a-button>
+        <a-button type="primary" :loading="saving" @click="confirmClassSelection">Lưu</a-button>
       </div>
     </a-modal>
   </div>
@@ -229,7 +229,7 @@ function resetClassSelection() {
   classModal.selectedIds = [];
 }
 
-function confirmClassSelection() {
+async function confirmClassSelection() {
   if (!selectedTeacher.value || !classModal.record) return;
   const selected = classModal.classes.filter(c => classModal.selectedIds.includes(c.id_lop));
   // Update the active subject row: id_lop array and ten_lop string
@@ -239,6 +239,8 @@ function confirmClassSelection() {
   const list = selected.map(c => ({ id: c.id_lop, ten: c.ten_lop }));
   assignments[selectedTeacher.value.id] = assignments[selectedTeacher.value.id] || {};
   assignments[selectedTeacher.value.id][classModal.record.id_mon] = list;
+  // Save immediately after confirming
+  await handleUpdate();
   classModal.visible = false;
 }
 
