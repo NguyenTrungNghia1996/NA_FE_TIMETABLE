@@ -87,6 +87,7 @@
     <!-- <a-drawer v-model:open="drawerInfoOpen" title="Xếp thời khóa biểu" :footer="null" height="100vh" placement="bottom" @close="closeInfoDrawer"> -->
     <a-drawer v-model:open="drawerInfoOpen" title="Xếp thời khóa biểu" :footer="null" height="100vh" placement="bottom" @close="closeInfoDrawer">
       <template #extra>
+        <a-button class="mr-2" @click="openCloneFromInfo">Sao chép</a-button>
         <a-button type="primary" @click="openAdjustFromInfo">Tinh chỉnh thời khóa biểu</a-button>
       </template>
       <ClientOnly>
@@ -171,6 +172,15 @@ const rules = {
 const openAdjustFromInfo = () => {
   openAdjustDrawer({ id: infoTimetableId.value });
 };
+
+const openCloneFromInfo = () => {
+  const record = dataSource.value?.find?.(x => x.id === infoTimetableId.value);
+  if (record) {
+    openCloneModal(record);
+  } else {
+    message.warning("Không tìm thấy thời khóa biểu để sao chép");
+  }
+};
 const fetchData = async p => {
   try {
     loading.value = true;
@@ -237,7 +247,8 @@ const editItem = record => {
 const openCloneModal = record => {
   cloneSourceId.value = record.id;
   cloneSourceName.value = record.ten;
-  Object.assign(cloneForm, { ten: `Bản sao ${record.ten}`, dang_su_dung: record?.dang_su_dung ?? true });
+  // Object.assign(cloneForm, { ten: `Bản sao ${record.ten}`, dang_su_dung: record?.dang_su_dung ?? true });
+  Object.assign(cloneForm, { ten: "", dang_su_dung: record?.dang_su_dung ?? true });
   cloneVisible.value = true;
   cloneFormRef.value?.clearValidate?.();
 };
