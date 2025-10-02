@@ -6,7 +6,7 @@
         <span class="md:inline">Đặt lại</span>
       </a-button>
       <a-button type="primary" @click="drawerAssignmentOpen = true" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">
-        <span class="md:inline">Phân công chuyên môn</span>
+        <span class="md:inline">Chuyên môn của Giáo viên</span>
       </a-button>
       <a-button type="primary" @click="drawerAvoidOpen = true" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">
         <span class="md:inline">Tiết tránh xếp</span>
@@ -69,7 +69,7 @@
     <a-drawer v-model:open="drawerAvoidOpen" title="Thiết lập tiết tránh xếp của giáo viên" :footer="null" height="100vh" placement="bottom" @close="closeTeacherAvoid">
       <TeacherAvoid ref="avoidRef" />
     </a-drawer>
-    <a-drawer v-model:open="drawerAssignmentOpen" title="Phân công chuyên môn" :footer="null" height="100vh" placement="bottom" @close="closeAssignmentDrawer">
+    <a-drawer v-model:open="drawerAssignmentOpen" title="Chuyên môn của Giáo viên" :footer="null" height="100vh" placement="bottom" @close="closeAssignmentDrawer">
       <TeacherAssignment ref="assignmentRef" />
     </a-drawer>
   </div>
