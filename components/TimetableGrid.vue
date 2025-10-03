@@ -539,6 +539,8 @@ async function onDrop(caId, dayId, pIdx) {
           classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
           selectedSubjectId.value = null;
           selectedCellPos.value = null;
+          // Refresh timetable-level unscheduled list after arranging
+          await fetchAllUnscheduled();
           await fetchTeacherTimetable(srcClone.id_giao_vien);
         } else {
           message.error("Load timetable error", listError.value || listData.value);
@@ -588,6 +590,8 @@ async function onTeacherDrop(caId, dayId, pIdx) {
       message.error("Update teacher timetable error", error.value || data.value);
     } else {
       await fetchTeacherTimetable(selectedTeacherId.value);
+      // Refresh timetable-level unscheduled list after arranging
+      await fetchAllUnscheduled();
       if (selectedClassId.value && props.timetableId) {
         try {
           const { data: listData, error: listError } = await RestApi.timetable.get_class({
@@ -1155,6 +1159,8 @@ async function clearCell() {
       if (selectedTeacherId.value && props.timetableId) {
         await fetchTeacherTimetable(selectedTeacherId.value);
       }
+      // Refresh timetable-level unscheduled list after cancel/clear
+      await fetchAllUnscheduled();
     } else {
       message.error("Clear cell error", error.value || data.value);
     }
@@ -1275,6 +1281,8 @@ async function confirmAdd() {
     if (data.value?.status === "success") {
       if (contextMenu.isTeacher) {
         await fetchTeacherTimetable(selectedTeacherId.value);
+        // Refresh timetable-level unscheduled list after arranging
+        await fetchAllUnscheduled();
         if (selectedClassId.value && props.timetableId) {
           const { data: listData, error: listError } = await RestApi.timetable.get_class({
             params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
@@ -1311,6 +1319,8 @@ async function confirmAdd() {
         if (selectedTeacherId.value && props.timetableId) {
           await fetchTeacherTimetable(selectedTeacherId.value);
         }
+        // Refresh timetable-level unscheduled list after arranging
+        await fetchAllUnscheduled();
       }
     } else {
       message.error("Update timetable error", error.value || data.value);
