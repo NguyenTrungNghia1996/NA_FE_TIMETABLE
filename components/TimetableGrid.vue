@@ -162,6 +162,12 @@ const targetCell = ref(null);
 const selectedSubjectId = ref(null);
 const selectedCellPos = ref(null);
 const lessonOptions = ref([]);
+// Guard: avoid clearing selection when classId changes due to teacher-cell click
+const suppressSelectionResetOnClassChange = ref(false);
+// Guards to prevent watcher-fetch overriding suggestion highlights
+const teacherSuggestInProgress = ref(false);
+const classSuggestInProgress = ref(false);
+const suppressNextTeacherTimetableFetch = ref(false);
 const lessonColumns = computed(() => [
   {
     title: "STT",
@@ -246,27 +252,51 @@ watch(
 );
 
 watch(selectedClassId, async id => {
+  // Capture suggest flags at the time this watcher starts
+  const skipTeacherFetch = teacherSuggestInProgress.value;
+  const skipClassFetch = classSuggestInProgress.value;
+
   emit("update:classId", id);
   await fetchClassName(id);
+
   if (id && props.timetableId) {
-    await fetchClassTimetable();
+    if (!skipClassFetch) {
+      await fetchClassTimetable();
+    }
   }
+
   if (id && selectedTeacherId.value && props.timetableId) {
-    await fetchTeacherTimetable(selectedTeacherId.value);
-    selectedSubjectId.value = null;
-    selectedCellPos.value = null;
+    if (suppressNextTeacherTimetableFetch.value) {
+      suppressNextTeacherTimetableFetch.value = false;
+    } else if (!skipTeacherFetch) {
+      await fetchTeacherTimetable(selectedTeacherId.value);
+    }
+    if (!suppressSelectionResetOnClassChange.value) {
+      selectedSubjectId.value = null;
+      selectedCellPos.value = null;
+    }
+    // reset the guard after handling this change
+    suppressSelectionResetOnClassChange.value = false;
   }
 });
 
 // Keep class timetable in sync when inputs change
 watch([selectedClassId, () => props.timetableId], async () => {
-  await fetchClassTimetable();
+  if (!classSuggestInProgress.value) {
+    await fetchClassTimetable();
+  }
 });
 
 watch(selectedTeacherId, async id => {
+  // Capture suggest flag to avoid late false after awaits
+  const skipTeacherFetch = teacherSuggestInProgress.value;
   await fetchTeacherName(id);
   if (id && props.timetableId) {
-    await fetchTeacherTimetable(id);
+    if (suppressNextTeacherTimetableFetch.value) {
+      suppressNextTeacherTimetableFetch.value = false;
+    } else if (!skipTeacherFetch) {
+      await fetchTeacherTimetable(id);
+    }
   } else {
     teacherDsCa.value = [];
     teacherUnscheduled.value = [];
@@ -631,6 +661,7 @@ async function onCellClick(caId, dayId, pIdx) {
     selectedCellPos.value = null;
   }
   try {
+    classSuggestInProgress.value = true;
     const body = {
       id_lop: selectedClassId.value,
       timetable: [
@@ -664,6 +695,7 @@ async function onCellClick(caId, dayId, pIdx) {
   } catch (err) {
     message.error("Find position error", err);
   }
+  classSuggestInProgress.value = false;
 }
 
 async function onUnscheduledClick(lesson) {
@@ -673,6 +705,7 @@ async function onUnscheduledClick(lesson) {
   selectedCellPos.value = null;
   console.log(">>>>", lesson);
   try {
+    classSuggestInProgress.value = true;
     const body = {
       id_lop: selectedClassId.value,
       ds_chua_xep: [lesson],
@@ -698,10 +731,13 @@ async function onUnscheduledClick(lesson) {
   } catch (err) {
     message.error("Find position error", err);
   }
+  classSuggestInProgress.value = false;
 }
 
 async function onTeacherUnscheduledClick(lesson) {
   if (!lesson || !selectedTeacherId.value) return;
+  // Mark suggestion flow before changing reactive deps to avoid watcher overrides
+  teacherSuggestInProgress.value = true;
   selectedClassId.value = lesson.id_lop || null;
   selectedSubjectId.value = lesson.id_mon || null;
   selectedCellPos.value = null;
@@ -732,6 +768,7 @@ async function onTeacherUnscheduledClick(lesson) {
   } catch (err) {
     message.error("Find teacher position error", err);
   }
+  teacherSuggestInProgress.value = false;
 }
 
 async function onTimetableUnscheduledClick(lesson) {
@@ -739,6 +776,9 @@ async function onTimetableUnscheduledClick(lesson) {
   console.log(lesson);
 
   // Sync selections based on the clicked lesson
+  // Mark suggestion flows before changing ids to avoid watcher overrides
+  classSuggestInProgress.value = !!lesson.id_lop;
+  teacherSuggestInProgress.value = !!lesson.id_giao_vien;
   selectedClassId.value = lesson.id_lop || null;
   selectedTeacherId.value = lesson.id_giao_vien || null;
   selectedSubjectId.value = lesson.id_mon || null;
@@ -748,6 +788,7 @@ async function onTimetableUnscheduledClick(lesson) {
   // Load class timetable suggestions/positions
   if (lesson.id_lop) {
     try {
+      classSuggestInProgress.value = true;
       const body = {
         id_lop: lesson.id_lop,
         ds_chua_xep: [lesson],
@@ -773,11 +814,13 @@ async function onTimetableUnscheduledClick(lesson) {
     } catch (err) {
       message.error("Find class position error", err);
     }
+    classSuggestInProgress.value = false;
   }
 
   // Load teacher timetable suggestions/positions
   if (lesson.id_giao_vien) {
     try {
+      teacherSuggestInProgress.value = true;
       const body = {
         id_giao_vien: lesson.id_giao_vien,
         ds_chua_xep: [lesson],
@@ -803,11 +846,27 @@ async function onTimetableUnscheduledClick(lesson) {
     } catch (err) {
       message.error("Find teacher position error", err);
     }
+    teacherSuggestInProgress.value = false;
   }
 }
 
 async function onTeacherCellClick(caId, dayId, pIdx) {
   const cell = getTeacherCell(caId, dayId, pIdx);
+  if (!cell) return;
+  // Prevent selection from being cleared by selectedClassId watcher for this user action
+  if (selectedTeacherId.value) {
+    suppressSelectionResetOnClassChange.value = true;
+  }
+  // Mark teacher suggestion flow early to avoid watcher overrides
+  teacherSuggestInProgress.value = true;
+  // Avoid class fetch re-render while computing teacher suggestions
+  classSuggestInProgress.value = true;
+  // Ensure watchers skip exactly one teacher fetch triggered by this click
+  suppressNextTeacherTimetableFetch.value = true;
+  // Ensure selected teacher matches the clicked cell to avoid early-return
+  if (!selectedTeacherId.value || selectedTeacherId.value !== cell.id_giao_vien) {
+    selectedTeacherId.value = cell.id_giao_vien || selectedTeacherId.value;
+  }
   selectedClassId.value = cell.id_lop;
   if (cell?.id_mon) {
     selectedSubjectId.value = cell.id_mon;
@@ -816,7 +875,10 @@ async function onTeacherCellClick(caId, dayId, pIdx) {
     selectedSubjectId.value = null;
     selectedCellPos.value = null;
   }
-  if (!selectedTeacherId.value || !cell) return;
+  if (!selectedTeacherId.value) {
+    teacherSuggestInProgress.value = false;
+    return;
+  }
   try {
     const body = {
       id_giao_vien: selectedTeacherId.value,
@@ -850,6 +912,8 @@ async function onTeacherCellClick(caId, dayId, pIdx) {
   } catch (err) {
     message.error("Find teacher position error", err);
   }
+  teacherSuggestInProgress.value = false;
+  classSuggestInProgress.value = false;
 }
 
 function setRest(val) {
