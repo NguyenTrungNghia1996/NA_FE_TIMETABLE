@@ -863,8 +863,6 @@ async function onTeacherCellClick(caId, dayId, pIdx) {
   }
   // Mark teacher suggestion flow early to avoid watcher overrides
   teacherSuggestInProgress.value = true;
-  // Avoid class fetch re-render while computing teacher suggestions
-  classSuggestInProgress.value = true;
   // Ensure watchers skip exactly one teacher fetch triggered by this click
   suppressNextTeacherTimetableFetch.value = true;
   // Ensure selected teacher matches the clicked cell to avoid early-return
@@ -917,7 +915,6 @@ async function onTeacherCellClick(caId, dayId, pIdx) {
     message.error("Find teacher position error", err);
   }
   teacherSuggestInProgress.value = false;
-  classSuggestInProgress.value = false;
 }
 
 function setRest(val) {
