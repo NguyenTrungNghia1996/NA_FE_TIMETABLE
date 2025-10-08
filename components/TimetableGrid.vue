@@ -626,7 +626,8 @@ function onDragOver(event, caId, dayId, pIdx) {
 
 function openContextMenu(event, caId, dayId, pIdx, isTeacher = false) {
   const cell = isTeacher ? getTeacherCell(caId, dayId, pIdx) : getCell(caId, dayId, pIdx);
-  if (cell?.isRest) {
+  // Nếu vừa isRest vừa isError, vẫn cho mở menu (ưu tiên isError)
+  if (cell?.isRest && !cell?.isError) {
     contextMenu.show = false;
     return;
   }
