@@ -28,6 +28,11 @@
                   <template #icon><SettingOutlined /></template>
                 </a-button>
               </a-tooltip>
+              <a-tooltip title="Xuất Excel">
+                <a-button type="link" size="small" @click="openExportModal(record)">
+                  <template #icon><FileExcelOutlined /></template>
+                </a-button>
+              </a-tooltip>
               <a-tooltip title="Sao chép">
                 <a-button type="link" size="small" @click="openCloneModal(record)">
                   <template #icon><CopyOutlined /></template>
@@ -83,6 +88,50 @@
           <a-button type="primary" @click="handleCloneOk" :loading="cloneConfirmLoading">Tạo bản sao</a-button>
         </div>
       </a-form>
+    </a-modal>
+
+    <!-- Export Modal -->
+    <a-modal v-model:open="exportModal.visible" :title="'Xuất Excel thời khóa biểu' + (exportModal.timetableName ? `: ${exportModal.timetableName}` : '')" :footer="null" width="900px" @cancel="closeExportModal">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Thời khóa biểu của lớp -->
+        <a-card type="inner" title="Thời khóa biểu của lớp">
+          <div class="mb-3 text-gray-600">Chọn thông tin hiển thị trên thời khóa biểu:</div>
+          <div class="flex flex-col gap-2 mb-4">
+            <a-checkbox v-model:checked="exportModal.options.class.showRoom">Phòng học</a-checkbox>
+            <a-checkbox v-model:checked="exportModal.options.class.showTeacher">Tên Giáo viên</a-checkbox>
+          </div>
+          <a-button type="primary" class="bg-blue-500" :loading="exportModal.loading" @click="exportClass"> Xuất TKB Lớp </a-button>
+        </a-card>
+
+        <!-- Thời khóa biểu toàn trường -->
+        <a-card type="inner" title="Thời khóa biểu toàn trường">
+          <div class="mb-3 text-gray-600">Chọn thông tin hiển thị trên thời khóa biểu:</div>
+          <div class="flex flex-col gap-2 mb-4">
+            <a-checkbox v-model:checked="exportModal.options.school.showRoom">Phòng học</a-checkbox>
+            <a-checkbox v-model:checked="exportModal.options.school.showTeacher">Tên Giáo viên</a-checkbox>
+          </div>
+          <a-button type="primary" class="bg-blue-500" :loading="exportModal.loading" @click="exportAll"> Xuất TKB Toàn trường </a-button>
+        </a-card>
+
+        <!-- Thời khóa biểu của giáo viên -->
+        <a-card type="inner" title="Thời khóa biểu của giáo viên">
+          <div class="mb-3 text-gray-600">Chọn thông tin hiển thị trên thời khóa biểu:</div>
+          <div class="flex flex-col gap-2 mb-4">
+            <a-checkbox v-model:checked="exportModal.options.teacher.showRoom">Phòng học</a-checkbox>
+          </div>
+          <a-button type="primary" class="bg-blue-500" :loading="exportModal.loading" @click="exportTeacher"> Xuất TKB Giáo viên </a-button>
+        </a-card>
+
+        <!-- Ma trận thời khóa biểu -->
+        <a-card type="inner" title="Ma trận thời khóa biểu">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <a-button @click="notifyUpdating">Ma trận Tần Bình</a-button>
+            <a-button @click="notifyUpdating">Ma trận Giáo viên</a-button>
+            <a-button @click="notifyUpdating">Ma trận Khối</a-button>
+            <a-button @click="notifyUpdating">Ma trận Tổ chuyên môn</a-button>
+          </div>
+        </a-card>
+      </div>
     </a-modal>
     <!-- <a-drawer v-model:open="drawerInfoOpen" title="Xếp thời khóa biểu" :footer="null" height="100vh" placement="bottom" @close="closeInfoDrawer"> -->
     <a-drawer v-model:open="drawerInfoOpen" title="Xếp thời khóa biểu" :footer="null" height="100vh" placement="bottom" @close="closeInfoDrawer">
@@ -141,7 +190,7 @@ const columns = [
   {
     title: "Thao tác",
     key: "action",
-    width: 160,
+    width: 200,
     align: "center",
   },
 ];
@@ -162,6 +211,19 @@ const cloneSourceId = ref(null);
 const cloneSourceName = ref("");
 const cloneForm = reactive({ ten: "", dang_su_dung: true });
 
+// Export modal state
+const exportModal = reactive({
+  visible: false,
+  timetableId: null,
+  timetableName: "",
+  loading: false,
+  options: {
+    class: { showRoom: false, showTeacher: false },
+    school: { showRoom: false, showTeacher: false },
+    teacher: { showRoom: false },
+  },
+});
+
 const rules = {
   ten: [
     { required: true, message: "Vui lòng nhập tên thời khóa biểu", trigger: ["blur", "change"] },
@@ -181,6 +243,80 @@ const openCloneFromInfo = () => {
     message.warning("Không tìm thấy thời khóa biểu để sao chép");
   }
 };
+
+const openExportModal = record => {
+  exportModal.timetableId = record?.id ?? null;
+  exportModal.timetableName = record?.ten ?? "";
+  exportModal.visible = true;
+  // reset options each open
+  exportModal.options.class.showRoom = false;
+  exportModal.options.class.showTeacher = false;
+  exportModal.options.school.showRoom = false;
+  exportModal.options.school.showTeacher = false;
+  exportModal.options.teacher.showRoom = false;
+};
+const closeExportModal = () => {
+  exportModal.visible = false;
+};
+
+// Download helper reused across pages
+const exportFile = async apiFn => {
+  try {
+    exportModal.loading = true;
+    const { data, error } = await apiFn();
+    if (error.value) {
+      throw new Error(error.value?.data?.message || "Xuất file không thành công");
+    }
+    const { blob, headers } = data.value || {};
+    if (!(blob instanceof Blob)) throw new Error("Xuất file không thành công");
+    const cd = headers && (headers["content-disposition"] || headers["Content-Disposition"]);
+    const filename = (cd && (decodeURIComponent(/filename\*=UTF-8''([^;]+)/.exec(cd)?.[1] || "") || /filename="([^"]+)"/.exec(cd)?.[1])) || "export.xlsx";
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    message.error(err.message || "Xuất file không thành công");
+  } finally {
+    exportModal.loading = false;
+  }
+};
+
+const exportAll = () =>
+  exportFile(() =>
+    RestApi.timetable.export({
+      params: {
+        idtkb: exportModal.timetableId,
+        show_room: exportModal.options.school.showRoom ? 1 : 0,
+        show_teacher: exportModal.options.school.showTeacher ? 1 : 0,
+      },
+    }),
+  );
+const exportClass = () =>
+  exportFile(() =>
+    RestApi.timetable.export_class({
+      params: {
+        idtkb: exportModal.timetableId,
+        show_room: exportModal.options.class.showRoom ? 1 : 0,
+        show_teacher: exportModal.options.class.showTeacher ? 1 : 0,
+      },
+    }),
+  );
+const exportTeacher = () =>
+  exportFile(() =>
+    RestApi.timetable.export_teacher({
+      params: {
+        idtkb: exportModal.timetableId,
+        show_room: exportModal.options.teacher.showRoom ? 1 : 0,
+      },
+    }),
+  );
+
+const notifyUpdating = () => message.info("Tính năng đang phát triển");
 const fetchData = async p => {
   try {
     loading.value = true;
