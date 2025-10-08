@@ -455,38 +455,29 @@ function teacherIsDraggable(cell) {
 
 function cellClasses(caId, dayId, pIdx, cell) {
   const drag = isDraggable(cell);
-  // return {
-  //   "cursor-move": drag,
-  //   "bg-green-100": drag,
-  //   "bg-red-50": cell.isLock,
-  //   "bg-sky-200": isSameSubject(caId, dayId, pIdx),
-  //   "bg-sky-400": isSelectedCell(caId, dayId, pIdx),
-  // };
-
+  const err = !!cell?.isError;
+  // Ưu tiên hiển thị cảnh báo lỗi (nền đỏ) nếu có lỗi
   return {
     "cursor-move": drag,
-    "bg-[#AFFF2C]": drag,
-    "bg-red-50": cell.isLock,
-    "bg-[#20B1AA]": isSameSubject(caId, dayId, pIdx),
-    "bg-blue-400": isSelectedCell(caId, dayId, pIdx),
+    "bg-red-300": err,
+    "bg-[#AFFF2C]": drag && !err,
+    "bg-red-50": cell.isLock && !err,
+    "bg-[#20B1AA]": isSameSubject(caId, dayId, pIdx) && !err,
+    "bg-blue-400": isSelectedCell(caId, dayId, pIdx) && !err,
   };
 }
 
 function teacherCellClasses(caId, dayId, pIdx, cell) {
   const drag = teacherIsDraggable(cell);
-  // return {
-  //   "cursor-move": drag,
-  //   "bg-green-100": drag,
-  //   "bg-red-50": cell.isLock,
-  //   "bg-sky-200": teacherIsSameSubject(caId, dayId, pIdx),
-  //   "bg-sky-400": teacherIsSelectedCell(caId, dayId, pIdx),
-  // };
+  const err = !!cell?.isError;
+  // Ưu tiên hiển thị cảnh báo lỗi (nền đỏ) nếu có lỗi
   return {
     "cursor-move": drag,
-    "bg-[#AFFF2C]": drag,
-    "bg-red-50": cell.isLock,
-    "bg-[#20B1AA]": teacherIsSameSubject(caId, dayId, pIdx),
-    "bg-blue-400": teacherIsSelectedCell(caId, dayId, pIdx),
+    "bg-red-300": err,
+    "bg-[#AFFF2C]": drag && !err,
+    "bg-red-50": cell.isLock && !err,
+    "bg-[#20B1AA]": teacherIsSameSubject(caId, dayId, pIdx) && !err,
+    "bg-blue-400": teacherIsSelectedCell(caId, dayId, pIdx) && !err,
   };
 }
 
