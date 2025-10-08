@@ -474,6 +474,7 @@ const cancelArrange = async () => {
 
 const exportFile = async apiFn => {
   settingStore.setLoading(true);
+  exportModal.loading = true;
   try {
     const { data, error } = await apiFn();
     if (error.value) {
@@ -498,12 +499,66 @@ const exportFile = async apiFn => {
     message.error(err.message || "Xuất file không thành công");
   } finally {
     settingStore.setLoading(false);
+    exportModal.loading = false;
   }
 };
 
 const exportClass = () => exportFile(() => RestApi.timetable.export_class({ params: { idtkb: props.timetableId } }));
 const exportTeacher = () => exportFile(() => RestApi.timetable.export_teacher({ params: { idtkb: props.timetableId } }));
 const exportTkb = () => exportFile(() => RestApi.timetable.export({ params: { idtkb: props.timetableId } }));
+
+// Export modal state + helpers
+const exportModal = reactive({
+  visible: false,
+  loading: false,
+  options: {
+    class: { showRoom: false, showTeacher: false },
+    school: { showRoom: false, showTeacher: false },
+    teacher: { showRoom: false },
+  },
+});
+
+const openExportModal = () => {
+  exportModal.visible = true;
+  // reset options each open
+  exportModal.options.class.showRoom = false;
+  exportModal.options.class.showTeacher = false;
+  exportModal.options.school.showRoom = false;
+  exportModal.options.school.showTeacher = false;
+  exportModal.options.teacher.showRoom = false;
+};
+const closeExportModal = () => (exportModal.visible = false);
+
+const exportAllWithOptions = () =>
+  exportFile(() =>
+    RestApi.timetable.export({
+      params: {
+        idtkb: props.timetableId,
+        show_room: exportModal.options.school.showRoom ? 1 : 0,
+        show_teacher: exportModal.options.school.showTeacher ? 1 : 0,
+      },
+    }),
+  );
+const exportClassWithOptions = () =>
+  exportFile(() =>
+    RestApi.timetable.export_class({
+      params: {
+        idtkb: props.timetableId,
+        show_room: exportModal.options.class.showRoom ? 1 : 0,
+        show_teacher: exportModal.options.class.showTeacher ? 1 : 0,
+      },
+    }),
+  );
+const exportTeacherWithOptions = () =>
+  exportFile(() =>
+    RestApi.timetable.export_teacher({
+      params: {
+        idtkb: props.timetableId,
+        show_room: exportModal.options.teacher.showRoom ? 1 : 0,
+      },
+    }),
+  );
+const notifyUpdating = () => message.info("Tính năng đang phát triển");
 
 async function fetchInfo() {
   // if (!props.timetableId) return;
@@ -551,17 +606,7 @@ defineExpose({ refresh, reset });
   <div class="min-h-screen">
     <!-- Header -->
     <div class="flex justify-end items-center mb-6">
-      <!-- <h1 class="text-xl font-bold text-gray-700">THÔNG TIN THỜI KHÓA BIỂU</h1> -->
-      <a-dropdown class="mr-2">
-        <a-button> Xuất dữ liệu XLSX </a-button>
-        <template #overlay>
-          <a-menu>
-            <a-menu-item key="export-class" @click="exportClass">Lớp</a-menu-item>
-            <a-menu-item key="export-teacher" @click="exportTeacher">Giáo viên</a-menu-item>
-            <a-menu-item key="export-tkb" @click="exportTkb">Thời khóa biểu</a-menu-item>
-          </a-menu>
-        </template>
-      </a-dropdown>
+      <a-button class="mr-2" @click="openExportModal"> Xuất dữ liệu XLSX </a-button>
       <a-button type="primary" danger @click="cancelArrange"> Hủy kết quả xếp </a-button>
     </div>
 
@@ -620,6 +665,50 @@ defineExpose({ refresh, reset });
     </a-modal>
     <a-modal v-model:open="roomModal.visible" title="Xếp Phòng học" :confirm-loading="roomModal.loading" @ok="confirmArrangeRoom" @cancel="roomModal.visible = false" width="800px">
       <a-table :columns="roomColumns" :data-source="roomModal.data" :row-selection="roomRowSelection" row-key="id" :pagination="false" :scroll="{ y: 600 }" size="small" />
+    </a-modal>
+
+    <!-- Export Modal -->
+    <a-modal v-model:open="exportModal.visible" :title="'Xuất Excel thời khóa biểu'" :footer="null" width="900px" @cancel="closeExportModal">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Thời khóa biểu của lớp -->
+        <a-card type="inner" title="Thời khóa biểu của lớp">
+          <div class="mb-3 text-gray-600">Chọn thông tin hiển thị trên thời khóa biểu:</div>
+          <div class="flex flex-col gap-2 mb-4">
+            <a-checkbox v-model:checked="exportModal.options.class.showRoom">Phòng học</a-checkbox>
+            <a-checkbox v-model:checked="exportModal.options.class.showTeacher">Tên Giáo viên</a-checkbox>
+          </div>
+          <a-button type="primary" class="bg-blue-500" :loading="exportModal.loading" @click="exportClassWithOptions">Xuất TKB Lớp</a-button>
+        </a-card>
+
+        <!-- Thời khóa biểu toàn trường -->
+        <a-card type="inner" title="Thời khóa biểu toàn trường">
+          <div class="mb-3 text-gray-600">Chọn thông tin hiển thị trên thời khóa biểu:</div>
+          <div class="flex flex-col gap-2 mb-4">
+            <a-checkbox v-model:checked="exportModal.options.school.showRoom">Phòng học</a-checkbox>
+            <a-checkbox v-model:checked="exportModal.options.school.showTeacher">Tên Giáo viên</a-checkbox>
+          </div>
+          <a-button type="primary" class="bg-blue-500" :loading="exportModal.loading" @click="exportAllWithOptions">Xuất TKB Toàn trường</a-button>
+        </a-card>
+
+        <!-- Thời khóa biểu của giáo viên -->
+        <a-card type="inner" title="Thời khóa biểu của giáo viên">
+          <div class="mb-3 text-gray-600">Chọn thông tin hiển thị trên thời khóa biểu:</div>
+          <div class="flex flex-col gap-2 mb-4">
+            <a-checkbox v-model:checked="exportModal.options.teacher.showRoom">Phòng học</a-checkbox>
+          </div>
+          <a-button type="primary" class="bg-blue-500" :loading="exportModal.loading" @click="exportTeacherWithOptions">Xuất TKB Giáo viên</a-button>
+        </a-card>
+
+        <!-- Ma trận thời khóa biểu -->
+        <a-card type="inner" title="Ma trận thời khóa biểu">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <a-button @click="notifyUpdating">Ma trận Tần Bình</a-button>
+            <a-button @click="notifyUpdating">Ma trận Giáo viên</a-button>
+            <a-button @click="notifyUpdating">Ma trận Khối</a-button>
+            <a-button @click="notifyUpdating">Ma trận Tổ chuyên môn</a-button>
+          </div>
+        </a-card>
+      </div>
     </a-modal>
   </div>
 </template>
