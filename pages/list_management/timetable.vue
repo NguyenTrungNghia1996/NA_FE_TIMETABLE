@@ -100,7 +100,7 @@
             <a-checkbox v-model:checked="exportModal.options.class.showRoom">Phòng học</a-checkbox>
             <a-checkbox v-model:checked="exportModal.options.class.showTeacher">Tên Giáo viên</a-checkbox>
           </div>
-          <a-button type="primary" class="bg-blue-500" :loading="exportModal.loading" @click="exportClass"> Xuất TKB Lớp </a-button>
+          <a-button type="primary" class="bg-blue-500" :loading="exportModal.loadingKey === 'class'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'class'" @click="exportClass"> Xuất TKB Lớp </a-button>
         </a-card>
 
         <!-- Thời khóa biểu toàn trường -->
@@ -110,7 +110,7 @@
             <a-checkbox v-model:checked="exportModal.options.school.showRoom">Phòng học</a-checkbox>
             <a-checkbox v-model:checked="exportModal.options.school.showTeacher">Tên Giáo viên</a-checkbox>
           </div>
-          <a-button type="primary" class="bg-blue-500" :loading="exportModal.loading" @click="exportAll"> Xuất TKB Toàn trường </a-button>
+          <a-button type="primary" class="bg-blue-500" :loading="exportModal.loadingKey === 'school'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'school'" @click="exportAll"> Xuất TKB Toàn trường </a-button>
         </a-card>
 
         <!-- Thời khóa biểu của giáo viên -->
@@ -119,7 +119,7 @@
           <div class="flex flex-col gap-2 mb-4">
             <a-checkbox v-model:checked="exportModal.options.teacher.showRoom">Phòng học</a-checkbox>
           </div>
-          <a-button type="primary" class="bg-blue-500" :loading="exportModal.loading" @click="exportTeacher"> Xuất TKB Giáo viên </a-button>
+          <a-button type="primary" class="bg-blue-500" :loading="exportModal.loadingKey === 'teacher'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'teacher'" @click="exportTeacher"> Xuất TKB Giáo viên </a-button>
         </a-card>
 
         <!-- Ma trận thời khóa biểu -->
@@ -216,7 +216,7 @@ const exportModal = reactive({
   visible: false,
   timetableId: null,
   timetableName: "",
-  loading: false,
+  loadingKey: null, // 'class' | 'school' | 'teacher' | null
   options: {
     class: { showRoom: false, showTeacher: false },
     school: { showRoom: false, showTeacher: false },
@@ -248,6 +248,7 @@ const openExportModal = record => {
   exportModal.timetableId = record?.id ?? null;
   exportModal.timetableName = record?.ten ?? "";
   exportModal.visible = true;
+  exportModal.loadingKey = null;
   // reset options each open
   exportModal.options.class.showRoom = false;
   exportModal.options.class.showTeacher = false;
@@ -257,12 +258,14 @@ const openExportModal = record => {
 };
 const closeExportModal = () => {
   exportModal.visible = false;
+  exportModal.loadingKey = null;
 };
-
+const settingStore = useSettingStore();
 // Download helper reused across pages
-const exportFile = async apiFn => {
+const exportFile = async (apiFn, key) => {
   try {
-    exportModal.loading = true;
+    settingStore.setLoading(true);
+    exportModal.loadingKey = key;
     const { data, error } = await apiFn();
     if (error.value) {
       throw new Error(error.value?.data?.message || "Xuất file không thành công");
@@ -282,38 +285,45 @@ const exportFile = async apiFn => {
   } catch (err) {
     message.error(err.message || "Xuất file không thành công");
   } finally {
-    exportModal.loading = false;
+    exportModal.loadingKey = null;
+    settingStore.setLoading(false);
   }
 };
 
 const exportAll = () =>
-  exportFile(() =>
-    RestApi.timetable.export({
-      params: {
-        idtkb: exportModal.timetableId,
-        show_room: exportModal.options.school.showRoom ? 1 : 0,
-        show_teacher: exportModal.options.school.showTeacher ? 1 : 0,
-      },
-    }),
+  exportFile(
+    () =>
+      RestApi.timetable.export({
+        params: {
+          idtkb: exportModal.timetableId,
+          show_room: exportModal.options.school.showRoom ? 1 : 0,
+          show_teacher: exportModal.options.school.showTeacher ? 1 : 0,
+        },
+      }),
+    "school",
   );
 const exportClass = () =>
-  exportFile(() =>
-    RestApi.timetable.export_class({
-      params: {
-        idtkb: exportModal.timetableId,
-        show_room: exportModal.options.class.showRoom ? 1 : 0,
-        show_teacher: exportModal.options.class.showTeacher ? 1 : 0,
-      },
-    }),
+  exportFile(
+    () =>
+      RestApi.timetable.export_class({
+        params: {
+          idtkb: exportModal.timetableId,
+          show_room: exportModal.options.class.showRoom ? 1 : 0,
+          show_teacher: exportModal.options.class.showTeacher ? 1 : 0,
+        },
+      }),
+    "class",
   );
 const exportTeacher = () =>
-  exportFile(() =>
-    RestApi.timetable.export_teacher({
-      params: {
-        idtkb: exportModal.timetableId,
-        show_room: exportModal.options.teacher.showRoom ? 1 : 0,
-      },
-    }),
+  exportFile(
+    () =>
+      RestApi.timetable.export_teacher({
+        params: {
+          idtkb: exportModal.timetableId,
+          show_room: exportModal.options.teacher.showRoom ? 1 : 0,
+        },
+      }),
+    "teacher",
   );
 
 const notifyUpdating = () => message.info("Tính năng đang phát triển");
