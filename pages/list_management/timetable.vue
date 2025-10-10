@@ -143,7 +143,17 @@
         <TimetableInfo ref="infoRef" :timetableId="infoTimetableId" />
       </ClientOnly>
     </a-drawer>
-    <a-drawer v-model:open="drawerAdjustOpen" title="Tinh chỉnh thời khóa biểu" :footer="null" height="100vh" placement="bottom" :header-style="{ padding: '0px 0px' }" :body-style="{ padding: '4px 4px' }">
+    <a-drawer
+      v-model:open="drawerAdjustOpen"
+      title="Tinh chỉnh thời khóa biểu"
+      :footer="null"
+      height="100vh"
+      placement="bottom"
+      :header-style="{ padding: '0px 0px' }"
+      :body-style="{ padding: '4px 4px' }"
+      :destroyOnClose="true"
+      @close="closeAdjustDrawer"
+    >
       <ClientOnly>
         <TimetableGrid v-model:classId="adjustClassId" :timetableId="adjustTimetableId" />
       </ClientOnly>
@@ -512,5 +522,12 @@ const openInfoDrawer = reg => {
 const openAdjustDrawer = record => {
   adjustTimetableId.value = record.id;
   drawerAdjustOpen.value = true;
+};
+
+// Ensure adjust drawer state resets when closed
+const closeAdjustDrawer = () => {
+  // Clear ids to reset child component props/state
+  adjustClassId.value = null;
+  adjustTimetableId.value = null;
 };
 </script>
