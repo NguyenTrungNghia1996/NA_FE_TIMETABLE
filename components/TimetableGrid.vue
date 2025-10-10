@@ -646,8 +646,6 @@ async function onCellClick(caId, dayId, pIdx) {
   emit("cell-click", { ca: caId, ngay: dayId, tiet: pIdx + 1, record: cell });
   if (cell?.id_giao_vien) {
     selectedTeacherId.value = cell.id_giao_vien;
-  } else {
-    selectedTeacherId.value = null;
   }
   if (cell?.id_mon) {
     selectedSubjectId.value = cell.id_mon;
@@ -849,8 +847,8 @@ async function onTimetableUnscheduledClick(lesson) {
 async function onTeacherCellClick(caId, dayId, pIdx) {
   const cell = getTeacherCell(caId, dayId, pIdx);
   if (!cell) return;
-  // Prevent selection from being cleared by selectedClassId watcher for this user action
-  if (selectedTeacherId.value) {
+  // Prevent selection from being cleared only if classId will change
+  if (cell?.id_lop && cell.id_lop !== selectedClassId.value) {
     suppressSelectionResetOnClassChange.value = true;
   }
   // Mark teacher suggestion flow early to avoid watcher overrides
@@ -861,7 +859,9 @@ async function onTeacherCellClick(caId, dayId, pIdx) {
   if (!selectedTeacherId.value || selectedTeacherId.value !== cell.id_giao_vien) {
     selectedTeacherId.value = cell.id_giao_vien || selectedTeacherId.value;
   }
-  selectedClassId.value = cell.id_lop;
+  if (cell?.id_lop) {
+    selectedClassId.value = cell.id_lop;
+  }
   if (cell?.id_mon) {
     selectedSubjectId.value = cell.id_mon;
     selectedCellPos.value = { ca: caId, ngay: dayId, pIdx };
