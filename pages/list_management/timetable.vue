@@ -18,12 +18,12 @@
           </template>
           <template v-else-if="column.key === 'action'">
             <div class="flex justify-center gap-2">
-              <a-tooltip title="Thời khóa biểu">
+              <a-tooltip v-if="record.dang_su_dung" title="Thời khóa biểu">
                 <a-button type="link" size="small" @click="openInfoDrawer(record)">
                   <template #icon><CalendarOutlined /></template>
                 </a-button>
               </a-tooltip>
-              <a-tooltip title="Tinh chỉnh">
+              <a-tooltip v-if="record.dang_su_dung" title="Tinh chỉnh">
                 <a-button type="link" size="small" @click="openAdjustDrawer(record)">
                   <template #icon><SettingOutlined /></template>
                 </a-button>
