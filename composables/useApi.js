@@ -123,6 +123,10 @@ let ENDPOINTS = {
   TIMETABLE_EXPORT: "/api/export",
   TIMETABLE_EXPORT_CLASS: "/api/export/lop",
   TIMETABLE_EXPORT_TEACHER: "/api/export/giaovien",
+  TIMETABLE_EXPORT_MATRIX_SCHOOL: "/api/export/matran/toantruong",
+  TIMETABLE_EXPORT_MATRIX_TEACHER: "/api/export/matran/giaovien",
+  TIMETABLE_EXPORT_MATRIX_GRADE: "/api/export/matran/khoi",
+  TIMETABLE_EXPORT_MATRIX_EXPERTISE: "/api/export/matran/tohopmon",
 
   S3: "/api/presigned_url",
 };
@@ -943,6 +947,18 @@ class Timetable {
   async export_teacher(data) {
     return await this.request.download(ENDPOINTS.TIMETABLE_EXPORT_TEACHER, data);
     // return await this.request.get(ENDPOINTS.TIMETABLE_EXPORT_TEACHER, data)
+  }
+  async export_matrix_school(data) {
+    return await this.request.download(ENDPOINTS.TIMETABLE_EXPORT_MATRIX_SCHOOL, data);
+  }
+  async export_matrix_teacher(data) {
+    return await this.request.download(ENDPOINTS.TIMETABLE_EXPORT_MATRIX_TEACHER, data);
+  }
+  async export_matrix_grade(data) {
+    return await this.request.download(ENDPOINTS.TIMETABLE_EXPORT_MATRIX_GRADE, data);
+  }
+  async export_matrix_expertise(data) {
+    return await this.request.download(ENDPOINTS.TIMETABLE_EXPORT_MATRIX_EXPERTISE, data);
   }
 }
 export default () => {

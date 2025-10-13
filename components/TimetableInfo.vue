@@ -504,9 +504,9 @@ const exportFile = async (apiFn, key) => {
   }
 };
 
-const exportClass = () => exportFile(() => RestApi.timetable.export_class({ params: { idtkb: props.timetableId } }), 'class');
-const exportTeacher = () => exportFile(() => RestApi.timetable.export_teacher({ params: { idtkb: props.timetableId } }), 'teacher');
-const exportTkb = () => exportFile(() => RestApi.timetable.export({ params: { idtkb: props.timetableId } }), 'school');
+const exportClass = () => exportFile(() => RestApi.timetable.export_class({ params: { idtkb: props.timetableId } }), "class");
+const exportTeacher = () => exportFile(() => RestApi.timetable.export_teacher({ params: { idtkb: props.timetableId } }), "teacher");
+const exportTkb = () => exportFile(() => RestApi.timetable.export({ params: { idtkb: props.timetableId } }), "school");
 
 // Export modal state + helpers
 const exportModal = reactive({
@@ -537,39 +537,44 @@ const closeExportModal = () => {
 const exportAllWithOptions = () =>
   exportFile(
     () =>
-    RestApi.timetable.export({
-      params: {
-        idtkb: props.timetableId,
-        show_room: exportModal.options.school.showRoom ? 1 : 0,
-        show_teacher: exportModal.options.school.showTeacher ? 1 : 0,
-      },
-    }),
-    'school',
+      RestApi.timetable.export({
+        params: {
+          idtkb: props.timetableId,
+          show_room: exportModal.options.school.showRoom ? 1 : 0,
+          show_teacher: exportModal.options.school.showTeacher ? 1 : 0,
+        },
+      }),
+    "school",
   );
 const exportClassWithOptions = () =>
   exportFile(
     () =>
-    RestApi.timetable.export_class({
-      params: {
-        idtkb: props.timetableId,
-        show_room: exportModal.options.class.showRoom ? 1 : 0,
-        show_teacher: exportModal.options.class.showTeacher ? 1 : 0,
-      },
-    }),
-    'class',
+      RestApi.timetable.export_class({
+        params: {
+          idtkb: props.timetableId,
+          show_room: exportModal.options.class.showRoom ? 1 : 0,
+          show_teacher: exportModal.options.class.showTeacher ? 1 : 0,
+        },
+      }),
+    "class",
   );
 const exportTeacherWithOptions = () =>
   exportFile(
     () =>
-    RestApi.timetable.export_teacher({
-      params: {
-        idtkb: props.timetableId,
-        show_room: exportModal.options.teacher.showRoom ? 1 : 0,
-      },
-    }),
-    'teacher',
+      RestApi.timetable.export_teacher({
+        params: {
+          idtkb: props.timetableId,
+          show_room: exportModal.options.teacher.showRoom ? 1 : 0,
+        },
+      }),
+    "teacher",
   );
 const notifyUpdating = () => message.info("Tính năng đang phát triển");
+
+const exportMatrixSchool = () => exportFile(() => RestApi.timetable.export_matrix_school({ params: { idtkb: props.timetableId } }), "matrix-school");
+const exportMatrixTeacher = () => exportFile(() => RestApi.timetable.export_matrix_teacher({ params: { idtkb: props.timetableId } }), "matrix-teacher");
+const exportMatrixGrade = () => exportFile(() => RestApi.timetable.export_matrix_grade({ params: { idtkb: props.timetableId } }), "matrix-grade");
+const exportMatrixExpertise = () => exportFile(() => RestApi.timetable.export_matrix_expertise({ params: { idtkb: props.timetableId } }), "matrix-expertise");
 
 async function fetchInfo() {
   // if (!props.timetableId) return;
@@ -688,15 +693,7 @@ defineExpose({ refresh, reset });
             <a-checkbox v-model:checked="exportModal.options.class.showRoom">Phòng học</a-checkbox>
             <a-checkbox v-model:checked="exportModal.options.class.showTeacher">Tên Giáo viên</a-checkbox>
           </div>
-          <a-button
-            type="primary"
-            class="bg-blue-500"
-            :loading="exportModal.loadingKey === 'class'"
-            :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'class'"
-            @click="exportClassWithOptions"
-          >
-            Xuất TKB Lớp
-          </a-button>
+          <a-button type="primary" class="bg-blue-500" :loading="exportModal.loadingKey === 'class'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'class'" @click="exportClassWithOptions"> Xuất TKB Lớp </a-button>
         </a-card>
 
         <!-- Thời khóa biểu toàn trường -->
@@ -706,15 +703,7 @@ defineExpose({ refresh, reset });
             <a-checkbox v-model:checked="exportModal.options.school.showRoom">Phòng học</a-checkbox>
             <a-checkbox v-model:checked="exportModal.options.school.showTeacher">Tên Giáo viên</a-checkbox>
           </div>
-          <a-button
-            type="primary"
-            class="bg-blue-500"
-            :loading="exportModal.loadingKey === 'school'"
-            :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'school'"
-            @click="exportAllWithOptions"
-          >
-            Xuất TKB Toàn trường
-          </a-button>
+          <a-button type="primary" class="bg-blue-500" :loading="exportModal.loadingKey === 'school'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'school'" @click="exportAllWithOptions"> Xuất TKB Toàn trường </a-button>
         </a-card>
 
         <!-- Thời khóa biểu của giáo viên -->
@@ -723,24 +712,16 @@ defineExpose({ refresh, reset });
           <div class="flex flex-col gap-2 mb-4">
             <a-checkbox v-model:checked="exportModal.options.teacher.showRoom">Phòng học</a-checkbox>
           </div>
-          <a-button
-            type="primary"
-            class="bg-blue-500"
-            :loading="exportModal.loadingKey === 'teacher'"
-            :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'teacher'"
-            @click="exportTeacherWithOptions"
-          >
-            Xuất TKB Giáo viên
-          </a-button>
+          <a-button type="primary" class="bg-blue-500" :loading="exportModal.loadingKey === 'teacher'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'teacher'" @click="exportTeacherWithOptions"> Xuất TKB Giáo viên </a-button>
         </a-card>
 
         <!-- Ma trận thời khóa biểu -->
         <a-card type="inner" title="Ma trận thời khóa biểu">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <a-button @click="notifyUpdating">Ma trận Tần Bình</a-button>
-            <a-button @click="notifyUpdating">Ma trận Giáo viên</a-button>
-            <a-button @click="notifyUpdating">Ma trận Khối</a-button>
-            <a-button @click="notifyUpdating">Ma trận Tổ chuyên môn</a-button>
+            <a-button :loading="exportModal.loadingKey === 'matrix-school'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-school'" @click="exportMatrixSchool">Ma trận Toàn trường</a-button>
+            <a-button :loading="exportModal.loadingKey === 'matrix-teacher'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-teacher'" @click="exportMatrixTeacher">Ma trận Giáo viên</a-button>
+            <a-button :loading="exportModal.loadingKey === 'matrix-grade'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-grade'" @click="exportMatrixGrade">Ma trận Khối</a-button>
+            <a-button :loading="exportModal.loadingKey === 'matrix-expertise'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-expertise'" @click="exportMatrixExpertise">Ma trận Tổ chuyên môn</a-button>
           </div>
         </a-card>
       </div>

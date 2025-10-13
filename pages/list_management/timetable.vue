@@ -125,10 +125,10 @@
         <!-- Ma trận thời khóa biểu -->
         <a-card type="inner" title="Ma trận thời khóa biểu">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <a-button @click="notifyUpdating">Ma trận Tần Bình</a-button>
-            <a-button @click="notifyUpdating">Ma trận Giáo viên</a-button>
-            <a-button @click="notifyUpdating">Ma trận Khối</a-button>
-            <a-button @click="notifyUpdating">Ma trận Tổ chuyên môn</a-button>
+            <a-button :loading="exportModal.loadingKey === 'matrix-school'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-school'" @click="exportMatrixSchool">Ma trận Toàn trường</a-button>
+            <a-button :loading="exportModal.loadingKey === 'matrix-teacher'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-teacher'" @click="exportMatrixTeacher">Ma trận Giáo viên</a-button>
+            <a-button :loading="exportModal.loadingKey === 'matrix-grade'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-grade'" @click="exportMatrixGrade">Ma trận Khối</a-button>
+            <a-button :loading="exportModal.loadingKey === 'matrix-expertise'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-expertise'" @click="exportMatrixExpertise">Ma trận Tổ chuyên môn</a-button>
           </div>
         </a-card>
       </div>
@@ -143,17 +143,7 @@
         <TimetableInfo ref="infoRef" :timetableId="infoTimetableId" />
       </ClientOnly>
     </a-drawer>
-    <a-drawer
-      v-model:open="drawerAdjustOpen"
-      title="Tinh chỉnh thời khóa biểu"
-      :footer="null"
-      height="100vh"
-      placement="bottom"
-      :header-style="{ padding: '0px 0px' }"
-      :body-style="{ padding: '4px 4px' }"
-      :destroyOnClose="true"
-      @close="closeAdjustDrawer"
-    >
+    <a-drawer v-model:open="drawerAdjustOpen" title="Tinh chỉnh thời khóa biểu" :footer="null" height="100vh" placement="bottom" :header-style="{ padding: '0px 0px' }" :body-style="{ padding: '4px 4px' }" :destroyOnClose="true" @close="closeAdjustDrawer">
       <ClientOnly>
         <TimetableGrid v-model:classId="adjustClassId" :timetableId="adjustTimetableId" />
       </ClientOnly>
@@ -226,7 +216,7 @@ const exportModal = reactive({
   visible: false,
   timetableId: null,
   timetableName: "",
-  loadingKey: null, // 'class' | 'school' | 'teacher' | null
+  loadingKey: null, // 'class' | 'school' | 'teacher' | 'matrix-school' | 'matrix-teacher' | 'matrix-grade' | 'matrix-expertise' | null
   options: {
     class: { showRoom: false, showTeacher: false },
     school: { showRoom: false, showTeacher: false },
@@ -336,7 +326,6 @@ const exportTeacher = () =>
     "teacher",
   );
 
-const notifyUpdating = () => message.info("Tính năng đang phát triển");
 const fetchData = async p => {
   try {
     loading.value = true;
@@ -355,6 +344,12 @@ const fetchData = async p => {
   }
 };
 
+const exportMatrixSchool = () => exportFile(() => RestApi.timetable.export_matrix_school({ params: { idtkb: exportModal.timetableId } }), "matrix-school");
+const exportMatrixTeacher = () => exportFile(() => RestApi.timetable.export_matrix_teacher({ params: { idtkb: exportModal.timetableId } }), "matrix-teacher");
+const exportMatrixGrade = () => exportFile(() => RestApi.timetable.export_matrix_grade({ params: { idtkb: exportModal.timetableId } }), "matrix-grade");
+const exportMatrixExpertise = () => exportFile(() => RestApi.timetable.export_matrix_expertise({ params: { idtkb: exportModal.timetableId } }), "matrix-expertise");
+
+const notifyUpdating = () => message.info("Tính năng đang phát triển");
 const handleTableChange = async pag => {
   pagination.current = pag.current;
   pagination.pageSize = pag.pageSize;
