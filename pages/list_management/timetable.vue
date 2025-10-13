@@ -17,7 +17,7 @@
             </a-tag>
           </template>
           <template v-else-if="column.key === 'action'">
-            <div class="flex justify-center gap-2">
+            <div class="flex justify-end gap-2">
               <a-tooltip v-if="record.dang_su_dung" title="Thời khóa biểu">
                 <a-button type="link" size="small" @click="openInfoDrawer(record)">
                   <template #icon><CalendarOutlined /></template>
