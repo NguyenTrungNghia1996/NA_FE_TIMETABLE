@@ -3,17 +3,7 @@
     <div>
       <SelectGradeLevelByUnit v-model="gradeId" />
       <a-card title="DANH SÁCH LỚP">
-        <a-table
-          :columns="columns"
-          :data-source="classes"
-          :loading="loading"
-          :pagination="pagination"
-          size="small"
-          row-key="id"
-          @change="handleTableChange"
-          :customRow="onRow"
-          :row-class-name="rowClassName"
-        >
+        <a-table :columns="columns" :data-source="classes" :loading="loading" :pagination="pagination" size="small" row-key="id" @change="handleTableChange" :customRow="onRow" :row-class-name="rowClassName">
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'stt'">
               {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
@@ -109,16 +99,7 @@
           >
           <a-radio-button value="all"><p class="uppercase">Tất cả giáo viên</p></a-radio-button>
         </a-radio-group>
-        <a-table
-          :columns="teacherColumns"
-          :data-source="teacherModal.teachers"
-          :loading="teacherModal.loading"
-          :pagination="false"
-          size="small"
-          row-key="id"
-          :row-selection="teacherRowSelection"
-          :customRow="onTeacherRow"
-        />
+        <a-table :columns="teacherColumns" :data-source="teacherModal.teachers" :loading="teacherModal.loading" :pagination="false" size="small" row-key="id" :row-selection="teacherRowSelection" :customRow="onTeacherRow" />
         <div class="flex justify-end gap-2 mt-4">
           <a-button @click="cancelTeacher">Hủy</a-button>
           <a-button type="primary" @click="confirmTeacher">OK</a-button>
@@ -133,16 +114,7 @@
         <div class="mb-2">
           <a-button danger @click="noRoom">Không sử dụng phòng học</a-button>
         </div>
-        <a-table
-          :columns="roomColumns"
-          :data-source="roomModal.rooms"
-          :loading="roomModal.loading"
-          :pagination="false"
-          size="small"
-          row-key="id"
-          :row-selection="roomRowSelection"
-          :customRow="onRoomRow"
-        />
+        <a-table :columns="roomColumns" :data-source="roomModal.rooms" :loading="roomModal.loading" :pagination="false" size="small" row-key="id" :row-selection="roomRowSelection" :customRow="onRoomRow" />
         <div class="flex justify-end gap-2 mt-4">
           <a-button @click="cancelRoom">Hủy</a-button>
           <a-button type="primary" @click="confirmRoom">OK</a-button>
@@ -191,7 +163,7 @@ async function safeConfirmAndSave(confirmFn) {
   selectionSaving = true;
   try {
     confirmFn && confirmFn();
-    await handleSave();
+    // await handleSave();
   } finally {
     selectionSaving = false;
   }
@@ -220,25 +192,11 @@ watch(
 );
 
 // Tổng số tiết theo ca và theo tuần (gộp cả 2 loại phòng)
-const totalMorning = computed(() =>
-  (subjects.value || []).reduce(
-    (sum, s) =>
-      sum + (Number(s.so_tiet_ca_sang_truyen_thong) || 0) + (Number(s.so_tiet_ca_sang_phong_chuyen_dung) || 0),
-    0,
-  ),
-);
+const totalMorning = computed(() => (subjects.value || []).reduce((sum, s) => sum + (Number(s.so_tiet_ca_sang_truyen_thong) || 0) + (Number(s.so_tiet_ca_sang_phong_chuyen_dung) || 0), 0));
 
-const totalAfternoon = computed(() =>
-  (subjects.value || []).reduce(
-    (sum, s) =>
-      sum + (Number(s.so_tiet_ca_chieu_truyen_thong) || 0) + (Number(s.so_tiet_ca_chieu_phong_chuyen_dung) || 0),
-    0,
-  ),
-);
+const totalAfternoon = computed(() => (subjects.value || []).reduce((sum, s) => sum + (Number(s.so_tiet_ca_chieu_truyen_thong) || 0) + (Number(s.so_tiet_ca_chieu_phong_chuyen_dung) || 0), 0));
 
-const totalWeekly = computed(() =>
-  (subjects.value || []).reduce((sum, s) => sum + (Number(s.so_tiet_tuan) || 0), 0),
-);
+const totalWeekly = computed(() => (subjects.value || []).reduce((sum, s) => sum + (Number(s.so_tiet_tuan) || 0), 0));
 
 // Tiêu đề thẻ: hiển thị tên lớp và tổng số tiết theo yêu cầu
 const cardTitle = computed(() => {
@@ -544,7 +502,7 @@ const onRow = record => {
 };
 
 // Highlight active selected class row
-const rowClassName = record => (record.id === selectedClassId.value ? 'active-row' : '');
+const rowClassName = record => (record.id === selectedClassId.value ? "active-row" : "");
 
 // Allow selecting by clicking the whole row in teacher modal and auto-save
 const onTeacherRow = record => {
