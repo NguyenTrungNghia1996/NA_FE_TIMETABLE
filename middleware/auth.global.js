@@ -96,4 +96,56 @@ export default defineNuxtRouteMiddleware(async (to) => {
     userStore.logout();
     return navigateTo("/login");
   }
+
+  // 4) Chặn truy cập nếu không có quyền với URL
+  try {
+    const menuTree = Array.isArray(settingStore.menu) ? settingStore.menu : [];
+    const permissionsArr = Array.isArray(settingStore.permissions) ? settingStore.permissions : [];
+
+    // Map { key: permissionValue }
+    const permissionMap = {};
+    for (const p of permissionsArr) {
+      if (p && typeof p.key === "string") permissionMap[p.key] = p.permissionValue ?? 0;
+    }
+
+    // Tìm node theo path (hỗ trợ dynamic :param)
+    const findMenuPathByRoute = (items, path) => {
+      for (const item of items) {
+        if (item?.url === path) return [item];
+        if (item?.url && item.url.includes(":")) {
+          const base = item.url.split(":")[0];
+          if (path.startsWith(base)) return [item];
+        }
+        const children = Array.isArray(item?.children) ? item.children : [];
+        if (children.length) {
+          const found = findMenuPathByRoute(children, path);
+          if (found.length) return [item, ...found];
+        }
+      }
+      return [];
+    };
+
+    const chain = findMenuPathByRoute(menuTree, to.path);
+    if (chain.length) {
+      const current = chain[chain.length - 1];
+      const parentKey = chain.length > 1 ? chain[chain.length - 2]?.key : "menu";
+      const parentPermVal = permissionMap[parentKey] ?? 0;
+      const bit = typeof current?.permissionBit === "number" ? current.permissionBit : null;
+
+      // Nếu có permissionBit thì tính trạng thái, ngược lại cho phép truy cập
+      if (bit !== null) {
+        const currentPermission = (parentPermVal >> bit) & 0b11; // 0: none, 1: view, 2: edit
+        // Lưu permission hiện tại vào store (phục vụ UI tắt/bật nút)
+        if (typeof useSettingStore === "function") {
+          try { settingStore.setCurrentPermission(currentPermission); } catch {}
+        }
+        if (currentPermission === 0) {
+          // Không có quyền => chuyển về dashboard
+          return navigateTo("/dashboard");
+        }
+      }
+    }
+  } catch (e) {
+    // Trong trường hợp lỗi tính quyền, vẫn cho qua thay vì chặn nhầm
+  }
 });
