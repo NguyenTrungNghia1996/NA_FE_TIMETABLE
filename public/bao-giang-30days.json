@@ -1,0 +1,137 @@
+{
+  "className": "11A1",
+  "records": [
+    { "date": "2025-10-01", "period": 1, "subject": "Toán", "lessonNo": 1, "lessonTitle": "Bài 1: Hàm số bậc nhất" },
+    { "date": "2025-10-01", "period": 2, "subject": "Ngữ văn", "lessonNo": 1, "lessonTitle": "Bài 1: Thơ hiện đại" },
+    { "date": "2025-10-01", "period": 3, "subject": "Tiếng Anh", "lessonNo": 1, "lessonTitle": "Bài 1: Thì hiện tại hoàn thành" },
+    { "date": "2025-10-01", "period": 4, "subject": "Vật lý", "lessonNo": 1, "lessonTitle": "Bài 1: Định luật Newton" },
+    { "date": "2025-10-01", "period": 5, "subject": "Hóa học", "lessonNo": 1, "lessonTitle": "Bài 1: Oxi hoá - khử" },
+
+    { "date": "2025-10-02", "period": 1, "subject": "Sinh học", "lessonNo": 1, "lessonTitle": "Bài 1: Tế bào" },
+    { "date": "2025-10-02", "period": 2, "subject": "Lịch sử", "lessonNo": 1, "lessonTitle": "Bài 1: Cách mạng tư sản" },
+    { "date": "2025-10-02", "period": 3, "subject": "Địa lý", "lessonNo": 1, "lessonTitle": "Bài 1: Khí hậu Việt Nam" },
+    { "date": "2025-10-02", "period": 4, "subject": "Tin học", "lessonNo": 1, "lessonTitle": "Bài 1: Thuật toán cơ bản" },
+    { "date": "2025-10-02", "period": 5, "subject": "Công nghệ", "lessonNo": 1, "lessonTitle": "Bài 1: Kỹ thuật điện" },
+
+    { "date": "2025-10-03", "period": 1, "subject": "Toán", "lessonNo": 2, "lessonTitle": "Bài 2: Hàm số bậc hai" },
+    { "date": "2025-10-03", "period": 2, "subject": "Ngữ văn", "lessonNo": 2, "lessonTitle": "Bài 2: Truyện ngắn hiện đại" },
+    { "date": "2025-10-03", "period": 3, "subject": "Tiếng Anh", "lessonNo": 2, "lessonTitle": "Bài 2: Mệnh đề quan hệ" },
+    { "date": "2025-10-03", "period": 4, "subject": "Vật lý", "lessonNo": 2, "lessonTitle": "Bài 2: Công và năng lượng" },
+    { "date": "2025-10-03", "period": 5, "subject": "Thể dục", "lessonNo": 1, "lessonTitle": "Bài 1: Khởi động - chạy bền" },
+
+    { "date": "2025-10-06", "period": 1, "subject": "Hóa học", "lessonNo": 2, "lessonTitle": "Bài 2: Cân bằng hóa học" },
+    { "date": "2025-10-06", "period": 2, "subject": "Sinh học", "lessonNo": 2, "lessonTitle": "Bài 2: Quang hợp" },
+    { "date": "2025-10-06", "period": 3, "subject": "Địa lý", "lessonNo": 2, "lessonTitle": "Bài 2: Dân số Việt Nam" },
+    { "date": "2025-10-06", "period": 4, "subject": "Tin học", "lessonNo": 2, "lessonTitle": "Bài 2: Cấu trúc dữ liệu" },
+    { "date": "2025-10-06", "period": 5, "subject": "Giáo dục công dân", "lessonNo": 1, "lessonTitle": "Bài 1: Công dân & pháp luật" },
+
+    { "date": "2025-10-07", "period": 1, "subject": "Toán", "lessonNo": 3, "lessonTitle": "Bài 3: Đồ thị hàm số" },
+    { "date": "2025-10-07", "period": 2, "subject": "Ngữ văn", "lessonNo": 3, "lessonTitle": "Bài 3: Ký sự" },
+    { "date": "2025-10-07", "period": 3, "subject": "Tiếng Anh", "lessonNo": 3, "lessonTitle": "Bài 3: Câu bị động" },
+    { "date": "2025-10-07", "period": 4, "subject": "Vật lý", "lessonNo": 3, "lessonTitle": "Bài 3: Động lượng" },
+    { "date": "2025-10-07", "period": 5, "subject": "Âm nhạc", "lessonNo": 1, "lessonTitle": "Bài 1: Nhạc lý cơ bản" },
+
+    { "date": "2025-10-08", "period": 1, "subject": "Toán", "lessonNo": 4, "lessonTitle": "Bài 4: Hệ phương trình" },
+    { "date": "2025-10-08", "period": 2, "subject": "Ngữ văn", "lessonNo": 4, "lessonTitle": "Bài 4: Thơ trữ tình" },
+    { "date": "2025-10-08", "period": 3, "subject": "Tiếng Anh", "lessonNo": 4, "lessonTitle": "Bài 4: Câu điều kiện" },
+    { "date": "2025-10-08", "period": 4, "subject": "Vật lý", "lessonNo": 4, "lessonTitle": "Bài 4: Chuyển động tròn" },
+    { "date": "2025-10-08", "period": 5, "subject": "Hóa học", "lessonNo": 3, "lessonTitle": "Bài 3: Dung dịch" },
+
+    { "date": "2025-10-09", "period": 1, "subject": "Sinh học", "lessonNo": 3, "lessonTitle": "Bài 3: Di truyền" },
+    { "date": "2025-10-09", "period": 2, "subject": "Lịch sử", "lessonNo": 2, "lessonTitle": "Bài 2: Cách mạng công nghiệp" },
+    { "date": "2025-10-09", "period": 3, "subject": "Địa lý", "lessonNo": 3, "lessonTitle": "Bài 3: Địa hình Việt Nam" },
+    { "date": "2025-10-09", "period": 4, "subject": "Tin học", "lessonNo": 3, "lessonTitle": "Bài 3: Lập trình cơ bản" },
+    { "date": "2025-10-09", "period": 5, "subject": "Công nghệ", "lessonNo": 2, "lessonTitle": "Bài 2: Kỹ thuật cơ khí" },
+
+    { "date": "2025-10-10", "period": 1, "subject": "Toán", "lessonNo": 5, "lessonTitle": "Bài 5: Bất phương trình" },
+    { "date": "2025-10-10", "period": 2, "subject": "Ngữ văn", "lessonNo": 5, "lessonTitle": "Bài 5: Văn nghị luận" },
+    { "date": "2025-10-10", "period": 3, "subject": "Tiếng Anh", "lessonNo": 5, "lessonTitle": "Bài 5: Câu tường thuật" },
+    { "date": "2025-10-10", "period": 4, "subject": "Vật lý", "lessonNo": 5, "lessonTitle": "Bài 5: Dao động điều hoà" },
+    { "date": "2025-10-10", "period": 5, "subject": "Thể dục", "lessonNo": 2, "lessonTitle": "Bài 2: Bài tập phát triển" },
+
+    { "date": "2025-10-13", "period": 1, "subject": "Hóa học", "lessonNo": 4, "lessonTitle": "Bài 4: Este - Lipit" },
+    { "date": "2025-10-13", "period": 2, "subject": "Sinh học", "lessonNo": 4, "lessonTitle": "Bài 4: Quang hợp nâng cao" },
+    { "date": "2025-10-13", "period": 3, "subject": "Địa lý", "lessonNo": 4, "lessonTitle": "Bài 4: Sông ngòi" },
+    { "date": "2025-10-13", "period": 4, "subject": "Tin học", "lessonNo": 4, "lessonTitle": "Bài 4: Cấu trúc dữ liệu nâng cao" },
+    { "date": "2025-10-13", "period": 5, "subject": "Giáo dục công dân", "lessonNo": 2, "lessonTitle": "Bài 2: Quyền & nghĩa vụ" },
+
+    { "date": "2025-10-14", "period": 1, "subject": "Toán", "lessonNo": 6, "lessonTitle": "Bài 6: Hệ bất phương trình" },
+    { "date": "2025-10-14", "period": 2, "subject": "Ngữ văn", "lessonNo": 6, "lessonTitle": "Bài 6: Ký ức & truyện ký" },
+    { "date": "2025-10-14", "period": 3, "subject": "Tiếng Anh", "lessonNo": 6, "lessonTitle": "Bài 6: Câu giả định" },
+    { "date": "2025-10-14", "period": 4, "subject": "Vật lý", "lessonNo": 6, "lessonTitle": "Bài 6: Momen lực" },
+    { "date": "2025-10-14", "period": 5, "subject": "Âm nhạc", "lessonNo": 2, "lessonTitle": "Bài 2: Giai điệu & tiết tấu" },
+
+    { "date": "2025-10-15", "period": 1, "subject": "Toán", "lessonNo": 7, "lessonTitle": "Bài 7: Hàm số mũ" },
+    { "date": "2025-10-15", "period": 2, "subject": "Ngữ văn", "lessonNo": 7, "lessonTitle": "Bài 7: Tùy bút" },
+    { "date": "2025-10-15", "period": 3, "subject": "Tiếng Anh", "lessonNo": 7, "lessonTitle": "Bài 7: Modal verbs" },
+    { "date": "2025-10-15", "period": 4, "subject": "Vật lý", "lessonNo": 7, "lessonTitle": "Bài 7: Truyền nhiệt" },
+    { "date": "2025-10-15", "period": 5, "subject": "Hóa học", "lessonNo": 5, "lessonTitle": "Bài 5: Amin & Amino axit" },
+
+    { "date": "2025-10-16", "period": 1, "subject": "Sinh học", "lessonNo": 5, "lessonTitle": "Bài 5: Hô hấp tế bào" },
+    { "date": "2025-10-16", "period": 2, "subject": "Lịch sử", "lessonNo": 3, "lessonTitle": "Bài 3: Chiến tranh thế giới" },
+    { "date": "2025-10-16", "period": 3, "subject": "Địa lý", "lessonNo": 5, "lessonTitle": "Bài 5: Biển Đông" },
+    { "date": "2025-10-16", "period": 4, "subject": "Tin học", "lessonNo": 5, "lessonTitle": "Bài 5: Lập trình hướng đối tượng" },
+    { "date": "2025-10-16", "period": 5, "subject": "Công nghệ", "lessonNo": 3, "lessonTitle": "Bài 3: Mạch điện" },
+
+    { "date": "2025-10-17", "period": 1, "subject": "Toán", "lessonNo": 8, "lessonTitle": "Bài 8: Logarit" },
+    { "date": "2025-10-17", "period": 2, "subject": "Ngữ văn", "lessonNo": 8, "lessonTitle": "Bài 8: Kịch" },
+    { "date": "2025-10-17", "period": 3, "subject": "Tiếng Anh", "lessonNo": 8, "lessonTitle": "Bài 8: Phrasal verbs" },
+    { "date": "2025-10-17", "period": 4, "subject": "Vật lý", "lessonNo": 8, "lessonTitle": "Bài 8: Điện xoay chiều" },
+    { "date": "2025-10-17", "period": 5, "subject": "Thể dục", "lessonNo": 3, "lessonTitle": "Bài 3: Độ bền & sức nhanh" },
+
+    { "date": "2025-10-20", "period": 1, "subject": "Hóa học", "lessonNo": 6, "lessonTitle": "Bài 6: Polime" },
+    { "date": "2025-10-20", "period": 2, "subject": "Sinh học", "lessonNo": 6, "lessonTitle": "Bài 6: Enzim" },
+    { "date": "2025-10-20", "period": 3, "subject": "Địa lý", "lessonNo": 6, "lessonTitle": "Bài 6: Đất & thổ nhưỡng" },
+    { "date": "2025-10-20", "period": 4, "subject": "Tin học", "lessonNo": 6, "lessonTitle": "Bài 6: CSDL quan hệ" },
+    { "date": "2025-10-20", "period": 5, "subject": "Giáo dục công dân", "lessonNo": 3, "lessonTitle": "Bài 3: Trách nhiệm công dân" },
+
+    { "date": "2025-10-21", "period": 1, "subject": "Toán", "lessonNo": 9, "lessonTitle": "Bài 9: Cấp số cộng" },
+    { "date": "2025-10-21", "period": 2, "subject": "Ngữ văn", "lessonNo": 9, "lessonTitle": "Bài 9: Văn học dân gian" },
+    { "date": "2025-10-21", "period": 3, "subject": "Tiếng Anh", "lessonNo": 9, "lessonTitle": "Bài 9: Collocations" },
+    { "date": "2025-10-21", "period": 4, "subject": "Vật lý", "lessonNo": 9, "lessonTitle": "Bài 9: Từ trường" },
+    { "date": "2025-10-21", "period": 5, "subject": "Âm nhạc", "lessonNo": 3, "lessonTitle": "Bài 3: Hợp âm cơ bản" },
+
+    { "date": "2025-10-22", "period": 1, "subject": "Toán", "lessonNo": 10, "lessonTitle": "Bài 10: Cấp số nhân" },
+    { "date": "2025-10-22", "period": 2, "subject": "Ngữ văn", "lessonNo": 10, "lessonTitle": "Bài 10: Truyện thơ Nôm" },
+    { "date": "2025-10-22", "period": 3, "subject": "Tiếng Anh", "lessonNo": 10, "lessonTitle": "Bài 10: Idioms" },
+    { "date": "2025-10-22", "period": 4, "subject": "Vật lý", "lessonNo": 10, "lessonTitle": "Bài 10: Sóng cơ" },
+    { "date": "2025-10-22", "period": 5, "subject": "Hóa học", "lessonNo": 7, "lessonTitle": "Bài 7: Nhôm & hợp chất" },
+
+    { "date": "2025-10-23", "period": 1, "subject": "Sinh học", "lessonNo": 7, "lessonTitle": "Bài 7: Cảm ứng ở TV & ĐV" },
+    { "date": "2025-10-23", "period": 2, "subject": "Lịch sử", "lessonNo": 4, "lessonTitle": "Bài 4: Việt Nam cận đại" },
+    { "date": "2025-10-23", "period": 3, "subject": "Địa lý", "lessonNo": 7, "lessonTitle": "Bài 7: Kinh tế vùng" },
+    { "date": "2025-10-23", "period": 4, "subject": "Tin học", "lessonNo": 7, "lessonTitle": "Bài 7: SQL cơ bản" },
+    { "date": "2025-10-23", "period": 5, "subject": "Công nghệ", "lessonNo": 4, "lessonTitle": "Bài 4: Vật liệu" },
+
+    { "date": "2025-10-24", "period": 1, "subject": "Toán", "lessonNo": 11, "lessonTitle": "Bài 11: Nhị thức Newton" },
+    { "date": "2025-10-24", "period": 2, "subject": "Ngữ văn", "lessonNo": 11, "lessonTitle": "Bài 11: Bi kịch hiện đại" },
+    { "date": "2025-10-24", "period": 3, "subject": "Tiếng Anh", "lessonNo": 11, "lessonTitle": "Bài 11: Conditional mix" },
+    { "date": "2025-10-24", "period": 4, "subject": "Vật lý", "lessonNo": 11, "lessonTitle": "Bài 11: Nhiệt động lực học" },
+    { "date": "2025-10-24", "period": 5, "subject": "Thể dục", "lessonNo": 4, "lessonTitle": "Bài 4: Bài tập sức mạnh" },
+
+    { "date": "2025-10-27", "period": 1, "subject": "Hóa học", "lessonNo": 8, "lessonTitle": "Bài 8: Sắt & hợp chất" },
+    { "date": "2025-10-27", "period": 2, "subject": "Sinh học", "lessonNo": 8, "lessonTitle": "Bài 8: Hệ tuần hoàn" },
+    { "date": "2025-10-27", "period": 3, "subject": "Địa lý", "lessonNo": 8, "lessonTitle": "Bài 8: Tài nguyên nước" },
+    { "date": "2025-10-27", "period": 4, "subject": "Tin học", "lessonNo": 8, "lessonTitle": "Bài 8: Web căn bản" },
+    { "date": "2025-10-27", "period": 5, "subject": "Giáo dục công dân", "lessonNo": 4, "lessonTitle": "Bài 4: Văn hoá & pháp luật" },
+
+    { "date": "2025-10-28", "period": 1, "subject": "Toán", "lessonNo": 12, "lessonTitle": "Bài 12: Xác suất cơ bản" },
+    { "date": "2025-10-28", "period": 2, "subject": "Ngữ văn", "lessonNo": 12, "lessonTitle": "Bài 12: Tự sự hiện đại" },
+    { "date": "2025-10-28", "period": 3, "subject": "Tiếng Anh", "lessonNo": 12, "lessonTitle": "Bài 12: Reported speech" },
+    { "date": "2025-10-28", "period": 4, "subject": "Vật lý", "lessonNo": 12, "lessonTitle": "Bài 12: Điện từ trường" },
+    { "date": "2025-10-28", "period": 5, "subject": "Âm nhạc", "lessonNo": 4, "lessonTitle": "Bài 4: Giai điệu nâng cao" },
+
+    { "date": "2025-10-29", "period": 1, "subject": "Toán", "lessonNo": 13, "lessonTitle": "Bài 13: Thống kê mô tả" },
+    { "date": "2025-10-29", "period": 2, "subject": "Ngữ văn", "lessonNo": 13, "lessonTitle": "Bài 13: Văn chính luận" },
+    { "date": "2025-10-29", "period": 3, "subject": "Tiếng Anh", "lessonNo": 13, "lessonTitle": "Bài 13: Gerunds & infinitives" },
+    { "date": "2025-10-29", "period": 4, "subject": "Vật lý", "lessonNo": 13, "lessonTitle": "Bài 13: Sóng điện từ" },
+    { "date": "2025-10-29", "period": 5, "subject": "Hóa học", "lessonNo": 9, "lessonTitle": "Bài 9: Đồng & hợp chất" },
+
+    { "date": "2025-10-30", "period": 1, "subject": "Sinh học", "lessonNo": 9, "lessonTitle": "Bài 9: Bài tiết" },
+    { "date": "2025-10-30", "period": 2, "subject": "Lịch sử", "lessonNo": 5, "lessonTitle": "Bài 5: Việt Nam hiện đại" },
+    { "date": "2025-10-30", "period": 3, "subject": "Địa lý", "lessonNo": 9, "lessonTitle": "Bài 9: Khoáng sản" },
+    { "date": "2025-10-30", "period": 4, "subject": "Tin học", "lessonNo": 9, "lessonTitle": "Bài 9: Thuật toán sắp xếp" },
+    { "date": "2025-10-30", "period": 5, "subject": "Công nghệ", "lessonNo": 5, "lessonTitle": "Bài 5: Điện tử cơ bản" }
+  ]
+}
+
