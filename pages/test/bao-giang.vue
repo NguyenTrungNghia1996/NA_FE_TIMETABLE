@@ -23,24 +23,7 @@
       </div>
       <div class="flex items-center gap-2">
         <span class="text-sm text-gray-600">Khoảng thời gian:</span>
-        <a-select v-model:value="rangeMode" size="small" style="min-width: 160px" :options="rangeModeOptions" />
-        <a-date-picker
-          v-if="rangeMode === 'week'"
-          v-model:value="weekPicker"
-          picker="week"
-          size="small"
-          :format="'[Tuần] WW/YYYY'"
-          placeholder="Chọn tuần"
-          @change="onWeekChange"
-        />
-        <a-range-picker v-if="rangeMode === 'custom'" size="small" format="DD/MM/YYYY" @change="onRangeChange" />
-        <a-select
-          v-if="rangeMode === 'month'"
-          v-model:value="weekCount"
-          :options="weekCountOptions"
-          size="small"
-          style="min-width: 140px"
-        />
+        <a-range-picker size="small" format="DD/MM/YYYY" @change="onRangeChange" />
       </div>
     </div>
   </div>
@@ -63,15 +46,7 @@
 const className = ref("11A1");
 const viewMode = ref("class"); // 'class' | 'subject'
 const selectedSubject = ref("");
-const rangeMode = ref("week"); // 'week' | 'month' | 'custom'
-const rangeModeOptions = [
-  { label: 'Tuần này', value: 'week' },
-  { label: 'Tháng này', value: 'month' },
-  { label: 'Khoảng tùy chọn', value: 'custom' },
-];
 const customRange = ref([]); // [startDate, endDate] - Date objects
-const weekCount = ref('all'); // 'all' | '1'..'6'
-const weekPicker = ref(); // dayjs | Date for week picker
 
 function normalizeDate(d) {
   const date = new Date(d);
@@ -79,17 +54,7 @@ function normalizeDate(d) {
   return date;
 }
 
-function getMonday(d = new Date()) {
-  const date = new Date(d);
-  const day = (date.getDay() + 6) % 7; // 0=Mon ... 6=Sun
-  date.setDate(date.getDate() - day);
-  date.setHours(0, 0, 0, 0);
-  return date;
-}
-
-function toKey(date) {
-  return [date.getFullYear(), date.getMonth() + 1, date.getDate()].join("-");
-}
+// Bỏ các tiện ích tuần/tháng
 
 function formatDate(date) {
   try {
@@ -121,55 +86,7 @@ onMounted(async () => {
   }
 });
 
-function getWeekDates(base = new Date()) {
-  const start = getMonday(base);
-  const arr = [];
-  for (let i = 0; i < 5; i++) {
-    const d = new Date(start);
-    d.setDate(d.getDate() + i);
-    arr.push(normalizeDate(d));
-  }
-  return arr;
-}
-
-function getMonthDates(base = new Date()) {
-  const dt = new Date(base);
-  const y = dt.getFullYear();
-  const m = dt.getMonth();
-  const first = new Date(y, m, 1);
-  const last = new Date(y, m + 1, 0);
-  const arr = [];
-  for (let d = new Date(first); d <= last; d.setDate(d.getDate() + 1)) {
-    const day = d.getDay();
-    if (day >= 1 && day <= 5) arr.push(normalizeDate(d));
-  }
-  return arr;
-}
-
-// Danh sách tuần (T2-T6) trong tháng của baseDate
-const monthWeeks = computed(() => {
-  const dt = new Date(baseDate.value);
-  const y = dt.getFullYear();
-  const m = dt.getMonth();
-  const first = new Date(y, m, 1);
-  const last = new Date(y, m + 1, 0);
-  const map = new Map(); // mondayKey -> { monday: Date, dates: Date[] }
-  for (let d = new Date(first); d <= last; d.setDate(d.getDate() + 1)) {
-    const day = d.getDay();
-    if (day < 1 || day > 5) continue; // only Mon-Fri
-    const mon = getMonday(d);
-    const key = toKey(mon);
-    if (!map.has(key)) map.set(key, { monday: mon, dates: [] });
-    map.get(key).dates.push(normalizeDate(d));
-  }
-  const weeks = Array.from(map.values()).sort((a, b) => a.monday - b.monday);
-  return weeks.map((w, idx) => ({ index: idx + 1, monday: w.monday, dates: w.dates.sort((a, b) => a - b) }));
-});
-
-const weekCountOptions = computed(() => {
-  const max = monthWeeks.value.length || 5;
-  return [{ label: 'Tất cả tuần', value: 'all' }, ...Array.from({ length: max }, (_, i) => ({ label: `${i + 1} tuần`, value: String(i + 1) }))];
-});
+// Bỏ các chế độ tuần/tháng, chỉ chọn khoảng thời gian tùy chọn
 
 function getDatesBetweenWeekdays(start, end) {
   if (!start || !end) return [];
@@ -183,17 +100,24 @@ function getDatesBetweenWeekdays(start, end) {
   return arr;
 }
 
-const baseDate = ref(new Date());
 const rangeDates = computed(() => {
-  if (rangeMode.value === 'week') return getWeekDates(baseDate.value);
-  if (rangeMode.value === 'month') {
-    const weeks = monthWeeks.value;
-    const picked = weekCount.value === 'all'
-      ? weeks
-      : weeks.slice(0, Math.min(Number(weekCount.value) || 0, weeks.length));
-    return picked.flatMap(w => w.dates);
+  let s, e;
+  if (customRange.value && customRange.value.length === 2) {
+    [s, e] = customRange.value;
+  } else if (rawDataset.value && rawDataset.value.length) {
+    // Mặc định: hiển thị toàn bộ khoảng theo dữ liệu hiện có
+    let minTime = Infinity;
+    let maxTime = -Infinity;
+    for (const r of rawDataset.value) {
+      const t = new Date(r.date).setHours(0, 0, 0, 0);
+      if (t < minTime) minTime = t;
+      if (t > maxTime) maxTime = t;
+    }
+    if (isFinite(minTime) && isFinite(maxTime)) {
+      s = new Date(minTime);
+      e = new Date(maxTime);
+    }
   }
-  const [s, e] = customRange.value || [];
   return getDatesBetweenWeekdays(s, e);
 });
 
@@ -203,20 +127,36 @@ function onRangeChange(val) {
   customRange.value = start && end ? [start, end] : [];
 }
 
-function onWeekChange(val) {
-  const d = val?.toDate ? val.toDate() : val;
-  if (d) baseDate.value = d;
-}
+// Không còn chọn tuần/tháng nên bỏ onWeekChange
 
 // Flatten về một mảng theo khoảng ngày đã chọn dựa trên dữ liệu JSON
 const flatRows = computed(() => {
   const rows = [];
-  // lấy phạm vi ngày [start..end]
-  const start = rangeDates.value[0];
-  const end = rangeDates.value[rangeDates.value.length - 1];
-  if (!start || !end) return rows;
+  // Lấy phạm vi ngày [start..end] (mặc định toàn bộ nếu chưa chọn)
+  let s, e;
+  if (customRange.value && customRange.value.length === 2) {
+    [s, e] = customRange.value;
+  } else if (rawDataset.value && rawDataset.value.length) {
+    let minTime = Infinity;
+    let maxTime = -Infinity;
+    for (const r of rawDataset.value) {
+      const t = new Date(r.date).setHours(0, 0, 0, 0);
+      if (t < minTime) minTime = t;
+      if (t > maxTime) maxTime = t;
+    }
+    if (isFinite(minTime) && isFinite(maxTime)) {
+      s = new Date(minTime);
+      e = new Date(maxTime);
+    }
+  }
+  if (!s || !e) return rows;
+  const start = normalizeDate(s);
+  const end = normalizeDate(e);
+  // Yêu cầu: bao gồm cả những tiết của ngày phía sau
+  const endPlusOne = new Date(end);
+  endPlusOne.setDate(endPlusOne.getDate() + 1);
   const startTime = start.getTime();
-  const endTime = end.getTime();
+  const endTime = endPlusOne.getTime();
 
   for (const rec of rawDataset.value || []) {
     const d = new Date(rec.date);
@@ -277,18 +217,27 @@ watch([viewMode, subjectOptions], () => {
 }, { immediate: true });
 
 const rangeText = computed(() => {
-  if (rangeMode.value === 'week') {
-    const dates = getWeekDates(baseDate.value);
-    if (!dates.length) return 'Tuần: (trống)';
-    return `Tuần: ${formatDate(dates[0])} - ${formatDate(dates[dates.length - 1])}`;
+  let s, e;
+  if (customRange.value && customRange.value.length === 2) {
+    [s, e] = customRange.value;
+  } else if (rawDataset.value && rawDataset.value.length) {
+    let minTime = Infinity;
+    let maxTime = -Infinity;
+    for (const r of rawDataset.value) {
+      const t = new Date(r.date).setHours(0, 0, 0, 0);
+      if (t < minTime) minTime = t;
+      if (t > maxTime) maxTime = t;
+    }
+    if (isFinite(minTime) && isFinite(maxTime)) {
+      s = new Date(minTime);
+      e = new Date(maxTime);
+    }
   }
-  if (rangeMode.value === 'month') {
-    const dates = rangeDates.value;
-    if (!dates.length) return 'Tháng: (trống)';
-    return `Tháng: ${formatDate(dates[0])} - ${formatDate(dates[dates.length - 1])}`;
+  if (s && e) {
+    const ePlus = new Date(e);
+    ePlus.setDate(ePlus.getDate() + 1);
+    return `Khoảng: ${formatDate(s)} - ${formatDate(e)} (bao gồm tiết ngày kế tiếp)`;
   }
-  const [s, e] = customRange.value || [];
-  if (s && e) return `Khoảng: ${formatDate(s)} - ${formatDate(e)}`;
   return 'Khoảng: chưa chọn';
 });
 
