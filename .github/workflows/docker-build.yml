@@ -54,6 +54,10 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
+          build-args: |
+            BUILD_TAG=${{ github.ref_name }}-${{ github.run_number }}
+            BUILD_SHA=${{ github.sha }}
+            BUILD_TIME=${{ steps.meta.outputs.created }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
