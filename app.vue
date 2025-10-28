@@ -32,4 +32,7 @@ const theme = ref({
     colorInfo: "#0284C7",
   },
 });
+useHead({
+  link: [{ rel: "icon", type: "image/x-icon", href: "/logo.png" }],
+});
 </script>
