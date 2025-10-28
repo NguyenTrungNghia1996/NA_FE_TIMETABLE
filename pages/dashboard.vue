@@ -157,7 +157,13 @@
         <div>
           <h3 class="font-semibold mb-2 flex items-center gap-2"><Icon name="ant-design:info-circle-outlined" /> Trạng thái hệ thống</h3>
           <ul class="text-sm text-gray-700 space-y-1">
-            <li>Phiên bản: 1.0.0</li>
+            <li>
+              Phiên bản: {{ buildTag || 'dev' }}
+              <span v-if="buildShaShort">({{ buildShaShort }})</span>
+            </li>
+            <li>
+              Ngày build: {{ buildDate || 'N/A' }}
+            </li>
             <li>Người dùng: {{ displayName }}</li>
           </ul>
         </div>
@@ -208,4 +214,30 @@ const canAdminPermission = computed(() => canAccess("/administration/permission"
 const canAdminMenu = computed(() => canAccess("/administration/menu"));
 const canAdminUnit = computed(() => canAccess("/administration/unit"));
 const canAnyAdministration = computed(() => canAdminUser.value || canAdminPermission.value || canAdminMenu.value || canAdminUnit.value);
+
+// Build info from runtime config (injected by Docker ENV)
+const runtime = useRuntimeConfig();
+const buildTag = computed(() => runtime.public.buildTag);
+const buildShaShort = computed(() => (runtime.public.buildSha || '').slice(0, 7));
+const buildDate = computed(() => {
+  const t = runtime.public.buildTime || '';
+  if (!t) return '';
+
+  // Prefer fast path for ISO date string
+  const datePart = t.split('T')[0];
+  if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+    const [y, m, d] = datePart.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  // Fallback parse
+  const d = new Date(t);
+  if (!isNaN(d.getTime())) {
+    const dd = String(d.getUTCDate()).padStart(2, '0');
+    const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const yy = d.getUTCFullYear();
+    return `${dd}/${mm}/${yy}`;
+  }
+  return '';
+});
 </script>

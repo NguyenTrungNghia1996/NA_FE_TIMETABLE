@@ -39,6 +39,9 @@ docker-build-and-push:
       echo "Building and tagging Docker image..."
       docker build \
         --build-arg BUILDKIT_INLINE_CACHE=1 \
+        --build-arg BUILD_TAG=$TAG_BRANCH \
+        --build-arg BUILD_SHA=$TAG_SHA \
+        --build-arg BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
         --cache-from=type=registry,ref=$IMAGE_NAME:$TAG_CACHE \
         -t $IMAGE_NAME:$TAG_LATEST \
         -t $IMAGE_NAME:$TAG_SHA \
