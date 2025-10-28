@@ -9,12 +9,12 @@
             <h1 class="text-2xl md:text-3xl font-extrabold leading-tight">VN Timetable — Nền tảng quản lý và xếp thời khóa biểu</h1>
             <p class="opacity-95">Tự động xếp lịch theo ràng buộc, quản lý dữ liệu đồng bộ, tối ưu xung đột và xuất báo cáo linh hoạt cho nhà trường.</p>
             <div class="flex flex-wrap gap-2 pt-2">
-              <template v-if="canTimetable">
+              <template v-if="menuUrlSet.has('/list_management/timetable')">
                 <NuxtLink to="/list_management/timetable">
                   <a-button type="primary" size="large">Bắt đầu xếp TKB</a-button>
                 </NuxtLink>
               </template>
-              <template v-if="canAnyCategory">
+              <template v-if="['/category_management/subject', '/category_management/grade_level', '/category_management/teacher', '/category_management/class'].some(u => menuUrlSet.has(u))">
                 <NuxtLink to="/category_management/subject">
                   <a-button size="large">Quản lý danh mục</a-button>
                 </NuxtLink>
@@ -25,95 +25,34 @@
         </div>
       </a-card>
     </div>
-    <!-- Modules -->
+    <!-- Modules (rendered from visibleMenu) -->
     <section class="grid md:grid-cols-2 xl:grid-cols-3 gap-2">
-      <!-- Danh mục -->
-      <a-card hoverable v-if="canAnyCategory">
+      <a-card v-for="node in menuCards" :key="node.key" hoverable>
         <div class="flex items-start gap-3">
-          <Icon name="ant-design:folder-open-filled" class="text-blue-600 text-2xl mt-1" />
+          <Icon :name="node.icon || 'ant-design:menu-outlined'" class="text-blue-600 text-2xl mt-1" />
           <div class="flex-1">
-            <h3 class="font-semibold">Danh mục dữ liệu</h3>
-            <p class="text-gray-600 text-sm">Quản lý môn học, khối lớp, giáo viên, phòng học, ca/ngày/tiết...</p>
-            <div class="flex flex-wrap gap-2 mt-3">
-              <template v-if="canSubject"
-                ><NuxtLink to="/category_management/subject"><a-button size="small">Môn học</a-button></NuxtLink></template
-              >
-              <template v-if="canGradeLevel"
-                ><NuxtLink to="/category_management/grade_level"><a-button size="small">Khối lớp</a-button></NuxtLink></template
-              >
-              <template v-if="canTeacher"
-                ><NuxtLink to="/category_management/teacher"><a-button size="small">Giáo viên</a-button></NuxtLink></template
-              >
-              <template v-if="canClass"
-                ><NuxtLink to="/category_management/class"><a-button size="small">Lớp học</a-button></NuxtLink></template
-              >
-            </div>
-          </div>
-        </div>
-      </a-card>
-
-      <!-- Phân công giảng dạy -->
-      <a-card hoverable v-if="canTeacherAssignment">
-        <div class="flex items-start gap-3">
-          <Icon name="ant-design:team-outlined" class="text-blue-600 text-2xl mt-1" />
-          <div class="flex-1">
-            <h3 class="font-semibold">Phân công giảng dạy</h3>
-            <p class="text-gray-600 text-sm">Thiết lập giáo viên giảng dạy theo lớp/môn, số tiết, ca.</p>
-            <div class="flex flex-wrap gap-2 mt-3">
-              <NuxtLink to="/list_management/teacher_assignment"><a-button size="small">Phân công GV</a-button></NuxtLink>
-            </div>
-          </div>
-        </div>
-      </a-card>
-
-      <!-- Xếp thời khóa biểu -->
-      <a-card hoverable v-if="canTimetable">
-        <div class="flex items-start gap-3">
-          <Icon name="ant-design:calendar-filled" class="text-blue-600 text-2xl mt-1" />
-          <div class="flex-1">
-            <h3 class="font-semibold">Xếp thời khóa biểu</h3>
-            <p class="text-gray-600 text-sm">Tối ưu xung đột, hỗ trợ ràng buộc phòng, tiết liền kề, hai ca.</p>
-            <div class="flex flex-wrap gap-2 mt-3">
-              <NuxtLink to="/list_management/timetable"><a-button size="small" type="primary">Danh sách TKB</a-button></NuxtLink>
-            </div>
-          </div>
-        </div>
-      </a-card>
-
-      <!-- Báo cáo & Xuất file -->
-      <a-card hoverable v-if="canTimetable">
-        <div class="flex items-start gap-3">
-          <Icon name="ant-design:file-done-outlined" class="text-blue-600 text-2xl mt-1" />
-          <div class="flex-1">
-            <h3 class="font-semibold">Báo cáo & Xuất file</h3>
-            <p class="text-gray-600 text-sm">Xuất lịch theo lớp, giáo viên, phòng; ma trận toàn trường.</p>
-            <div class="flex flex-wrap gap-2 mt-3">
-              <NuxtLink to="/list_management/timetable"><a-button size="small">Xuất từ TKB</a-button></NuxtLink>
-            </div>
-          </div>
-        </div>
-      </a-card>
-
-      <!-- Quản trị hệ thống -->
-      <a-card hoverable v-if="canAnyAdministration">
-        <div class="flex items-start gap-3">
-          <Icon name="ant-design:setting-filled" class="text-blue-600 text-2xl mt-1" />
-          <div class="flex-1">
-            <h3 class="font-semibold">Quản trị hệ thống</h3>
-            <p class="text-gray-600 text-sm">Quản lý người dùng, vai trò, phân quyền, menu và đơn vị.</p>
-            <div class="flex flex-wrap gap-2 mt-3">
-              <template v-if="canAdminUser"
-                ><NuxtLink to="/administration/user"><a-button size="small">Người dùng</a-button></NuxtLink></template
-              >
-              <template v-if="canAdminPermission"
-                ><NuxtLink to="/administration/permission"><a-button size="small">Phân quyền</a-button></NuxtLink></template
-              >
-              <template v-if="canAdminMenu"
-                ><NuxtLink to="/administration/menu"><a-button size="small">Menu</a-button></NuxtLink></template
-              >
-              <template v-if="canAdminUnit"
-                ><NuxtLink to="/administration/unit"><a-button size="small">Đơn vị</a-button></NuxtLink></template
-              >
+            <h3 class="font-semibold">{{ node.title }}</h3>
+            <div class="flex flex-wrap items-center gap-2 mt-3">
+              <template v-if="node.children && node.children.length">
+                <template v-for="child in node.children.slice(0, maxItemsPerCard)" :key="child.key">
+                  <NuxtLink v-if="child.url" :to="child.url"
+                    ><a-tag>{{ child.title }}</a-tag></NuxtLink
+                  >
+                </template>
+                <a-dropdown v-if="node.children.length > maxItemsPerCard">
+                  <a-button size="small" type="default">Xem thêm ({{ node.children.length - maxItemsPerCard }})</a-button>
+                  <template #overlay>
+                    <a-menu>
+                      <a-menu-item v-for="child in node.children.slice(maxItemsPerCard)" :key="child.key">
+                        <NuxtLink v-if="child.url" :to="child.url">{{ child.title }}</NuxtLink>
+                      </a-menu-item>
+                    </a-menu>
+                  </template>
+                </a-dropdown>
+              </template>
+              <template v-else-if="node.url">
+                <NuxtLink :to="node.url"><a-button size="small" type="primary">Mở</a-button></NuxtLink>
+              </template>
             </div>
           </div>
         </div>
@@ -158,12 +97,10 @@
           <h3 class="font-semibold mb-2 flex items-center gap-2"><Icon name="ant-design:info-circle-outlined" /> Trạng thái hệ thống</h3>
           <ul class="text-sm text-gray-700 space-y-1">
             <li>
-              Phiên bản: {{ buildTag || 'dev' }}
+              Phiên bản: {{ buildTag || "dev" }}
               <span v-if="buildShaShort">({{ buildShaShort }})</span>
             </li>
-            <li>
-              Ngày build: {{ buildDate || 'N/A' }}
-            </li>
+            <li>Ngày build: {{ buildDate || "N/A" }}</li>
             <li>Người dùng: {{ displayName }}</li>
           </ul>
         </div>
@@ -180,64 +117,48 @@ const displayName = computed(() => userStore?.name || userStore?.role || "Quản
 // Permission-aware quick menu
 const { visibleMenu } = useMenu();
 
-const allowedUrls = computed(() => {
-  const urls = [];
+// Build a simple set of URLs from visible menu (already permission-filtered)
+const menuUrlSet = computed(() => {
+  const set = new Set();
   const walk = (nodes = []) => {
     nodes.forEach(n => {
-      if (n?.url) urls.push(n.url);
+      if (n?.url) set.add(n.url);
       if (Array.isArray(n?.children) && n.children.length) walk(n.children);
     });
   };
   walk(visibleMenu?.value || []);
-  return urls;
+  return set;
 });
 
-const canAccess = path => {
-  const list = allowedUrls.value || [];
-  return list.some(u => u === path || (typeof u === "string" && u.includes(":") && path.startsWith(u.split(":")[0])));
-};
-
-// Feature checks
-const canTimetable = computed(() => canAccess("/list_management/timetable"));
-const canTeacherAssignment = computed(() => canAccess("/list_management/teacher_assignment"));
-
-// Category pages
-const canSubject = computed(() => canAccess("/category_management/subject"));
-const canGradeLevel = computed(() => canAccess("/category_management/grade_level"));
-const canTeacher = computed(() => canAccess("/category_management/teacher"));
-const canClass = computed(() => canAccess("/category_management/class"));
-const canAnyCategory = computed(() => canSubject.value || canGradeLevel.value || canTeacher.value || canClass.value);
-
-// Administration
-const canAdminUser = computed(() => canAccess("/administration/user"));
-const canAdminPermission = computed(() => canAccess("/administration/permission"));
-const canAdminMenu = computed(() => canAccess("/administration/menu"));
-const canAdminUnit = computed(() => canAccess("/administration/unit"));
-const canAnyAdministration = computed(() => canAdminUser.value || canAdminPermission.value || canAdminMenu.value || canAdminUnit.value);
+// Cards rendered from visibleMenu (skip self-link Dashboard)
+const menuCards = computed(() => (visibleMenu.value || []).filter(n => n.url !== "/dashboard"));
 
 // Build info from runtime config (injected by Docker ENV)
 const runtime = useRuntimeConfig();
 const buildTag = computed(() => runtime.public.buildTag);
-const buildShaShort = computed(() => (runtime.public.buildSha || '').slice(0, 7));
+const buildShaShort = computed(() => (runtime.public.buildSha || "").slice(0, 7));
 const buildDate = computed(() => {
-  const t = runtime.public.buildTime || '';
-  if (!t) return '';
+  const t = runtime.public.buildTime || "";
+  if (!t) return "";
 
   // Prefer fast path for ISO date string
-  const datePart = t.split('T')[0];
+  const datePart = t.split("T")[0];
   if (/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
-    const [y, m, d] = datePart.split('-');
+    const [y, m, d] = datePart.split("-");
     return `${d}/${m}/${y}`;
   }
 
   // Fallback parse
   const d = new Date(t);
   if (!isNaN(d.getTime())) {
-    const dd = String(d.getUTCDate()).padStart(2, '0');
-    const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(d.getUTCDate()).padStart(2, "0");
+    const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
     const yy = d.getUTCFullYear();
     return `${dd}/${mm}/${yy}`;
   }
-  return '';
+  return "";
 });
+
+// UI constants
+const maxItemsPerCard = 8;
 </script>
