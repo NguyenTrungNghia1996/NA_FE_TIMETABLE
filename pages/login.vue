@@ -3,7 +3,7 @@
     <div class="max-w-md w-full space-y-8">
       <!-- Logo công ty -->
       <div class="flex justify-center">
-        <img src="/logo.png" alt="Logo công ty" class="h-30 w-auto" />
+        <img :src="unitStore.logo" alt="Logo công ty" class="h-30 w-auto" />
       </div>
       <a-card class="shadow-xl">
         <h2 class="text-center text-2xl font-bold text-gray-800 mb-6">Đăng nhập hệ thống</h2>
@@ -46,6 +46,7 @@ const settingStore = useSettingStore();
 definePageMeta({ layout: "auth" });
 const { RestApi } = useApi();
 const userStore = useUserStore();
+const unitStore = useUnitStore();
 const { loadMenu } = useMenu();
 const { loadPermissions } = usePermissions();
 

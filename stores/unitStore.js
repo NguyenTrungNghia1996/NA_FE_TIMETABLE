@@ -31,7 +31,11 @@ export const useUnitStore = defineStore("unit", {
         default:
           return useRuntimeConfig().public.baseURL;
       }
-    }
+    },
+    logo: (state) => {
+      return "/logo.png"
+      // return "https://image.nguyenanh-est.com/website/1745742349824_placeholder.png"
+    },
   },
 
   // Optional: persist qua reload nếu cần

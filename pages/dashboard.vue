@@ -21,7 +21,7 @@
               </template>
             </div>
           </div>
-          <img src="/logo.png" alt="VN Timetable" class="h-24 md:h-28 w-auto drop-shadow-md" />
+          <img :src="unitStore.logo" alt="VN Timetable" class="h-24 md:h-28 w-auto drop-shadow-md" />
         </div>
       </a-card>
     </div>
@@ -168,6 +168,7 @@
 
 <script setup>
 const userStore = useUserStore();
+const unitStore = useUnitStore();
 const displayName = computed(() => userStore?.name || userStore?.role || "Quản trị viên");
 
 // Permission-aware quick menu
