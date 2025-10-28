@@ -34,6 +34,7 @@ export const useUnitStore = defineStore("unit", {
     },
     logo: (state) => {
       return "/logo.png"
+      // return "https://image.nguyenanh-est.com/website/1745742349824_placeholder.png"
     },
   },
 

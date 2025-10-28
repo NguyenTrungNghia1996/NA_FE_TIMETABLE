@@ -4,7 +4,7 @@
       <div v-if="loading" class="fixed inset-0 w-full h-screen z-[9999] flex flex-col items-center justify-center" :class="backgroundClass">
         <!-- Logo đặt riêng ở phần trên -->
         <div v-if="showLogo" class="logo-container mb-8">
-          <img src="/logo.png" :class="['mx-auto', logoClass]" alt="Logo" />
+          <img :src="unitStore.logo" :class="['mx-auto', logoClass]" alt="Logo" />
         </div>
 
         <div class="loading-content text-center mx-4 max-w-xs sm:max-w-sm">
@@ -31,6 +31,7 @@
 </template>
 
 <script setup>
+const unitStore = useUnitStore();
 const props = defineProps({
   loading: Boolean,
   title: String,

@@ -2,7 +2,7 @@
   <div class="h-full w-full flex justify-between items-center bg-gray-900 px-6 border-b border-gray-700">
     <!-- Logo with modern glow effect -->
     <div class="flex items-center">
-      <img src="/logo.png" alt="Logo" class="h-16 p-2 cursor-pointer transition-all duration-300 ease-out rounded-xl hover:scale-105 hover:shadow-xl hover:shadow-blue-500/20 active:scale-95 active:shadow-none" @click="() => navigateTo(`/`)" />
+      <img :src="unitStore.logo" alt="Logo" class="h-16 p-2 cursor-pointer transition-all duration-300 ease-out rounded-xl hover:scale-105 hover:shadow-xl hover:shadow-blue-500/20 active:scale-95 active:shadow-none" @click="() => navigateTo(`/`)" />
     </div>
 
     <!-- User dropdown with modern styling -->
@@ -83,6 +83,7 @@
 import { KeyOutlined, LogoutOutlined, UserOutlined } from "@ant-design/icons-vue";
 
 const userStore = useUserStore();
+const unitStore = useUnitStore();
 const { RestApi } = useApi();
 
 // Modal state

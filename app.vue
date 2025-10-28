@@ -11,6 +11,7 @@
 </template>
 <script setup>
 const settingStore = useSettingStore();
+const unitStore = useUnitStore();
 import vi_VN from "ant-design-vue/es/locale/vi_VN";
 const locale = computed(() => {
   return vi_VN;
@@ -32,7 +33,7 @@ const theme = ref({
     colorInfo: "#0284C7",
   },
 });
-useHead({
-  link: [{ rel: "icon", type: "image/x-icon", href: "/logo.png" }],
-});
+useHead(() => ({
+  link: [{ rel: "icon", type: "image/x-icon", href: unitStore.logo }],
+}));
 </script>

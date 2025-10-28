@@ -5,7 +5,7 @@
       <div class="grid md:grid-cols-2 gap-10 items-center">
         <div class="space-y-5">
           <div class="flex items-center gap-3">
-            <img src="/logo.png" alt="VN Timetable" class="h-14 w-auto" />
+            <img :src="unitStore.logo" alt="VN Timetable" class="h-14 w-auto" />
             <span class="text-xs uppercase tracking-widest text-gray-500">Phiên bản Web</span>
           </div>
           <h1 class="text-3xl md:text-5xl font-extrabold leading-tight text-gray-900">
@@ -119,6 +119,7 @@
 definePageMeta({ layout: 'auth' })
 
 const userStore = useUserStore();
+const unitStore = useUnitStore();
 // Nếu đã đăng nhập, chuyển đến dashboard
 if (process.client ? !!userStore.token : Boolean(userStore.token)) {
   await navigateTo('/dashboard');
