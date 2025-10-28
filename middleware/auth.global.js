@@ -99,6 +99,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // 4) Chặn truy cập nếu không có quyền với URL
   try {
+    if (to.path === "/dashboard") {
+      return; // bỏ qua kiểm tra quyền cho /dashboard
+    }
     const menuTree = Array.isArray(settingStore.menu) ? settingStore.menu : [];
     const permissionsArr = Array.isArray(settingStore.permissions) ? settingStore.permissions : [];
 
@@ -137,7 +140,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
         const currentPermission = (parentPermVal >> bit) & 0b11; // 0: none, 1: view, 2: edit
         // Lưu permission hiện tại vào store (phục vụ UI tắt/bật nút)
         if (typeof useSettingStore === "function") {
-          try { settingStore.setCurrentPermission(currentPermission); } catch {}
+          try { settingStore.setCurrentPermission(currentPermission); } catch { }
         }
         if (currentPermission === 0) {
           // Không có quyền => chuyển về dashboard
