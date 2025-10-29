@@ -119,7 +119,7 @@ export const useSettingStore = defineStore(
       storage: piniaPluginPersistedstate.cookies(),
     },
   },
-  // {
-  //   persist: true,
-  // },
+  {
+    persist: true,
+  },
 );
