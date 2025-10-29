@@ -111,13 +111,13 @@ export const useSettingStore = defineStore(
       },
       // pageBackground getter removed
     },
-    persist: {
-      paths: ['timetableTheme'],
-    },
     // persist: {
-    //   // storage: piniaPluginPersistedstate.localStorage(),
-    //   storage: piniaPluginPersistedstate.cookies(),
+    //   paths: ['timetableTheme'],
     // },
+    persist: {
+      // storage: piniaPluginPersistedstate.localStorage(),
+      storage: piniaPluginPersistedstate.cookies(),
+    },
   },
   // {
   //   persist: true,
