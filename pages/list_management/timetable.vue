@@ -152,7 +152,6 @@
 </template>
 
 <script setup>
-definePageMeta({ ssr: false });
 const { RestApi } = useApi();
 
 const searchText = ref("");
@@ -493,10 +492,7 @@ const deleteItem = async id => {
   }
 };
 
-onMounted(() => {
-  // Chỉ fetch trên client để tránh SSR gọi API gây 502 khi F5
-  fetchData({ ...param.value });
-});
+fetchData({ ...param.value });
 
 const drawerInfoOpen = ref(false);
 const infoRef = ref(null);
