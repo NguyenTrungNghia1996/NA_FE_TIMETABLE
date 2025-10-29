@@ -544,12 +544,13 @@ function labelCellStyle() {
 }
 
 // Resolve background color from palette with priority:
-// error > drag > lock > sameSubject > selected > empty
+// error > selected > drag > lock > sameSubject > empty
 function resolveCellBg(caId, dayId, pIdx, cell, isTeacher = false) {
   const palette = activePalette.value || {};
   const err = !!cell?.isError;
   if (err) return palette.errorBg;
-
+  const selected = isTeacher ? teacherIsSelectedCell(caId, dayId, pIdx) : isSelectedCell(caId, dayId, pIdx);
+  if (selected) return palette.selectedBg;
   const drag = isTeacher ? teacherIsDraggable(cell) : isDraggable(cell);
   if (drag) return palette.dragBg;
 
@@ -557,9 +558,6 @@ function resolveCellBg(caId, dayId, pIdx, cell, isTeacher = false) {
 
   const sameSubject = isTeacher ? teacherIsSameSubject(caId, dayId, pIdx) : isSameSubject(caId, dayId, pIdx);
   if (sameSubject) return palette.sameSubjectBg;
-
-  const selected = isTeacher ? teacherIsSelectedCell(caId, dayId, pIdx) : isSelectedCell(caId, dayId, pIdx);
-  if (selected) return palette.selectedBg;
 
   return palette.emptyBg;
 }
@@ -575,28 +573,32 @@ function teacherCellStyle(caId, dayId, pIdx, cell) {
 function cellClasses(caId, dayId, pIdx, cell) {
   const drag = isDraggable(cell);
   const err = !!cell?.isError;
-  // Ưu tiên hiển thị cảnh báo lỗi (nền đỏ) nếu có lỗi
+  const same = isSameSubject(caId, dayId, pIdx);
+  const selected = isSelectedCell(caId, dayId, pIdx);
+  // Áp dụng thứ tự ưu tiên: lỗi > đang chọn > kéo > khóa > cùng môn
   return {
     "cursor-move": drag,
     "bg-red-300": err,
-    "bg-[#AFFF2C]": drag && !err,
-    "bg-red-50": cell.isLock && !err,
-    "bg-[#20B1AA]": isSameSubject(caId, dayId, pIdx) && !err,
-    "bg-blue-400": isSelectedCell(caId, dayId, pIdx) && !err,
+    "bg-blue-400": !err && selected,
+    "bg-[#AFFF2C]": !err && !selected && drag && !cell?.isLock && !same,
+    "bg-red-50": !err && !selected && !drag && cell?.isLock && !same,
+    "bg-[#20B1AA]": !err && !selected && !drag && !cell?.isLock && same,
   };
 }
 
 function teacherCellClasses(caId, dayId, pIdx, cell) {
   const drag = teacherIsDraggable(cell);
   const err = !!cell?.isError;
-  // Ưu tiên hiển thị cảnh báo lỗi (nền đỏ) nếu có lỗi
+  const same = teacherIsSameSubject(caId, dayId, pIdx);
+  const selected = teacherIsSelectedCell(caId, dayId, pIdx);
+  // Áp dụng thứ tự ưu tiên: lỗi > đang chọn > kéo > khóa > cùng môn
   return {
     "cursor-move": drag,
     "bg-red-300": err,
-    "bg-[#AFFF2C]": drag && !err,
-    "bg-red-50": cell.isLock && !err,
-    "bg-[#20B1AA]": teacherIsSameSubject(caId, dayId, pIdx) && !err,
-    "bg-blue-400": teacherIsSelectedCell(caId, dayId, pIdx) && !err,
+    "bg-blue-400": !err && selected,
+    "bg-[#AFFF2C]": !err && !selected && drag && !cell?.isLock && !same,
+    "bg-red-50": !err && !selected && !drag && cell?.isLock && !same,
+    "bg-[#20B1AA]": !err && !selected && !drag && !cell?.isLock && same,
   };
 }
 
