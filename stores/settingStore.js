@@ -16,10 +16,17 @@ export const useSettingStore = defineStore(
       // Timetable color settings
       timetableTheme: {
         // Set warm as default for eye comfort
-        activePalette: 'warm',
+        activePalette: 'default',
         palettes: {
-          // Default palette mirrors existing hard-coded colors
           default: {
+            errorBg: '#FCA5A5',        // tailwind red-300
+            dragBg: '#AFFF2C',         // arbitrary green used previously
+            lockBg: '#FEE2E2',         // tailwind red-200 (close to red-50 visual)
+            sameSubjectBg: '#20B1AA',  // arbitrary teal used previously
+            selectedBg: '#60A5FA',     // tailwind blue-400
+            emptyBg: '#FFF9ED',        // fallback
+          },
+          default_old: {
             errorBg: '#FCA5A5',        // tailwind red-300
             dragBg: '#AFFF2C',         // arbitrary green used previously
             lockBg: '#FEE2E2',         // tailwind red-200 (close to red-50 visual)
