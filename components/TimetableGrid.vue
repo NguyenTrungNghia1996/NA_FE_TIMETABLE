@@ -2,7 +2,7 @@
   <div @click="contextMenu.show = false" class="grid grid-cols-1 gap-2">
     <div class="grid grid-cols-4 gap-2">
       <div class="col-span-3 overflow-auto">
-        <SelectClass class="m-3" v-model="selectedClassId" :autoSelectFirst="true" size="small" :noFormItem="true" :inlineLabel="true" />
+        <SelectClass v-model="selectedClassId" :autoSelectFirst="true" size="small" :noFormItem="true" :inlineLabel="true" />
         <div v-for="ca in dsCa" :key="ca.id">
           <div class="overflow-x-auto">
             <table class="min-w-full border-collapse select-none">
@@ -19,7 +19,7 @@
                     <span class="[writing-mode:vertical-rl] items-center justify-center">{{ ca.id == 1 ? "Ca sáng" : "Ca chiều" }}</span>
                   </td>
                   <td class="border p-0.5 text-center font-medium select-none">Tiết {{ (pIdx % 5) + 1 }}</td>
-                  <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 text-xs align-top min-w-[100px] max-w-[100px] relative select-none" :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="isDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
+                  <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 text-xs align-top min-w-[100px] max-w-[100px] relative select-none" :style="cellStyle(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="isDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
                     <template v-if="ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isError">
                       <span class="italic text-red-500">Nghỉ</span>
                     </template>
@@ -56,7 +56,7 @@
                       <span class="[writing-mode:vertical-rl] items-center justify-center">{{ ca.id == 1 ? "Ca sáng" : "Ca chiều" }}</span>
                     </td>
                     <td class="border p-0.5 text-center font-medium select-none">Tiết {{ (pIdx % 5) + 1 }}</td>
-                    <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 text-xs align-top min-w-[100px] max-w-[100px] relative select-none" :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)" @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)" @drop="onTeacherDrop(ca.id, ngay.id, pIdx)" @click="onTeacherCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx, true)">
+                    <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 text-xs align-top min-w-[100px] max-w-[100px] relative select-none" :style="teacherCellStyle(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)" @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)" @drop="onTeacherDrop(ca.id, ngay.id, pIdx)" @click="onTeacherCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx, true)">
                       <template v-if="ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isError">
                         <span class="italic text-red-500">Nghỉ</span>
                       </template>
@@ -80,6 +80,12 @@
         </div>
       </div>
       <div class="h-[calc(100vh-110px)] flex flex-col">
+        <div class="py-1 flex justify-end w-full">
+          <a-button size="" @click.stop="openThemeModal">
+            <Icon name="ant-design:setting-filled" class="mr-2" />
+            Cài đặt màu TKB
+          </a-button>
+        </div>
         <div class="h-1/3 overflow-auto m-3 shadow-xl">
           <h4 class="font-semibold">
             Tiết chưa xếp của lớp học
@@ -123,6 +129,48 @@
       </ul>
     </div>
 
+    <!-- Timetable theme modal -->
+    <a-modal v-model:open="themeModal.open" title="Cài đặt màu thời khóa biểu" :confirm-loading="themeModal.saving" width="650px" @ok="saveTheme" @cancel="themeModal.open = false">
+      <div class="space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-32 text-sm text-gray-600">Bộ màu</div>
+          <a-select class="flex-1" v-model:value="themeForm.activePalette" :options="paletteOptions" />
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-32 text-sm text-gray-600">Nền lỗi</div>
+            <input type="color" v-model="themeForm.colors.errorBg" class="w-10 h-8 p-0 border rounded" />
+            <a-input size="small" v-model:value="themeForm.colors.errorBg" />
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-32 text-sm text-gray-600">Nền đang kéo</div>
+            <input type="color" v-model="themeForm.colors.dragBg" class="w-10 h-8 p-0 border rounded" />
+            <a-input size="small" v-model:value="themeForm.colors.dragBg" />
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-32 text-sm text-gray-600">Nền khóa</div>
+            <input type="color" v-model="themeForm.colors.lockBg" class="w-10 h-8 p-0 border rounded" />
+            <a-input size="small" v-model:value="themeForm.colors.lockBg" />
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-32 text-sm text-gray-600">Nền cùng môn</div>
+            <input type="color" v-model="themeForm.colors.sameSubjectBg" class="w-10 h-8 p-0 border rounded" />
+            <a-input size="small" v-model:value="themeForm.colors.sameSubjectBg" />
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-32 text-sm text-gray-600">Nền đang chọn</div>
+            <input type="color" v-model="themeForm.colors.selectedBg" class="w-10 h-8 p-0 border rounded" />
+            <a-input size="small" v-model:value="themeForm.colors.selectedBg" />
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-32 text-sm text-gray-600">Nền trống</div>
+            <input type="color" v-model="themeForm.colors.emptyBg" class="w-10 h-8 p-0 border rounded" />
+            <a-input size="small" v-model:value="themeForm.colors.emptyBg" />
+          </div>
+        </div>
+      </div>
+    </a-modal>
+
     <a-modal v-model:open="showAddModal" title="Chọn tiết học" :footer="null" @cancel="showAddModal = false">
       <a-table :columns="lessonColumns" :data-source="lessonOptions" :pagination="false" size="small" bordered :customRow="lessonRowProps" />
     </a-modal>
@@ -131,6 +179,7 @@
 
 <script setup>
 import { transformTimetable } from "@/composables/useTimetable";
+import { useSettingStore } from "~/stores/settingStore";
 const { RestApi } = useApi();
 
 const props = defineProps({
@@ -199,6 +248,43 @@ const lessonColumns = computed(() => [
     width: 120,
   },
 ]);
+
+// Timetable color palette (configurable via setting store)
+const settingStore = useSettingStore();
+const activePalette = computed(() => settingStore.activeTimetablePalette);
+// Theme modal state and handlers
+const themeModal = reactive({ open: false, saving: false });
+const themeForm = reactive({
+  activePalette: computed(() => settingStore.timetableTheme.activePalette).value,
+  colors: { ...activePalette.value },
+});
+const paletteOptions = computed(() => Object.keys(settingStore.timetableTheme.palettes || {}).map(key => ({ label: key, value: key })));
+
+watch(
+  () => themeForm.activePalette,
+  key => {
+    const p = settingStore.timetableTheme.palettes[key] || {};
+    themeForm.colors = { ...p };
+  },
+);
+
+function openThemeModal() {
+  themeForm.activePalette = settingStore.timetableTheme.activePalette;
+  themeForm.colors = { ...activePalette.value };
+  themeModal.open = true;
+}
+
+function saveTheme() {
+  themeModal.saving = true;
+  try {
+    // Update or create selected palette then activate it
+    settingStore.setTimetablePalette(themeForm.activePalette, { ...themeForm.colors });
+    settingStore.setActiveTimetablePalette(themeForm.activePalette);
+    themeModal.open = false;
+  } finally {
+    themeModal.saving = false;
+  }
+}
 const lessonRowProps = (record, index) => ({
   onClick: () => onSelectLessonRow(index),
 });
@@ -451,6 +537,35 @@ function canReceiveDrop(cell) {
 
 function teacherIsDraggable(cell) {
   return cell?.isDrag && !cell.isRest && !cell.isLock;
+}
+
+// Resolve background color from palette with priority:
+// error > drag > lock > sameSubject > selected > empty
+function resolveCellBg(caId, dayId, pIdx, cell, isTeacher = false) {
+  const palette = activePalette.value || {};
+  const err = !!cell?.isError;
+  if (err) return palette.errorBg;
+
+  const drag = isTeacher ? teacherIsDraggable(cell) : isDraggable(cell);
+  if (drag) return palette.dragBg;
+
+  if (cell?.isLock) return palette.lockBg;
+
+  const sameSubject = isTeacher ? teacherIsSameSubject(caId, dayId, pIdx) : isSameSubject(caId, dayId, pIdx);
+  if (sameSubject) return palette.sameSubjectBg;
+
+  const selected = isTeacher ? teacherIsSelectedCell(caId, dayId, pIdx) : isSelectedCell(caId, dayId, pIdx);
+  if (selected) return palette.selectedBg;
+
+  return palette.emptyBg;
+}
+
+function cellStyle(caId, dayId, pIdx, cell) {
+  return { backgroundColor: resolveCellBg(caId, dayId, pIdx, cell, false) };
+}
+
+function teacherCellStyle(caId, dayId, pIdx, cell) {
+  return { backgroundColor: resolveCellBg(caId, dayId, pIdx, cell, true) };
 }
 
 function cellClasses(caId, dayId, pIdx, cell) {
