@@ -38,11 +38,9 @@ export const useUnitStore = defineStore("unit",
         // return "https://image.nguyenanh-est.com/website/1745742349824_placeholder.png"
       },
     },
-    persist: {
-      // storage: piniaPluginPersistedstate.localStorage(),
-      storage: piniaPluginPersistedstate.cookies(),
-    },
-  }, {
-  persist: true,
-},
+    // persist: {
+    //   // storage: piniaPluginPersistedstate.localStorage(),
+    //   storage: piniaPluginPersistedstate.cookies(),
+    // },
+  },
 );

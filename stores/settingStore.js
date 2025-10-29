@@ -114,12 +114,12 @@ export const useSettingStore = defineStore(
     // persist: {
     //   paths: ['timetableTheme'],
     // },
-    persist: {
-      // storage: piniaPluginPersistedstate.localStorage(),
-      storage: piniaPluginPersistedstate.cookies(),
-    },
+    // persist: {
+    //   // storage: piniaPluginPersistedstate.localStorage(),
+    //   storage: piniaPluginPersistedstate.cookies(),
+    // },
   },
-  {
-    persist: true,
-  },
+  // {
+  //   persist: true,
+  // },
 );
