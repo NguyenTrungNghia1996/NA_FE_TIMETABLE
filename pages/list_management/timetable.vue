@@ -28,6 +28,11 @@
                   <template #icon><SettingOutlined /></template>
                 </a-button>
               </a-tooltip>
+              <a-tooltip v-if="record.dang_su_dung" title="Đồng bộ">
+                <a-button type="link" size="small" :loading="syncingId === record.id" :disabled="!!syncingId && syncingId !== record.id" @click="syncTimetable(record)">
+                  <template #icon><SyncOutlined /></template>
+                </a-button>
+              </a-tooltip>
               <a-tooltip title="Xuất Excel">
                 <a-button type="link" size="small" @click="openExportModal(record)">
                   <template #icon><FileExcelOutlined /></template>
@@ -229,6 +234,28 @@ const rules = {
     { required: true, message: "Vui lòng nhập tên thời khóa biểu", trigger: ["blur", "change"] },
     { max: 100, message: "Tên thời khóa biểu không quá 100 kí tự", trigger: ["blur", "change"] },
   ],
+};
+
+// Sync state and action
+const syncingId = ref(null);
+const syncTimetable = async record => {
+  if (!record?.id) return;
+  try {
+    syncingId.value = record.id;
+    const { data, error } = await RestApi.timetable.sync({ params: { idtkb: record.id } });
+    if (error?.value) {
+      throw new Error(error.value?.data?.message || "Đồng bộ không thành công");
+    }
+    if (data?.value?.status === "success") {
+      message.success(data.value?.message || "Đồng bộ thành công");
+    } else {
+      throw new Error(data?.value?.message || "Đồng bộ không thành công");
+    }
+  } catch (err) {
+    message.error(err?.message || "Đồng bộ không thành công");
+  } finally {
+    syncingId.value = null;
+  }
 };
 
 const openAdjustFromInfo = () => {
