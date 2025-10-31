@@ -6,7 +6,8 @@
  * @param {Object} opts
  * @param {number}   [opts.daysCount=7]            - số ngày hiển thị (1..7)
  * @param {number[]} [opts.shifts=[1,2]]           - danh sách ca
- * @param {number}   [opts.periodsPerShift=5]      - số tiết mỗi ca
+ * @param {number}   [opts.periodsPerShift=5]      - số tiết mỗi ca (mặc định nếu không có cấu hình theo ca)
+ * @param {Object}   [opts.periodsPerShiftByShift]  - số tiết theo từng ca, key = id ca (1..N)
  * @param {string[]} [opts.dayNames]               - nhãn ngày
  * @returns {{ds_Ca:Array, unassigned:Array, index:Object}}
  */
@@ -14,6 +15,7 @@ export function transformTimetable(records = [], opts = {}) {
   const daysCount = opts.daysCount ?? 7;
   const shifts = opts.shifts ?? [1, 2];
   const periodsPerShift = opts.periodsPerShift ?? 5;
+  const periodsPerShiftByShift = opts.periodsPerShiftByShift || {};
   const dayNames =
     opts.dayNames ??
     ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"]; // ngay: 1..7
@@ -46,7 +48,8 @@ export function transformTimetable(records = [], opts = {}) {
     const ds_Ngay = [];
     for (let day = 1; day <= daysCount; day++) {
       const ds_Tiet = [];
-      for (let p = 1; p <= periodsPerShift; p++) {
+      const pps = Number(periodsPerShiftByShift?.[caId]) || periodsPerShift;
+      for (let p = 1; p <= pps; p++) {
         const k = keyOf(day, caId, p);
         const cell = index[k];
         if (cell) {

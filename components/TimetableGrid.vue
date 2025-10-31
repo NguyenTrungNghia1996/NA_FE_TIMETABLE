@@ -15,10 +15,10 @@
               </thead>
               <tbody>
                 <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
-                  <td v-if="pIdx % timetableConfig.periodsPerShift === 0" class="border p-0.5 text-center font-medium select-none align-middle" :rowspan="timetableConfig.periodsPerShift" :style="labelCellStyle()">
-                    <span class="[writing-mode:vertical-rl] items-center justify-center">{{ ca.id == 1 ? "Ca sáng" : "Ca chiều" }}</span>
+                  <td v-if="pIdx % getPeriodsForShift(ca.id) === 0" class="border p-0.5 text-center font-medium select-none align-middle" :rowspan="getPeriodsForShift(ca.id)" :style="labelCellStyle()">
+                    <span class="[writing-mode:vertical-rl] items-center justify-center">{{ getShiftLabel(ca.id) }}</span>
                   </td>
-                  <td class="border p-0.5 text-center font-medium select-none" :style="labelCellStyle()">Tiết {{ (pIdx % timetableConfig.periodsPerShift) + 1 }}</td>
+                  <td class="border p-0.5 text-center font-medium select-none" :style="labelCellStyle()">Tiết {{ (pIdx % getPeriodsForShift(ca.id)) + 1 }}</td>
                   <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 text-xs align-top min-w-[100px] max-w-[100px] relative select-none" :style="cellStyle(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="isDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
                     <template v-if="ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isError">
                       <span class="italic text-red-500">Nghỉ</span>
@@ -52,10 +52,10 @@
                 </thead>
                 <tbody>
                   <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
-                    <td v-if="pIdx % timetableConfig.periodsPerShift === 0" class="border p-0.5 text-center font-medium select-none align-middle" :rowspan="timetableConfig.periodsPerShift" :style="labelCellStyle()">
-                      <span class="[writing-mode:vertical-rl] items-center justify-center">{{ ca.id == 1 ? "Ca sáng" : "Ca chiều" }}</span>
+                    <td v-if="pIdx % getPeriodsForShift(ca.id) === 0" class="border p-0.5 text-center font-medium select-none align-middle" :rowspan="getPeriodsForShift(ca.id)" :style="labelCellStyle()">
+                      <span class="[writing-mode:vertical-rl] items-center justify-center">{{ getShiftLabel(ca.id) }}</span>
                     </td>
-                    <td class="border p-0.5 text-center font-medium select-none" :style="labelCellStyle()">Tiết {{ (pIdx % timetableConfig.periodsPerShift) + 1 }}</td>
+                    <td class="border p-0.5 text-center font-medium select-none" :style="labelCellStyle()">Tiết {{ (pIdx % getPeriodsForShift(ca.id)) + 1 }}</td>
                     <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 text-xs align-top min-w-[100px] max-w-[100px] relative select-none" :style="teacherCellStyle(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)" @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)" @drop="onTeacherDrop(ca.id, ngay.id, pIdx)" @click="onTeacherCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx, true)">
                       <template v-if="ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isError">
                         <span class="italic text-red-500">Nghỉ</span>
@@ -81,10 +81,39 @@
       </div>
       <div class="h-[calc(100vh-110px)] flex flex-col">
         <div class="py-1 flex justify-end w-full">
-          <a-button size="" @click.stop="openThemeModal">
-            <Icon name="ant-design:setting-filled" class="mr-2" />
-            Cài đặt màu TKB
-          </a-button>
+          <!-- Desktop/Tablet: show two full buttons -->
+          <div class="hidden lg:flex items-center gap-2">
+            <a-button @click.stop="openThemeModal">
+              <Icon name="ant-design:bg-colors-outlined" class="mr-2" />
+              Cài đặt màu TKB
+            </a-button>
+            <a-button @click.stop="openStructModal">
+              <Icon name="ant-design:appstore-add-outlined" class="mr-2" />
+              Cài đặt hiển thị TKB
+            </a-button>
+          </div>
+
+          <!-- Mobile: compact single menu -->
+          <div class="lg:hidden">
+            <a-dropdown :trigger="['click']">
+              <a-button @click.stop>
+                <Icon name="ant-design:setting-outlined" class="mr-2" />
+                Cài đặt
+              </a-button>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item key="theme" @click="openThemeModal">
+                    <Icon name="ant-design:bg-colors-outlined" class="mr-2" />
+                    Cài đặt màu TKB
+                  </a-menu-item>
+                  <a-menu-item key="struct" @click="openStructModal">
+                    <Icon name="ant-design:appstore-add-outlined" class="mr-2" />
+                    Cài đặt hiển thị TKB
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
+          </div>
         </div>
         <div class="h-1/3 overflow-auto m-3 shadow-xl">
           <h4 class="font-semibold">
@@ -166,6 +195,27 @@
             <div class="w-32 text-sm text-gray-600">Nền trống</div>
             <input type="color" v-model="themeForm.colors.emptyBg" class="w-10 h-8 p-0 border rounded" />
             <a-input size="small" v-model:value="themeForm.colors.emptyBg" />
+          </div>
+        </div>
+      </div>
+    </a-modal>
+
+    <!-- Timetable structure modal -->
+    <a-modal v-model:open="structModal.open" title="Cài đặt hiển thị thời khóa biểu" :confirm-loading="structModal.saving" width="760px" @ok="saveStruct" @cancel="structModal.open = false">
+      <div class="space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-40 text-sm text-gray-600">Số ngày học</div>
+          <a-input-number :min="1" :max="7" v-model:value="structForm.daysCount" />
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-40 text-sm text-gray-600">Ca học và số tiết</div>
+          <div class="flex-1 space-y-2">
+            <div v-for="(label, idx) in structForm.shifts" :key="idx" class="flex items-center gap-2">
+              <a-input class="flex-1" v-model:value="structForm.shifts[idx]" placeholder="Tên ca (ví dụ: Ca Sáng)" />
+              <a-input-number :min="1" v-model:value="structForm.periods[idx]" />
+              <a-button danger @click="removeShiftRow(idx)" :disabled="structForm.shifts.length <= 1">Xóa</a-button>
+            </div>
+            <a-button type="dashed" @click="addShiftRow"><Icon name="ant-design:plus-outlined" /> Thêm ca</a-button>
           </div>
         </div>
       </div>
@@ -254,6 +304,36 @@ const settingStore = useSettingStore();
 const activePalette = computed(() => settingStore.activeTimetablePalette);
 // Centralized timetable config from Pinia
 const timetableConfig = computed(() => settingStore.timetableConfig);
+// transformTimetable expects numeric shift ids; map labels -> indices 1..N
+const transformOpts = computed(() => {
+  const cfg = timetableConfig.value || {};
+  const shiftIds = (cfg.shifts || []).map((_, idx) => idx + 1);
+  const perShift = Object.fromEntries(shiftIds.map((id, idx) => [id, Number(cfg.shiftPeriods?.[idx]) || cfg.periodsPerShift || 5]));
+  return {
+    daysCount: cfg.daysCount,
+    shifts: shiftIds,
+    periodsPerShift: cfg.periodsPerShift,
+    periodsPerShiftByShift: perShift,
+    dayNames: cfg.dayNames,
+  };
+});
+
+function getShiftLabel(shiftId) {
+  const labels = timetableConfig.value?.shifts || [];
+  return labels[Number(shiftId) - 1] || (Number(shiftId) === 1 ? "Ca sáng" : "Ca chiều");
+}
+
+function getPeriodsForShift(shiftId) {
+  const cfg = timetableConfig.value || {};
+  const idx = Number(shiftId) - 1;
+  const fromCfg = Number(cfg.shiftPeriods?.[idx]);
+  if (fromCfg > 0) return fromCfg;
+  // fallback to data length if available to avoid mismatch
+  const ca = dsCa.value.find(c => c.id === Number(shiftId));
+  const len = ca?.ds_Ngay?.[0]?.ds_Tiet?.length;
+  if (Number(len) > 0) return Number(len);
+  return Number(cfg.periodsPerShift) || 5;
+}
 // Theme modal state and handlers
 const themeModal = reactive({ open: false, saving: false });
 const themeForm = reactive({
@@ -274,6 +354,62 @@ function openThemeModal() {
   themeForm.activePalette = settingStore.timetableTheme.activePalette;
   themeForm.colors = { ...activePalette.value };
   themeModal.open = true;
+}
+
+// Structure modal state and handlers
+const structModal = reactive({ open: false, saving: false });
+const structForm = reactive({ daysCount: 7, shifts: [], periods: [] });
+
+function openStructModal() {
+  const cfg = timetableConfig.value || {};
+  structForm.daysCount = Number(cfg.daysCount) || 7;
+  structForm.shifts = [...(cfg.shifts || [])];
+  const def = Number(cfg.periodsPerShift) || 5;
+  const periods = Array.isArray(cfg.shiftPeriods) ? cfg.shiftPeriods.map(n => Number(n) || def) : [];
+  while (periods.length < structForm.shifts.length) periods.push(def);
+  structForm.periods = periods.slice(0, structForm.shifts.length);
+  if (!structForm.shifts.length) {
+    structForm.shifts = ["Ca 1"];
+    structForm.periods = [def];
+  }
+  structModal.open = true;
+}
+
+function addShiftRow() {
+  structForm.shifts.push("");
+  const def = Number(timetableConfig.value?.periodsPerShift) || 5;
+  structForm.periods.push(def);
+}
+
+function removeShiftRow(idx) {
+  if (structForm.shifts.length <= 1) return;
+  structForm.shifts.splice(idx, 1);
+  structForm.periods.splice(idx, 1);
+}
+
+async function saveStruct() {
+  try {
+    structModal.saving = true;
+    const days = Math.max(1, Math.min(7, Number(structForm.daysCount) || 7));
+    const shifts = (structForm.shifts || []).map(s => String(s || "").trim()).filter(Boolean);
+    const periods = (structForm.periods || []).map(n => Math.max(1, Number(n) || 1));
+    if (!shifts.length) {
+      message.error("Vui lòng nhập ít nhất 1 ca học");
+      return;
+    }
+    while (periods.length < shifts.length) periods.push(Number(timetableConfig.value?.periodsPerShift) || 5);
+    settingStore.setTimetableDaysCount(days);
+    settingStore.setTimetableShifts(shifts);
+    settingStore.setTimetableShiftPeriods(periods.slice(0, shifts.length));
+    structModal.open = false;
+    // refresh grids to apply new structure
+    await fetchClassTimetable();
+    if (selectedTeacherId.value && props.timetableId) {
+      await fetchTeacherTimetable(selectedTeacherId.value);
+    }
+  } finally {
+    structModal.saving = false;
+  }
 }
 
 function saveTheme() {
@@ -312,7 +448,7 @@ async function fetchClassTimetable() {
     });
     if (data.value?.status === "success") {
       const { timetable, ds_chua_xep } = data.value.data || {};
-      const { ds_Ca } = transformTimetable(timetable || [], timetableConfig.value);
+      const { ds_Ca } = transformTimetable(timetable || [], transformOpts.value);
       dsCa.value = ds_Ca;
       classUnscheduled.value = Array.isArray(ds_chua_xep) ? ds_chua_xep : [];
     } else {
@@ -482,7 +618,7 @@ async function fetchTeacherTimetable(teacherId) {
     });
     if (data.value?.status === "success") {
       const { timetable, ds_chua_xep } = data.value.data || {};
-      const { ds_Ca } = transformTimetable(timetable || [], timetableConfig.value);
+      const { ds_Ca } = transformTimetable(timetable || [], transformOpts.value);
       teacherDsCa.value = ds_Ca;
       teacherUnscheduled.value = Array.isArray(ds_chua_xep) ? ds_chua_xep : [];
     } else {
@@ -633,7 +769,7 @@ async function onDrop(caId, dayId, pIdx) {
           params: { idLop: selectedClassId.value, idtkb: dstClone.id_tkb },
         });
         if (listData.value?.status === "success") {
-          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], transformOpts.value);
           dsCa.value = ds_Ca;
           classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
           selectedSubjectId.value = null;
@@ -697,7 +833,7 @@ async function onTeacherDrop(caId, dayId, pIdx) {
             params: { idLop: selectedClassId.value, idtkb: dstClone.id_tkb },
           });
           if (listData.value?.status === "success") {
-            const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
+            const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], transformOpts.value);
             dsCa.value = ds_Ca;
             classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
           } else {
@@ -775,7 +911,7 @@ async function onCellClick(caId, dayId, pIdx) {
       // message.log("Find position response", data.value);
       const { timetable, ds_chua_xep } = data.value.data || {};
       if (Array.isArray(timetable)) {
-        const { ds_Ca } = transformTimetable(timetable || [], timetableConfig.value);
+        const { ds_Ca } = transformTimetable(timetable || [], transformOpts.value);
         dsCa.value = ds_Ca;
       }
       if (Array.isArray(ds_chua_xep)) {
@@ -806,7 +942,7 @@ async function onUnscheduledClick(lesson) {
     if (data.value?.status === "success") {
       const { timetable, ds_chua_xep } = data.value.data || {};
       if (Array.isArray(timetable)) {
-        const { ds_Ca } = transformTimetable(timetable || [], timetableConfig.value);
+        const { ds_Ca } = transformTimetable(timetable || [], transformOpts.value);
         dsCa.value = ds_Ca;
       }
       if (Array.isArray(ds_chua_xep)) {
@@ -838,7 +974,7 @@ async function onTeacherUnscheduledClick(lesson) {
     if (data.value?.status === "success") {
       const { timetable, ds_chua_xep } = data.value.data || {};
       if (Array.isArray(timetable)) {
-        const { ds_Ca } = transformTimetable(timetable, timetableConfig.value);
+        const { ds_Ca } = transformTimetable(timetable, transformOpts.value);
         teacherDsCa.value = ds_Ca;
       }
       if (Array.isArray(ds_chua_xep)) {
@@ -879,7 +1015,7 @@ async function onTimetableUnscheduledClick(lesson) {
       if (data.value?.status === "success") {
         const { timetable, ds_chua_xep } = data.value.data || {};
         if (Array.isArray(timetable)) {
-          const { ds_Ca } = transformTimetable(timetable || [], timetableConfig.value);
+          const { ds_Ca } = transformTimetable(timetable || [], transformOpts.value);
           dsCa.value = ds_Ca;
         }
         if (Array.isArray(ds_chua_xep)) {
@@ -906,7 +1042,7 @@ async function onTimetableUnscheduledClick(lesson) {
       if (data.value?.status === "success") {
         const { timetable, ds_chua_xep } = data.value.data || {};
         if (Array.isArray(timetable)) {
-          const { ds_Ca } = transformTimetable(timetable, timetableConfig.value);
+          const { ds_Ca } = transformTimetable(timetable, transformOpts.value);
           teacherDsCa.value = ds_Ca;
         }
         if (Array.isArray(ds_chua_xep)) {
@@ -967,7 +1103,7 @@ async function onTeacherCellClick(caId, dayId, pIdx) {
     if (data.value?.status === "success") {
       const { timetable, ds_chua_xep } = data.value.data || {};
       if (Array.isArray(timetable)) {
-        const { ds_Ca } = transformTimetable(timetable, timetableConfig.value);
+        const { ds_Ca } = transformTimetable(timetable, transformOpts.value);
         teacherDsCa.value = ds_Ca;
       }
       if (Array.isArray(ds_chua_xep)) {
@@ -1014,7 +1150,7 @@ async function setLock(val) {
           params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
         });
         if (listData.value?.status === "success") {
-          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], transformOpts.value);
           dsCa.value = ds_Ca;
           classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
           selectedSubjectId.value = null;
@@ -1033,7 +1169,7 @@ async function setLock(val) {
           params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
         });
         if (listData.value?.status === "success") {
-          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], transformOpts.value);
           dsCa.value = ds_Ca;
           classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
         } else {
@@ -1059,7 +1195,7 @@ async function lockSubjectPeriods() {
         params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
       });
       if (listData.value?.status === "success") {
-        const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
+        const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], transformOpts.value);
         dsCa.value = ds_Ca;
         classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
       } else {
@@ -1087,7 +1223,7 @@ async function unlockSubjectPeriods() {
         params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
       });
       if (listData.value?.status === "success") {
-        const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
+        const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], transformOpts.value);
         dsCa.value = ds_Ca;
         classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
       } else {
@@ -1116,7 +1252,7 @@ async function lockTeacherPeriods() {
           params: { idLop: selectedClassId.value, idtkb: props.timetableId },
         });
         if (listData.value?.status === "success") {
-          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], transformOpts.value);
           dsCa.value = ds_Ca;
           classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
         } else {
@@ -1146,7 +1282,7 @@ async function unlockTeacherPeriods() {
           params: { idLop: selectedClassId.value, idtkb: props.timetableId },
         });
         if (listData.value?.status === "success") {
-          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], transformOpts.value);
           dsCa.value = ds_Ca;
           classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
         } else {
@@ -1175,7 +1311,7 @@ async function clearCell() {
         params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
       });
       if (listData.value?.status === "success") {
-        const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
+        const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], transformOpts.value);
         dsCa.value = ds_Ca;
         classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
         selectedSubjectId.value = null;
@@ -1315,7 +1451,7 @@ async function confirmAdd() {
             params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
           });
           if (listData.value?.status === "success") {
-            const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
+            const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], transformOpts.value);
             dsCa.value = ds_Ca;
             classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
           } else {
@@ -1327,7 +1463,7 @@ async function confirmAdd() {
           params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
         });
         if (listData.value?.status === "success") {
-          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], transformOpts.value);
           dsCa.value = ds_Ca;
           classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
         } else {

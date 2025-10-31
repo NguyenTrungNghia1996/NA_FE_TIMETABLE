@@ -64,8 +64,11 @@ export const useSettingStore = defineStore(
       // Timetable structure settings (centralized)
       timetableConfig: {
         daysCount: 7,
-        shifts: [1, 2],
+        shifts: ["Ca Sáng", "Ca Chiều"],
+        // Fallback periods per shift if per-shift not provided
         periodsPerShift: 5,
+        // Per-shift periods aligned with `shifts` (index 0 -> shiftId 1)
+        shiftPeriods: [4, 5],
         dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
       },
       // Global page theme removed (no page background color)
@@ -114,6 +117,9 @@ export const useSettingStore = defineStore(
       setTimetableShifts(shifts) {
         if (Array.isArray(shifts) && shifts.length) {
           this.timetableConfig.shifts = [...shifts];
+          const def = this.timetableConfig.periodsPerShift || 5;
+          const old = Array.isArray(this.timetableConfig.shiftPeriods) ? this.timetableConfig.shiftPeriods : [];
+          this.timetableConfig.shiftPeriods = shifts.map((_, idx) => Number(old[idx]) > 0 ? Number(old[idx]) : def);
         }
       },
       setTimetableDaysCount(n) {
@@ -124,6 +130,21 @@ export const useSettingStore = defineStore(
       setTimetablePeriodsPerShift(n) {
         if (typeof n === 'number' && n > 0) {
           this.timetableConfig.periodsPerShift = n;
+        }
+      },
+      setTimetableShiftPeriods(periodsArr) {
+        if (Array.isArray(periodsArr) && periodsArr.length) {
+          const def = this.timetableConfig.periodsPerShift || 5;
+          this.timetableConfig.shiftPeriods = periodsArr.map(v => Number(v) > 0 ? Number(v) : def);
+        }
+      },
+      setTimetableShiftPeriodByIndex(index, n) {
+        const idx = Number(index);
+        if (Number.isInteger(idx) && idx >= 0 && typeof n === 'number' && n > 0) {
+          const arr = Array.isArray(this.timetableConfig.shiftPeriods) ? [...this.timetableConfig.shiftPeriods] : [];
+          while (arr.length <= idx) arr.push(this.timetableConfig.periodsPerShift || 5);
+          arr[idx] = Number(n);
+          this.timetableConfig.shiftPeriods = arr;
         }
       },
       // setPageBackground removed
