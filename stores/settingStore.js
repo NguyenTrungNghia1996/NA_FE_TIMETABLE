@@ -68,10 +68,9 @@ export const useSettingStore = defineStore(
         // Fallback periods per shift if per-shift not provided
         periodsPerShift: 5,
         // Per-shift periods aligned with `shifts` (index 0 -> shiftId 1)
-        shiftPeriods: [4, 5],
+        shiftPeriods: [5, 5],
         dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
       },
-      // Global page theme removed (no page background color)
     }),
     actions: {
       setLoading(value) {
