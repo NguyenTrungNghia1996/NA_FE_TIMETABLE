@@ -61,6 +61,13 @@ export const useSettingStore = defineStore(
           },
         },
       },
+      // Timetable structure settings (centralized)
+      timetableConfig: {
+        daysCount: 7,
+        shifts: [1, 2],
+        periodsPerShift: 5,
+        dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
+      },
       // Global page theme removed (no page background color)
     }),
     actions: {
@@ -94,6 +101,30 @@ export const useSettingStore = defineStore(
           ...current,
           [name]: value,
         };
+      },
+      // Timetable config actions
+      setTimetableConfig(partial) {
+        this.timetableConfig = { ...this.timetableConfig, ...partial };
+      },
+      setTimetableDayNames(dayNames) {
+        if (Array.isArray(dayNames) && dayNames.length) {
+          this.timetableConfig.dayNames = [...dayNames];
+        }
+      },
+      setTimetableShifts(shifts) {
+        if (Array.isArray(shifts) && shifts.length) {
+          this.timetableConfig.shifts = [...shifts];
+        }
+      },
+      setTimetableDaysCount(n) {
+        if (typeof n === 'number' && n > 0) {
+          this.timetableConfig.daysCount = n;
+        }
+      },
+      setTimetablePeriodsPerShift(n) {
+        if (typeof n === 'number' && n > 0) {
+          this.timetableConfig.periodsPerShift = n;
+        }
       },
       // setPageBackground removed
     },
