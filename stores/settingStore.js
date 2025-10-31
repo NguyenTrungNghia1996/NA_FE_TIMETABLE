@@ -64,7 +64,7 @@ export const useSettingStore = defineStore(
       // Timetable structure settings (centralized)
       timetableConfig: {
         daysCount: 7,
-        shifts: [1, 2],
+        shifts: ["Ca Sáng", "Ca Chiều"],
         periodsPerShift: 5,
         dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
       },
