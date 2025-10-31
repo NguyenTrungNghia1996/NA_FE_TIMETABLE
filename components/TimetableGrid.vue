@@ -212,7 +212,7 @@
           <div class="flex-1 space-y-2">
             <div v-for="(label, idx) in structForm.shifts" :key="idx" class="flex items-center gap-2">
               <a-input class="flex-1" v-model:value="structForm.shifts[idx]" placeholder="Tên ca (ví dụ: Ca Sáng)" />
-              <a-input-number :min="1" v-model:value="structForm.periods[idx]" />
+              <a-input-number :min="1" :max="5" v-model:value="structForm.periods[idx]" />
               <a-button danger @click="removeShiftRow(idx)" :disabled="structForm.shifts.length <= 1">Xóa</a-button>
             </div>
             <a-button type="dashed" @click="addShiftRow"><Icon name="ant-design:plus-outlined" /> Thêm ca</a-button>
