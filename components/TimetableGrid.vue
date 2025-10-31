@@ -15,10 +15,10 @@
               </thead>
               <tbody>
                 <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
-                  <td v-if="pIdx % 5 === 0" class="border p-0.5 text-center font-medium select-none align-middle" :rowspan="5" :style="labelCellStyle()">
+                  <td v-if="pIdx % timetableConfig.periodsPerShift === 0" class="border p-0.5 text-center font-medium select-none align-middle" :rowspan="timetableConfig.periodsPerShift" :style="labelCellStyle()">
                     <span class="[writing-mode:vertical-rl] items-center justify-center">{{ ca.id == 1 ? "Ca sáng" : "Ca chiều" }}</span>
                   </td>
-                  <td class="border p-0.5 text-center font-medium select-none" :style="labelCellStyle()">Tiết {{ (pIdx % 5) + 1 }}</td>
+                  <td class="border p-0.5 text-center font-medium select-none" :style="labelCellStyle()">Tiết {{ (pIdx % timetableConfig.periodsPerShift) + 1 }}</td>
                   <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 text-xs align-top min-w-[100px] max-w-[100px] relative select-none" :style="cellStyle(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="isDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
                     <template v-if="ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isError">
                       <span class="italic text-red-500">Nghỉ</span>
@@ -52,10 +52,10 @@
                 </thead>
                 <tbody>
                   <tr v-for="(tiet, pIdx) in ca.ds_Ngay[0].ds_Tiet" :key="pIdx">
-                    <td v-if="pIdx % 5 === 0" class="border p-0.5 text-center font-medium select-none align-middle" :rowspan="5" :style="labelCellStyle()">
+                    <td v-if="pIdx % timetableConfig.periodsPerShift === 0" class="border p-0.5 text-center font-medium select-none align-middle" :rowspan="timetableConfig.periodsPerShift" :style="labelCellStyle()">
                       <span class="[writing-mode:vertical-rl] items-center justify-center">{{ ca.id == 1 ? "Ca sáng" : "Ca chiều" }}</span>
                     </td>
-                    <td class="border p-0.5 text-center font-medium select-none" :style="labelCellStyle()">Tiết {{ (pIdx % 5) + 1 }}</td>
+                    <td class="border p-0.5 text-center font-medium select-none" :style="labelCellStyle()">Tiết {{ (pIdx % timetableConfig.periodsPerShift) + 1 }}</td>
                     <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 text-xs align-top min-w-[100px] max-w-[100px] relative select-none" :style="teacherCellStyle(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)" @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)" @drop="onTeacherDrop(ca.id, ngay.id, pIdx)" @click="onTeacherCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx, true)">
                       <template v-if="ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isError">
                         <span class="italic text-red-500">Nghỉ</span>
@@ -252,6 +252,8 @@ const lessonColumns = computed(() => [
 // Timetable color palette (configurable via setting store)
 const settingStore = useSettingStore();
 const activePalette = computed(() => settingStore.activeTimetablePalette);
+// Centralized timetable config from Pinia
+const timetableConfig = computed(() => settingStore.timetableConfig);
 // Theme modal state and handlers
 const themeModal = reactive({ open: false, saving: false });
 const themeForm = reactive({
@@ -310,12 +312,7 @@ async function fetchClassTimetable() {
     });
     if (data.value?.status === "success") {
       const { timetable, ds_chua_xep } = data.value.data || {};
-      const { ds_Ca } = transformTimetable(timetable || [], {
-        daysCount: 7,
-        shifts: [1, 2],
-        periodsPerShift: 5,
-        dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-      });
+      const { ds_Ca } = transformTimetable(timetable || [], timetableConfig.value);
       dsCa.value = ds_Ca;
       classUnscheduled.value = Array.isArray(ds_chua_xep) ? ds_chua_xep : [];
     } else {
@@ -485,12 +482,7 @@ async function fetchTeacherTimetable(teacherId) {
     });
     if (data.value?.status === "success") {
       const { timetable, ds_chua_xep } = data.value.data || {};
-      const { ds_Ca } = transformTimetable(timetable || [], {
-        daysCount: 7,
-        shifts: [1, 2],
-        periodsPerShift: 5,
-        dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-      });
+      const { ds_Ca } = transformTimetable(timetable || [], timetableConfig.value);
       teacherDsCa.value = ds_Ca;
       teacherUnscheduled.value = Array.isArray(ds_chua_xep) ? ds_chua_xep : [];
     } else {
@@ -641,12 +633,7 @@ async function onDrop(caId, dayId, pIdx) {
           params: { idLop: selectedClassId.value, idtkb: dstClone.id_tkb },
         });
         if (listData.value?.status === "success") {
-          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
-            daysCount: 7,
-            shifts: [1, 2],
-            periodsPerShift: 5,
-            dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-          });
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
           dsCa.value = ds_Ca;
           classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
           selectedSubjectId.value = null;
@@ -710,12 +697,7 @@ async function onTeacherDrop(caId, dayId, pIdx) {
             params: { idLop: selectedClassId.value, idtkb: dstClone.id_tkb },
           });
           if (listData.value?.status === "success") {
-            const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
-              daysCount: 7,
-              shifts: [1, 2],
-              periodsPerShift: 5,
-              dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-            });
+            const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
             dsCa.value = ds_Ca;
             classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
           } else {
@@ -793,12 +775,7 @@ async function onCellClick(caId, dayId, pIdx) {
       // message.log("Find position response", data.value);
       const { timetable, ds_chua_xep } = data.value.data || {};
       if (Array.isArray(timetable)) {
-        const { ds_Ca } = transformTimetable(timetable || [], {
-          daysCount: 7,
-          shifts: [1, 2],
-          periodsPerShift: 5,
-          dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-        });
+        const { ds_Ca } = transformTimetable(timetable || [], timetableConfig.value);
         dsCa.value = ds_Ca;
       }
       if (Array.isArray(ds_chua_xep)) {
@@ -829,12 +806,7 @@ async function onUnscheduledClick(lesson) {
     if (data.value?.status === "success") {
       const { timetable, ds_chua_xep } = data.value.data || {};
       if (Array.isArray(timetable)) {
-        const { ds_Ca } = transformTimetable(timetable || [], {
-          daysCount: 7,
-          shifts: [1, 2],
-          periodsPerShift: 5,
-          dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-        });
+        const { ds_Ca } = transformTimetable(timetable || [], timetableConfig.value);
         dsCa.value = ds_Ca;
       }
       if (Array.isArray(ds_chua_xep)) {
@@ -866,12 +838,7 @@ async function onTeacherUnscheduledClick(lesson) {
     if (data.value?.status === "success") {
       const { timetable, ds_chua_xep } = data.value.data || {};
       if (Array.isArray(timetable)) {
-        const { ds_Ca } = transformTimetable(timetable, {
-          daysCount: 7,
-          shifts: [1, 2],
-          periodsPerShift: 5,
-          dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-        });
+        const { ds_Ca } = transformTimetable(timetable, timetableConfig.value);
         teacherDsCa.value = ds_Ca;
       }
       if (Array.isArray(ds_chua_xep)) {
@@ -912,12 +879,7 @@ async function onTimetableUnscheduledClick(lesson) {
       if (data.value?.status === "success") {
         const { timetable, ds_chua_xep } = data.value.data || {};
         if (Array.isArray(timetable)) {
-          const { ds_Ca } = transformTimetable(timetable || [], {
-            daysCount: 7,
-            shifts: [1, 2],
-            periodsPerShift: 5,
-            dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-          });
+          const { ds_Ca } = transformTimetable(timetable || [], timetableConfig.value);
           dsCa.value = ds_Ca;
         }
         if (Array.isArray(ds_chua_xep)) {
@@ -944,12 +906,7 @@ async function onTimetableUnscheduledClick(lesson) {
       if (data.value?.status === "success") {
         const { timetable, ds_chua_xep } = data.value.data || {};
         if (Array.isArray(timetable)) {
-          const { ds_Ca } = transformTimetable(timetable, {
-            daysCount: 7,
-            shifts: [1, 2],
-            periodsPerShift: 5,
-            dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-          });
+          const { ds_Ca } = transformTimetable(timetable, timetableConfig.value);
           teacherDsCa.value = ds_Ca;
         }
         if (Array.isArray(ds_chua_xep)) {
@@ -1010,12 +967,7 @@ async function onTeacherCellClick(caId, dayId, pIdx) {
     if (data.value?.status === "success") {
       const { timetable, ds_chua_xep } = data.value.data || {};
       if (Array.isArray(timetable)) {
-        const { ds_Ca } = transformTimetable(timetable, {
-          daysCount: 7,
-          shifts: [1, 2],
-          periodsPerShift: 5,
-          dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-        });
+        const { ds_Ca } = transformTimetable(timetable, timetableConfig.value);
         teacherDsCa.value = ds_Ca;
       }
       if (Array.isArray(ds_chua_xep)) {
@@ -1062,12 +1014,7 @@ async function setLock(val) {
           params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
         });
         if (listData.value?.status === "success") {
-          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
-            daysCount: 7,
-            shifts: [1, 2],
-            periodsPerShift: 5,
-            dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-          });
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
           dsCa.value = ds_Ca;
           classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
           selectedSubjectId.value = null;
@@ -1086,12 +1033,7 @@ async function setLock(val) {
           params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
         });
         if (listData.value?.status === "success") {
-          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
-            daysCount: 7,
-            shifts: [1, 2],
-            periodsPerShift: 5,
-            dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-          });
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
           dsCa.value = ds_Ca;
           classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
         } else {
@@ -1117,12 +1059,7 @@ async function lockSubjectPeriods() {
         params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
       });
       if (listData.value?.status === "success") {
-        const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
-          daysCount: 7,
-          shifts: [1, 2],
-          periodsPerShift: 5,
-          dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-        });
+        const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
         dsCa.value = ds_Ca;
         classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
       } else {
@@ -1150,12 +1087,7 @@ async function unlockSubjectPeriods() {
         params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
       });
       if (listData.value?.status === "success") {
-        const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
-          daysCount: 7,
-          shifts: [1, 2],
-          periodsPerShift: 5,
-          dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-        });
+        const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
         dsCa.value = ds_Ca;
         classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
       } else {
@@ -1184,12 +1116,7 @@ async function lockTeacherPeriods() {
           params: { idLop: selectedClassId.value, idtkb: props.timetableId },
         });
         if (listData.value?.status === "success") {
-          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
-            daysCount: 7,
-            shifts: [1, 2],
-            periodsPerShift: 5,
-            dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-          });
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
           dsCa.value = ds_Ca;
           classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
         } else {
@@ -1219,12 +1146,7 @@ async function unlockTeacherPeriods() {
           params: { idLop: selectedClassId.value, idtkb: props.timetableId },
         });
         if (listData.value?.status === "success") {
-          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
-            daysCount: 7,
-            shifts: [1, 2],
-            periodsPerShift: 5,
-            dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-          });
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
           dsCa.value = ds_Ca;
           classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
         } else {
@@ -1253,12 +1175,7 @@ async function clearCell() {
         params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
       });
       if (listData.value?.status === "success") {
-        const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
-          daysCount: 7,
-          shifts: [1, 2],
-          periodsPerShift: 5,
-          dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-        });
+        const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
         dsCa.value = ds_Ca;
         classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
         selectedSubjectId.value = null;
@@ -1398,12 +1315,7 @@ async function confirmAdd() {
             params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
           });
           if (listData.value?.status === "success") {
-            const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
-              daysCount: 7,
-              shifts: [1, 2],
-              periodsPerShift: 5,
-              dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-            });
+            const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
             dsCa.value = ds_Ca;
             classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
           } else {
@@ -1415,12 +1327,7 @@ async function confirmAdd() {
           params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
         });
         if (listData.value?.status === "success") {
-          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], {
-            daysCount: 7,
-            shifts: [1, 2],
-            periodsPerShift: 5,
-            dayNames: ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7", "Chủ Nhật"],
-          });
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], timetableConfig.value);
           dsCa.value = ds_Ca;
           classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
         } else {
