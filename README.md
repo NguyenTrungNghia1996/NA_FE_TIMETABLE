@@ -179,6 +179,9 @@ Các component trong `components/Select/*` được auto-import dưới dạng P
 
 <!-- Chọn Phòng học theo Loại phòng -->
 <SelectClassroom v-model="roomId" :idLoaiPhonghoc="roomTypeId" />
+
+<!-- Chọn Năm học -->
+<SelectYear v-model="yearId" placeholder="Chọn năm học" />
 ```
 
 Ghi chú:
@@ -189,6 +192,7 @@ Ghi chú:
 
 - `SelectClass` (Lớp): `id_khoi`, `autoSelectFirst`, `noFormItem`, `inlineLabel`.
 - `SelectTeacher` (Giáo viên): `autoSelectFirst`, `noFormItem`, `inlineLabel`.
+- `SelectYear` (Năm học): không có props đặc thù ngoài nhóm chung.
 - `SelectSubject` (Môn học): không có props đặc thù ngoài nhóm chung.
 - `SelectClassroom` (Phòng học): `idLoaiPhonghoc` để lọc theo loại phòng.
 - `SelectClassroomType` (Loại phòng học): không có props đặc thù ngoài nhóm chung.
