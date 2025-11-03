@@ -215,7 +215,7 @@
               <a-input-number :min="1" :max="5" v-model:value="structForm.periods[idx]" />
               <a-button danger @click="removeShiftRow(idx)" :disabled="structForm.shifts.length <= 1">Xóa</a-button>
             </div>
-            <a-button type="dashed" @click="addShiftRow"><Icon name="ant-design:plus-outlined" /> Thêm ca</a-button>
+            <!-- <a-button type="dashed" @click="addShiftRow"><Icon name="ant-design:plus-outlined" /> Thêm ca</a-button> -->
           </div>
         </div>
       </div>
