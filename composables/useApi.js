@@ -130,6 +130,10 @@ let ENDPOINTS = {
   TIMETABLE_EXPORT_MATRIX_EXPERTISE: "/api/export/matran/tohopmon",
 
   S3: "/api/presigned_url",
+  // YEAR (Năm học)
+  YEAR: "/api/namhoc",
+  // HOLIDAY (Ngày nghỉ)
+  HOLIDAY: "/api/ngaynghi",
 };
 import { useUserStore } from "~~/stores/userStore";
 import { useUnitStore } from "~~/stores/unitStore";
@@ -257,6 +261,8 @@ class RestApi {
     this.teacher = new Teacher(this.request);
     this.class = new Class(this.request);
     this.timetable = new Timetable(this.request);
+    this.year = new Year(this.request);
+    this.holiday = new Holiday(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -968,3 +974,41 @@ class Timetable {
 export default () => {
   return { RestApi: new RestApi() };
 };
+
+// YEAR CLASS
+class Year {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.YEAR, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.YEAR, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.YEAR, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.YEAR, data);
+  }
+}
+
+// HOLIDAY CLASS
+class Holiday {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.HOLIDAY, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.HOLIDAY, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.HOLIDAY, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.HOLIDAY, data);
+  }
+}
