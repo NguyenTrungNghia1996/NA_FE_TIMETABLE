@@ -17,26 +17,92 @@
             {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
           </template>
           <template v-if="column.key === 'action'">
-            <div class="flex justify-center">
-              <div class="md:flex space-x-2">
-                <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission">
+            <div class="flex justify-center gap-2">
+              <a-tooltip title="Chi tiết phân phối">
+                <a-button type="link" size="small" @click="openDetailDrawer(record)">
                   <template #icon>
-                    <EditOutlined />
+                    <UnorderedListOutlined />
                   </template>
                 </a-button>
-                <a-popconfirm title="Bạn chắc chắn muốn xóa?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
-                  <a-button type="link" danger size="small" :disabled="!settingStore.currentPermission">
-                    <template #icon>
-                      <DeleteOutlined />
-                    </template>
-                  </a-button>
-                </a-popconfirm>
-              </div>
+              </a-tooltip>
+              <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission">
+                <template #icon>
+                  <EditOutlined />
+                </template>
+              </a-button>
+              <a-popconfirm title="Bạn chắc chắn muốn xóa?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
+                <a-button type="link" danger size="small" :disabled="!settingStore.currentPermission">
+                  <template #icon>
+                    <DeleteOutlined />
+                  </template>
+                </a-button>
+              </a-popconfirm>
             </div>
           </template>
         </template>
       </a-table>
     </ClientOnly>
+
+    <!-- Drawer: Chi tiết phân phối chương trình (full, slide from bottom) -->
+    <a-drawer v-model:open="detailDrawer.open" :title="`Chi tiết phân phối: ${detailDrawer.header.ten || ''}`" :footer="null" height="100vh" placement="bottom" :destroyOnClose="true">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Left: Form nhập chi tiết -->
+        <a-card size="small" title="Thiết lập phân phối chương trình">
+          <div class="grid grid-cols-1 gap-3 mb-3 text-sm">
+            <div><span class="font-medium">Năm học:</span> {{ detailDrawer.header.ten_nam_hoc || "-" }}</div>
+            <div><span class="font-medium">Khối lớp:</span> {{ detailDrawer.header.ten_khoi || "-" }}</div>
+            <div><span class="font-medium">Ban học:</span> {{ detailDrawer.header.ten_ban || "-" }}</div>
+            <div><span class="font-medium">Môn học:</span> {{ detailDrawer.header.ten_mon || "-" }}</div>
+          </div>
+          <a-form ref="detailFormRef" :model="detailForm" layout="vertical" :rules="detailRules">
+            <a-form-item label="Tuần" name="tuan">
+              <a-input-number v-model:value="detailForm.tuan" :min="1" :step="1" class="!w-full" placeholder="Nhập tuần" />
+            </a-form-item>
+            <a-form-item label="Số thứ tự tiết" name="thu_tu_tiet">
+              <a-input-number v-model:value="detailForm.thu_tu_tiet" :min="1" :step="1" class="!w-full" placeholder="Nhập số thứ tự tiết" />
+            </a-form-item>
+            <a-form-item label="Phân môn" name="phan_mon">
+              <a-input v-model:value="detailForm.phan_mon" allow-clear placeholder="Nhập tên phân môn" />
+            </a-form-item>
+            <a-form-item label="Tên bài học" name="ten_bai">
+              <a-input v-model:value="detailForm.ten_bai" allow-clear placeholder="Nhập tên bài học" />
+            </a-form-item>
+            <a-form-item label="Ghi chú" name="ghi_chu">
+              <a-input v-model:value="detailForm.ghi_chu" allow-clear placeholder="Ghi chú (không bắt buộc)" />
+            </a-form-item>
+            <div class="flex gap-2">
+              <a-button type="primary" :loading="detailDrawer.saving" :disabled="!settingStore.currentPermission" @click="saveDetail">Lưu</a-button>
+              <a-button danger @click="resetDetailForm" :disabled="!settingStore.currentPermission">Hủy</a-button>
+            </div>
+          </a-form>
+        </a-card>
+
+        <!-- Right: Danh sách chi tiết -->
+        <a-card class="col-span-2" size="small" title="Danh sách chi tiết phân phối chương trình">
+          <ClientOnly class="overflow-x-auto">
+            <a-table :columns="detailColumns" :data-source="detailData" :pagination="detailPagination" :loading="detailDrawer.loading" size="small" bordered :scroll="{ x: '800' }" @change="handleDetailTableChange">
+              <template #bodyCell="{ column, record, index }">
+                <template v-if="column.key === 'stt'">
+                  {{ (detailPagination.current - 1) * detailPagination.pageSize + index + 1 }}
+                </template>
+                <template v-else-if="column.key === 'action'">
+                  <div class="flex justify-center gap-2">
+                    <a-button type="link" size="small" :disabled="!settingStore.currentPermission" @click="editDetail(record)">
+                      <template #icon><EditOutlined /></template>
+                    </a-button>
+                    <a-popconfirm title="Xóa mục này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteDetail(record.id)">
+                      <a-button type="link" size="small" danger :disabled="!settingStore.currentPermission">
+                        <template #icon><DeleteOutlined /></template>
+                      </a-button>
+                    </a-popconfirm>
+                  </div>
+                </template>
+              </template>
+            </a-table>
+          </ClientOnly>
+        </a-card>
+      </div>
+    </a-drawer>
 
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa' : 'Thêm mới'" @cancel="handleCancel" :width="600">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
@@ -73,7 +139,7 @@ const columns = [
   { title: "Khối", dataIndex: "ten_khoi", key: "ten_khoi", ellipsis: true },
   { title: "Ban", dataIndex: "ten_ban", key: "ten_ban", ellipsis: true },
   { title: "Môn", dataIndex: "ten_mon", key: "ten_mon", ellipsis: true },
-  { title: "Thao tác", key: "action", width: 80, align: "center", fixed: "right" },
+  { title: "Thao tác", key: "action", width: 120, align: "center", fixed: "right" },
 ];
 
 const dataSource = ref([]);
@@ -129,6 +195,118 @@ const fetchData = async param => {
     message.error(err.message || "Lỗi tải dữ liệu");
   } finally {
     loading.value = false;
+  }
+};
+
+// Drawer: Chi tiết phân phối
+const detailDrawer = reactive({ open: false, header: {}, loading: false, saving: false });
+const detailParam = ref({ pageIndex: 1, pageSize: 10, search: "", idPpct: null });
+const detailData = ref([]);
+const detailPagination = reactive({ current: 1, pageSize: 10, total: 0, showSizeChanger: true, pageSizeOptions: ["10", "20", "50"] });
+const detailColumns = [
+  { title: "STT", key: "stt", width: 60, align: "center" },
+  { title: "Tuần", dataIndex: "tuan", key: "tuan", width: 90, align: "center" },
+  { title: "Số thứ tự tiết", dataIndex: "thu_tu_tiet", key: "thu_tu_tiet", width: 140, align: "center" },
+  { title: "Phân môn", dataIndex: "phan_mon", key: "phan_mon" },
+  { title: "Tên bài học", dataIndex: "ten_bai", key: "ten_bai" },
+  { title: "Thao tác", key: "action", width: 100, align: "center", fixed: "right" },
+];
+
+const detailFormRef = ref();
+const isDetailEdit = ref(false);
+const detailForm = reactive({ id: null, id_ppct: null, tuan: null, thu_tu_tiet: null, phan_mon: "", ten_bai: "", ghi_chu: "" });
+const detailRules = reactive({
+  tuan: [{ required: true, message: "Vui lòng nhập tuần", trigger: "blur" }],
+  thu_tu_tiet: [{ required: true, message: "Vui lòng nhập số thứ tự tiết", trigger: "blur" }],
+  ten_bai: [{ required: true, message: "Vui lòng nhập tên bài học", trigger: "blur" }],
+});
+
+const openDetailDrawer = async record => {
+  detailDrawer.open = true;
+  detailDrawer.header = { ...record };
+  detailParam.value = { pageIndex: 1, pageSize: 10, search: "", idPpct: record.id };
+  resetDetailForm();
+  await fetchDetailData();
+};
+
+const fetchDetailData = async () => {
+  try {
+    detailDrawer.loading = true;
+    const { data, error } = await RestApi.phanphoi_chuongtrinh_chitiet.list({ params: { ...detailParam.value } });
+    if (data.value?.status === "success") {
+      detailData.value = data.value.data.items || [];
+      detailPagination.total = data.value.data.totalrecord || 0;
+    } else {
+      throw new Error(error.value?.data?.message || "Không tải được dữ liệu");
+    }
+  } catch (err) {
+    detailData.value = [];
+    detailPagination.total = 0;
+    message.error(err.message || "Lỗi tải dữ liệu");
+  } finally {
+    detailDrawer.loading = false;
+  }
+};
+
+const handleDetailTableChange = async pag => {
+  detailPagination.current = pag.current;
+  detailPagination.pageSize = pag.pageSize;
+  detailParam.value.pageIndex = pag.current;
+  detailParam.value.pageSize = pag.pageSize;
+  await fetchDetailData();
+};
+
+const resetDetailForm = () => {
+  isDetailEdit.value = false;
+  Object.assign(detailForm, { id: null, id_ppct: detailDrawer.header?.id || null, tuan: null, thu_tu_tiet: null, phan_mon: "", ten_bai: "", ghi_chu: "" });
+  detailFormRef.value?.resetFields?.();
+};
+
+const editDetail = record => {
+  isDetailEdit.value = true;
+  Object.assign(detailForm, { ...record, id_ppct: detailDrawer.header?.id || record.id_ppct });
+};
+
+const saveDetail = async () => {
+  try {
+    await detailFormRef.value?.validate?.();
+    detailDrawer.saving = true;
+    const payload = { id: detailForm.id, id_ppct: detailDrawer.header?.id, tuan: detailForm.tuan, thu_tu_tiet: detailForm.thu_tu_tiet, phan_mon: detailForm.phan_mon, ten_bai: detailForm.ten_bai, ghi_chu: detailForm.ghi_chu };
+    let resp;
+    if (isDetailEdit.value) {
+      resp = await RestApi.phanphoi_chuongtrinh_chitiet.update({ body: payload });
+    } else {
+      delete payload.id;
+      resp = await RestApi.phanphoi_chuongtrinh_chitiet.create({ body: payload });
+    }
+    if (resp.data.value?.status === "success") {
+      message.success(resp.data.value?.message || "Thành công");
+      await fetchDetailData();
+      resetDetailForm();
+    } else {
+      throw new Error(resp.error?.value?.data?.message || "Lỗi không xác định");
+    }
+  } catch (err) {
+    message.error(err.message || "Lỗi khi lưu dữ liệu");
+  } finally {
+    detailDrawer.saving = false;
+  }
+};
+
+const deleteDetail = async id => {
+  try {
+    const { data, error } = await RestApi.phanphoi_chuongtrinh_chitiet.delete({ params: { Id: id } });
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Xóa thành công");
+      detailParam.value.pageIndex = 1;
+      detailPagination.current = 1;
+    } else {
+      throw new Error(error.value?.data?.message || "Xóa không thành công");
+    }
+  } catch (err) {
+    message.error(err.message || "Xóa không thành công");
+  } finally {
+    await fetchDetailData();
   }
 };
 
