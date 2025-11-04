@@ -56,10 +56,10 @@
           </div>
           <a-form ref="detailFormRef" :model="detailForm" layout="vertical" :rules="detailRules">
             <a-form-item label="Tuần" name="tuan">
-              <a-input-number v-model:value="detailForm.tuan" :min="1" :step="1" class="!w-full" placeholder="Nhập tuần" />
+              <a-input-number v-model:value="detailForm.tuan" :min="1" :step="1" :precision="0" class="!w-full" placeholder="Nhập tuần" />
             </a-form-item>
             <a-form-item label="Số thứ tự tiết" name="thu_tu_tiet">
-              <a-input-number v-model:value="detailForm.thu_tu_tiet" :min="1" :step="1" class="!w-full" placeholder="Nhập số thứ tự tiết" />
+              <a-input-number v-model:value="detailForm.thu_tu_tiet" :min="1" :step="1" :precision="0" class="!w-full" placeholder="Nhập số thứ tự tiết" />
             </a-form-item>
             <a-form-item label="Phân môn" name="phan_mon">
               <a-input v-model:value="detailForm.phan_mon" allow-clear placeholder="Nhập tên phân môn" />
