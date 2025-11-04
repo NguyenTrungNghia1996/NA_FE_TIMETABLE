@@ -136,6 +136,8 @@ let ENDPOINTS = {
   HOLIDAY: "/api/ngaynghi",
   // PHANPHOI_CHUONGTRINH
   PHANPHOI_CHUONGTRINH: "/api/phanphoi_chuongtrinh",
+  // PHANPHOI_CHUONGTRINH_CHITIET
+  PHANPHOI_CHUONGTRINH_CHITIET: "/api/phanphoi_chuongtrinh_chitiet",
 };
 import { useUserStore } from "~~/stores/userStore";
 import { useUnitStore } from "~~/stores/unitStore";
@@ -266,6 +268,7 @@ class RestApi {
     this.year = new Year(this.request);
     this.holiday = new Holiday(this.request);
     this.phanphoi_chuongtrinh = new PhanphoiChuongtrinh(this.request);
+    this.phanphoi_chuongtrinh_chitiet = new PhanphoiChuongtrinhChitiet(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -1032,5 +1035,24 @@ class PhanphoiChuongtrinh {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.PHANPHOI_CHUONGTRINH, data);
+  }
+}
+
+// PHANPHOI_CHUONGTRINH_CHITIET CLASS
+class PhanphoiChuongtrinhChitiet {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.PHANPHOI_CHUONGTRINH_CHITIET, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.PHANPHOI_CHUONGTRINH_CHITIET, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.PHANPHOI_CHUONGTRINH_CHITIET, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.PHANPHOI_CHUONGTRINH_CHITIET, data);
   }
 }
