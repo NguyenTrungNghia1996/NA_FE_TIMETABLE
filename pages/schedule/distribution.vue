@@ -235,7 +235,14 @@ const detailPagination = reactive({ current: 1, pageSize: 10, total: 0, showSize
 const detailColumns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
   { title: "Tuần", dataIndex: "tuan", key: "tuan", align: "center" },
-  { title: "Số thứ tự tiết", dataIndex: "thu_tu_tiet", key: "thu_tu_tiet", align: "center" },
+  {
+    title: "Số thứ tự tiết",
+    dataIndex: "thu_tu_tiet",
+    key: "thu_tu_tiet",
+    align: "center",
+    sorter: (a, b) => (Number(a?.thu_tu_tiet) || 0) - (Number(b?.thu_tu_tiet) || 0),
+    defaultSortOrder: "ascend",
+  },
   { title: "Phân môn", dataIndex: "phan_mon", key: "phan_mon" },
   { title: "Tên bài học", dataIndex: "ten_bai", key: "ten_bai" },
   { title: "Thao tác", key: "action", width: 100, align: "center", fixed: "right" },
@@ -256,6 +263,7 @@ const openDetailDrawer = async record => {
   detailParam.value = { pageIndex: 1, pageSize: 10, search: "", idPpct: record.id };
   resetDetailForm();
   await fetchDetailData();
+  await setNextThuTuTietFromAll();
 };
 
 const fetchDetailData = async () => {
@@ -263,7 +271,10 @@ const fetchDetailData = async () => {
     detailDrawer.loading = true;
     const { data, error } = await RestApi.phanphoi_chuongtrinh_chitiet.list({ params: { ...detailParam.value } });
     if (data.value?.status === "success") {
-      detailData.value = data.value.data.items || [];
+      const items = data.value.data.items || [];
+      // Sắp xếp danh sách chi tiết theo Số thứ tự tiết (tăng dần)
+      items.sort((a, b) => (Number(a?.thu_tu_tiet) || 0) - (Number(b?.thu_tu_tiet) || 0));
+      detailData.value = items;
       detailPagination.total = data.value.data.totalrecord || 0;
     } else {
       throw new Error(error.value?.data?.message || "Không tải được dữ liệu");
@@ -274,6 +285,27 @@ const fetchDetailData = async () => {
     message.error(err.message || "Lỗi tải dữ liệu");
   } finally {
     detailDrawer.loading = false;
+  }
+};
+
+// Tính và gán "Số thứ tự tiết" tiếp theo (dựa trên tất cả bản ghi hiện có của PPCT)
+const setNextThuTuTietFromAll = async () => {
+  try {
+    if (!detailDrawer.header?.id) return;
+    if (isDetailEdit.value) return; // không tự động khi đang chỉnh sửa
+    const { data } = await RestApi.phanphoi_chuongtrinh_chitiet.list({
+      params: { idPpct: detailDrawer.header.id, pageIndex: 1, pageSize: 100000 },
+    });
+    if (data.value?.status === "success") {
+      const all = data.value.data.items || [];
+      const max = all.reduce((m, x) => {
+        const v = Number(x?.thu_tu_tiet) || 0;
+        return v > m ? v : m;
+      }, 0);
+      detailForm.thu_tu_tiet = max + 1 || 1;
+    }
+  } catch (e) {
+    // bỏ qua lỗi, không chặn luồng
   }
 };
 
@@ -319,6 +351,7 @@ const handleImport = async () => {
       message.success(resp.data.value?.message || "Import thành công");
       closeImportModal();
       await fetchDetailData();
+      await setNextThuTuTietFromAll();
     } else {
       const msg = resp.error?.value?.data?.message || resp.data.value?.message || "Import không thành công";
       throw new Error(msg);
@@ -340,8 +373,23 @@ const handleDetailTableChange = async pag => {
 
 const resetDetailForm = () => {
   isDetailEdit.value = false;
-  Object.assign(detailForm, { id: null, id_ppct: detailDrawer.header?.id || null, tuan: null, thu_tu_tiet: null, phan_mon: "", ten_bai: "", ghi_chu: "" });
+  // Reset các field trước, sau đó gán giá trị mặc định (để tránh resetFields ghi đè)
   detailFormRef.value?.resetFields?.();
+  Object.assign(detailForm, {
+    id: null,
+    id_ppct: detailDrawer.header?.id || null,
+    tuan: null,
+    thu_tu_tiet:
+      (Number(
+        detailData.value?.reduce?.(
+          (m, x) => ((Number(x?.thu_tu_tiet) || 0) > m ? Number(x?.thu_tu_tiet) : m),
+          0,
+        ),
+      ) || 0) + 1,
+    phan_mon: "",
+    ten_bai: "",
+    ghi_chu: "",
+  });
 };
 
 const editDetail = record => {
@@ -365,6 +413,7 @@ const saveDetail = async () => {
       message.success(resp.data.value?.message || "Thành công");
       await fetchDetailData();
       resetDetailForm();
+      await setNextThuTuTietFromAll();
     } else {
       throw new Error(resp.error?.value?.data?.message || "Lỗi không xác định");
     }
@@ -389,6 +438,7 @@ const deleteDetail = async id => {
     message.error(err.message || "Xóa không thành công");
   } finally {
     await fetchDetailData();
+    await setNextThuTuTietFromAll();
   }
 };
 
