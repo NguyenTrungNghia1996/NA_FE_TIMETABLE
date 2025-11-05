@@ -205,8 +205,8 @@ const detailData = ref([]);
 const detailPagination = reactive({ current: 1, pageSize: 10, total: 0, showSizeChanger: true, pageSizeOptions: ["10", "20", "50"] });
 const detailColumns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
-  { title: "Tuần", dataIndex: "tuan", key: "tuan", width: 90, align: "center" },
-  { title: "Số thứ tự tiết", dataIndex: "thu_tu_tiet", key: "thu_tu_tiet", width: 140, align: "center" },
+  { title: "Tuần", dataIndex: "tuan", key: "tuan", align: "center" },
+  { title: "Số thứ tự tiết", dataIndex: "thu_tu_tiet", key: "thu_tu_tiet", align: "center" },
   { title: "Phân môn", dataIndex: "phan_mon", key: "phan_mon" },
   { title: "Tên bài học", dataIndex: "ten_bai", key: "ten_bai" },
   { title: "Thao tác", key: "action", width: 100, align: "center", fixed: "right" },
