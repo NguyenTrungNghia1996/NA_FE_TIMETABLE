@@ -25,6 +25,13 @@
                   </template>
                 </a-button>
               </a-tooltip>
+              <a-tooltip title="Import dữ liệu">
+                <a-button type="link" size="small" :disabled="!settingStore.currentPermission" @click="openImportModal(record)">
+                  <template #icon>
+                    <UploadOutlined />
+                  </template>
+                </a-button>
+              </a-tooltip>
               <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission">
                 <template #icon>
                   <EditOutlined />
@@ -103,6 +110,28 @@
         </a-card>
       </div>
     </a-drawer>
+
+    <!-- Modal: Import dữ liệu PPCT -->
+    <a-modal v-model:open="importModal.open" title="IMPORT PHÂN PHỐI CHƯƠNG TRÌNH" :confirmLoading="importModal.uploading" @ok="handleImport" @cancel="closeImportModal">
+      <div class="space-y-2 text-sm">
+        <div><span class="font-medium">Tên phân phối chương trình:</span> {{ detailDrawer.header.ten || "-" }}</div>
+        <div><span class="font-medium">Năm học:</span> {{ detailDrawer.header.ten_nam_hoc || "-" }}</div>
+        <div><span class="font-medium">Khối lớp:</span> {{ detailDrawer.header.ten_khoi || "-" }}</div>
+        <div><span class="font-medium">Ban học:</span> {{ detailDrawer.header.ten_ban || "-" }}</div>
+        <div><span class="font-medium">Môn học:</span> {{ detailDrawer.header.ten_mon || "-" }}</div>
+      </div>
+      <div class="mt-4">
+        <a-upload :beforeUpload="beforeUpload" :maxCount="1" :file-list="importModal.fileList" @remove="onRemoveFile" :accept="'.xlsx,.xls'" :showUploadList="{ showRemoveIcon: true }">
+          <a-button>Chọn file</a-button>
+        </a-upload>
+      </div>
+      <template #footer>
+        <div class="flex justify-end space-x-2">
+          <a-button @click="closeImportModal">Hủy</a-button>
+          <a-button type="primary" :disabled="!importModal.file || !settingStore.currentPermission" :loading="importModal.uploading" @click="handleImport">Lưu</a-button>
+        </div>
+      </template>
+    </a-modal>
 
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa' : 'Thêm mới'" @cancel="handleCancel" :width="600">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
@@ -245,6 +274,59 @@ const fetchDetailData = async () => {
     message.error(err.message || "Lỗi tải dữ liệu");
   } finally {
     detailDrawer.loading = false;
+  }
+};
+
+// Import modal state and actions
+const importModal = reactive({ open: false, file: null, fileList: [], uploading: false });
+const openImportModal = (record) => {
+  if (record) {
+    // set header to selected row so modal knows the context
+    detailDrawer.header = { ...record };
+  }
+  importModal.open = true;
+};
+const closeImportModal = () => {
+  importModal.open = false;
+  importModal.file = null;
+  importModal.fileList = [];
+};
+const beforeUpload = file => {
+  importModal.file = file;
+  importModal.fileList = [file];
+  return false; // prevent auto upload
+};
+const onRemoveFile = () => {
+  importModal.file = null;
+  importModal.fileList = [];
+};
+const handleImport = async () => {
+  if (!detailDrawer.header?.id) {
+    message.error("Không xác định được phân phối chương trình");
+    return;
+  }
+  if (!importModal.file) {
+    message.warning("Vui lòng chọn file để import");
+    return;
+  }
+  try {
+    importModal.uploading = true;
+    const form = new FormData();
+    form.append("file", importModal.file);
+    form.append("idppct", String(detailDrawer.header.id));
+    const resp = await RestApi.phanphoi_chuongtrinh_chitiet.import_file({ body: form });
+    if (resp.data.value?.status === "success") {
+      message.success(resp.data.value?.message || "Import thành công");
+      closeImportModal();
+      await fetchDetailData();
+    } else {
+      const msg = resp.error?.value?.data?.message || resp.data.value?.message || "Import không thành công";
+      throw new Error(msg);
+    }
+  } catch (err) {
+    message.error(err.message || "Import không thành công");
+  } finally {
+    importModal.uploading = false;
   }
 };
 

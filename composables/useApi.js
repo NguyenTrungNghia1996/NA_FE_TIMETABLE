@@ -138,6 +138,8 @@ let ENDPOINTS = {
   PHANPHOI_CHUONGTRINH: "/api/phanphoi_chuongtrinh",
   // PHANPHOI_CHUONGTRINH_CHITIET
   PHANPHOI_CHUONGTRINH_CHITIET: "/api/phanphoi_chuongtrinh_chitiet",
+  // PHANPHOI_CHUONGTRINH_CHITIET - IMPORT
+  PHANPHOI_CHUONGTRINH_CHITIET_IMPORT: "/api/phanphoi_chuongtrinh_chitiet/import",
 };
 import { useUserStore } from "~~/stores/userStore";
 import { useUnitStore } from "~~/stores/unitStore";
@@ -188,6 +190,20 @@ class Request {
       baseURL: this.base_url,
       method: "POST",
       headers: this.createHeaders(),
+      ...options,
+      ...this.handler,
+    });
+  }
+  // POST multipart/form-data (for file uploads). Do not set Content-Type so browser sets boundary
+  postForm(url, options) {
+    const userStore = useUserStore();
+    const headers = {
+      Authorization: `Bearer ${userStore.token}`,
+    };
+    return useFetch(url, {
+      baseURL: this.base_url,
+      method: "POST",
+      headers,
       ...options,
       ...this.handler,
     });
@@ -1054,5 +1070,9 @@ class PhanphoiChuongtrinhChitiet {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.PHANPHOI_CHUONGTRINH_CHITIET, data);
+  }
+  // Import chi tiết PPCT từ file Excel
+  async import_file(data) {
+    return await this.request.postForm(ENDPOINTS.PHANPHOI_CHUONGTRINH_CHITIET_IMPORT, data);
   }
 }
