@@ -74,9 +74,7 @@
             <a-form-item label="Tên bài học" name="ten_bai">
               <a-input v-model:value="detailForm.ten_bai" allow-clear placeholder="Nhập tên bài học" />
             </a-form-item>
-            <a-form-item label="Ghi chú" name="ghi_chu">
-              <a-input v-model:value="detailForm.ghi_chu" allow-clear placeholder="Ghi chú (không bắt buộc)" />
-            </a-form-item>
+            
             <div class="flex gap-2">
               <a-button type="primary" :loading="detailDrawer.saving" :disabled="!settingStore.currentPermission" @click="saveDetail">Lưu</a-button>
               <a-button danger @click="resetDetailForm" :disabled="!settingStore.currentPermission">Hủy</a-button>
@@ -250,7 +248,7 @@ const detailColumns = [
 
 const detailFormRef = ref();
 const isDetailEdit = ref(false);
-const detailForm = reactive({ id: null, id_ppct: null, tuan: null, thu_tu_tiet: null, phan_mon: "", ten_bai: "", ghi_chu: "" });
+const detailForm = reactive({ id: null, id_ppct: null, tuan: null, thu_tu_tiet: null, phan_mon: "", ten_bai: "" });
 const detailRules = reactive({
   tuan: [{ required: true, message: "Vui lòng nhập tuần", trigger: "blur" }],
   thu_tu_tiet: [{ required: true, message: "Vui lòng nhập số thứ tự tiết", trigger: "blur" }],
@@ -388,20 +386,26 @@ const resetDetailForm = () => {
       ) || 0) + 1,
     phan_mon: "",
     ten_bai: "",
-    ghi_chu: "",
   });
 };
 
 const editDetail = record => {
   isDetailEdit.value = true;
-  Object.assign(detailForm, { ...record, id_ppct: detailDrawer.header?.id || record.id_ppct });
+  Object.assign(detailForm, {
+    id: record.id,
+    id_ppct: detailDrawer.header?.id || record.id_ppct,
+    tuan: record.tuan,
+    thu_tu_tiet: record.thu_tu_tiet,
+    phan_mon: record.phan_mon,
+    ten_bai: record.ten_bai,
+  });
 };
 
 const saveDetail = async () => {
   try {
     await detailFormRef.value?.validate?.();
     detailDrawer.saving = true;
-    const payload = { id: detailForm.id, id_ppct: detailDrawer.header?.id, tuan: detailForm.tuan, thu_tu_tiet: detailForm.thu_tu_tiet, phan_mon: detailForm.phan_mon, ten_bai: detailForm.ten_bai, ghi_chu: detailForm.ghi_chu };
+    const payload = { id: detailForm.id, id_ppct: detailDrawer.header?.id, tuan: detailForm.tuan, thu_tu_tiet: detailForm.thu_tu_tiet, phan_mon: detailForm.phan_mon, ten_bai: detailForm.ten_bai };
     let resp;
     if (isDetailEdit.value) {
       resp = await RestApi.phanphoi_chuongtrinh_chitiet.update({ body: payload });
