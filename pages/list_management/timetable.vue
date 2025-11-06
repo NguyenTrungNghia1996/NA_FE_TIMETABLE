@@ -134,6 +134,7 @@
             <a-button :loading="exportModal.loadingKey === 'matrix-teacher'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-teacher'" @click="exportMatrixTeacher">Ma trận Giáo viên</a-button>
             <a-button :loading="exportModal.loadingKey === 'matrix-grade'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-grade'" @click="exportMatrixGrade">Ma trận Khối</a-button>
             <a-button :loading="exportModal.loadingKey === 'matrix-expertise'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-expertise'" @click="exportMatrixExpertise">Ma trận Tổ chuyên môn</a-button>
+            <a-button :loading="exportModal.loadingKey === 'matrix-class'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-class'" @click="exportMatrixClass">Ma trận Lớp học</a-button>
           </div>
         </a-card>
       </div>
@@ -221,7 +222,7 @@ const exportModal = reactive({
   visible: false,
   timetableId: null,
   timetableName: "",
-  loadingKey: null, // 'class' | 'school' | 'teacher' | 'matrix-school' | 'matrix-teacher' | 'matrix-grade' | 'matrix-expertise' | null
+  loadingKey: null, // 'class' | 'school' | 'teacher' | 'matrix-school' | 'matrix-teacher' | 'matrix-grade' | 'matrix-expertise' | 'matrix-class' | null
   options: {
     class: { showRoom: false, showTeacher: false },
     school: { showRoom: false, showTeacher: false },
@@ -375,6 +376,7 @@ const exportMatrixSchool = () => exportFile(() => RestApi.timetable.export_matri
 const exportMatrixTeacher = () => exportFile(() => RestApi.timetable.export_matrix_teacher({ params: { idtkb: exportModal.timetableId } }), "matrix-teacher");
 const exportMatrixGrade = () => exportFile(() => RestApi.timetable.export_matrix_grade({ params: { idtkb: exportModal.timetableId } }), "matrix-grade");
 const exportMatrixExpertise = () => exportFile(() => RestApi.timetable.export_matrix_expertise({ params: { idtkb: exportModal.timetableId } }), "matrix-expertise");
+const exportMatrixClass = () => exportFile(() => RestApi.timetable.export_matrix_class({ params: { idtkb: exportModal.timetableId } }), "matrix-class");
 
 const notifyUpdating = () => message.info("Tính năng đang phát triển");
 const handleTableChange = async pag => {
