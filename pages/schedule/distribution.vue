@@ -50,11 +50,11 @@
       </a-table>
     </ClientOnly>
 
-    <!-- Drawer: Chi tiết phân phối chương trình (full, slide from bottom) -->
-    <a-drawer v-model:open="detailDrawer.open" :title="`Chi tiết phân phối: ${detailDrawer.header.ten || ''}`" :footer="null" height="100vh" placement="bottom" :destroyOnClose="true">
+    <!-- Modal: Chi tiết phân phối chương trình -->
+    <a-modal v-model:open="detailDrawer.open" :title="`Chi tiết phân phối: ${detailDrawer.header.ten || ''}`" :footer="null" :width="1000" :bodyStyle="{ maxHeight: '70vh', overflowY: 'auto' }">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <!-- Left: Form nhập chi tiết -->
-        <a-card size="small" title="Thiết lập phân phối chương trình">
+        <!-- <a-card size="small" title="Thiết lập phân phối chương trình">
           <div class="grid grid-cols-1 gap-3 mb-3 text-sm">
             <div><span class="font-medium">Năm học:</span> {{ detailDrawer.header.ten_nam_hoc || "-" }}</div>
             <div><span class="font-medium">Khối lớp:</span> {{ detailDrawer.header.ten_khoi || "-" }}</div>
@@ -80,21 +80,45 @@
               <a-button danger @click="resetDetailForm" :disabled="!settingStore.currentPermission">Hủy</a-button>
             </div>
           </a-form>
-        </a-card>
+        </a-card> -->
 
         <!-- Right: Danh sách chi tiết -->
-        <a-card class="col-span-2" size="small" title="Danh sách chi tiết phân phối chương trình">
+        <a-card class="col-span-3" size="small" title="Danh sách chi tiết phân phối chương trình">
+          <template #extra>
+            <a-popconfirm title="Xóa các mục đã chọn?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteSelectedDetails">
+              <a-button
+                danger
+                size="small"
+                :disabled="!settingStore.currentPermission || !detailSelection.selectedRowKeys.length"
+                :loading="detailSelection.deleting"
+              >
+                Xóa đã chọn ({{ detailSelection.selectedRowKeys.length }})
+              </a-button>
+            </a-popconfirm>
+          </template>
           <ClientOnly class="overflow-x-auto">
-            <a-table :columns="detailColumns" :data-source="detailData" :pagination="detailPagination" :loading="detailDrawer.loading" size="small" bordered :scroll="{ x: '800' }" @change="handleDetailTableChange">
-              <template #bodyCell="{ column, record, index }">
+            <a-table
+              :columns="detailColumns"
+              :data-source="detailData"
+              :pagination="detailPagination"
+              :loading="detailDrawer.loading"
+              size="small"
+              bordered
+              :scroll="{ x: '800' }"
+              @change="handleDetailTableChange"
+              row-key="id"
+              :row-selection="detailRowSelection"
+            >
+              <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'stt'">
-                  {{ (detailPagination.current - 1) * detailPagination.pageSize + index + 1 }}
+                  <!-- {{ (detailPagination.current - 1) * detailPagination.pageSize + index + 1 }} -->
+                  {{ record.stt }}
                 </template>
-                <template v-else-if="column.key === 'action'">
+                <template v-if="column.key === 'action'">
                   <div class="flex justify-center gap-2">
-                    <a-button type="link" size="small" :disabled="!settingStore.currentPermission" @click="editDetail(record)">
+                    <!-- <a-button type="link" size="small" :disabled="!settingStore.currentPermission" @click="editDetail(record)">
                       <template #icon><EditOutlined /></template>
-                    </a-button>
+                    </a-button> -->
                     <a-popconfirm title="Xóa mục này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteDetail(record.id)">
                       <a-button type="link" size="small" danger :disabled="!settingStore.currentPermission">
                         <template #icon><DeleteOutlined /></template>
@@ -107,7 +131,7 @@
           </ClientOnly>
         </a-card>
       </div>
-    </a-drawer>
+    </a-modal>
 
     <!-- Modal: Import dữ liệu PPCT -->
     <a-modal v-model:open="importModal.open" title="IMPORT PHÂN PHỐI CHƯƠNG TRÌNH" :confirmLoading="importModal.uploading" @ok="handleImport" @cancel="closeImportModal">
@@ -255,6 +279,13 @@ const detailRules = reactive({
   ten_bai: [{ required: true, message: "Vui lòng nhập tên bài học", trigger: "blur" }],
 });
 
+// Row selection for detail table
+const detailSelection = reactive({ selectedRowKeys: [], deleting: false });
+const detailRowSelection = computed(() => ({
+  selectedRowKeys: detailSelection.selectedRowKeys,
+  onChange: keys => (detailSelection.selectedRowKeys = keys),
+}));
+
 const openDetailDrawer = async record => {
   detailDrawer.open = true;
   detailDrawer.header = { ...record };
@@ -366,7 +397,34 @@ const handleDetailTableChange = async pag => {
   detailPagination.pageSize = pag.pageSize;
   detailParam.value.pageIndex = pag.current;
   detailParam.value.pageSize = pag.pageSize;
+  // Clear selection when page changes
+  detailSelection.selectedRowKeys = [];
   await fetchDetailData();
+};
+
+// Delete multiple selected detail rows
+const deleteSelectedDetails = async () => {
+  const ids = [...detailSelection.selectedRowKeys];
+  if (!ids.length) return;
+  detailSelection.deleting = true;
+  let ok = 0;
+  let fail = 0;
+  for (const id of ids) {
+    try {
+      const { data, error } = await RestApi.phanphoi_chuongtrinh_chitiet.delete({ params: { Id: id } });
+      if (data.value?.status === "success") ok++;
+      else fail++;
+    } catch (e) {
+      fail++;
+    }
+  }
+  if (ok && !fail) message.success(`Đã xóa ${ok} mục`);
+  else if (ok && fail) message.warning(`Đã xóa ${ok} mục, lỗi ${fail} mục`);
+  else message.error("Xóa không thành công");
+  detailSelection.deleting = false;
+  detailSelection.selectedRowKeys = [];
+  await fetchDetailData();
+  await setNextThuTuTietFromAll();
 };
 
 const resetDetailForm = () => {
