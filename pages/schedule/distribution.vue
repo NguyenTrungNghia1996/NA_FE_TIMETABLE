@@ -18,13 +18,13 @@
           </template>
           <template v-if="column.key === 'action'">
             <div class="flex justify-center gap-2">
-              <!-- <a-tooltip title="Chi tiết phân phối">
+              <a-tooltip title="Chi tiết phân phối">
                 <a-button type="link" size="small" @click="openDetailDrawer(record)">
                   <template #icon>
                     <UnorderedListOutlined />
                   </template>
                 </a-button>
-              </a-tooltip> -->
+              </a-tooltip>
               <a-tooltip title="Import dữ liệu">
                 <a-button type="link" size="small" :disabled="!settingStore.currentPermission" @click="openImportModal(record)">
                   <template #icon>
