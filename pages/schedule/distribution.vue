@@ -18,13 +18,13 @@
           </template>
           <template v-if="column.key === 'action'">
             <div class="flex justify-center gap-2">
-              <a-tooltip title="Chi tiết phân phối">
+              <!-- <a-tooltip title="Chi tiết phân phối">
                 <a-button type="link" size="small" @click="openDetailDrawer(record)">
                   <template #icon>
                     <UnorderedListOutlined />
                   </template>
                 </a-button>
-              </a-tooltip>
+              </a-tooltip> -->
               <a-tooltip title="Import dữ liệu">
                 <a-button type="link" size="small" :disabled="!settingStore.currentPermission" @click="openImportModal(record)">
                   <template #icon>
@@ -74,7 +74,7 @@
             <a-form-item label="Tên bài học" name="ten_bai">
               <a-input v-model:value="detailForm.ten_bai" allow-clear placeholder="Nhập tên bài học" />
             </a-form-item>
-            
+
             <div class="flex gap-2">
               <a-button type="primary" :loading="detailDrawer.saving" :disabled="!settingStore.currentPermission" @click="saveDetail">Lưu</a-button>
               <a-button danger @click="resetDetailForm" :disabled="!settingStore.currentPermission">Hủy</a-button>
@@ -309,7 +309,7 @@ const setNextThuTuTietFromAll = async () => {
 
 // Import modal state and actions
 const importModal = reactive({ open: false, file: null, fileList: [], uploading: false });
-const openImportModal = (record) => {
+const openImportModal = record => {
   if (record) {
     // set header to selected row so modal knows the context
     detailDrawer.header = { ...record };
@@ -377,13 +377,7 @@ const resetDetailForm = () => {
     id: null,
     id_ppct: detailDrawer.header?.id || null,
     tuan: null,
-    thu_tu_tiet:
-      (Number(
-        detailData.value?.reduce?.(
-          (m, x) => ((Number(x?.thu_tu_tiet) || 0) > m ? Number(x?.thu_tu_tiet) : m),
-          0,
-        ),
-      ) || 0) + 1,
+    thu_tu_tiet: (Number(detailData.value?.reduce?.((m, x) => ((Number(x?.thu_tu_tiet) || 0) > m ? Number(x?.thu_tu_tiet) : m), 0)) || 0) + 1,
     phan_mon: "",
     ten_bai: "",
   });
