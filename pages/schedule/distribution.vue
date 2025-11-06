@@ -84,18 +84,6 @@
 
         <!-- Right: Danh sách chi tiết -->
         <a-card class="col-span-3" size="small" title="Danh sách chi tiết phân phối chương trình">
-          <template #extra>
-            <a-popconfirm title="Xóa các mục đã chọn?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteSelectedDetails">
-              <a-button
-                danger
-                size="small"
-                :disabled="!settingStore.currentPermission || !detailSelection.selectedRowKeys.length"
-                :loading="detailSelection.deleting"
-              >
-                Xóa đã chọn ({{ detailSelection.selectedRowKeys.length }})
-              </a-button>
-            </a-popconfirm>
-          </template>
           <ClientOnly class="overflow-x-auto">
             <a-table
               :columns="detailColumns"
@@ -107,24 +95,11 @@
               :scroll="{ x: '800' }"
               @change="handleDetailTableChange"
               row-key="id"
-              :row-selection="detailRowSelection"
             >
               <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'stt'">
                   <!-- {{ (detailPagination.current - 1) * detailPagination.pageSize + index + 1 }} -->
                   {{ record.stt }}
-                </template>
-                <template v-if="column.key === 'action'">
-                  <div class="flex justify-center gap-2">
-                    <!-- <a-button type="link" size="small" :disabled="!settingStore.currentPermission" @click="editDetail(record)">
-                      <template #icon><EditOutlined /></template>
-                    </a-button> -->
-                    <a-popconfirm title="Xóa mục này?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteDetail(record.id)">
-                      <a-button type="link" size="small" danger :disabled="!settingStore.currentPermission">
-                        <template #icon><DeleteOutlined /></template>
-                      </a-button>
-                    </a-popconfirm>
-                  </div>
                 </template>
               </template>
             </a-table>
@@ -267,7 +242,6 @@ const detailColumns = [
   },
   { title: "Phân môn", dataIndex: "phan_mon", key: "phan_mon" },
   { title: "Tên bài học", dataIndex: "ten_bai", key: "ten_bai" },
-  { title: "Thao tác", key: "action", width: 100, align: "center", fixed: "right" },
 ];
 
 const detailFormRef = ref();
@@ -279,12 +253,7 @@ const detailRules = reactive({
   ten_bai: [{ required: true, message: "Vui lòng nhập tên bài học", trigger: "blur" }],
 });
 
-// Row selection for detail table
-const detailSelection = reactive({ selectedRowKeys: [], deleting: false });
-const detailRowSelection = computed(() => ({
-  selectedRowKeys: detailSelection.selectedRowKeys,
-  onChange: keys => (detailSelection.selectedRowKeys = keys),
-}));
+// (Removed row selection and bulk delete for detail list)
 
 const openDetailDrawer = async record => {
   detailDrawer.open = true;
@@ -397,34 +366,7 @@ const handleDetailTableChange = async pag => {
   detailPagination.pageSize = pag.pageSize;
   detailParam.value.pageIndex = pag.current;
   detailParam.value.pageSize = pag.pageSize;
-  // Clear selection when page changes
-  detailSelection.selectedRowKeys = [];
   await fetchDetailData();
-};
-
-// Delete multiple selected detail rows
-const deleteSelectedDetails = async () => {
-  const ids = [...detailSelection.selectedRowKeys];
-  if (!ids.length) return;
-  detailSelection.deleting = true;
-  let ok = 0;
-  let fail = 0;
-  for (const id of ids) {
-    try {
-      const { data, error } = await RestApi.phanphoi_chuongtrinh_chitiet.delete({ params: { Id: id } });
-      if (data.value?.status === "success") ok++;
-      else fail++;
-    } catch (e) {
-      fail++;
-    }
-  }
-  if (ok && !fail) message.success(`Đã xóa ${ok} mục`);
-  else if (ok && fail) message.warning(`Đã xóa ${ok} mục, lỗi ${fail} mục`);
-  else message.error("Xóa không thành công");
-  detailSelection.deleting = false;
-  detailSelection.selectedRowKeys = [];
-  await fetchDetailData();
-  await setNextThuTuTietFromAll();
 };
 
 const resetDetailForm = () => {
@@ -480,23 +422,7 @@ const saveDetail = async () => {
   }
 };
 
-const deleteDetail = async id => {
-  try {
-    const { data, error } = await RestApi.phanphoi_chuongtrinh_chitiet.delete({ params: { Id: id } });
-    if (data.value?.status === "success") {
-      message.success(data.value?.message || "Xóa thành công");
-      detailParam.value.pageIndex = 1;
-      detailPagination.current = 1;
-    } else {
-      throw new Error(error.value?.data?.message || "Xóa không thành công");
-    }
-  } catch (err) {
-    message.error(err.message || "Xóa không thành công");
-  } finally {
-    await fetchDetailData();
-    await setNextThuTuTietFromAll();
-  }
-};
+
 
 const handleTableChange = async pag => {
   pagination.current = pag.current;
