@@ -85,17 +85,7 @@
         <!-- Right: Danh sách chi tiết -->
         <a-card class="col-span-3" size="small" title="Danh sách chi tiết phân phối chương trình">
           <ClientOnly class="overflow-x-auto">
-            <a-table
-              :columns="detailColumns"
-              :data-source="detailData"
-              :pagination="detailPagination"
-              :loading="detailDrawer.loading"
-              size="small"
-              bordered
-              :scroll="{ x: '800' }"
-              @change="handleDetailTableChange"
-              row-key="id"
-            >
+            <a-table :columns="detailColumns" :data-source="detailData" :pagination="detailPagination" :loading="detailDrawer.loading" size="small" bordered :scroll="{ x: '800' }" @change="handleDetailTableChange" row-key="id">
               <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'stt'">
                   <!-- {{ (detailPagination.current - 1) * detailPagination.pageSize + index + 1 }} -->
@@ -154,10 +144,13 @@
 </template>
 
 <script setup>
+const router = useRouter();
 const settingStore = useSettingStore();
 const { RestApi } = useApi();
 const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
-
+function reloadPage() {
+  router.go(0);
+}
 const columns = [
   { title: "STT", key: "stt", width: 50, align: "center" },
   { title: "Tên", dataIndex: "ten", key: "ten", ellipsis: true },
@@ -348,8 +341,10 @@ const handleImport = async () => {
     if (resp.data.value?.status === "success") {
       message.success(resp.data.value?.message || "Import thành công");
       closeImportModal();
-      await fetchDetailData();
-      await setNextThuTuTietFromAll();
+      reloadPage();
+      // window.location.reload();
+      // await fetchDetailData();
+      // await setNextThuTuTietFromAll();
     } else {
       const msg = resp.error?.value?.data?.message || resp.data.value?.message || "Import không thành công";
       throw new Error(msg);
@@ -421,8 +416,6 @@ const saveDetail = async () => {
     detailDrawer.saving = false;
   }
 };
-
-
 
 const handleTableChange = async pag => {
   pagination.current = pag.current;

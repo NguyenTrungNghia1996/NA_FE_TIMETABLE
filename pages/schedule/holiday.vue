@@ -204,8 +204,9 @@ const buildPayload = () => {
   return {
     ...(isEdit.value ? { id: formState.id } : {}),
     ten: formState.ten,
-    tu_ngay: start ? dayjs(start).toDate().toISOString() : null,
-    den_ngay: end ? dayjs(end).toDate().toISOString() : null,
+    // Use local date format to avoid timezone shifting one day backward
+    tu_ngay: start ? dayjs(start).format('YYYY-MM-DD') : null,
+    den_ngay: end ? dayjs(end).format('YYYY-MM-DD') : null,
   };
 };
 
