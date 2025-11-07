@@ -341,7 +341,6 @@ const handleImport = async () => {
     if (resp.data.value?.status === "success") {
       message.success(resp.data.value?.message || "Import thành công");
       closeImportModal();
-      reloadPage();
       // window.location.reload();
       // await fetchDetailData();
       // await setNextThuTuTietFromAll();
@@ -353,6 +352,7 @@ const handleImport = async () => {
     message.error(err.message || "Import không thành công");
   } finally {
     importModal.uploading = false;
+    reloadPage();
   }
 };
 
