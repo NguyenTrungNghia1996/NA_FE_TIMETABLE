@@ -47,7 +47,12 @@
       </a-table>
     </ClientOnly>
 
-    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa lịch báo giảng' : 'Thêm mới lịch báo giảng'" @cancel="handleCancel" :width="640">
+    <a-modal
+      v-model:open="visible"
+      :title="isEdit ? `Chỉnh sửa lịch báo giảng - Tuần ${editingWeek || ''}` : `Thêm mới lịch báo giảng - Tuần ${nextWeek}`"
+      @cancel="handleCancel"
+      :width="640"
+    >
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <SelectYear v-model="formState.id_nam_hoc" label="Năm học" name="id_nam_hoc" :rules="rules.id_nam_hoc" />
         <SelectTimetable v-model="formState.id_tkb" label="Thời khóa biểu" name="id_tkb" :rules="rules.id_tkb" />
@@ -104,6 +109,7 @@ const visible = ref(false);
 const confirmLoading = ref(false);
 const isEdit = ref(false);
 const formRef = ref();
+const editingWeek = ref(null);
 
 const pagination = reactive({
   current: 1,
@@ -133,6 +139,13 @@ const formatDate = date => {
     return "";
   }
 };
+
+// Tính tuần kế tiếp (max tuần hiện có + 1) từ dữ liệu đang hiển thị
+const maxWeek = computed(() => {
+  const weeks = (dataSource.value || []).map(i => Number(i?.tuan) || 0);
+  return weeks.length ? Math.max(...weeks) : 0;
+});
+const nextWeek = computed(() => (maxWeek.value || 0) + 1);
 
 // Chỉ cho phép sửa/xóa khi có quyền và lịch chưa bắt đầu
 const canModify = record => {
@@ -186,6 +199,7 @@ const handleSearch = async () => {
 const showModal = () => {
   isEdit.value = false;
   Object.assign(formState, { id: undefined, id_nam_hoc: undefined, id_tkb: undefined });
+  editingWeek.value = null;
   visible.value = true;
 };
 
@@ -200,6 +214,7 @@ const editItem = record => {
     id_nam_hoc: record.id_nam_hoc,
     id_tkb: record.id_tkb,
   });
+  editingWeek.value = record?.tuan ?? null;
   visible.value = true;
 };
 
@@ -242,6 +257,7 @@ const handleOk = async () => {
 
 const handleCancel = () => {
   formRef.value?.resetFields?.();
+  editingWeek.value = null;
   visible.value = false;
 };
 
