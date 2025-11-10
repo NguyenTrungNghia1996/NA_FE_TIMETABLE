@@ -58,7 +58,7 @@
     </a-modal>
 
     <!-- Slip (Phiếu báo giảng) Modal -->
-    <a-modal v-model:open="slipModal.visible" title="Danh sách phiếu báo giảng" @cancel="closeSlipModal" :width="900" :footer="null">
+    <a-modal v-model:open="slipModal.visible" title="Danh sách phiếu báo giảng" @cancel="closeSlipModal" :width="1000" :footer="null">
       <div class="flex flex-col md:flex-row gap-2 mb-3">
         <a-input-search v-model:value="slipModal.searchText" placeholder="Tìm theo tên giáo viên..." enter-button @search="handleSlipSearch" class="w-full md:w-1/3" />
       </div>
@@ -297,7 +297,7 @@ const slipColumns = [
   { title: "Họ và tên giáo viên", dataIndex: "ten_giao_vien", key: "teacher_name" },
   { title: "Tuần", dataIndex: "tuan", key: "tuan", width: 80, align: "center", sorter: (a, b) => (Number(a?.tuan) || 0) - (Number(b?.tuan) || 0), sortDirections: ["ascend", "descend"] },
   { title: "Năm học", dataIndex: "ten_nam", key: "ten_nam_hoc", width: 140 },
-  { title: "Từ ngày - Đến ngày", key: "date_range", width: 260 },
+  { title: "Từ ngày - Đến ngày", key: "date_range", width: 300 },
 ];
 
 const fetchSlipData = async p => {
