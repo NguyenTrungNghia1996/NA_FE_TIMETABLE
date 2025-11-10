@@ -50,9 +50,6 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa lịch báo giảng' : 'Thêm mới lịch báo giảng'" @cancel="handleCancel" :width="640">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <SelectYear v-model="formState.id_nam_hoc" label="Năm học" name="id_nam_hoc" :rules="rules.id_nam_hoc" />
-        <a-form-item label="Tuần" name="tuan" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
-          <a-input-number v-model:value="formState.tuan" :min="1" :max="100" :precision="0" class="!w-full" placeholder="Nhập số tuần" />
-        </a-form-item>
         <SelectTimetable v-model="formState.id_tkb" label="Thời khóa biểu" name="id_tkb" :rules="rules.id_tkb" />
       </a-form>
 
@@ -120,13 +117,11 @@ const pagination = reactive({
 const formState = reactive({
   id: undefined,
   id_nam_hoc: undefined,
-  tuan: undefined,
   id_tkb: undefined,
 });
 
 const rules = reactive({
   id_nam_hoc: [{ required: true, message: "Vui lòng chọn năm học", trigger: "change" }],
-  tuan: [{ required: true, message: "Vui lòng nhập số tuần", trigger: "blur" }],
   id_tkb: [{ required: true, message: "Vui lòng chọn thời khóa biểu", trigger: "change" }],
 });
 
@@ -190,7 +185,7 @@ const handleSearch = async () => {
 
 const showModal = () => {
   isEdit.value = false;
-  Object.assign(formState, { id: undefined, id_nam_hoc: undefined, tuan: undefined, id_tkb: undefined });
+  Object.assign(formState, { id: undefined, id_nam_hoc: undefined, id_tkb: undefined });
   visible.value = true;
 };
 
@@ -203,7 +198,6 @@ const editItem = record => {
   Object.assign(formState, {
     id: record.id,
     id_nam_hoc: record.id_nam_hoc,
-    tuan: record.tuan,
     id_tkb: record.id_tkb,
   });
   visible.value = true;
@@ -212,7 +206,6 @@ const editItem = record => {
 const buildPayload = () => ({
   ...(isEdit.value ? { id: formState.id } : {}),
   id_nam_hoc: formState.id_nam_hoc,
-  tuan: formState.tuan,
   id_tkb: formState.id_tkb,
 });
 
