@@ -27,13 +27,7 @@
                     <template #icon><EditOutlined /></template>
                   </a-button>
                 </a-tooltip>
-                <a-popconfirm
-                  placement="topRight"
-                  title="Bạn chắc chắn muốn xóa?"
-                  ok-text="Đồng ý"
-                  cancel-text="Hủy"
-                  @confirm="confirmDelete(record)"
-                >
+                <a-popconfirm placement="topRight" title="Bạn chắc chắn muốn xóa?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="confirmDelete(record)">
                   <a-tooltip :title="canModify(record) ? 'Xóa' : 'Lịch đã bắt đầu - không thể xóa'">
                     <a-button type="link" danger size="small" :disabled="!canModify(record)">
                       <template #icon><DeleteOutlined /></template>
@@ -47,7 +41,7 @@
       </a-table>
     </ClientOnly>
 
-    <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa lịch báo giảng' : 'Thêm mới lịch báo giảng'" @cancel="handleCancel" :width="640">
+    <a-modal v-model:open="visible" :title="isEdit ? `Chỉnh sửa lịch báo giảng - Tuần ${editingWeek || ''}` : `Thêm mới lịch báo giảng - Tuần ${nextWeek}`" @cancel="handleCancel" :width="640">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <SelectYear v-model="formState.id_nam_hoc" label="Năm học" name="id_nam_hoc" :rules="rules.id_nam_hoc" />
         <SelectTimetable v-model="formState.id_tkb" label="Thời khóa biểu" name="id_tkb" :rules="rules.id_tkb" />
@@ -64,7 +58,7 @@
     </a-modal>
 
     <!-- Slip (Phiếu báo giảng) Modal -->
-    <a-modal v-model:open="slipModal.visible" title="Danh sách phiếu báo giảng" @cancel="closeSlipModal" :width="900" :footer="null">
+    <a-modal v-model:open="slipModal.visible" title="Danh sách phiếu báo giảng" @cancel="closeSlipModal" :width="1000" :footer="null">
       <div class="flex flex-col md:flex-row gap-2 mb-3">
         <a-input-search v-model:value="slipModal.searchText" placeholder="Tìm theo tên giáo viên..." enter-button @search="handleSlipSearch" class="w-full md:w-1/3" />
       </div>
@@ -83,6 +77,7 @@
 
 <script setup>
 import dayjs from "dayjs";
+import "dayjs/locale/vi";
 const settingStore = useSettingStore();
 const { RestApi } = useApi();
 
@@ -104,6 +99,7 @@ const visible = ref(false);
 const confirmLoading = ref(false);
 const isEdit = ref(false);
 const formRef = ref();
+const editingWeek = ref(null);
 
 const pagination = reactive({
   current: 1,
@@ -128,11 +124,18 @@ const rules = reactive({
 const formatDate = date => {
   if (!date) return "";
   try {
-    return dayjs(date).format("DD/MM/YYYY");
+    return dayjs(date).format("dd DD/MM/YYYY");
   } catch {
     return "";
   }
 };
+
+// Tính tuần kế tiếp (max tuần hiện có + 1) từ dữ liệu đang hiển thị
+const maxWeek = computed(() => {
+  const weeks = (dataSource.value || []).map(i => Number(i?.tuan) || 0);
+  return weeks.length ? Math.max(...weeks) : 0;
+});
+const nextWeek = computed(() => (maxWeek.value || 0) + 1);
 
 // Chỉ cho phép sửa/xóa khi có quyền và lịch chưa bắt đầu
 const canModify = record => {
@@ -186,6 +189,7 @@ const handleSearch = async () => {
 const showModal = () => {
   isEdit.value = false;
   Object.assign(formState, { id: undefined, id_nam_hoc: undefined, id_tkb: undefined });
+  editingWeek.value = null;
   visible.value = true;
 };
 
@@ -200,6 +204,7 @@ const editItem = record => {
     id_nam_hoc: record.id_nam_hoc,
     id_tkb: record.id_tkb,
   });
+  editingWeek.value = record?.tuan ?? null;
   visible.value = true;
 };
 
@@ -242,6 +247,7 @@ const handleOk = async () => {
 
 const handleCancel = () => {
   formRef.value?.resetFields?.();
+  editingWeek.value = null;
   visible.value = false;
 };
 
@@ -291,7 +297,7 @@ const slipColumns = [
   { title: "Họ và tên giáo viên", dataIndex: "ten_giao_vien", key: "teacher_name" },
   { title: "Tuần", dataIndex: "tuan", key: "tuan", width: 80, align: "center", sorter: (a, b) => (Number(a?.tuan) || 0) - (Number(b?.tuan) || 0), sortDirections: ["ascend", "descend"] },
   { title: "Năm học", dataIndex: "ten_nam", key: "ten_nam_hoc", width: 140 },
-  { title: "Từ ngày - Đến ngày", key: "date_range", width: 260 },
+  { title: "Từ ngày - Đến ngày", key: "date_range", width: 300 },
 ];
 
 const fetchSlipData = async p => {
