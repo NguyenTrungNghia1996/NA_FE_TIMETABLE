@@ -141,6 +141,9 @@ let ENDPOINTS = {
   PHANPHOI_CHUONGTRINH_CHITIET: "/api/phanphoi_chuongtrinh_chitiet",
   // PHANPHOI_CHUONGTRINH_CHITIET - IMPORT
   PHANPHOI_CHUONGTRINH_CHITIET_IMPORT: "/api/phanphoi_chuongtrinh_chitiet/import",
+  // LECTURE SCHEDULE (Lịch báo giảng)
+  LECTURE_SCHEDULE: "/api/lich_baogiang",
+  LECTURE_SCHEDULE_SLIP: "/api/lich_baogiang/phieu",
 };
 import { useUserStore } from "~~/stores/userStore";
 import { useUnitStore } from "~~/stores/unitStore";
@@ -286,6 +289,7 @@ class RestApi {
     this.holiday = new Holiday(this.request);
     this.phanphoi_chuongtrinh = new PhanphoiChuongtrinh(this.request);
     this.phanphoi_chuongtrinh_chitiet = new PhanphoiChuongtrinhChitiet(this.request);
+    this.lecture_schedule = new LectureSchedule(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -1036,6 +1040,28 @@ class Holiday {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.HOLIDAY, data);
+  }
+}
+
+// LECTURE_SCHEDULE CLASS
+class LectureSchedule {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.LECTURE_SCHEDULE, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.LECTURE_SCHEDULE, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.LECTURE_SCHEDULE, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.LECTURE_SCHEDULE, data);
+  }
+  async slip_list(data) {
+    return await this.request.get(ENDPOINTS.LECTURE_SCHEDULE_SLIP, data);
   }
 }
 
