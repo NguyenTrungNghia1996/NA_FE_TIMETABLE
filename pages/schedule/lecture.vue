@@ -27,13 +27,7 @@
                     <template #icon><EditOutlined /></template>
                   </a-button>
                 </a-tooltip>
-                <a-popconfirm
-                  placement="topRight"
-                  title="Bạn chắc chắn muốn xóa?"
-                  ok-text="Đồng ý"
-                  cancel-text="Hủy"
-                  @confirm="confirmDelete(record)"
-                >
+                <a-popconfirm placement="topRight" title="Bạn chắc chắn muốn xóa?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="confirmDelete(record)">
                   <a-tooltip :title="canModify(record) ? 'Xóa' : 'Lịch đã bắt đầu - không thể xóa'">
                     <a-button type="link" danger size="small" :disabled="!canModify(record)">
                       <template #icon><DeleteOutlined /></template>
@@ -47,12 +41,7 @@
       </a-table>
     </ClientOnly>
 
-    <a-modal
-      v-model:open="visible"
-      :title="isEdit ? `Chỉnh sửa lịch báo giảng - Tuần ${editingWeek || ''}` : `Thêm mới lịch báo giảng - Tuần ${nextWeek}`"
-      @cancel="handleCancel"
-      :width="640"
-    >
+    <a-modal v-model:open="visible" :title="isEdit ? `Chỉnh sửa lịch báo giảng - Tuần ${editingWeek || ''}` : `Thêm mới lịch báo giảng - Tuần ${nextWeek}`" @cancel="handleCancel" :width="640">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <SelectYear v-model="formState.id_nam_hoc" label="Năm học" name="id_nam_hoc" :rules="rules.id_nam_hoc" />
         <SelectTimetable v-model="formState.id_tkb" label="Thời khóa biểu" name="id_tkb" :rules="rules.id_tkb" />
@@ -88,6 +77,7 @@
 
 <script setup>
 import dayjs from "dayjs";
+import "dayjs/locale/vi";
 const settingStore = useSettingStore();
 const { RestApi } = useApi();
 
@@ -134,7 +124,7 @@ const rules = reactive({
 const formatDate = date => {
   if (!date) return "";
   try {
-    return dayjs(date).format("DD/MM/YYYY");
+    return dayjs(date).format("dd DD/MM/YYYY");
   } catch {
     return "";
   }
