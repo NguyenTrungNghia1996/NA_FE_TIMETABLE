@@ -94,7 +94,7 @@ const param = ref({ pageIndex: 1, pageSize: 10, search: "" });
 const columns = [
   { title: "STT", dataIndex: "stt", key: "stt", width: 60, align: "center" },
   { title: "Năm học", dataIndex: "ten_nam_hoc", key: "ten_nam_hoc", width: 160 },
-  { title: "Tuần", dataIndex: "tuan", key: "tuan", width: 80, align: "center" },
+  { title: "Tuần", dataIndex: "tuan", key: "tuan", width: 80, align: "center", sorter: (a, b) => (Number(a?.tuan) || 0) - (Number(b?.tuan) || 0), sortDirections: ["ascend", "descend"] },
   { title: "Theo TKB", dataIndex: "ten_tkb", key: "ten_tkb", width: 200 },
   { title: "Từ ngày - Đến ngày", key: "date_range", width: 260 },
   { title: "Thao tác", key: "action", width: 100, align: "center", fixed: "right" },
@@ -296,7 +296,7 @@ const slipPagination = reactive({ current: 1, pageSize: 10, total: 0, showSizeCh
 const slipColumns = [
   { title: "STT", dataIndex: "stt", key: "stt", width: 60, align: "center" },
   { title: "Họ và tên giáo viên", dataIndex: "ten_giao_vien", key: "teacher_name" },
-  { title: "Tuần", dataIndex: "tuan", key: "tuan", width: 80, align: "center" },
+  { title: "Tuần", dataIndex: "tuan", key: "tuan", width: 80, align: "center", sorter: (a, b) => (Number(a?.tuan) || 0) - (Number(b?.tuan) || 0), sortDirections: ["ascend", "descend"] },
   { title: "Năm học", dataIndex: "ten_nam", key: "ten_nam_hoc", width: 140 },
   { title: "Từ ngày - Đến ngày", key: "date_range", width: 260 },
 ];
