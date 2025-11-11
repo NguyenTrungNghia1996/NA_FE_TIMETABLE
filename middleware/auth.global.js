@@ -70,6 +70,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const settingStore = useSettingStore();
   const { loadMenu } = useMenu();
   const { loadPermissions, setPermissions } = usePermissions();
+  const { RestApi } = useApi();
 
   const token = userStore.token;
   if (!token) return navigateTo("/login");
@@ -83,9 +84,27 @@ export default defineNuxtRouteMiddleware(async (to) => {
       return navigateTo("/login");
     }
 
+    // Load menu + permissions + unit info in parallel
     const tasks = [];
     if (!settingStore.menu?.length) tasks.push(loadMenu());
     if (!settingStore.menuPermissions?.length) tasks.push(loadPermissions());
+    // Unit info (thông tin đơn vị) — luôn cố gắng nạp để đồng bộ cấu hình thời khóa biểu
+    tasks.push((async () => {
+      try {
+        const { data } = await RestApi.unit_info.get();
+        const payload = data.value?.data || {};
+        // Apply to timetable config in settingStore
+        const so_ngay = Number(payload.so_ngay) || 0;
+        const list_ca = Array.isArray(payload.list_ca) ? payload.list_ca : [];
+        const shiftNames = list_ca.map(s => s.ten_ca).filter(Boolean);
+        const shiftPeriods = list_ca.map(s => Number(s.so_tiet) || 0);
+        if (so_ngay) settingStore.setTimetableDaysCount(so_ngay);
+        if (shiftNames.length) settingStore.setTimetableShifts(shiftNames);
+        if (shiftPeriods.length) settingStore.setTimetableShiftPeriods(shiftPeriods);
+      } catch (_) {
+        // soft-fail: không chặn điều hướng nếu lỗi nạp thông tin đơn vị
+      }
+    })());
     if (tasks.length) await Promise.all(tasks);
 
     if (typeof setPermissions === "function" && settingStore.menuPermissions?.length) {
