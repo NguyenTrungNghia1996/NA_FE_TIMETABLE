@@ -34,7 +34,8 @@
               </a-tag>
             </div>
           </a-form-item>
-          <SelectSchoolShift v-model="shiftIds" :multiple="true" placeholder="Chọn ca học" />
+
+          <SelectSchoolShift v-model="formState.shiftIds" name="shiftIds" :multiple="true" placeholder="Chọn ca học" :rules="rules.shiftIds" />
           <a-form-item label="Ca học và số tiết" name="list_ca">
             <div class="space-y-4">
               <div v-for="shift in formState.list_ca" :key="shift.id_ca_hoc" class="border rounded p-3">
@@ -93,10 +94,9 @@ const formState = reactive({
   idCap: [],
   list_ca: [],
   so_ngay: 7,
+  shiftIds: [],
 });
 
-// Ca học (chọn qua SelectSchoolShift)
-const shiftIds = ref([]);
 const shiftOptions = ref([]); // { label, value }
 
 // Derived days from so_ngay
@@ -115,6 +115,14 @@ const rules = reactive({
   ],
   idCap: [{ required: true, type: "array", message: "Vui lòng chọn cấp học", trigger: "change" }],
   so_ngay: [{ required: true, message: "Vui lòng nhập số ngày học", trigger: "change" }],
+  shiftIds: [
+    {
+      required: true,
+      type: "array",
+      message: "Vui lòng chọn ca học",
+      trigger: "change",
+    },
+  ],
 });
 
 const getPeriodOptions = n => {
@@ -130,11 +138,12 @@ const maxPeriods = computed(() => {
 
 // Đồng bộ list_ca dựa theo ca được chọn
 const ensureListCaFromShiftIds = () => {
-  const idSet = new Set(shiftIds.value || []);
+  const idsArr = Array.isArray(formState.shiftIds) ? formState.shiftIds : [];
+  const idSet = new Set(idsArr);
   // Loại bỏ ca không còn chọn
   formState.list_ca = (formState.list_ca || []).filter(x => idSet.has(x.id_ca_hoc));
   // Thêm ca mới
-  (shiftIds.value || []).forEach(id => {
+  idsArr.forEach(id => {
     if (!formState.list_ca.find(x => x.id_ca_hoc === id)) {
       const opt = (shiftOptions.value || []).find(o => o.value === id);
       formState.list_ca.push({ id_ca_hoc: id, ten_ca: opt?.label || `Ca ${id}`, so_tiet: Number(settingStore.timetableConfig?.periodsPerShift) || 5 });
@@ -142,7 +151,7 @@ const ensureListCaFromShiftIds = () => {
   });
 };
 
-watch(shiftIds, ensureListCaFromShiftIds);
+watch(() => formState.shiftIds, ensureListCaFromShiftIds, { deep: true });
 
 // No toggle helpers for cấp học when using Select
 
@@ -177,7 +186,7 @@ const mapRespToForm = payload => {
   // UI-only sync handled by computed activeDays
   applyToSettingStore();
   // sync shiftIds from list_ca
-  shiftIds.value = (formState.list_ca || []).map(x => x.id_ca_hoc);
+  formState.shiftIds = (formState.list_ca || []).map(x => x.id_ca_hoc);
 };
 
 // Cấp học dùng SelectSchoolLevel, không cần tự nạp options
