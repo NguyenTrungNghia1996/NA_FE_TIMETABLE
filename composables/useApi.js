@@ -144,6 +144,8 @@ let ENDPOINTS = {
   // LECTURE SCHEDULE (Lịch báo giảng)
   LECTURE_SCHEDULE: "/api/lich_baogiang",
   LECTURE_SCHEDULE_SLIP: "/api/lich_baogiang/phieu",
+  // UNIT INFO (Thông tin đơn vị)
+  UNIT_INFO: "/api/thongtin_donvi",
 };
 import { useUserStore } from "~~/stores/userStore";
 import { useUnitStore } from "~~/stores/unitStore";
@@ -290,6 +292,7 @@ class RestApi {
     this.phanphoi_chuongtrinh = new PhanphoiChuongtrinh(this.request);
     this.phanphoi_chuongtrinh_chitiet = new PhanphoiChuongtrinhChitiet(this.request);
     this.lecture_schedule = new LectureSchedule(this.request);
+    this.unit_info = new UnitInfo(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -1062,6 +1065,21 @@ class LectureSchedule {
   }
   async slip_list(data) {
     return await this.request.get(ENDPOINTS.LECTURE_SCHEDULE_SLIP, data);
+  }
+}
+
+// UNIT INFO (Thông tin đơn vị)
+class UnitInfo {
+  constructor() {
+    this.request = new Request();
+  }
+  // GET /api/thongtin_donvi
+  async get(data) {
+    return await this.request.get(ENDPOINTS.UNIT_INFO, data);
+  }
+  // PUT /api/thongtin_donvi
+  async update(data) {
+    return await this.request.put(ENDPOINTS.UNIT_INFO, data);
   }
 }
 
