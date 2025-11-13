@@ -22,17 +22,13 @@
                     <template #icon><ProfileOutlined /></template>
                   </a-button>
                 </a-tooltip>
-                <a-tooltip :title="canModify(record) ? 'Chỉnh sửa' : 'Lịch đã bắt đầu - không thể sửa'">
-                  <a-button type="link" size="small" @click="editItem(record)" :disabled="!canModify(record)">
-                    <template #icon><EditOutlined /></template>
-                  </a-button>
-                </a-tooltip>
+                <a-button type="link" size="small" @click="editItem(record)" :disabled="!canModify(record)">
+                  <template #icon><EditOutlined /></template>
+                </a-button>
                 <a-popconfirm placement="topRight" title="Bạn chắc chắn muốn xóa?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="confirmDelete(record)">
-                  <a-tooltip :title="canModify(record) ? 'Xóa' : 'Lịch đã bắt đầu - không thể xóa'">
-                    <a-button type="link" danger size="small" :disabled="!canModify(record)">
-                      <template #icon><DeleteOutlined /></template>
-                    </a-button>
-                  </a-tooltip>
+                  <a-button type="link" danger size="small" :disabled="!canModify(record)">
+                    <template #icon><DeleteOutlined /></template>
+                  </a-button>
                 </a-popconfirm>
               </div>
             </div>
