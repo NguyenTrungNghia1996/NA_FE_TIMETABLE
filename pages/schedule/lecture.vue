@@ -7,7 +7,7 @@
     </div>
 
     <ClientOnly class="overflow-x-auto">
-      <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: '1000' }" @change="handleTableChange" bordered size="small" row-key="id">
+      <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: '1000', y: 500 }" @change="handleTableChange" bordered size="small" row-key="id">
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'date_range'">
             <span>
@@ -58,15 +58,42 @@
       <div class="flex flex-col md:flex-row gap-2 mb-3">
         <a-input-search v-model:value="slipModal.searchText" placeholder="Tìm theo tên giáo viên..." enter-button @search="handleSlipSearch" class="w-full md:w-1/3" />
       </div>
-      <a-table :columns="slipColumns" :data-source="slipModal.data" :pagination="slipPagination" :loading="slipModal.loading" @change="handleSlipTableChange" bordered size="small" row-key="id">
+      <a-table :columns="slipColumns" :data-source="slipModal.data" :pagination="slipPagination" :loading="slipModal.loading" :scroll="{ x: '1000', y: 500 }" @change="handleSlipTableChange" bordered size="small" row-key="id">
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'date_range'">
             <span>
               {{ formatDate(record.tu_ngay) && formatDate(record.den_ngay) ? `Từ ngày ${formatDate(record.tu_ngay)} đến ${formatDate(record.den_ngay)}` : "" }}
             </span>
           </template>
+          <template v-else-if="column.key === 'action'">
+            <a-button type="link" size="small" @click="openSlipDetail(record)">Chi tiết</a-button>
+          </template>
         </template>
       </a-table>
+    </a-modal>
+
+    <!-- Slip Detail Modal -->
+    <a-modal v-model:open="detailModal.visible" :title="'CHI TIẾT PHIẾU BÁO GIẢNG'" :width="1000" @cancel="closeDetailModal">
+      <div class="mb-3">
+        <div class="font-semibold">{{ detailModal.header.teacher }}</div>
+        <div v-if="detailModal.header.week || (detailModal.header.from && detailModal.header.to)" class="text-gray-600 text-sm">
+          <span v-if="detailModal.header.week">Tuần {{ detailModal.header.week }}</span>
+          <span v-if="detailModal.header.from && detailModal.header.to"> (Từ ngày {{ formatDate(detailModal.header.from) }} đến {{ formatDate(detailModal.header.to) }})</span>
+        </div>
+      </div>
+      <a-table :columns="detailColumns" :data-source="detailRows" :loading="detailModal.loading" :scroll="{ x: '1200', y: 520 }" size="small" bordered :pagination="false" row-key="_k">
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.key === 'day'">
+            <span class="[writing-mode:vertical-rl] items-center justify-center">{{ record.day }}</span>
+          </template>
+          <template v-if="column.key === 'session'">
+            <span class="[writing-mode:vertical-lr] items-center justify-center"> {{ record.session }}</span>
+          </template>
+        </template>
+      </a-table>
+      <template #footer>
+        <a-button @click="closeDetailModal">Đóng</a-button>
+      </template>
     </a-modal>
   </div>
 </template>
@@ -294,6 +321,7 @@ const slipColumns = [
   { title: "Tuần", dataIndex: "tuan", key: "tuan", width: 80, align: "center", sorter: (a, b) => (Number(a?.tuan) || 0) - (Number(b?.tuan) || 0), sortDirections: ["ascend", "descend"] },
   { title: "Năm học", dataIndex: "ten_nam", key: "ten_nam_hoc", width: 140 },
   { title: "Từ ngày - Đến ngày", key: "date_range", width: 300 },
+  { title: "Chức năng", key: "action", width: 120, align: "center" },
 ];
 
 const fetchSlipData = async p => {
@@ -339,5 +367,99 @@ const handleSlipSearch = async () => {
   const s = (slipModal.searchText || "").trim();
   if (s) params.search = s;
   await fetchSlipData(params);
+};
+
+// Detail modal state and logic
+const detailModal = reactive({ visible: false, loading: false, header: { teacher: "", week: null, from: null, to: null }, data: null });
+const detailColumns = [
+  {
+    title: "Thứ/Ngày",
+    dataIndex: "day",
+    key: "day",
+    width: 90,
+    customCell: record => ({ rowSpan: record?._rowspan_day ?? 1, class: "td-vertical" }),
+  },
+  {
+    title: "Buổi",
+    dataIndex: "session",
+    key: "session",
+    width: 60,
+    align: "center",
+    customCell: record => ({ rowSpan: record?._rowspan_session ?? 1, class: "td-vertical" }),
+  },
+  { title: "Tiết TKB", dataIndex: "tiet_tkb", key: "tiet_tkb", width: 80, align: "center" },
+  { title: "Tiết PPCT", dataIndex: "tiet_ppct", key: "tiet_ppct", width: 90, align: "center" },
+  { title: "Lớp", dataIndex: "ten_lop", key: "ten_lop", width: 80, align: "center" },
+  { title: "Môn (Phân môn)", dataIndex: "mon_phanmon", key: "mon_phanmon", width: 200 },
+  { title: "Nội dung bài học", dataIndex: "ten_bai", key: "ten_bai", width: 300 },
+  { title: "Ghi chú", dataIndex: "ghi_chu", key: "ghi_chu", width: 120 },
+];
+const detailRows = ref([]);
+
+const openSlipDetail = async record => {
+  try {
+    detailModal.visible = true;
+    detailModal.loading = true;
+    detailModal.header.teacher = record?.ten_giao_vien || "";
+    detailModal.header.week = record?.tuan || null;
+    detailModal.header.from = record?.tu_ngay || null;
+    detailModal.header.to = record?.den_ngay || null;
+    detailRows.value = [];
+    const { data, error } = await RestApi.lecture_schedule.slip_detail({ params: { Idpbg: record?.id } });
+
+    if (data.value?.status === "success") {
+      const items = data.value?.data?.items || {};
+      // teacher from API has priority
+      detailModal.header.teacher = items?.ten_giao_vien || detailModal.header.teacher;
+      const rows = [];
+      (items?.lich_theo_ngay || []).forEach((d, di) => {
+        const dayLabel = d?.ngay || "";
+        const start = rows.length;
+        (d?.buoi_hoc || []).forEach((s, si) => {
+          const sessionLabel = s?.ten_buoi || "";
+          const sessionStart = rows.length;
+          (s?.cac_tiet_hoc || []).forEach((t, ti) => {
+            const part = t?.phan_mon ? ` (${t?.phan_mon})` : "";
+            rows.push({
+              _k: `${di}-${si}-${ti}`,
+              day: dayLabel,
+              session: sessionLabel,
+              tiet_tkb: t?.tiet_tkb ?? "",
+              tiet_ppct: t?.tiet_ppct ?? "",
+              ten_lop: t?.ten_lop || "",
+              mon_phanmon: `${t?.ten_mon || ""}${part}`.trim(),
+              ten_bai: t?.ten_bai || "",
+              ghi_chu: t?.ghi_chu || "",
+              _rowspan_day: 0,
+              _rowspan_session: 0,
+            });
+          });
+          const sessionEnd = rows.length;
+          const scount = sessionEnd - sessionStart;
+          if (scount > 0) {
+            rows[sessionStart]._rowspan_session = scount;
+            for (let i = sessionStart + 1; i < sessionEnd; i++) rows[i]._rowspan_session = 0;
+          }
+        });
+        const end = rows.length;
+        const count = end - start;
+        if (count > 0) {
+          rows[start]._rowspan_day = count;
+          for (let i = start + 1; i < end; i++) rows[i]._rowspan_day = 0;
+        }
+      });
+      detailRows.value = rows;
+    } else {
+      throw new Error(error.value?.data?.message || "Không tải được chi tiết phiếu");
+    }
+  } catch (err) {
+    message.error(err.message || "Lỗi tải chi tiết");
+  } finally {
+    detailModal.loading = false;
+  }
+};
+
+const closeDetailModal = () => {
+  detailModal.visible = false;
 };
 </script>
