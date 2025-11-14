@@ -84,7 +84,13 @@
       <a-table :columns="detailColumns" :data-source="detailRows" :loading="detailModal.loading" :scroll="{ x: '1200', y: 520 }" size="small" bordered :pagination="false" row-key="_k">
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'day'">
-            <span class="[writing-mode:vertical-rl] items-center justify-center">{{ record.day }}</span>
+            <div class="text-center h-full flex justify-center items-center">
+              <div v-if="record.day?.includes('(')">
+                <div>{{ record.day.split("(")[0] }}</div>
+                <div>({{ record.day.split("(")[1] }}</div>
+              </div>
+              <div v-else>{{ record.day }}</div>
+            </div>
           </template>
           <template v-if="column.key === 'session'">
             <span class="[writing-mode:vertical-lr] items-center justify-center"> {{ record.session }}</span>

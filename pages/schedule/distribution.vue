@@ -315,8 +315,16 @@ const closeImportModal = () => {
   importModal.fileList = [];
 };
 const beforeUpload = file => {
-  importModal.file = file;
-  importModal.fileList = [file];
+  const originFile = file?.originFileObj || file;
+  const extIndex = originFile.name?.lastIndexOf(".") ?? -1;
+  const ext = extIndex >= 0 ? originFile.name.slice(extIndex) : "";
+  const newName = `${Date.now()}${ext}`;
+  const renamedFile = new File([originFile], newName, {
+    type: originFile.type,
+    lastModified: originFile.lastModified,
+  });
+  importModal.file = renamedFile;
+  importModal.fileList = [{ ...file, name: originFile.name }];
   return false; // prevent auto upload
 };
 const onRemoveFile = () => {
@@ -335,6 +343,7 @@ const handleImport = async () => {
   try {
     importModal.uploading = true;
     const form = new FormData();
+    // Gửi File đã được đổi tên trong bộ nhớ
     form.append("file", importModal.file);
     form.append("idppct", String(detailDrawer.header.id));
     const resp = await RestApi.phanphoi_chuongtrinh_chitiet.import_file({ body: form });
@@ -351,8 +360,10 @@ const handleImport = async () => {
   } catch (err) {
     message.error(err.message || "Import không thành công");
   } finally {
+    closeImportModal();
     importModal.uploading = false;
-    reloadPage();
+    // onRemoveFile();
+    // reloadPage();
   }
 };
 
