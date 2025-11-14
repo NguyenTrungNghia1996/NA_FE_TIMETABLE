@@ -73,7 +73,7 @@
     </a-modal>
 
     <!-- Slip Detail Modal -->
-    <a-modal v-model:open="detailModal.visible" :title="'CHI TIẾT PHIẾU BÁO GIẢNG'" :width="1000" @cancel="closeDetailModal">
+    <a-modal v-model:open="detailModal.visible" :title="'CHI TIẾT PHIẾU BÁO GIẢNG'" :width="1200" @cancel="closeDetailModal">
       <div class="mb-3">
         <div class="font-semibold">{{ detailModal.header.teacher }}</div>
         <div v-if="detailModal.header.week || (detailModal.header.from && detailModal.header.to)" class="text-gray-600 text-sm">
