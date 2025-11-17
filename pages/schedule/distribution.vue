@@ -40,7 +40,7 @@
                 </a-button>
               </a-tooltip>
               <a-tooltip title="Import dữ liệu">
-                <a-button type="link" size="small" :disabled="!canModify(record)" @click="openImportModal(record)">
+                <a-button type="link" size="small" @click="openImportModal(record)">
                   <template #icon>
                     <UploadOutlined />
                   </template>
@@ -52,7 +52,7 @@
                 </template>
               </a-button>
               <a-popconfirm title="Bạn chắc chắn muốn xóa?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
-                <a-button type="link" danger size="small" :disabled="!canModify(record)">
+                <a-button type="link" danger size="small">
                   <template #icon>
                     <DeleteOutlined />
                   </template>
