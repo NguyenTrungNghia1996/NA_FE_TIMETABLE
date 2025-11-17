@@ -1,13 +1,24 @@
 <template>
   <div class="p-2 md:p-4 bg-white min-h-full">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4">
-      <a-input-search v-model:value="searchText" placeholder="Tìm kiếm..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
-      <a-button @click="resetForm" class="w-full md:w-auto">
-        <span class="md:inline">Đặt lại</span>
-      </a-button>
-      <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">
-        <span class="md:inline">Thêm mới</span>
-      </a-button>
+    <div class="space-y-2 mb-4">
+      <a-form :model="param" layout="vertical" class="grid grid-cols-1 md:grid-cols-4 gap-2">
+        <SelectYear v-model="param.IdNam" name="filter_id_nam_hoc" label="Năm học" />
+        <SelectGradeLevel v-model="param.IdKhoi" name="filter_id_khoi" label="Khối lớp" />
+        <SelectSchoolship v-model="param.IdBan" name="filter_id_ban" label="Ban học" />
+        <SelectSubject v-model="param.IdMon" name="filter_id_mon" label="Môn học" />
+      </a-form>
+
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+        <a-input-search v-model:value="searchText" placeholder="Tìm kiếm..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
+        <div class="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+          <a-button @click="resetForm" class="w-full md:w-auto">
+            <span class="md:inline">Đặt lại</span>
+          </a-button>
+          <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">
+            <span class="md:inline">Thêm mới</span>
+          </a-button>
+        </div>
+      </div>
     </div>
 
     <ClientOnly class="overflow-x-auto">
@@ -147,7 +158,15 @@
 const router = useRouter();
 const settingStore = useSettingStore();
 const { RestApi } = useApi();
-const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
+const param = ref({
+  pageIndex: 1,
+  pageSize: 10,
+  search: "",
+  IdKhoi: null,
+  IdBan: null,
+  IdMon: null,
+  IdNam: null,
+});
 function reloadPage() {
   router.go(0);
 }
@@ -198,17 +217,37 @@ const rules = reactive({
   id_mon: [{ required: true, message: "Vui lòng chọn môn", trigger: "change" }],
 });
 
-const fetchData = async param => {
+// Chỉ build các query param khi có giá trị (tránh gửi null/rỗng lên API)
+const buildQueryParams = () => {
+  const query = {
+    pageIndex: param.value.pageIndex,
+    pageSize: param.value.pageSize,
+  };
+
+  const s = (param.value.search || "").trim();
+  if (s) query.search = s;
+
+  const hasValue = v => v !== null && v !== undefined && v !== "";
+  if (hasValue(param.value.IdNam)) query.IdNam = param.value.IdNam;
+  if (hasValue(param.value.IdKhoi)) query.IdKhoi = param.value.IdKhoi;
+  if (hasValue(param.value.IdBan)) query.IdBan = param.value.IdBan;
+  if (hasValue(param.value.IdMon)) query.IdMon = param.value.IdMon;
+
+  return query;
+};
+
+const fetchData = async () => {
   try {
     loading.value = true;
-    const { data } = await RestApi.phanphoi_chuongtrinh.list({ params: param });
+    const query = buildQueryParams();
+    const { data, error } = await RestApi.phanphoi_chuongtrinh.list({ params: query });
     if (data.value?.status === "success") {
       dataSource.value = data.value.data.items || [];
       pagination.total = data.value.data.totalrecord;
     } else {
       throw new Error(error.value?.data?.message || "Không tải được dữ liệu");
     }
-  } catch (error) {
+  } catch (err) {
     dataSource.value = [];
     pagination.total = 0;
     message.error(err.message || "Lỗi tải dữ liệu");
@@ -216,6 +255,16 @@ const fetchData = async param => {
     loading.value = false;
   }
 };
+
+// Tự động lọc theo các tiêu chí chọn (Năm, Khối, Ban, Môn)
+watch(
+  () => [param.value.IdNam, param.value.IdKhoi, param.value.IdBan, param.value.IdMon],
+  async () => {
+    pagination.current = 1;
+    param.value.pageIndex = 1;
+    await fetchData();
+  },
+);
 
 // Drawer: Chi tiết phân phối
 const detailDrawer = reactive({ open: false, header: {}, loading: false, saving: false });
@@ -431,9 +480,9 @@ const saveDetail = async () => {
 const handleTableChange = async pag => {
   pagination.current = pag.current;
   pagination.pageSize = pag.pageSize;
-  param.value.PageIndex = pag.current;
-  param.value.PageSize = pag.pageSize;
-  await fetchData({ ...param.value });
+  param.value.pageIndex = pag.current;
+  param.value.pageSize = pag.pageSize;
+  await fetchData();
 };
 
 const handleSearch = async () => {
@@ -444,7 +493,8 @@ const handleSearch = async () => {
     delete param.value.search;
   }
   pagination.current = 1;
-  await fetchData({ ...param.value });
+  param.value.pageIndex = 1;
+  await fetchData();
 };
 
 const showModal = () => {
@@ -497,14 +547,14 @@ const deleteItem = async id => {
     if (data.value?.status === "success") {
       message.success(data.value?.message || "Xóa thành công");
       pagination.current = 1;
-      param.value.PageIndex = 1;
+      param.value.pageIndex = 1;
     } else {
       throw new Error(error.value?.data?.message || "Xóa không thành công");
     }
   } catch (error) {
     message.error(error?.message || error?.value?.data?.message || "Xóa không thành công ");
   } finally {
-    await fetchData({ ...param.value });
+    await fetchData();
   }
 };
 
@@ -513,13 +563,16 @@ const resetForm = async () => {
     formRef.value.resetFields();
   }
   searchText.value = "";
-  param.value.PageIndex = 1;
-  param.value.PageSize = 10;
+  param.value.pageIndex = 1;
+  param.value.pageSize = 10;
   param.value.search = "";
+  param.value.IdKhoi = null;
+  param.value.IdBan = null;
+  param.value.IdMon = null;
+  param.value.IdNam = null;
   pagination.current = 1;
   pagination.pageSize = 10;
-  await fetchData({ ...param.value });
+  await fetchData();
 };
-
-await fetchData({ ...param.value });
+await fetchData();
 </script>
