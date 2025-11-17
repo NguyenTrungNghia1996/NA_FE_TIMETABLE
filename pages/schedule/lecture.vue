@@ -1,9 +1,17 @@
 <template>
   <div class="p-2 md:p-4 bg-white min-h-full">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4">
-      <a-input-search v-model:value="searchText" placeholder="Tìm kiếm lịch báo giảng..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
-      <a-button @click="resetForm" class="w-full md:w-auto">Đặt lại</a-button>
-      <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Thêm mới</a-button>
+    <div class="space-y-2 mb-4">
+      <a-form :model="param" layout="vertical" class="grid grid-cols-1 md:grid-cols-4 gap-2">
+        <SelectYear v-model="param.IdNam" name="filter_id_nam_hoc" label="Năm học" />
+      </a-form>
+
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
+        <a-input-search v-model:value="searchText" placeholder="Tìm kiếm lịch báo giảng..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
+        <div class="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+          <a-button @click="resetForm" class="w-full md:w-auto">Đặt lại</a-button>
+          <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Thêm mới</a-button>
+        </div>
+      </div>
     </div>
 
     <ClientOnly class="overflow-x-auto">
@@ -110,7 +118,7 @@ import "dayjs/locale/vi";
 const settingStore = useSettingStore();
 const { RestApi } = useApi();
 
-const param = ref({ pageIndex: 1, pageSize: 10, search: "" });
+const param = ref({ pageIndex: 1, pageSize: 10, search: "", IdNam: null });
 
 const columns = [
   { title: "STT", dataIndex: "stt", key: "stt", width: 60, align: "center" },
@@ -179,10 +187,28 @@ const canModify = record => {
   }
 };
 
-const fetchData = async p => {
+// Chỉ build các query param khi có giá trị (tránh gửi null/rỗng lên API)
+const hasValue = v => v !== null && v !== undefined && v !== "";
+
+const buildQueryParams = () => {
+  const query = {
+    pageIndex: param.value.pageIndex,
+    pageSize: param.value.pageSize,
+  };
+
+  const s = (param.value.search || "").trim();
+  if (s) query.search = s;
+
+  if (hasValue(param.value.IdNam)) query.IdNam = param.value.IdNam;
+
+  return query;
+};
+
+const fetchData = async () => {
   try {
     loading.value = true;
-    const { data, error } = await RestApi.lecture_schedule.list({ params: p });
+    const query = buildQueryParams();
+    const { data, error } = await RestApi.lecture_schedule.list({ params: query });
     if (data.value?.status === "success") {
       dataSource.value = data.value.data?.items || [];
       pagination.total = data.value.data?.totalrecord || 0;
@@ -203,7 +229,7 @@ const handleTableChange = async pag => {
   pagination.pageSize = pag.pageSize;
   param.value.pageIndex = pag.current;
   param.value.pageSize = pag.pageSize;
-  await fetchData({ ...param.value });
+  await fetchData();
 };
 
 const handleSearch = async () => {
@@ -212,7 +238,7 @@ const handleSearch = async () => {
   else delete param.value.search;
   pagination.current = 1;
   param.value.pageIndex = 1;
-  await fetchData({ ...param.value });
+  await fetchData();
 };
 
 const showModal = () => {
@@ -264,7 +290,7 @@ const handleOk = async () => {
         throw new Error(error.value?.data?.message || "Thêm mới không thành công");
       }
     }
-    await fetchData({ ...param.value });
+    await fetchData();
     visible.value = false;
     formRef.value?.resetFields?.();
   } catch (error) {
@@ -293,7 +319,7 @@ const deleteItem = async id => {
   } catch (error) {
     message.error(error?.message || error?.value?.data?.message || "Xóa không thành công");
   } finally {
-    await fetchData({ ...param.value });
+    await fetchData();
   }
 };
 
@@ -311,12 +337,23 @@ const resetForm = async () => {
   param.value.pageIndex = 1;
   param.value.pageSize = 10;
   delete param.value.search;
+  param.value.IdNam = null;
   pagination.current = 1;
   pagination.pageSize = 10;
-  await fetchData({ ...param.value });
+  await fetchData();
 };
 
-await fetchData({ ...param.value });
+await fetchData();
+
+// Tự động lọc theo Năm học khi thay đổi
+watch(
+  () => param.value.IdNam,
+  async () => {
+    pagination.current = 1;
+    param.value.pageIndex = 1;
+    await fetchData();
+  },
+);
 
 // Slip modal state and logic
 const slipModal = reactive({ visible: false, loading: false, id_lbg: null, data: [], searchText: "" });
