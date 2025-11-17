@@ -343,10 +343,10 @@ const slipModal = reactive({ visible: false, loading: false, id_lbg: null, data:
 const slipPagination = reactive({ current: 1, pageSize: 10, total: 0, showSizeChanger: true, pageSizeOptions: ["1", "10", "20", "50"], showTotal: t => `Tổng ${t} bản ghi` });
 const slipColumns = [
   { title: "STT", dataIndex: "stt", key: "stt", width: 60, align: "center" },
-  { title: "Họ và tên giáo viên", dataIndex: "ten_giao_vien", key: "teacher_name" },
+  { title: "Họ và tên giáo viên", width: 100, dataIndex: "ten_giao_vien", key: "teacher_name" },
   { title: "Tuần", dataIndex: "tuan", key: "tuan", width: 80, align: "center", sorter: (a, b) => (Number(a?.tuan) || 0) - (Number(b?.tuan) || 0), sortDirections: ["ascend", "descend"] },
-  { title: "Năm học", dataIndex: "ten_nam", key: "ten_nam_hoc", width: 140 },
-  { title: "Từ ngày - Đến ngày", key: "date_range", width: 300 },
+  { title: "Năm học", dataIndex: "ten_nam", key: "ten_nam_hoc", width: 100 },
+  { title: "Từ ngày - Đến ngày", key: "date_range", width: 250 },
   { title: "Chức năng", key: "action", width: 120, align: "center" },
 ];
 
