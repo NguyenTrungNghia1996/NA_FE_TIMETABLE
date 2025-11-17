@@ -14,6 +14,9 @@
           <a-button @click="resetForm" class="w-full md:w-auto">
             <span class="md:inline">Đặt lại</span>
           </a-button>
+          <a :href="'/Mau_ppct.xlsx'" download class="w-full md:w-auto">
+            <a-button class="w-full md:w-auto">Tải file mẫu</a-button>
+          </a>
           <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">
             <span class="md:inline">Thêm mới</span>
           </a-button>
@@ -37,19 +40,19 @@
                 </a-button>
               </a-tooltip>
               <a-tooltip title="Import dữ liệu">
-                <a-button type="link" size="small" :disabled="!settingStore.currentPermission" @click="openImportModal(record)">
+                <a-button type="link" size="small" :disabled="!canModify(record)" @click="openImportModal(record)">
                   <template #icon>
                     <UploadOutlined />
                   </template>
                 </a-button>
               </a-tooltip>
-              <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission">
+              <a-button type="link" size="small" @click="editItem(record)" :disabled="!canModify(record)">
                 <template #icon>
                   <EditOutlined />
                 </template>
               </a-button>
               <a-popconfirm title="Bạn chắc chắn muốn xóa?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteItem(record.id)">
-                <a-button type="link" danger size="small" :disabled="!settingStore.currentPermission">
+                <a-button type="link" danger size="small" :disabled="!canModify(record)">
                   <template #icon>
                     <DeleteOutlined />
                   </template>
@@ -216,6 +219,12 @@ const rules = reactive({
   id_ban: [{ required: true, message: "Vui lòng chọn ban", trigger: "change" }],
   id_mon: [{ required: true, message: "Vui lòng chọn môn", trigger: "change" }],
 });
+
+// Chỉ cho phép chỉnh sửa/xóa/import khi có quyền và bản ghi được phép sửa (edit = true từ API)
+const canModify = record => {
+  if (!settingStore.currentPermission) return false;
+  return !!record?.edit;
+};
 
 // Chỉ build các query param khi có giá trị (tránh gửi null/rỗng lên API)
 const buildQueryParams = () => {
