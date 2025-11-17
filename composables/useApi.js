@@ -145,6 +145,8 @@ let ENDPOINTS = {
   LECTURE_SCHEDULE: "/api/lich_baogiang",
   LECTURE_SCHEDULE_SLIP: "/api/lich_baogiang/phieu",
   LECTURE_SCHEDULE_SLIP_DETAIL: "/api/lich_baogiang/phieu/chitiet",
+  LECTURE_SCHEDULE_EXPORT: "/api/lich_baogiang/export",
+  LECTURE_SCHEDULE_SLIP_EXPORT: "/api/lich_baogiang/phieu/export",
   // UNIT INFO (Thông tin đơn vị)
   UNIT_INFO: "/api/thongtin_donvi",
 };
@@ -1069,6 +1071,12 @@ class LectureSchedule {
   }
   async slip_detail(data) {
     return await this.request.get(ENDPOINTS.LECTURE_SCHEDULE_SLIP_DETAIL, data);
+  }
+  async export(data) {
+    return await this.request.download(ENDPOINTS.LECTURE_SCHEDULE_EXPORT, data);
+  }
+  async slip_export(data) {
+    return await this.request.download(ENDPOINTS.LECTURE_SCHEDULE_SLIP_EXPORT, data);
   }
 }
 
