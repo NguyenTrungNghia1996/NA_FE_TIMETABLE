@@ -5,12 +5,9 @@
         <SelectYear v-model="param.IdNam" name="filter_id_nam_hoc" label="Năm học" />
       </a-form>
 
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
-        <a-input-search v-model:value="searchText" placeholder="Tìm kiếm lịch báo giảng..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
-        <div class="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-          <a-button @click="resetForm" class="w-full md:w-auto">Đặt lại</a-button>
-          <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Thêm mới</a-button>
-        </div>
+      <div class="flex flex-col md:flex-row justify-end md:items-center gap-2">
+        <a-button @click="resetForm" class="w-full md:w-auto">Đặt lại</a-button>
+        <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Thêm mới</a-button>
       </div>
     </div>
 
@@ -118,7 +115,7 @@ import "dayjs/locale/vi";
 const settingStore = useSettingStore();
 const { RestApi } = useApi();
 
-const param = ref({ pageIndex: 1, pageSize: 10, search: "", IdNam: null });
+const param = ref({ pageIndex: 1, pageSize: 10, IdNam: null });
 
 const columns = [
   { title: "STT", dataIndex: "stt", key: "stt", width: 60, align: "center" },
@@ -131,7 +128,6 @@ const columns = [
 
 const dataSource = ref([]);
 const loading = ref(false);
-const searchText = ref("");
 const visible = ref(false);
 const confirmLoading = ref(false);
 const isEdit = ref(false);
@@ -177,6 +173,7 @@ const nextWeek = computed(() => (maxWeek.value || 0) + 1);
 // Chỉ cho phép sửa/xóa khi có quyền và lịch chưa bắt đầu
 const canModify = record => {
   try {
+    if (record?.stt !== 1) return false;
     if (!settingStore.currentPermission) return false;
     if (!record?.tu_ngay) return false;
     const todayStart = dayjs().startOf("day").valueOf();
@@ -195,9 +192,6 @@ const buildQueryParams = () => {
     pageIndex: param.value.pageIndex,
     pageSize: param.value.pageSize,
   };
-
-  const s = (param.value.search || "").trim();
-  if (s) query.search = s;
 
   if (hasValue(param.value.IdNam)) query.IdNam = param.value.IdNam;
 
@@ -229,15 +223,6 @@ const handleTableChange = async pag => {
   pagination.pageSize = pag.pageSize;
   param.value.pageIndex = pag.current;
   param.value.pageSize = pag.pageSize;
-  await fetchData();
-};
-
-const handleSearch = async () => {
-  const search = (searchText.value || "").trim();
-  if (search) param.value.search = search;
-  else delete param.value.search;
-  pagination.current = 1;
-  param.value.pageIndex = 1;
   await fetchData();
 };
 
@@ -333,10 +318,8 @@ const confirmDelete = async record => {
 
 const resetForm = async () => {
   formRef.value?.resetFields?.();
-  searchText.value = "";
   param.value.pageIndex = 1;
   param.value.pageSize = 10;
-  delete param.value.search;
   param.value.IdNam = null;
   pagination.current = 1;
   pagination.pageSize = 10;
