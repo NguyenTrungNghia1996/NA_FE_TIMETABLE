@@ -27,6 +27,11 @@
                     <template #icon><ProfileOutlined /></template>
                   </a-button>
                 </a-tooltip>
+                <a-tooltip title="Xuất lịch báo giảng">
+                  <a-button type="link" size="small" @click="exportLecture(record)">
+                    <template #icon><FileExcelOutlined /></template>
+                  </a-button>
+                </a-tooltip>
                 <a-button type="link" size="small" @click="editItem(record)" :disabled="!canModify(record)">
                   <template #icon><EditOutlined /></template>
                 </a-button>
@@ -71,7 +76,10 @@
             </span>
           </template>
           <template v-else-if="column.key === 'action'">
-            <a-button type="link" size="small" @click="openSlipDetail(record)">Chi tiết</a-button>
+            <a-space>
+              <a-button type="link" size="small" @click="openSlipDetail(record)">Chi tiết</a-button>
+              <a-button type="link" size="small" @click="exportSlip(record)"> Xuất dữ liệu </a-button>
+            </a-space>
           </template>
         </template>
       </a-table>
@@ -123,7 +131,7 @@ const columns = [
   { title: "Tuần", dataIndex: "tuan", key: "tuan", width: 80, align: "center", sorter: (a, b) => (Number(a?.tuan) || 0) - (Number(b?.tuan) || 0), sortDirections: ["ascend", "descend"] },
   { title: "Theo TKB", dataIndex: "ten_tkb", key: "ten_tkb", width: 200 },
   { title: "Từ ngày - Đến ngày", key: "date_range", width: 260 },
-  { title: "Thao tác", key: "action", width: 100, align: "center", fixed: "right" },
+  { title: "Thao tác", key: "action", width: 140, align: "center", fixed: "right" },
 ];
 
 const dataSource = ref([]);
@@ -196,6 +204,36 @@ const buildQueryParams = () => {
   if (hasValue(param.value.IdNam)) query.IdNam = param.value.IdNam;
 
   return query;
+};
+
+// Download helper for lecture schedule exports
+const exportFile = async apiFn => {
+  try {
+    settingStore.setLoading(true);
+    const { data, error } = await apiFn();
+    if (error.value) {
+      throw new Error(error.value?.data?.message || "Xuất file không thành công");
+    }
+    const { blob: blobData, headers } = data.value || {};
+    if (!blobData) {
+      throw new Error("Xuất file không thành công");
+    }
+    const blob = blobData instanceof Blob ? blobData : new Blob([blobData]);
+    const cd = headers && (headers["content-disposition"] || headers["Content-Disposition"]);
+    const filename = (cd && (decodeURIComponent(/filename\*=UTF-8''([^;]+)/.exec(cd)?.[1] || "") || /filename=\"([^"]+)\"/.exec(cd)?.[1])) || "export.xlsx";
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    message.error(err.message || "Xuất file không thành công");
+  } finally {
+    settingStore.setLoading(false);
+  }
 };
 
 const fetchData = async () => {
@@ -347,7 +385,7 @@ const slipColumns = [
   { title: "Tuần", dataIndex: "tuan", key: "tuan", width: 80, align: "center", sorter: (a, b) => (Number(a?.tuan) || 0) - (Number(b?.tuan) || 0), sortDirections: ["ascend", "descend"] },
   { title: "Năm học", dataIndex: "ten_nam", key: "ten_nam_hoc", width: 100 },
   { title: "Từ ngày - Đến ngày", key: "date_range", width: 250 },
-  { title: "Chức năng", key: "action", width: 120, align: "center" },
+  { title: "Chức năng", key: "action", width: 140, align: "center" },
 ];
 
 const fetchSlipData = async p => {
@@ -393,6 +431,22 @@ const handleSlipSearch = async () => {
   const s = (slipModal.searchText || "").trim();
   if (s) params.search = s;
   await fetchSlipData(params);
+};
+
+const exportLecture = async record => {
+  if (!record?.id) {
+    message.error("Thiếu thông tin lịch báo giảng");
+    return;
+  }
+  await exportFile(() => RestApi.lecture_schedule.export({ params: { idlbg: record.id } }));
+};
+
+const exportSlip = async record => {
+  if (!record?.id) {
+    message.error("Thiếu thông tin phiếu báo giảng");
+    return;
+  }
+  await exportFile(() => RestApi.lecture_schedule.slip_export({ params: { idpbg: record.id } }));
 };
 
 // Detail modal state and logic
