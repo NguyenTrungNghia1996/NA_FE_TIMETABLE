@@ -33,8 +33,9 @@ const fetchSubject = async (search = "") => {
   loading.value = true;
   try {
     const searchTerm = (search || "").trim();
-    const params = { ...(props.extraParams || {}), search: searchTerm };
-    const { data, error } = await RestApi.subject.list({ params });
+    const params = { ...(props.extraParams || {}) };
+    if (searchTerm) params.search = searchTerm;
+    const { data, error } = await RestApi.subject.list(Object.keys(params).length ? { params } : {});
     if (data.value?.status === "success") {
       options.value = data.value.data.items?.map(item => ({
         label: item.ten,
