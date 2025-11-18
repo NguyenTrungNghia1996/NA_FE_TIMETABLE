@@ -420,6 +420,7 @@ const handleImport = async () => {
   } finally {
     closeImportModal();
     importModal.uploading = false;
+    await fetchData();
     // onRemoveFile();
     // reloadPage();
   }
