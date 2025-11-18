@@ -133,6 +133,7 @@ let ENDPOINTS = {
   S3: "/api/presigned_url",
   // YEAR (Năm học)
   YEAR: "/api/namhoc",
+  YEAR_MAX_WEEK: "/api/namhoc/tuanmax",
   // HOLIDAY (Ngày nghỉ)
   HOLIDAY: "/api/ngaynghi",
   // PHANPHOI_CHUONGTRINH
@@ -1027,6 +1028,10 @@ class Year {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.YEAR, data);
+  }
+  // GET /api/namhoc/tuanmax?Id=...
+  async max_week(data) {
+    return await this.request.get(ENDPOINTS.YEAR_MAX_WEEK, data);
   }
 }
 
