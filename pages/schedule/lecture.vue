@@ -47,7 +47,7 @@
       </a-table>
     </ClientOnly>
 
-    <a-modal v-model:open="visible" :title="isEdit ? `Chỉnh sửa lịch báo giảng - Tuần ${editingWeek || ''}` : `Thêm mới lịch báo giảng - Tuần ${nextWeek}`" @cancel="handleCancel" :width="640">
+    <a-modal v-model:open="visible" :title="modalTitle" @cancel="handleCancel" :width="640">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <SelectYear v-model="formState.id_nam_hoc" label="Năm học" name="id_nam_hoc" :rules="rules.id_nam_hoc" />
         <SelectTimetable v-model="formState.id_tkb" label="Thời khóa biểu" name="id_tkb" :rules="rules.id_tkb" />
@@ -172,7 +172,18 @@ const formatDate = date => {
 };
 
 // Tuần kế tiếp (hiển thị trên tiêu đề popup thêm mới)
-const nextWeek = ref(1);
+// - Chỉ hiển thị khi đã chọn Năm học
+const nextWeek = ref(null);
+
+const modalTitle = computed(() => {
+  if (isEdit.value) {
+    return `Chỉnh sửa lịch báo giảng - Tuần ${editingWeek.value || ""}`;
+  }
+  if (hasValue(formState.id_nam_hoc) && hasValue(nextWeek.value)) {
+    return `Thêm mới lịch báo giảng - Tuần ${nextWeek.value}`;
+  }
+  return "Thêm mới lịch báo giảng";
+});
 
 // Chỉ cho phép sửa/xóa khi có quyền và lịch chưa bắt đầu
 const canModify = record => {
@@ -207,7 +218,7 @@ const buildQueryParams = () => {
 const setNextWeekByYear = async idNamHoc => {
   try {
     if (!hasValue(idNamHoc)) {
-      nextWeek.value = 1;
+      nextWeek.value = null;
       return;
     }
     const { data, error } = await RestApi.year.max_week({ params: { Id: idNamHoc } });
