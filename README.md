@@ -193,7 +193,7 @@ Ghi chú:
 - `SelectClass` (Lớp): `id_khoi`, `autoSelectFirst`, `noFormItem`, `inlineLabel`.
 - `SelectTeacher` (Giáo viên): `autoSelectFirst`, `noFormItem`, `inlineLabel`.
 - `SelectYear` (Năm học): không có props đặc thù ngoài nhóm chung.
-- `SelectSubject` (Môn học): không có props đặc thù ngoài nhóm chung.
+- `SelectSubject` (Môn học): `extraParams` (Object) để gửi thêm query params khi gọi API.
 - `SelectClassroom` (Phòng học): `idLoaiPhonghoc` để lọc theo loại phòng.
 - `SelectClassroomType` (Loại phòng học): không có props đặc thù ngoài nhóm chung.
 - `SelectExpertise` (Tổ chuyên môn): không có props đặc thù; nạp qua API.

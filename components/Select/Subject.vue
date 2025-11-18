@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import debounce from "lodash/debounce";
 
 const { RestApi } = useApi();
@@ -19,6 +19,8 @@ const props = defineProps({
   size: { type: String, default: "middle" },
   rules: { type: Array, default: () => [] },
   disabled: { type: Boolean, default: false },
+  /** Tham số bổ sung gửi kèm khi gọi API lấy danh sách môn */
+  extraParams: { type: Object, default: () => ({}) },
 });
 
 const emit = defineEmits(["update:modelValue"]);
@@ -31,7 +33,9 @@ const fetchSubject = async (search = "") => {
   loading.value = true;
   try {
     const searchTerm = (search || "").trim();
-    const { data, error } = await RestApi.subject.list({ params: { search: searchTerm } });
+    const params = { ...(props.extraParams || {}) };
+    if (searchTerm) params.search = searchTerm;
+    const { data, error } = await RestApi.subject.list(Object.keys(params).length ? { params } : {});
     if (data.value?.status === "success") {
       options.value = data.value.data.items?.map(item => ({
         label: item.ten,
@@ -79,6 +83,15 @@ const handleUpdateValue = val => {
     fetchSubject("");
   }
 };
+
+watch(
+  () => props.extraParams,
+  () => {
+    search.value = "";
+    fetchSubject("");
+  },
+  { deep: true },
+);
 
 await fetchSubject();
 </script>

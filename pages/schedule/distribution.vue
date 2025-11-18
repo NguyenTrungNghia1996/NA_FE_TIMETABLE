@@ -5,7 +5,7 @@
         <SelectYear v-model="param.IdNam" name="filter_id_nam_hoc" label="Năm học" />
         <SelectGradeLevelByUnit v-model="param.IdKhoi" name="filter_id_khoi" label="Khối lớp" />
         <SelectSchoolship v-model="param.IdBan" name="filter_id_ban" label="Ban học" />
-        <SelectSubject v-model="param.IdMon" name="filter_id_mon" label="Môn học" />
+        <SelectSubject v-model="param.IdMon" name="filter_id_mon" label="Môn học" :extra-params="filterSubjectParams" />
       </a-form>
 
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
@@ -142,7 +142,7 @@
         <SelectYear v-model="formState.id_nam_hoc" name="id_nam_hoc" :rules="rules.id_nam_hoc" />
         <SelectGradeLevelByUnit v-model="formState.id_khoi" name="id_khoi" :rules="rules.id_khoi" />
         <SelectSchoolship v-model="formState.id_ban" name="id_ban" :rules="rules.id_ban" />
-        <SelectSubject v-model="formState.id_mon" name="id_mon" :rules="rules.id_mon" />
+        <SelectSubject v-model="formState.id_mon" name="id_mon" :rules="rules.id_mon" :extra-params="formSubjectParams" />
       </a-form>
 
       <template #footer>
@@ -169,6 +169,13 @@ const param = ref({
   IdBan: null,
   IdMon: null,
   IdNam: null,
+});
+
+// Query params bổ sung cho SelectSubject ở vùng filter: chỉ gửi khi đã chọn Khối & Ban
+const filterSubjectParams = computed(() => {
+  const { IdKhoi, IdBan } = param.value || {};
+  if (!IdKhoi || !IdBan) return {};
+  return { id_khoi: IdKhoi, id_ban: IdBan };
 });
 function reloadPage() {
   router.go(0);
@@ -207,6 +214,13 @@ const formState = reactive({
   id_khoi: null,
   id_ban: null,
   id_mon: null,
+});
+
+// Query params bổ sung cho SelectSubject trong modal thêm/sửa
+const formSubjectParams = computed(() => {
+  const { id_khoi, id_ban } = formState;
+  if (!id_khoi || !id_ban) return {};
+  return { id_khoi, id_ban };
 });
 
 const rules = reactive({
