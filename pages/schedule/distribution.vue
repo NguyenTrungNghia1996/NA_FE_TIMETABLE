@@ -3,7 +3,7 @@
     <div class="space-y-2 mb-4">
       <a-form :model="param" layout="vertical" class="grid grid-cols-1 md:grid-cols-4 gap-2">
         <SelectYear v-model="param.IdNam" name="filter_id_nam_hoc" label="Năm học" />
-        <SelectGradeLevel v-model="param.IdKhoi" name="filter_id_khoi" label="Khối lớp" />
+        <SelectGradeLevelByUnit v-model="param.IdKhoi" name="filter_id_khoi" label="Khối lớp" />
         <SelectSchoolship v-model="param.IdBan" name="filter_id_ban" label="Ban học" />
         <SelectSubject v-model="param.IdMon" name="filter_id_mon" label="Môn học" />
       </a-form>
