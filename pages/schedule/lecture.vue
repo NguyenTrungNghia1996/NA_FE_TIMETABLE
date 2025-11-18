@@ -47,7 +47,7 @@
       </a-table>
     </ClientOnly>
 
-    <a-modal v-model:open="visible" :title="isEdit ? `Chỉnh sửa lịch báo giảng - Tuần ${editingWeek || ''}` : `Thêm mới lịch báo giảng - Tuần ${nextWeek}`" @cancel="handleCancel" :width="640">
+    <a-modal v-model:open="visible" :title="modalTitle" @cancel="handleCancel" :width="640">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <SelectYear v-model="formState.id_nam_hoc" label="Năm học" name="id_nam_hoc" :rules="rules.id_nam_hoc" />
         <SelectTimetable v-model="formState.id_tkb" label="Thời khóa biểu" name="id_tkb" :rules="rules.id_tkb" />
@@ -171,24 +171,19 @@ const formatDate = date => {
   }
 };
 
-// Tuần kế tiếp
-// - Mặc định lấy theo dữ liệu đang hiển thị
-// - Khi mở popup "Thêm mới" sẽ tính lại theo toàn bộ bản ghi (trong năm học đã chọn)
-const nextWeek = ref(1);
+// Tuần kế tiếp (hiển thị trên tiêu đề popup thêm mới)
+// - Chỉ hiển thị khi đã chọn Năm học
+const nextWeek = ref(null);
 
-const updateNextWeekFromCurrentPage = () => {
-  const weeks = (dataSource.value || []).map(i => Number(i?.tuan) || 0);
-  const max = weeks.length ? Math.max(...weeks) : 0;
-  nextWeek.value = (max || 0) + 1;
-};
-
-watch(
-  () => dataSource.value,
-  () => {
-    updateNextWeekFromCurrentPage();
-  },
-  { immediate: true },
-);
+const modalTitle = computed(() => {
+  if (isEdit.value) {
+    return `Chỉnh sửa lịch báo giảng - Tuần ${editingWeek.value || ""}`;
+  }
+  if (hasValue(formState.id_nam_hoc) && hasValue(nextWeek.value)) {
+    return `Thêm mới lịch báo giảng - Tuần ${nextWeek.value}`;
+  }
+  return "Thêm mới lịch báo giảng";
+});
 
 // Chỉ cho phép sửa/xóa khi có quyền và lịch chưa bắt đầu
 const canModify = record => {
@@ -219,28 +214,22 @@ const buildQueryParams = () => {
   return query;
 };
 
-// Lấy tuần lớn nhất trên toàn bộ dữ liệu (không chỉ trang hiện tại)
-const setNextWeekFromAll = async () => {
+// Lấy tuần kế tiếp theo Năm học được chọn bằng API /api/namhoc/tuanmax?Id=...
+const setNextWeekByYear = async idNamHoc => {
   try {
-    const query = {
-      pageIndex: 1,
-      pageSize: 100000,
-    };
-    if (hasValue(param.value.IdNam)) query.IdNam = param.value.IdNam;
-
-    const { data } = await RestApi.lecture_schedule.list({ params: query });
-    if (data.value?.status === "success") {
-      const items = data.value.data?.items || [];
-      const max = items.reduce((m, x) => {
-        const v = Number(x?.tuan) || 0;
-        return v > m ? v : m;
-      }, 0);
-      if (max > 0) {
-        nextWeek.value = max + 1;
-      }
+    if (!hasValue(idNamHoc)) {
+      nextWeek.value = null;
+      return;
     }
-  } catch (e) {
-    // Nếu lỗi thì giữ nguyên giá trị hiện tại (đã tính theo trang)
+    const { data, error } = await RestApi.year.max_week({ params: { Id: idNamHoc } });
+    if (data.value?.status === "success") {
+      const max = Number(data.value.data) || 0;
+      nextWeek.value = max + 1;
+    } else {
+      throw new Error(error.value?.data?.message || "Không lấy được số tuần tối đa");
+    }
+  } catch {
+    // Nếu lỗi thì giữ nguyên giá trị hiện tại
   }
 };
 
@@ -304,11 +293,12 @@ const handleTableChange = async pag => {
 
 const showModal = () => {
   isEdit.value = false;
-  Object.assign(formState, { id: undefined, id_nam_hoc: undefined, id_tkb: undefined });
+  // Mặc định năm học theo bộ lọc hiện tại (nếu có)
+  Object.assign(formState, { id: undefined, id_nam_hoc: param.value.IdNam || undefined, id_tkb: undefined });
   editingWeek.value = null;
   visible.value = true;
-  // Khi thêm mới, luôn lấy tuần lớn nhất trên toàn bộ dữ liệu (không chỉ page 1)
-  setNextWeekFromAll();
+  // Khi thêm mới, số tuần phụ thuộc Năm học, lấy từ API /api/namhoc/tuanmax
+  setNextWeekByYear(formState.id_nam_hoc);
 };
 
 const editItem = record => {
@@ -413,6 +403,16 @@ watch(
     pagination.current = 1;
     param.value.pageIndex = 1;
     await fetchData();
+  },
+);
+
+// Khi chọn Năm học trong popup thêm mới, cập nhật lại tuần kế tiếp theo API
+watch(
+  () => formState.id_nam_hoc,
+  async val => {
+    if (!visible.value) return;
+    if (isEdit.value) return;
+    await setNextWeekByYear(val);
   },
 );
 
