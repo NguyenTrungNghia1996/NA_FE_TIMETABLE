@@ -171,12 +171,24 @@ const formatDate = date => {
   }
 };
 
-// Tính tuần kế tiếp (max tuần hiện có + 1) từ dữ liệu đang hiển thị
-const maxWeek = computed(() => {
+// Tuần kế tiếp
+// - Mặc định lấy theo dữ liệu đang hiển thị
+// - Khi mở popup "Thêm mới" sẽ tính lại theo toàn bộ bản ghi (trong năm học đã chọn)
+const nextWeek = ref(1);
+
+const updateNextWeekFromCurrentPage = () => {
   const weeks = (dataSource.value || []).map(i => Number(i?.tuan) || 0);
-  return weeks.length ? Math.max(...weeks) : 0;
-});
-const nextWeek = computed(() => (maxWeek.value || 0) + 1);
+  const max = weeks.length ? Math.max(...weeks) : 0;
+  nextWeek.value = (max || 0) + 1;
+};
+
+watch(
+  () => dataSource.value,
+  () => {
+    updateNextWeekFromCurrentPage();
+  },
+  { immediate: true },
+);
 
 // Chỉ cho phép sửa/xóa khi có quyền và lịch chưa bắt đầu
 const canModify = record => {
@@ -205,6 +217,31 @@ const buildQueryParams = () => {
   if (hasValue(param.value.IdNam)) query.IdNam = param.value.IdNam;
 
   return query;
+};
+
+// Lấy tuần lớn nhất trên toàn bộ dữ liệu (không chỉ trang hiện tại)
+const setNextWeekFromAll = async () => {
+  try {
+    const query = {
+      pageIndex: 1,
+      pageSize: 100000,
+    };
+    if (hasValue(param.value.IdNam)) query.IdNam = param.value.IdNam;
+
+    const { data } = await RestApi.lecture_schedule.list({ params: query });
+    if (data.value?.status === "success") {
+      const items = data.value.data?.items || [];
+      const max = items.reduce((m, x) => {
+        const v = Number(x?.tuan) || 0;
+        return v > m ? v : m;
+      }, 0);
+      if (max > 0) {
+        nextWeek.value = max + 1;
+      }
+    }
+  } catch (e) {
+    // Nếu lỗi thì giữ nguyên giá trị hiện tại (đã tính theo trang)
+  }
 };
 
 // Download helper for lecture schedule exports
@@ -270,6 +307,8 @@ const showModal = () => {
   Object.assign(formState, { id: undefined, id_nam_hoc: undefined, id_tkb: undefined });
   editingWeek.value = null;
   visible.value = true;
+  // Khi thêm mới, luôn lấy tuần lớn nhất trên toàn bộ dữ liệu (không chỉ page 1)
+  setNextWeekFromAll();
 };
 
 const editItem = record => {
