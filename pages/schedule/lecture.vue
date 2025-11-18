@@ -183,10 +183,11 @@ const canModify = record => {
   try {
     if (record?.stt !== 1) return false;
     if (!settingStore.currentPermission) return false;
-    if (!record?.tu_ngay) return false;
-    const todayStart = dayjs().startOf("day").valueOf();
-    const startDate = dayjs(record.tu_ngay).startOf("day").valueOf();
-    return startDate > todayStart; // chỉ khi bắt đầu sau hôm nay
+    // if (!record?.tu_ngay) return false;
+    // const todayStart = dayjs().startOf("day").valueOf();
+    // const startDate = dayjs(record.tu_ngay).startOf("day").valueOf();
+    // return startDate > todayStart; // chỉ khi bắt đầu sau hôm nay
+    return true;
   } catch (e) {
     return false;
   }
