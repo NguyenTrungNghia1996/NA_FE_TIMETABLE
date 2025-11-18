@@ -140,7 +140,7 @@
           <a-input v-model:value="formState.ten" placeholder="Nhập tên" :maxlength="255" show-count />
         </a-form-item>
         <SelectYear v-model="formState.id_nam_hoc" name="id_nam_hoc" :rules="rules.id_nam_hoc" />
-        <SelectGradeLevel v-model="formState.id_khoi" name="id_khoi" :rules="rules.id_khoi" />
+        <SelectGradeLevelByUnit v-model="formState.id_khoi" name="id_khoi" :rules="rules.id_khoi" />
         <SelectSchoolship v-model="formState.id_ban" name="id_ban" :rules="rules.id_ban" />
         <SelectSubject v-model="formState.id_mon" name="id_mon" :rules="rules.id_mon" />
       </a-form>
