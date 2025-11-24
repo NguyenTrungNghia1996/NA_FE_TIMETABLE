@@ -19,7 +19,7 @@
                     <span class="[writing-mode:vertical-rl] items-center justify-center">{{ getShiftLabel(ca.id) }}</span>
                   </td>
                   <td class="border p-0.5 text-center font-medium select-none" :style="labelCellStyle()">Tiết {{ (pIdx % getPeriodsForShift(ca.id)) + 1 }}</td>
-                  <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 text-xs align-top min-w-[100px] max-w-[100px] relative select-none" :style="cellStyle(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="isDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
+                  <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="text-center border p-0.5 text-xs align-top min-w-[100px] max-w-[100px] relative select-none" :style="cellStyle(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :class="cellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="isDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onDragStart(ca.id, ngay.id, pIdx)" @dragover="onDragOver($event, ca.id, ngay.id, pIdx)" @drop="onDrop(ca.id, ngay.id, pIdx)" @click="onCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx)">
                     <template v-if="ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isError">
                       <span class="italic text-red-500">Nghỉ</span>
                     </template>
@@ -56,7 +56,7 @@
                       <span class="[writing-mode:vertical-rl] items-center justify-center">{{ getShiftLabel(ca.id) }}</span>
                     </td>
                     <td class="border p-0.5 text-center font-medium select-none" :style="labelCellStyle()">Tiết {{ (pIdx % getPeriodsForShift(ca.id)) + 1 }}</td>
-                    <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="border p-0.5 text-xs align-top min-w-[100px] max-w-[100px] relative select-none" :style="teacherCellStyle(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)" @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)" @drop="onTeacherDrop(ca.id, ngay.id, pIdx)" @click="onTeacherCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx, true)">
+                    <td v-for="ngay in ca.ds_Ngay" :key="ngay.id" class="text-center border p-0.5 text-xs align-top min-w-[100px] max-w-[100px] relative select-none" :style="teacherCellStyle(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :class="teacherCellClasses(ca.id, ngay.id, pIdx, ngay.ds_Tiet[pIdx])" :draggable="teacherIsDraggable(ngay.ds_Tiet[pIdx])" @dragstart="onTeacherDragStart(ca.id, ngay.id, pIdx)" @dragover="onTeacherDragOver($event, ca.id, ngay.id, pIdx)" @drop="onTeacherDrop(ca.id, ngay.id, pIdx)" @click="onTeacherCellClick(ca.id, ngay.id, pIdx)" @contextmenu.prevent="openContextMenu($event, ca.id, ngay.id, pIdx, true)">
                       <template v-if="ngay.ds_Tiet[pIdx].isRest && !ngay.ds_Tiet[pIdx].isError">
                         <span class="italic text-red-500">Nghỉ</span>
                       </template>
