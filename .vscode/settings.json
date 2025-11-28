@@ -1,3 +1,15 @@
+// {
+//   "editor.quickSuggestions": {
+//     "strings": true
+//   },
+//   "tailwindCSS.includeLanguages": {
+//     "vue": "html"
+//   },
+//   "tailwindCSS.classAttributes": ["class", "className"],
+//   "files.associations": {
+//     "*.vue": "vue"
+//   }
+// }
 {
   "editor.quickSuggestions": {
     "strings": true
@@ -8,5 +20,19 @@
   "tailwindCSS.classAttributes": ["class", "className"],
   "files.associations": {
     "*.vue": "vue"
+  },
+
+  // thêm từ đây
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "prettier.requireConfig": true,
+  "editor.formatOnSave": true,
+  "[vue]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }

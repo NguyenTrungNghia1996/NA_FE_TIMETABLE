@@ -1,6 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: "2025-05-15",
+  compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   app: {
     head: {
@@ -15,18 +15,17 @@ export default defineNuxtConfig({
       ],
     },
   },
+  modules: [
+    '@nuxt/icon',
+    '@ant-design-vue/nuxt',
+    "@nuxtjs/tailwindcss",
+    "@pinia/nuxt",
+    "pinia-plugin-persistedstate",
+    "@vueuse/nuxt",
+    "@nuxt/image"
+  ],
   antd: { extractStyle: true },
   css: ["~/assets/css/tailwind.css"],
-  modules: [
-    "@nuxt/icon",
-    "@nuxt/image",
-    "@nuxtjs/tailwindcss",
-    "@ant-design-vue/nuxt",
-    "@pinia/nuxt",
-    "pinia-plugin-persistedstate/nuxt",
-    "@vueuse/nuxt",
-    "nuxt-clarity-analytics"
-  ],
   runtimeConfig: {
     encryptionKey: process.env.NUXT_ENCRYPTION_KEY || "default-strong-key-32-chars-123456",
     public: {
@@ -43,4 +42,4 @@ export default defineNuxtConfig({
       sourcemap: false
     }
   }
-});
+})
