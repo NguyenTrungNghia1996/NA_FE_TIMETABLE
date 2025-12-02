@@ -2,7 +2,7 @@
   <div @click="contextMenu.show = false" class="grid grid-cols-1 gap-2">
     <div class="grid grid-cols-4 gap-2">
       <div class="col-span-3 overflow-auto">
-        <SelectClass v-model="selectedClassId" :autoSelectFirst="true" size="small" :noFormItem="true" :inlineLabel="true" />
+        <SelectClass v-model="selectedClassId" :autoSelectFirst="true" size="small" :noFormItem="true" :inlineLabel="true" :showNavigationButtons="true" />
         <div v-for="ca in dsCa" :key="ca.id">
           <div class="overflow-x-auto">
             <table class="min-w-full border-collapse select-none">
@@ -39,7 +39,7 @@
         </div>
         <div>
           <!-- <p class="font-medium leading-tight text-xl">Giáo viên</p> -->
-          <SelectTeacher v-model="selectedTeacherId" :autoSelectFirst="true" size="small" :noFormItem="true" :inlineLabel="true" />
+          <SelectTeacher v-model="selectedTeacherId" :autoSelectFirst="true" size="small" :noFormItem="true" :inlineLabel="true" :showNavigationButtons="true" />
           <div v-for="ca in teacherDsCa" :key="ca.id">
             <div class="overflow-x-auto">
               <table class="min-w-full border-collapse select-none">
@@ -83,14 +83,18 @@
         <div class="py-1 flex justify-end w-full">
           <!-- Desktop/Tablet: show two full buttons -->
           <div class="hidden lg:flex items-center gap-2">
+            <a-button :disabled="!canUndo" @click.stop="undoLastClassUpdate">
+              <Icon name="ant-design:rollback-outlined" class="mr-2" />
+              Hoàn tác
+            </a-button>
             <a-button @click.stop="openThemeModal">
               <Icon name="ant-design:bg-colors-outlined" class="mr-2" />
               Cài đặt màu TKB
             </a-button>
-            <a-button @click.stop="openStructModal">
+            <!-- <a-button @click.stop="openStructModal">
               <Icon name="ant-design:appstore-add-outlined" class="mr-2" />
               Cài đặt hiển thị TKB
-            </a-button>
+            </a-button> -->
           </div>
 
           <!-- Mobile: compact single menu -->
@@ -109,6 +113,10 @@
                   <a-menu-item key="struct" @click="openStructModal">
                     <Icon name="ant-design:appstore-add-outlined" class="mr-2" />
                     Cài đặt hiển thị TKB
+                  </a-menu-item>
+                  <a-menu-item key="undo" :disabled="!canUndo" @click="undoLastClassUpdate">
+                    <Icon name="ant-design:rollback-outlined" class="mr-2" />
+                    Hoàn tác
                   </a-menu-item>
                 </a-menu>
               </template>
@@ -248,12 +256,15 @@ const teacherDsCa = ref([]);
 const teacherUnscheduled = ref([]);
 const timetableUnscheduled = ref([]);
 const classUnscheduled = ref([]);
+const classUpdateHistory = ref([]);
+const MAX_CLASS_HISTORY = 50;
 const selectedTeacherId = ref(null);
 const selectedTeacherName = ref("");
 const selectedClassId = ref(props.classId);
 const selectedClassName = ref("");
 let classNameFetchToken = 0;
 let teacherNameFetchToken = 0;
+const canUndo = computed(() => classUpdateHistory.value.length > 0);
 const emit = defineEmits(["cell-click", "update:classId"]);
 const showAddModal = ref(false);
 const selectedIdx = ref(0);
@@ -611,6 +622,80 @@ function getTeacherCell(caId, dayId, pIdx) {
   return ngay?.ds_Tiet[pIdx];
 }
 
+function saveClassUpdatePayload(payload) {
+  if (!payload?.timetable?.length) return false;
+  const snapshot = JSON.parse(JSON.stringify(payload));
+  classUpdateHistory.value.push(snapshot);
+  if (classUpdateHistory.value.length > MAX_CLASS_HISTORY) {
+    classUpdateHistory.value.shift();
+  }
+  return true;
+}
+
+function buildUndoTimetablePayload(timetable = []) {
+  if (!Array.isArray(timetable) || !timetable.length) return [];
+  const keysToPreserve = ["ngay", "tiet", "id_ca"];
+  return timetable.map((slot, idx) => {
+    const mirrored = timetable[timetable.length - 1 - idx] || {};
+    const merged = { ...slot };
+    Object.keys(mirrored).forEach(key => {
+      if (keysToPreserve.includes(key)) return;
+      merged[key] = mirrored[key];
+    });
+    return merged;
+  });
+}
+
+async function undoLastClassUpdate() {
+  const lastPayload = classUpdateHistory.value.pop();
+  if (!lastPayload) {
+    message.info("Không có thao tác để hoàn tác");
+    return;
+  }
+  const reversedTimetable = buildUndoTimetablePayload(lastPayload.timetable);
+  if (!reversedTimetable.length) {
+    message.info("Không có dữ liệu để hoàn tác");
+    return;
+  }
+  const body = {
+    ...lastPayload,
+    timetable: reversedTimetable,
+  };
+  try {
+    const { data, error } = await RestApi.timetable.update_class({ body });
+    if (data.value?.status !== "success") {
+      message.error("Hoàn tác thất bại", error.value || data.value);
+      return;
+    }
+    const idLop = lastPayload.id_lop || selectedClassId.value;
+    const idtkb = lastPayload.timetable?.[0]?.id_tkb || props.timetableId;
+    if (idLop && idtkb) {
+      const { data: listData, error: listError } = await RestApi.timetable.get_class({
+        params: { idLop, idtkb },
+      });
+      if (listData.value?.status === "success") {
+        const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], transformOpts.value);
+        dsCa.value = ds_Ca;
+        classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
+        selectedSubjectId.value = null;
+        selectedCellPos.value = null;
+      } else {
+        message.error("Load timetable error", listError.value || listData.value);
+      }
+    } else {
+      await fetchClassTimetable();
+    }
+    await fetchAllUnscheduled();
+    const teacherIds = Array.isArray(lastPayload.timetable) ? [...new Set(lastPayload.timetable.map(t => t?.id_giao_vien).filter(Boolean))] : [];
+    if (teacherIds.length && props.timetableId) {
+      const targetTeacher = teacherIds.includes(selectedTeacherId.value) ? selectedTeacherId.value : teacherIds[0];
+      await fetchTeacherTimetable(targetTeacher);
+    }
+  } catch (err) {
+    message.error("Hoàn tác thất bại", err);
+  }
+}
+
 async function fetchTeacherTimetable(teacherId) {
   try {
     const { data, error } = await RestApi.timetable.get_teacher({
@@ -760,8 +845,12 @@ async function onDrop(caId, dayId, pIdx) {
       id_lop: selectedClassId.value,
       timetable: [{ ...srcClone }, { ...dstClone }],
     };
+    const historyAdded = saveClassUpdatePayload(body);
     const { data, error } = await RestApi.timetable.update_class({ body });
     if (data.value?.status !== "success") {
+      if (historyAdded) {
+        classUpdateHistory.value.pop();
+      }
       message.error("Update timetable error", error.value || data.value);
     } else {
       try {
