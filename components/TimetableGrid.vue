@@ -752,6 +752,53 @@ async function handleUndoUnlockPeriod(payload) {
   }
 }
 
+async function handleUndoClearPeriod(payload) {
+  // const lesson = lessonOptions.value[selectedIdx.value];
+  // if (!lesson) return;
+  const cell = payload?.cell ?? payload;
+  if (!cell?.id_chitiet) {
+    message.info("Không có dữ liệu để hoàn tác");
+    return false;
+  }
+  console.log(cell);
+  const body = {
+    // id: cell.id_chitiet,
+    id: 0,
+    id_don_vi: cell.id_don_vi,
+    id_tkb: cell.id_tkb,
+    id_lop: cell.id_lop,
+    ten_lop: cell.ten_lop,
+    id_mon: cell.id_mon,
+    ten_mon: cell.ten_mon,
+    id_giao_vien: cell.id_giao_vien,
+    ten_giao_vien: cell.ten_giao_vien,
+    id_phong: cell.id_phong,
+    ten_phong: cell.ten_phong,
+    tiet_thu_may: cell.tiet_thu_may,
+    id_ca: cell.id_ca,
+    ngay: cell.ngay,
+    tiet: cell.tiet,
+    khoa: !!cell.isLock,
+    ds_vi_tri_xep_duoc: [],
+  };
+  try {
+    const { data, error } = await RestApi.timetable.update_period({ body });
+    if (data.value?.status !== "success") {
+      message.error("Hoàn tác huỷ tiết thất bại", error.value || data.value);
+      return false;
+    }
+    await fetchClassTimetable();
+    if (selectedTeacherId.value && props.timetableId) {
+      await fetchTeacherTimetable(selectedTeacherId.value);
+    }
+    await fetchAllUnscheduled();
+    return true;
+  } catch (err) {
+    message.error("Hoàn tác huỷ tiết thất bại", err);
+    return false;
+  }
+}
+
 async function undoLastAction() {
   const lastAction = timetableStore.lastAction;
   if (!lastAction) {
@@ -768,6 +815,9 @@ async function undoLastAction() {
       break;
     case "unlockPeriod":
       success = await handleUndoUnlockPeriod(lastAction.payload);
+      break;
+    case "clearPeriod":
+      success = await handleUndoClearPeriod(lastAction.payload);
       break;
     default:
       message.warning("Chưa hỗ trợ hoàn tác cho thao tác này");
@@ -1491,9 +1541,13 @@ async function unlockTeacherPeriods() {
 async function clearCell() {
   const cell = contextMenu.isTeacher ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx) : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell) return;
+  const snapshot = JSON.parse(JSON.stringify(cell));
+  snapshot.id_lop = selectedClassId.value ?? snapshot.id_lop;
+  snapshot.ten_lop = selectedClassName.value ?? snapshot.ten_lop;
   try {
     const { data, error } = await RestApi.timetable.cancel_period({ params: { Id: cell.id_chitiet } });
     if (data.value?.status === "success") {
+      timetableStore.pushClearPeriod({ cell: snapshot });
       const { data: listData, error: listError } = await RestApi.timetable.get_class({
         params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
       });
@@ -1625,7 +1679,6 @@ async function confirmAdd() {
     khoa: !!cell.isLock,
     ds_vi_tri_xep_duoc: [],
   };
-
   try {
     const { data, error } = await RestApi.timetable.update_period({ body });
     if (data.value?.status === "success") {

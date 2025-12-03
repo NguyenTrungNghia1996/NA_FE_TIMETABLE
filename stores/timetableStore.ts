@@ -31,7 +31,7 @@ export interface ClassUpdatePayload {
   [key: string]: unknown;
 }
 
-export type TimetableUndoType = "classUpdate" | "lockPeriod" | "unlockPeriod" | string;
+export type TimetableUndoType = "classUpdate" | "lockPeriod" | "unlockPeriod" | "clearPeriod" | string;
 
 export interface TimetableUndoEntry<T = unknown> {
   type: TimetableUndoType;
@@ -53,6 +53,10 @@ export interface UnlockPeriodUndoPayload {
   timetableId?: number;
   teacherId?: number;
   isTeacherView?: boolean;
+}
+
+export interface ClearPeriodUndoPayload {
+  cell: TimetablePeriod;
 }
 
 function clone<T>(value: T): T {
@@ -102,6 +106,14 @@ export const useTimetableStore = defineStore("timetable", {
       return this.pushUndoAction({
         type: "unlockPeriod",
         payload,
+        meta,
+      });
+    },
+    pushClearPeriod(payload?: ClearPeriodUndoPayload | null, meta?: Record<string, unknown>) {
+      if (!payload?.cell) return false;
+      return this.pushUndoAction({
+        type: "clearPeriod",
+        payload: clone(payload),
         meta,
       });
     },
