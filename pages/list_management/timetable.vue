@@ -142,8 +142,10 @@
     <!-- <a-drawer v-model:open="drawerInfoOpen" title="Xếp thời khóa biểu" :footer="null" height="100vh" placement="bottom" @close="closeInfoDrawer"> -->
     <a-drawer v-model:open="drawerInfoOpen" title="Xếp thời khóa biểu" :footer="null" height="100vh" placement="bottom" @close="closeInfoDrawer">
       <template #extra>
-        <a-button class="mr-2" @click="openCloneFromInfo">Sao chép</a-button>
-        <a-button type="primary" @click="openAdjustFromInfo">Tinh chỉnh thời khóa biểu</a-button>
+        <div class="flex">
+          <a-button class="mr-2" @click="openCloneFromInfo">Sao chép</a-button>
+          <a-button type="primary" @click="openAdjustFromInfo">Tinh chỉnh thời khóa biểu</a-button>
+        </div>
       </template>
       <ClientOnly>
         <TimetableInfo ref="infoRef" :timetableId="infoTimetableId" />
