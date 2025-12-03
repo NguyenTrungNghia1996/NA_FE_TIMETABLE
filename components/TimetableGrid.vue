@@ -760,7 +760,6 @@ async function handleUndoClearPeriod(payload) {
     message.info("Không có dữ liệu để hoàn tác");
     return false;
   }
-  console.log(cell);
   const body = {
     // id: cell.id_chitiet,
     id: 0,
@@ -799,6 +798,30 @@ async function handleUndoClearPeriod(payload) {
   }
 }
 
+async function handleUndoAddPeriod(payload) {
+  const cell = payload?.cell ?? payload;
+  if (!cell?.id_chitiet) {
+    message.info("Không có dữ liệu để hoàn tác");
+    return false;
+  }
+  try {
+    const { data, error } = await RestApi.timetable.cancel_period({ params: { Id: cell.id_chitiet } });
+    if (data.value?.status !== "success") {
+      message.error("Hoàn tác thêm tiết thất bại", error.value || data.value);
+      return false;
+    }
+    await fetchClassTimetable();
+    if (selectedTeacherId.value && props.timetableId) {
+      await fetchTeacherTimetable(selectedTeacherId.value);
+    }
+    await fetchAllUnscheduled();
+    return true;
+  } catch (err) {
+    message.error("Hoàn tác thêm tiết thất bại", err);
+    return false;
+  }
+}
+
 async function undoLastAction() {
   const lastAction = timetableStore.lastAction;
   if (!lastAction) {
@@ -818,6 +841,9 @@ async function undoLastAction() {
       break;
     case "clearPeriod":
       success = await handleUndoClearPeriod(lastAction.payload);
+      break;
+    case "addPeriod":
+      success = await handleUndoAddPeriod(lastAction.payload);
       break;
     default:
       message.warning("Chưa hỗ trợ hoàn tác cho thao tác này");
@@ -1154,7 +1180,6 @@ async function onUnscheduledClick(lesson) {
   selectedTeacherId.value = lesson.id_giao_vien || null;
   selectedSubjectId.value = lesson.id_mon || null;
   selectedCellPos.value = null;
-  console.log(">>>>", lesson);
   try {
     classSuggestInProgress.value = true;
     const body = {
@@ -1214,8 +1239,6 @@ async function onTeacherUnscheduledClick(lesson) {
 
 async function onTimetableUnscheduledClick(lesson) {
   if (!lesson) return;
-  console.log(lesson);
-
   // Sync selections based on the clicked lesson
   // Mark suggestion flows before changing ids to avoid watcher overrides
   classSuggestInProgress.value = !!lesson.id_lop;
@@ -1632,6 +1655,10 @@ async function addLesson() {
 }
 
 async function confirmAdd() {
+  const savedCa = contextMenu.ca;
+  const savedNgay = contextMenu.ngay;
+  const savedPIdx = contextMenu.pIdx;
+  const isTeacherContext = contextMenu.isTeacher;
   if (selectedIdx.value == null || !targetCell.value) return;
   const lesson = lessonOptions.value[selectedIdx.value];
   if (!lesson) return;
@@ -1679,6 +1706,7 @@ async function confirmAdd() {
     khoa: !!cell.isLock,
     ds_vi_tri_xep_duoc: [],
   };
+  let success = false;
   try {
     const { data, error } = await RestApi.timetable.update_period({ body });
     if (data.value?.status === "success") {
@@ -1715,11 +1743,19 @@ async function confirmAdd() {
         // Refresh timetable-level unscheduled list after arranging
         await fetchAllUnscheduled();
       }
+      success = true;
     } else {
       message.error("Update timetable error", error.value || data.value);
     }
   } catch (err) {
     message.error("Update timetable error", err);
+  }
+
+  if (success) {
+    const cellAfter = isTeacherContext ? getTeacherCell(savedCa, savedNgay, savedPIdx) : getCell(savedCa, savedNgay, savedPIdx);
+    if (cellAfter) {
+      timetableStore.pushAddPeriod({ cell: JSON.parse(JSON.stringify(cellAfter)) });
+    }
   }
 
   showAddModal.value = false;
