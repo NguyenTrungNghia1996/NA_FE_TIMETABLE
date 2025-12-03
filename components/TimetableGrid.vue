@@ -83,7 +83,7 @@
         <div class="py-1 flex justify-end w-full">
           <!-- Desktop/Tablet: show two full buttons -->
           <div class="hidden lg:flex items-center gap-2">
-            <a-button :disabled="!canUndo" @click.stop="undoLastAction">
+            <a-button :disabled="!canUndo || undoLoading" :loading="undoLoading" @click.stop="undoLastAction">
               <Icon name="ant-design:rollback-outlined" class="mr-2" />
               Hoàn tác
             </a-button>
@@ -114,7 +114,7 @@
                     <Icon name="ant-design:appstore-add-outlined" class="mr-2" />
                     Cài đặt hiển thị TKB
                   </a-menu-item>
-                  <a-menu-item key="undo" :disabled="!canUndo" @click="undoLastAction">
+                  <a-menu-item key="undo" :disabled="!canUndo || undoLoading" @click="undoLastAction">
                     <Icon name="ant-design:rollback-outlined" class="mr-2" />
                     Hoàn tác
                   </a-menu-item>
@@ -271,6 +271,7 @@ const selectedIdx = ref(0);
 const targetCell = ref(null);
 const selectedSubjectId = ref(null);
 const selectedCellPos = ref(null);
+const undoLoading = ref(false);
 const lessonOptions = ref([]);
 // Guard: avoid clearing selection when classId changes due to teacher-cell click
 const suppressSelectionResetOnClassChange = ref(false);
@@ -823,34 +824,40 @@ async function handleUndoAddPeriod(payload) {
 }
 
 async function undoLastAction() {
+  if (undoLoading.value) return;
   const lastAction = timetableStore.lastAction;
   if (!lastAction) {
     message.info("Không có thao tác để hoàn tác");
     return;
   }
   let success = false;
-  switch (lastAction.type) {
-    case "classUpdate":
-      success = await handleUndoClassUpdate(lastAction.payload);
-      break;
-    case "lockPeriod":
-      success = await handleUndoLockPeriod(lastAction.payload);
-      break;
-    case "unlockPeriod":
-      success = await handleUndoUnlockPeriod(lastAction.payload);
-      break;
-    case "clearPeriod":
-      success = await handleUndoClearPeriod(lastAction.payload);
-      break;
-    case "addPeriod":
-      success = await handleUndoAddPeriod(lastAction.payload);
-      break;
-    default:
-      message.warning("Chưa hỗ trợ hoàn tác cho thao tác này");
-      break;
-  }
-  if (success) {
-    timetableStore.popLastAction();
+  undoLoading.value = true;
+  try {
+    switch (lastAction.type) {
+      case "classUpdate":
+        success = await handleUndoClassUpdate(lastAction.payload);
+        break;
+      case "lockPeriod":
+        success = await handleUndoLockPeriod(lastAction.payload);
+        break;
+      case "unlockPeriod":
+        success = await handleUndoUnlockPeriod(lastAction.payload);
+        break;
+      case "clearPeriod":
+        success = await handleUndoClearPeriod(lastAction.payload);
+        break;
+      case "addPeriod":
+        success = await handleUndoAddPeriod(lastAction.payload);
+        break;
+      default:
+        message.warning("Chưa hỗ trợ hoàn tác cho thao tác này");
+        break;
+    }
+    if (success) {
+      timetableStore.popLastAction();
+    }
+  } finally {
+    undoLoading.value = false;
   }
 }
 
