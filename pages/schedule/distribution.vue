@@ -39,6 +39,13 @@
                   </template>
                 </a-button>
               </a-tooltip>
+              <a-tooltip title="Xuất phân phối">
+                <a-button type="link" size="small" @click="exportDistribution(record)">
+                  <template #icon>
+                    <FileExcelOutlined />
+                  </template>
+                </a-button>
+              </a-tooltip>
               <a-tooltip title="Import dữ liệu">
                 <a-button type="link" size="small" @click="openImportModal(record)">
                   <template #icon>
@@ -187,7 +194,7 @@ const columns = [
   { title: "Khối", dataIndex: "ten_khoi", key: "ten_khoi", ellipsis: true },
   { title: "Ban", dataIndex: "ten_ban", key: "ten_ban", ellipsis: true },
   { title: "Môn", dataIndex: "ten_mon", key: "ten_mon", ellipsis: true },
-  { title: "Thao tác", key: "action", width: 120, align: "center", fixed: "right" },
+  { title: "Thao tác", key: "action", width: 160, align: "center", fixed: "right" },
 ];
 
 const dataSource = ref([]);
@@ -277,6 +284,44 @@ const fetchData = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+// Download helper for phân phối chương trình
+const exportFile = async apiFn => {
+  try {
+    settingStore.setLoading(true);
+    const { data, error } = await apiFn();
+    if (error.value) {
+      throw new Error(error.value?.data?.message || "Xuất file không thành công");
+    }
+    const { blob: blobData, headers } = data.value || {};
+    if (!blobData) {
+      throw new Error("Xuất file không thành công");
+    }
+    const blob = blobData instanceof Blob ? blobData : new Blob([blobData]);
+    const cd = headers?.["content-disposition"] || headers?.["Content-Disposition"];
+    const filename = (cd && (decodeURIComponent(/filename\*=UTF-8''([^;]+)/.exec(cd)?.[1] || "") || /filename="([^"]+)"/.exec(cd)?.[1])) || "phanphoi.xlsx";
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    message.error(err.message || "Xuất file không thành công");
+  } finally {
+    settingStore.setLoading(false);
+  }
+};
+
+const exportDistribution = async record => {
+  if (!record?.id) {
+    message.error("Không xác định được phân phối chương trình");
+    return;
+  }
+  await exportFile(() => RestApi.phanphoi_chuongtrinh.export({ params: { Id: record.id } }));
 };
 
 // Tự động lọc theo các tiêu chí chọn (Năm, Khối, Ban, Môn)

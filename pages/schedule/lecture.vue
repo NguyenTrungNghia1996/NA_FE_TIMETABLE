@@ -50,6 +50,9 @@
     <a-modal v-model:open="visible" :title="modalTitle" @cancel="handleCancel" :width="640">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
         <SelectYear v-model="formState.id_nam_hoc" label="Năm học" name="id_nam_hoc" :rules="rules.id_nam_hoc" />
+        <a-form-item label="Tuần" name="tuan">
+          <a-input-number v-model:value="weekModel" :min="weekMin" :step="1" :precision="0" class="!w-full" placeholder="Chọn tuần" />
+        </a-form-item>
         <SelectTimetable v-model="formState.id_tkb" label="Thời khóa biểu" name="id_tkb" :rules="rules.id_tkb" />
       </a-form>
 
@@ -155,11 +158,13 @@ const formState = reactive({
   id: undefined,
   id_nam_hoc: undefined,
   id_tkb: undefined,
+  tuan: undefined,
 });
 
 const rules = reactive({
   id_nam_hoc: [{ required: true, message: "Vui lòng chọn năm học", trigger: "change" }],
   id_tkb: [{ required: true, message: "Vui lòng chọn thời khóa biểu", trigger: "change" }],
+  tuan: [{ required: true, message: "Vui lòng chọn tuần", trigger: "change" }],
 });
 
 const formatDate = date => {
@@ -185,6 +190,9 @@ const modalTitle = computed(() => {
   return "Thêm mới lịch báo giảng";
 });
 
+// Giới hạn tuần tối thiểu khi chọn
+const weekMin = computed(() => nextWeek.value || 1);
+
 // Chỉ cho phép sửa/xóa khi có quyền và lịch chưa bắt đầu
 const canModify = record => {
   try {
@@ -202,6 +210,14 @@ const canModify = record => {
 
 // Chỉ build các query param khi có giá trị (tránh gửi null/rỗng lên API)
 const hasValue = v => v !== null && v !== undefined && v !== "";
+
+// Tuần hiển thị trong form: mặc định lấy nextWeek khi chưa chọn
+const weekModel = computed({
+  get: () => (hasValue(formState.tuan) ? formState.tuan : nextWeek.value),
+  set: val => {
+    formState.tuan = val;
+  },
+});
 
 const buildQueryParams = () => {
   const query = {
@@ -291,14 +307,17 @@ const handleTableChange = async pag => {
   await fetchData();
 };
 
-const showModal = () => {
+const showModal = async () => {
   isEdit.value = false;
   // Mặc định năm học theo bộ lọc hiện tại (nếu có)
-  Object.assign(formState, { id: undefined, id_nam_hoc: param.value.IdNam || undefined, id_tkb: undefined });
+  Object.assign(formState, { id: undefined, id_nam_hoc: param.value.IdNam || undefined, id_tkb: undefined, tuan: undefined });
   editingWeek.value = null;
   visible.value = true;
   // Khi thêm mới, số tuần phụ thuộc Năm học, lấy từ API /api/namhoc/tuanmax
-  setNextWeekByYear(formState.id_nam_hoc);
+  await setNextWeekByYear(formState.id_nam_hoc);
+  if (hasValue(nextWeek.value)) {
+    formState.tuan = nextWeek.value;
+  }
 };
 
 const editItem = record => {
@@ -306,11 +325,13 @@ const editItem = record => {
     message.warning("Chỉ được sửa lịch báo giảng chưa bắt đầu");
     return;
   }
+  setNextWeekByYear(record.id_nam_hoc);
   isEdit.value = true;
   Object.assign(formState, {
     id: record.id,
     id_nam_hoc: record.id_nam_hoc,
     id_tkb: record.id_tkb,
+    tuan: record.tuan,
   });
   editingWeek.value = record?.tuan ?? null;
   visible.value = true;
@@ -320,6 +341,7 @@ const buildPayload = () => ({
   ...(isEdit.value ? { id: formState.id } : {}),
   id_nam_hoc: formState.id_nam_hoc,
   id_tkb: formState.id_tkb,
+  tuan: formState.tuan,
 });
 
 const handleOk = async () => {
@@ -356,6 +378,7 @@ const handleOk = async () => {
 const handleCancel = () => {
   formRef.value?.resetFields?.();
   editingWeek.value = null;
+  formState.tuan = undefined;
   visible.value = false;
 };
 
@@ -413,6 +436,19 @@ watch(
     if (!visible.value) return;
     if (isEdit.value) return;
     await setNextWeekByYear(val);
+    if (hasValue(nextWeek.value)) {
+      formState.tuan = nextWeek.value;
+    }
+  },
+);
+
+// Đồng bộ tuần hiển thị khi lấy được giá trị mới
+watch(
+  () => nextWeek.value,
+  val => {
+    if (!visible.value) return;
+    if (isEdit.value) return;
+    if (hasValue(val)) formState.tuan = val;
   },
 );
 

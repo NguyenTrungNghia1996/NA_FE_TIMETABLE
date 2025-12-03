@@ -138,6 +138,7 @@ let ENDPOINTS = {
   HOLIDAY: "/api/ngaynghi",
   // PHANPHOI_CHUONGTRINH
   PHANPHOI_CHUONGTRINH: "/api/phanphoi_chuongtrinh",
+  PHANPHOI_CHUONGTRINH_EXPORT: "/api/phanphoi_chuongtrinh/export",
   // PHANPHOI_CHUONGTRINH_CHITIET
   PHANPHOI_CHUONGTRINH_CHITIET: "/api/phanphoi_chuongtrinh_chitiet",
   // PHANPHOI_CHUONGTRINH_CHITIET - IMPORT
@@ -1116,6 +1117,9 @@ class PhanphoiChuongtrinh {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.PHANPHOI_CHUONGTRINH, data);
+  }
+  async export(data) {
+    return await this.request.download(ENDPOINTS.PHANPHOI_CHUONGTRINH_EXPORT, data);
   }
 }
 
