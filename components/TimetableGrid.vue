@@ -83,7 +83,7 @@
         <div class="py-1 flex justify-end w-full">
           <!-- Desktop/Tablet: show two full buttons -->
           <div class="hidden lg:flex items-center gap-2">
-            <a-button :disabled="!canUndo" @click.stop="undoLastClassUpdate">
+            <a-button :disabled="!canUndo || undoLoading" :loading="undoLoading" @click.stop="undoLastAction">
               <Icon name="ant-design:rollback-outlined" class="mr-2" />
               Hoàn tác
             </a-button>
@@ -114,7 +114,7 @@
                     <Icon name="ant-design:appstore-add-outlined" class="mr-2" />
                     Cài đặt hiển thị TKB
                   </a-menu-item>
-                  <a-menu-item key="undo" :disabled="!canUndo" @click="undoLastClassUpdate">
+                  <a-menu-item key="undo" :disabled="!canUndo || undoLoading" @click="undoLastAction">
                     <Icon name="ant-design:rollback-outlined" class="mr-2" />
                     Hoàn tác
                   </a-menu-item>
@@ -238,6 +238,7 @@
 <script setup>
 import { transformTimetable } from "@/composables/useTimetable";
 import { useSettingStore } from "~/stores/settingStore";
+import { useTimetableStore } from "~/stores/timetableStore";
 const { RestApi } = useApi();
 
 const props = defineProps({
@@ -251,26 +252,26 @@ const props = defineProps({
   },
 });
 
+const timetableStore = useTimetableStore();
 const dsCa = ref([]);
 const teacherDsCa = ref([]);
 const teacherUnscheduled = ref([]);
 const timetableUnscheduled = ref([]);
 const classUnscheduled = ref([]);
-const classUpdateHistory = ref([]);
-const MAX_CLASS_HISTORY = 50;
 const selectedTeacherId = ref(null);
 const selectedTeacherName = ref("");
 const selectedClassId = ref(props.classId);
 const selectedClassName = ref("");
 let classNameFetchToken = 0;
 let teacherNameFetchToken = 0;
-const canUndo = computed(() => classUpdateHistory.value.length > 0);
+const canUndo = computed(() => timetableStore.canUndo);
 const emit = defineEmits(["cell-click", "update:classId"]);
 const showAddModal = ref(false);
 const selectedIdx = ref(0);
 const targetCell = ref(null);
 const selectedSubjectId = ref(null);
 const selectedCellPos = ref(null);
+const undoLoading = ref(false);
 const lessonOptions = ref([]);
 // Guard: avoid clearing selection when classId changes due to teacher-cell click
 const suppressSelectionResetOnClassChange = ref(false);
@@ -623,13 +624,7 @@ function getTeacherCell(caId, dayId, pIdx) {
 }
 
 function saveClassUpdatePayload(payload) {
-  if (!payload?.timetable?.length) return false;
-  const snapshot = JSON.parse(JSON.stringify(payload));
-  classUpdateHistory.value.push(snapshot);
-  if (classUpdateHistory.value.length > MAX_CLASS_HISTORY) {
-    classUpdateHistory.value.shift();
-  }
-  return true;
+  return timetableStore.pushClassUpdate(payload);
 }
 
 function buildUndoTimetablePayload(timetable = []) {
@@ -646,29 +641,28 @@ function buildUndoTimetablePayload(timetable = []) {
   });
 }
 
-async function undoLastClassUpdate() {
-  const lastPayload = classUpdateHistory.value.pop();
-  if (!lastPayload) {
-    message.info("Không có thao tác để hoàn tác");
-    return;
+async function handleUndoClassUpdate(payload) {
+  if (!payload?.timetable?.length) {
+    message.info("Không có dữ liệu để hoàn tác");
+    return false;
   }
-  const reversedTimetable = buildUndoTimetablePayload(lastPayload.timetable);
+  const reversedTimetable = buildUndoTimetablePayload(payload.timetable);
   if (!reversedTimetable.length) {
     message.info("Không có dữ liệu để hoàn tác");
-    return;
+    return false;
   }
   const body = {
-    ...lastPayload,
+    ...payload,
     timetable: reversedTimetable,
   };
   try {
     const { data, error } = await RestApi.timetable.update_class({ body });
     if (data.value?.status !== "success") {
       message.error("Hoàn tác thất bại", error.value || data.value);
-      return;
+      return false;
     }
-    const idLop = lastPayload.id_lop || selectedClassId.value;
-    const idtkb = lastPayload.timetable?.[0]?.id_tkb || props.timetableId;
+    const idLop = payload.id_lop || selectedClassId.value;
+    const idtkb = payload.timetable?.[0]?.id_tkb || props.timetableId;
     if (idLop && idtkb) {
       const { data: listData, error: listError } = await RestApi.timetable.get_class({
         params: { idLop, idtkb },
@@ -686,13 +680,184 @@ async function undoLastClassUpdate() {
       await fetchClassTimetable();
     }
     await fetchAllUnscheduled();
-    const teacherIds = Array.isArray(lastPayload.timetable) ? [...new Set(lastPayload.timetable.map(t => t?.id_giao_vien).filter(Boolean))] : [];
+    const teacherIds = Array.isArray(payload.timetable) ? [...new Set(payload.timetable.map(t => t?.id_giao_vien).filter(Boolean))] : [];
     if (teacherIds.length && props.timetableId) {
       const targetTeacher = teacherIds.includes(selectedTeacherId.value) ? selectedTeacherId.value : teacherIds[0];
       await fetchTeacherTimetable(targetTeacher);
     }
+    return true;
   } catch (err) {
     message.error("Hoàn tác thất bại", err);
+    return false;
+  }
+}
+
+async function handleUndoLockPeriod(payload) {
+  const lockId = payload?.lockId ?? payload;
+  if (!lockId) {
+    message.info("Không có dữ liệu để hoàn tác");
+    return false;
+  }
+  try {
+    const { data, error } = await RestApi.timetable.unlock_period({ params: { Id: lockId } });
+    if (data.value?.status !== "success") {
+      message.error("Hoàn tác khóa thất bại", error.value || data.value);
+      return false;
+    }
+    // Refresh affected views
+    const idLop = payload?.classId || selectedClassId.value;
+    const idTkb = payload?.timetableId || props.timetableId;
+    if (idLop && idTkb) {
+      await fetchClassTimetable();
+    }
+    if (payload?.teacherId && props.timetableId) {
+      await fetchTeacherTimetable(payload.teacherId);
+    } else if (selectedTeacherId.value && props.timetableId) {
+      await fetchTeacherTimetable(selectedTeacherId.value);
+    }
+    await fetchAllUnscheduled();
+    return true;
+  } catch (err) {
+    message.error("Hoàn tác khóa thất bại", err);
+    return false;
+  }
+}
+
+async function handleUndoUnlockPeriod(payload) {
+  const lockId = payload?.lockId ?? payload;
+  if (!lockId) {
+    message.info("Không có dữ liệu để hoàn tác");
+    return false;
+  }
+  try {
+    const { data, error } = await RestApi.timetable.lock_period({ params: { Id: lockId } });
+    if (data.value?.status !== "success") {
+      message.error("Hoàn tác huỷ khóa thất bại", error.value || data.value);
+      return false;
+    }
+    const idLop = payload?.classId || selectedClassId.value;
+    const idTkb = payload?.timetableId || props.timetableId;
+    if (idLop && idTkb) {
+      await fetchClassTimetable();
+    }
+    if (payload?.teacherId && props.timetableId) {
+      await fetchTeacherTimetable(payload.teacherId);
+    } else if (selectedTeacherId.value && props.timetableId) {
+      await fetchTeacherTimetable(selectedTeacherId.value);
+    }
+    await fetchAllUnscheduled();
+    return true;
+  } catch (err) {
+    message.error("Hoàn tác huỷ khóa thất bại", err);
+    return false;
+  }
+}
+
+async function handleUndoClearPeriod(payload) {
+  // const lesson = lessonOptions.value[selectedIdx.value];
+  // if (!lesson) return;
+  const cell = payload?.cell ?? payload;
+  if (!cell?.id_chitiet) {
+    message.info("Không có dữ liệu để hoàn tác");
+    return false;
+  }
+  const body = {
+    // id: cell.id_chitiet,
+    id: 0,
+    id_don_vi: cell.id_don_vi,
+    id_tkb: cell.id_tkb,
+    id_lop: cell.id_lop,
+    ten_lop: cell.ten_lop,
+    id_mon: cell.id_mon,
+    ten_mon: cell.ten_mon,
+    id_giao_vien: cell.id_giao_vien,
+    ten_giao_vien: cell.ten_giao_vien,
+    id_phong: cell.id_phong,
+    ten_phong: cell.ten_phong,
+    tiet_thu_may: cell.tiet_thu_may,
+    id_ca: cell.id_ca,
+    ngay: cell.ngay,
+    tiet: cell.tiet,
+    khoa: !!cell.isLock,
+    ds_vi_tri_xep_duoc: [],
+  };
+  try {
+    const { data, error } = await RestApi.timetable.update_period({ body });
+    if (data.value?.status !== "success") {
+      message.error("Hoàn tác huỷ tiết thất bại", error.value || data.value);
+      return false;
+    }
+    await fetchClassTimetable();
+    if (selectedTeacherId.value && props.timetableId) {
+      await fetchTeacherTimetable(selectedTeacherId.value);
+    }
+    await fetchAllUnscheduled();
+    return true;
+  } catch (err) {
+    message.error("Hoàn tác huỷ tiết thất bại", err);
+    return false;
+  }
+}
+
+async function handleUndoAddPeriod(payload) {
+  const cell = payload?.cell ?? payload;
+  if (!cell?.id_chitiet) {
+    message.info("Không có dữ liệu để hoàn tác");
+    return false;
+  }
+  try {
+    const { data, error } = await RestApi.timetable.cancel_period({ params: { Id: cell.id_chitiet } });
+    if (data.value?.status !== "success") {
+      message.error("Hoàn tác thêm tiết thất bại", error.value || data.value);
+      return false;
+    }
+    await fetchClassTimetable();
+    if (selectedTeacherId.value && props.timetableId) {
+      await fetchTeacherTimetable(selectedTeacherId.value);
+    }
+    await fetchAllUnscheduled();
+    return true;
+  } catch (err) {
+    message.error("Hoàn tác thêm tiết thất bại", err);
+    return false;
+  }
+}
+
+async function undoLastAction() {
+  if (undoLoading.value) return;
+  const lastAction = timetableStore.lastAction;
+  if (!lastAction) {
+    message.info("Không có thao tác để hoàn tác");
+    return;
+  }
+  let success = false;
+  undoLoading.value = true;
+  try {
+    switch (lastAction.type) {
+      case "classUpdate":
+        success = await handleUndoClassUpdate(lastAction.payload);
+        break;
+      case "lockPeriod":
+        success = await handleUndoLockPeriod(lastAction.payload);
+        break;
+      case "unlockPeriod":
+        success = await handleUndoUnlockPeriod(lastAction.payload);
+        break;
+      case "clearPeriod":
+        success = await handleUndoClearPeriod(lastAction.payload);
+        break;
+      case "addPeriod":
+        success = await handleUndoAddPeriod(lastAction.payload);
+        break;
+      default:
+        message.warning("Chưa hỗ trợ hoàn tác cho thao tác này");
+        break;
+    }
+    if (success) {
+      timetableStore.popLastAction();
+    }
+  } finally {
+    undoLoading.value = false;
   }
 }
 
@@ -849,7 +1014,9 @@ async function onDrop(caId, dayId, pIdx) {
     const { data, error } = await RestApi.timetable.update_class({ body });
     if (data.value?.status !== "success") {
       if (historyAdded) {
-        classUpdateHistory.value.pop();
+        if (timetableStore.lastAction?.type === "classUpdate") {
+          timetableStore.popLastAction();
+        }
       }
       message.error("Update timetable error", error.value || data.value);
     } else {
@@ -1020,7 +1187,6 @@ async function onUnscheduledClick(lesson) {
   selectedTeacherId.value = lesson.id_giao_vien || null;
   selectedSubjectId.value = lesson.id_mon || null;
   selectedCellPos.value = null;
-  console.log(">>>>", lesson);
   try {
     classSuggestInProgress.value = true;
     const body = {
@@ -1080,8 +1246,6 @@ async function onTeacherUnscheduledClick(lesson) {
 
 async function onTimetableUnscheduledClick(lesson) {
   if (!lesson) return;
-  console.log(lesson);
-
   // Sync selections based on the clicked lesson
   // Mark suggestion flows before changing ids to avoid watcher overrides
   classSuggestInProgress.value = !!lesson.id_lop;
@@ -1235,6 +1399,13 @@ async function setLock(val) {
     if (val) {
       const { data, error } = await RestApi.timetable.lock_period({ params: { Id: cell.id_chitiet } });
       if (data.value?.status === "success") {
+        timetableStore.pushLockPeriod({
+          lockId: cell.id_chitiet,
+          // classId: selectedClassId.value,
+          // timetableId: cell.id_tkb,
+          // teacherId: selectedTeacherId.value,
+          // isTeacherView: contextMenu.isTeacher,
+        });
         const { data: listData, error: listError } = await RestApi.timetable.get_class({
           params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
         });
@@ -1254,6 +1425,13 @@ async function setLock(val) {
     } else {
       const { data, error } = await RestApi.timetable.unlock_period({ params: { Id: cell.id_chitiet } });
       if (data.value?.status === "success") {
+        timetableStore.pushUnlockPeriod({
+          lockId: cell.id_chitiet,
+          // classId: selectedClassId.value,
+          // timetableId: cell.id_tkb,
+          // teacherId: selectedTeacherId.value,
+          // isTeacherView: contextMenu.isTeacher,
+        });
         const { data: listData, error: listError } = await RestApi.timetable.get_class({
           params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
         });
@@ -1393,9 +1571,13 @@ async function unlockTeacherPeriods() {
 async function clearCell() {
   const cell = contextMenu.isTeacher ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx) : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell) return;
+  const snapshot = JSON.parse(JSON.stringify(cell));
+  snapshot.id_lop = selectedClassId.value ?? snapshot.id_lop;
+  snapshot.ten_lop = selectedClassName.value ?? snapshot.ten_lop;
   try {
     const { data, error } = await RestApi.timetable.cancel_period({ params: { Id: cell.id_chitiet } });
     if (data.value?.status === "success") {
+      timetableStore.pushClearPeriod({ cell: snapshot });
       const { data: listData, error: listError } = await RestApi.timetable.get_class({
         params: { idLop: selectedClassId.value, idtkb: cell.id_tkb },
       });
@@ -1480,6 +1662,10 @@ async function addLesson() {
 }
 
 async function confirmAdd() {
+  const savedCa = contextMenu.ca;
+  const savedNgay = contextMenu.ngay;
+  const savedPIdx = contextMenu.pIdx;
+  const isTeacherContext = contextMenu.isTeacher;
   if (selectedIdx.value == null || !targetCell.value) return;
   const lesson = lessonOptions.value[selectedIdx.value];
   if (!lesson) return;
@@ -1527,7 +1713,7 @@ async function confirmAdd() {
     khoa: !!cell.isLock,
     ds_vi_tri_xep_duoc: [],
   };
-
+  let success = false;
   try {
     const { data, error } = await RestApi.timetable.update_period({ body });
     if (data.value?.status === "success") {
@@ -1564,11 +1750,19 @@ async function confirmAdd() {
         // Refresh timetable-level unscheduled list after arranging
         await fetchAllUnscheduled();
       }
+      success = true;
     } else {
       message.error("Update timetable error", error.value || data.value);
     }
   } catch (err) {
     message.error("Update timetable error", err);
+  }
+
+  if (success) {
+    const cellAfter = isTeacherContext ? getTeacherCell(savedCa, savedNgay, savedPIdx) : getCell(savedCa, savedNgay, savedPIdx);
+    if (cellAfter) {
+      timetableStore.pushAddPeriod({ cell: JSON.parse(JSON.stringify(cellAfter)) });
+    }
   }
 
   showAddModal.value = false;
