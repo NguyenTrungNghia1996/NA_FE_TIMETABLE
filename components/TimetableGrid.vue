@@ -131,9 +131,20 @@
           <UnscheduledTable :data="classUnscheduled" class="w-full" @row-click="onUnscheduledClick" />
         </div>
         <div class="h-1/3 overflow-auto m-3 shadow-xl">
-          <h4 class="font-semibold">
-            Tiết chưa xếp của giáo viên
-            <span v-if="selectedTeacherName">: {{ selectedTeacherName }}</span>
+          <h4 class="font-semibold flex items-center justify-between gap-2 flex-wrap">
+            <span>
+              Tiết chưa xếp của giáo viên
+              <span v-if="selectedTeacherName"
+                >: {{ selectedTeacherName }}
+                <a-tooltip>
+                  <template #title>Đã xếp / Tổng</template>
+                  {{ teacherPeriodStats.scheduled }} / {{ teacherPeriodStats.total }}
+                </a-tooltip>
+              </span>
+            </span>
+            <!-- <span v-if="teacherPeriodStats.total || teacherPeriodStats.scheduled" class="text-sm font-normal text-gray-600">
+              Đã xếp / Tổng: 
+            </span> -->
           </h4>
           <TeacherUnscheduledTable :data="teacherUnscheduled" class="w-full" @row-click="onTeacherUnscheduledClick" />
         </div>
@@ -256,6 +267,7 @@ const timetableStore = useTimetableStore();
 const dsCa = ref([]);
 const teacherDsCa = ref([]);
 const teacherUnscheduled = ref([]);
+const teacherPeriodStats = ref({ scheduled: 0, total: 0 });
 const timetableUnscheduled = ref([]);
 const classUnscheduled = ref([]);
 const selectedTeacherId = ref(null);
@@ -531,6 +543,7 @@ watch(selectedTeacherId, async id => {
   } else {
     teacherDsCa.value = [];
     teacherUnscheduled.value = [];
+    teacherPeriodStats.value = { scheduled: 0, total: 0 };
   }
 });
 
@@ -867,19 +880,25 @@ async function fetchTeacherTimetable(teacherId) {
       params: { idGV: teacherId, idtkb: props.timetableId },
     });
     if (data.value?.status === "success") {
-      const { timetable, ds_chua_xep } = data.value.data || {};
+      const { timetable, ds_chua_xep, so_tiet_da_xep, tong_so_tiet } = data.value.data || {};
       const { ds_Ca } = transformTimetable(timetable || [], transformOpts.value);
+      teacherPeriodStats.value = {
+        scheduled: Number(so_tiet_da_xep) || 0,
+        total: Number(tong_so_tiet) || 0,
+      };
       teacherDsCa.value = ds_Ca;
       teacherUnscheduled.value = Array.isArray(ds_chua_xep) ? ds_chua_xep : [];
     } else {
       message.error("Get teacher timetable error", error.value || data.value);
       teacherDsCa.value = [];
       teacherUnscheduled.value = [];
+      teacherPeriodStats.value = { scheduled: 0, total: 0 };
     }
   } catch (err) {
     message.error("Get teacher timetable error", err);
     teacherDsCa.value = [];
     teacherUnscheduled.value = [];
+    teacherPeriodStats.value = { scheduled: 0, total: 0 };
   }
 }
 
