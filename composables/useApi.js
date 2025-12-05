@@ -129,6 +129,7 @@ let ENDPOINTS = {
   TIMETABLE_EXPORT_MATRIX_GRADE: "/api/export/matran/khoi",
   TIMETABLE_EXPORT_MATRIX_EXPERTISE: "/api/export/matran/tohopmon",
   TIMETABLE_EXPORT_MATRIX_CLASS: "/api/export/matran/lop",
+  TIMETABLE_EXPORT_MATRIX_CLASS_VERTICAL: "/api/export/matran/lopdoc",
 
   S3: "/api/presigned_url",
   // YEAR (Năm học)
@@ -1007,6 +1008,9 @@ class Timetable {
   }
   async export_matrix_class(data) {
     return await this.request.download(ENDPOINTS.TIMETABLE_EXPORT_MATRIX_CLASS, data);
+  }
+  async export_matrix_class_vertical(data) {
+    return await this.request.download(ENDPOINTS.TIMETABLE_EXPORT_MATRIX_CLASS_VERTICAL, data);
   }
 }
 export default () => {
