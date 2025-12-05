@@ -368,7 +368,10 @@ const detailRules = reactive({
 const openDetailDrawer = async record => {
   detailDrawer.open = true;
   detailDrawer.header = { ...record };
-  detailParam.value = { pageIndex: 1, pageSize: 10, search: "", idPpct: record.id };
+  const pageSize = detailPagination.pageSize || detailParam.value.pageSize || 10;
+  detailPagination.current = 1;
+  detailPagination.pageSize = pageSize;
+  detailParam.value = { pageIndex: 1, pageSize, search: "", idPpct: record.id };
   resetDetailForm();
   await fetchDetailData();
   await setNextThuTuTietFromAll();
