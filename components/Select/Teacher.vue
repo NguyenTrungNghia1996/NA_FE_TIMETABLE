@@ -90,7 +90,8 @@ const fetchTeachers = async (search = "") => {
     const { data, error } = await RestApi.teacher.list({ params });
 
     if (data.value?.status === "success") {
-      options.value = data.value.data.items?.map(item => ({
+      const items = Array.isArray(data.value?.data?.items) ? data.value.data.items : [];
+      options.value = items.map(item => ({
         label: `${item.ho_va_ho_dem} ${item.ten} (${item.ma_giao_vien})`,
         value: item.id,
       }));
