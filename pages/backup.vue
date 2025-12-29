@@ -1,26 +1,28 @@
 <template>
   <div class="p-2 md:p-4 bg-white min-h-full">
-    <div class="grid grid-cols-1 gap-1">
-      <a-card>
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div class="space-y-1">
+    <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
+      <a-card class="h-full shadow-sm">
+        <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div class="space-y-2 text-center md:text-left">
             <div class="text-lg font-semibold">Sao lưu danh mục</div>
             <p class="text-sm text-gray-600">Tải file sao lưu toàn bộ danh mục hiện có để lưu trữ hoặc chuyển sang môi trường khác.</p>
           </div>
-          <a-button type="primary" :loading="downloading" @click="downloadBackup">
-            <template #icon>
-              <CloudDownloadOutlined />
-            </template>
-            Tải file sao lưu
-          </a-button>
+          <div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:justify-end">
+            <a-button class="flex w-full items-center justify-center sm:w-auto" type="primary" :loading="downloading" @click="downloadBackup">
+              <template #icon>
+                <CloudDownloadOutlined />
+              </template>
+              Tải file sao lưu
+            </a-button>
+          </div>
         </div>
       </a-card>
 
-      <a-card title="Khôi phục danh mục">
+      <a-card title="Khôi phục danh mục" class="h-full shadow-sm">
         <div class="space-y-4">
           <a-alert type="warning" show-icon message="Khôi phục sẽ ghi đè danh mục hiện tại. Hãy chắc chắn bạn đã sao lưu trước khi thực hiện." />
-          <a-upload :before-upload="beforeUpload" :file-list="fileList" :on-remove="handleRemove" :max-count="1" :show-upload-list="{ showRemoveIcon: true }">
-            <a-button>
+          <a-upload class="w-full" :before-upload="beforeUpload" :file-list="fileList" :on-remove="handleRemove" :max-count="1" :show-upload-list="{ showRemoveIcon: true }">
+            <a-button class="flex w-full items-center justify-center sm:w-auto">
               <template #icon>
                 <UploadOutlined />
               </template>
@@ -28,14 +30,14 @@
             </a-button>
           </a-upload>
 
-          <div class="flex flex-wrap gap-2">
-            <a-button type="primary" :disabled="!selectedFile" :loading="uploading" @click="confirmRestore">
+          <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <a-button class="flex w-full items-center justify-center sm:w-auto" type="primary" :disabled="!selectedFile" :loading="uploading" @click="confirmRestore">
               <template #icon>
                 <InboxOutlined />
               </template>
               Khôi phục
             </a-button>
-            <a-button :disabled="!fileList.length" @click="handleRemove">Xóa file</a-button>
+            <a-button class="flex w-full items-center justify-center sm:w-auto" :disabled="!fileList.length" @click="handleRemove"> Xóa file </a-button>
           </div>
         </div>
       </a-card>
