@@ -46,6 +46,9 @@
 </template>
 
 <script setup>
+import { h } from "vue";
+import { Modal } from "ant-design-vue";
+import { CloudDownloadOutlined, ExclamationCircleOutlined, InboxOutlined, UploadOutlined } from "@ant-design/icons-vue";
 const settingStore = useSettingStore();
 const { RestApi } = useApi();
 
