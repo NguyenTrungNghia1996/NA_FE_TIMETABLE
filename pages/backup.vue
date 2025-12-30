@@ -46,10 +46,6 @@
 </template>
 
 <script setup>
-import { h } from "vue";
-import { Modal } from "ant-design-vue";
-import { CloudDownloadOutlined, ExclamationCircleOutlined, InboxOutlined, UploadOutlined } from "@ant-design/icons-vue";
-
 const settingStore = useSettingStore();
 const { RestApi } = useApi();
 
@@ -74,7 +70,7 @@ const downloadBackup = async () => {
   try {
     downloading.value = true;
     settingStore.setLoading(true);
-    const { data, error } = await RestApi.request.download("/api/export/backup");
+    const { data, error } = await RestApi.backup.export();
     if (error.value) {
       throw new Error(error.value?.data?.message || "Sao lưu không thành công");
     }
@@ -108,7 +104,7 @@ const performImport = async () => {
     settingStore.setLoading(true);
     const form = new FormData();
     form.append("file", selectedFile.value);
-    const { data, error } = await RestApi.request.postForm("/api/file/backup/import", { body: form });
+    const { data, error } = await RestApi.backup.restore({ body: form });
     if (error.value) {
       throw new Error(error.value?.data?.message || "Khôi phục không thành công");
     }
