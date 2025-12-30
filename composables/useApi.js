@@ -150,6 +150,9 @@ let ENDPOINTS = {
   LECTURE_SCHEDULE_SLIP_DETAIL: "/api/lich_baogiang/phieu/chitiet",
   LECTURE_SCHEDULE_EXPORT: "/api/lich_baogiang/export",
   LECTURE_SCHEDULE_SLIP_EXPORT: "/api/lich_baogiang/phieu/export",
+  // BACKUP
+  BACKUP_EXPORT: "/api/export/backup",
+  BACKUP_IMPORT: "/api/file/backup/import",
   // UNIT INFO (Thông tin đơn vị)
   UNIT_INFO: "/api/thongtin_donvi",
 };
@@ -298,6 +301,7 @@ class RestApi {
     this.phanphoi_chuongtrinh = new PhanphoiChuongtrinh(this.request);
     this.phanphoi_chuongtrinh_chitiet = new PhanphoiChuongtrinhChitiet(this.request);
     this.lecture_schedule = new LectureSchedule(this.request);
+    this.backup = new Backup(this.request);
     this.unit_info = new UnitInfo(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
@@ -1102,6 +1106,19 @@ class UnitInfo {
   // PUT /api/thongtin_donvi
   async update(data) {
     return await this.request.put(ENDPOINTS.UNIT_INFO, data);
+  }
+}
+
+// BACKUP
+class Backup {
+  constructor() {
+    this.request = new Request();
+  }
+  async export(data) {
+    return await this.request.download(ENDPOINTS.BACKUP_EXPORT, data);
+  }
+  async restore(data) {
+    return await this.request.postForm(ENDPOINTS.BACKUP_IMPORT, data);
   }
 }
 
