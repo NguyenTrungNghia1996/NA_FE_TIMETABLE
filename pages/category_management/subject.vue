@@ -60,6 +60,9 @@
           <a-form-item label="Tên môn học" name="ten">
             <a-input v-model:value="formState.ten" placeholder="Nhập tên môn học" :maxlength="30" show-count />
           </a-form-item>
+          <a-form-item label="Tên theo ngành" name="ten_theo_nganh">
+            <a-input v-model:value="formState.ten_theo_nganh" placeholder="Nhập tên theo ngành" :maxlength="200" show-count />
+          </a-form-item>
           <!-- <SelectClassroomType v-model="formState.Id_loai_phong_hoc" name="Id_loai_phong_hoc" :rules="rules.Id_loai_phong_hoc" /> -->
           <SelectClassroomType v-model="formState.Id_loai_phong_hoc" name="Id_loai_phong_hoc" :rules="rules.Id_loai_phong_hoc" />
           <SelectKnowledge v-model="formState.Id_khoi_kien_thuc" name="Id_khoi_kien_thuc" :multiple="true" />
@@ -204,6 +207,7 @@ const dataSource = ref([]);
 const formState = reactive({
   ma: "",
   ten: "",
+  ten_theo_nganh: "",
   Id_loai_phong_hoc: undefined,
   Id_khoi_kien_thuc: [],
   Do_GVCN_phu_trach: false,
@@ -226,6 +230,7 @@ const rules = reactive({
     { required: true, message: "Vui lòng nhập tên môn học", trigger: "blur" },
     { max: 30, message: "Tên môn học tối đa 30 ký tự", trigger: "blur" },
   ],
+  ten_theo_nganh: [{ max: 200, message: "Tên theo ngành tối đa 200 ký tự", trigger: "blur" }],
   So_tiet_toi_da_mot_ca: [
     { required: true, message: "Vui lòng nhập số tiết", trigger: ["blur", "change"] },
     {
@@ -356,6 +361,7 @@ const showModal = () => {
   Object.assign(formState, {
     ma: "",
     ten: "",
+    ten_theo_nganh: "",
     Id_loai_phong_hoc: undefined,
     Id_khoi_kien_thuc: [],
     Do_GVCN_phu_trach: false,
@@ -379,6 +385,7 @@ const editItem = async record => {
         id: data.value.data.id,
         ma: data.value.data.ma,
         ten: data.value.data.ten,
+        ten_theo_nganh: data.value.data.ten_theo_nganh,
         Id_loai_phong_hoc: data.value.data.id_loai_phong_hoc != 0 ? data.value.data.id_loai_phong_hoc : undefined,
         Id_khoi_kien_thuc: data.value.data.id_khoi_kien_thuc,
         Do_GVCN_phu_trach: data.value.data.do_GVCN_phu_trach,
