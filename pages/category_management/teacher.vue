@@ -47,6 +47,9 @@
 
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa giáo viên' : 'Thêm mới giáo viên'" @cancel="handleCancel" :width="600">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules">
+        <a-form-item label="Mã giáo viên" name="ma_giao_vien" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
+          <a-input v-model:value="formState.ma_giao_vien" placeholder="Nhập mã giáo viên" :maxlength="30" show-count />
+        </a-form-item>
         <a-form-item label="Họ và Họ đệm" name="ho_va_ho_dem" :label-col="{ span: 24 }" :wrapper-col="{ span: 24 }">
           <a-input v-model:value="formState.ho_va_ho_dem" placeholder="Nhập họ và họ đệm" :maxlength="30" show-count />
         </a-form-item>
@@ -108,6 +111,7 @@ const pagination = reactive({
 
 const formState = reactive({
   id: null,
+  ma_giao_vien: "",
   ho_va_ho_dem: "",
   ten: "",
   id_to_chuyen_mon: [],
@@ -115,6 +119,10 @@ const formState = reactive({
 });
 
 const rules = reactive({
+  ma_giao_vien: [
+    { required: true, message: "Vui lòng nhập mã giáo viên", trigger: "blur" },
+    { max: 30, message: "Mã giáo viên tối đa 30 ký tự", trigger: "blur" },
+  ],
   ho_va_ho_dem: [
     { required: true, message: "Vui lòng nhập họ và họ đệm", trigger: "blur" },
     { max: 30, message: "Tối đa 30 ký tự", trigger: "blur" },
@@ -167,7 +175,7 @@ const handleSearch = async () => {
 
 const showModal = () => {
   isEdit.value = false;
-  Object.assign(formState, { id: null, ho_va_ho_dem: "", ten: "", id_to_chuyen_mon: [], id_diem_truong: [] });
+  Object.assign(formState, { id: null, ma_giao_vien: "", ho_va_ho_dem: "", ten: "", id_to_chuyen_mon: [], id_diem_truong: [] });
   visible.value = true;
 };
 
@@ -178,6 +186,7 @@ const editItem = async id => {
     if (data.value?.status === "success") {
       Object.assign(formState, {
         id: data.value.data.id,
+        ma_giao_vien: data.value.data.ma_giao_vien,
         ho_va_ho_dem: data.value.data.ho_va_ho_dem,
         ten: data.value.data.ten,
         id_to_chuyen_mon: data.value.data.id_to_chuyen_mon,
