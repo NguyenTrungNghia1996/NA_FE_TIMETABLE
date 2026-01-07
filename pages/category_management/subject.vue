@@ -1,15 +1,16 @@
 <template>
   <div class="p-2 md:p-4 bg-white min-h-full">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4">
+    <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-2 mb-4">
       <a-input-search v-model:value="searchText" placeholder="Tìm kiếm môn học..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
-      <a-button @click="resetForm" class="w-full md:w-auto">
+      <a-button @click="resetForm" class="w-full xl:w-auto">
         <span class="md:inline">Đặt lại</span>
       </a-button>
-      <a-button @click="openBusyManager" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Cài đặt tiết tránh xếp</a-button>
-      <a-button @click="openDrawer" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Cài đặt tiết cố định</a-button>
-      <a-button @click="SubjectCombinationDrawer = true" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Tổ hợp môn</a-button>
-      <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">
-        <span class="md:inline">Thêm mới</span>
+      <a-button @click="openBusyManager" class="w-full xl:w-auto" :disabled="!settingStore.currentPermission">Cài đặt tiết tránh xếp</a-button>
+      <a-button @click="openDrawer" class="w-full xl:w-auto" :disabled="!settingStore.currentPermission">Cài đặt tiết cố định</a-button>
+      <a-button @click="SubjectCombinationDrawer = true" class="w-full xl:w-auto" :disabled="!settingStore.currentPermission">Tổ hợp môn</a-button>
+      <a-button type="primary" @click="openBulkModal" class="w-full xl:w-auto" :disabled="!settingStore.currentPermission">Cập nhật tên theo ngành</a-button>
+      <a-button type="primary" @click="showModal" class="w-full xl:w-auto" :disabled="!settingStore.currentPermission">
+        <span class="xl:inline">Thêm mới</span>
       </a-button>
     </div>
 
@@ -101,6 +102,28 @@
         </div>
       </template>
     </a-modal>
+    <a-modal v-model:open="bulkModalOpen" title="Cập nhật hàng loạt Tên theo ngành" @cancel="closeBulkModal" :width="1000">
+      <div class="flex flex-col gap-3">
+        <div class="flex flex-col md:flex-row items-start md:items-center gap-2">
+          <a-input-search v-model:value="bulkSearchText" placeholder="Tìm kiếm môn học..." enter-button @search="handleBulkSearch" class="w-full md:w-1/2" />
+          <a-button @click="resetBulkSelection">Bỏ chọn</a-button>
+        </div>
+        <a-table :columns="bulkColumns" :data-source="bulkDataSource" :pagination="bulkPagination" :loading="bulkModalLoading" :row-selection="bulkRowSelection" row-key="id" :scroll="{ x: 900, y: 420 }" size="small" bordered @change="handleBulkTableChange">
+          <template #bodyCell="{ column, record, index }">
+            <template v-if="column.key === 'stt'">{{ (bulkPagination.current - 1) * bulkPagination.pageSize + index + 1 }}</template>
+            <template v-else-if="column.key === 'ten_theo_nganh'">
+              <a-input v-model:value="record.ten_theo_nganh" placeholder="Nhập tên theo ngành" :maxlength="200" show-count @update:value="val => updateBulkEdit(record.id, val)" />
+            </template>
+          </template>
+        </a-table>
+      </div>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <a-button @click="closeBulkModal">Hủy</a-button>
+          <a-button type="primary" :loading="bulkModalSaving" @click="handleBulkUpdate">Cập nhật</a-button>
+        </div>
+      </template>
+    </a-modal>
     <a-modal v-model:open="busy_modal" title="Cài đặt tiết tránh xếp" @cancel="handleBusyCancel" :width="600" :footer="null">
       <div v-for="block in busy_data.ds_Ca" :key="block.id" class="mb-8">
         <Timetable :block="block" />
@@ -149,6 +172,13 @@ const busy_modal = ref(false);
 const busy_data = ref();
 const busy_manager_modal = ref(false);
 const selectedSubject = ref(null);
+const bulkModalOpen = ref(false);
+const bulkModalLoading = ref(false);
+const bulkModalSaving = ref(false);
+const bulkSearchText = ref("");
+const bulkDataSource = ref([]);
+const bulkSelectedRowKeys = ref([]);
+const bulkEdits = reactive({});
 
 const pagination = reactive({
   current: 1,
@@ -172,6 +202,13 @@ const columns = [
   { title: "Xếp thành cặp", dataIndex: "xep_thanh_cap", key: "bool", align: "center", width: 120 },
   { title: "Tự chọn", dataIndex: "la_mon_tu_chon", key: "bool", align: "center", width: 100 },
   { title: "Thao tác", key: "action", width: 100, align: "center", fixed: "right" },
+];
+
+const bulkColumns = [
+  { title: "STT", key: "stt", width: 60, align: "center" },
+  { title: "Mã môn", dataIndex: "ma", key: "ma", width: 120, ellipsis: true },
+  { title: "Tên môn học", dataIndex: "ten", key: "ten", width: 200, ellipsis: true },
+  { title: "Tên theo ngành", key: "ten_theo_nganh", width: 260 },
 ];
 
 const busyColumns = [
@@ -203,6 +240,14 @@ const busyColumns = [
 
 const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
 const dataSource = ref([]);
+const bulkPagination = reactive({
+  current: 1,
+  pageSize: 10,
+  total: 0,
+  showSizeChanger: true,
+  pageSizeOptions: ["10", "20", "50"],
+  showTotal: total => `Tổng ${total} bản ghi`,
+});
 
 const formState = reactive({
   ma: "",
@@ -355,6 +400,164 @@ const onBusyRow = record => ({
 });
 
 const busyRowClassName = record => (selectedSubject.value && record.id === selectedSubject.value.id ? "active-row" : "");
+
+const resetBulkEdits = () => {
+  Object.keys(bulkEdits).forEach(key => delete bulkEdits[key]);
+};
+
+const hasBulkEdit = id => Object.prototype.hasOwnProperty.call(bulkEdits, String(id));
+
+const updateBulkEdit = (id, value) => {
+  bulkEdits[String(id)] = value;
+};
+
+const bulkRowSelection = reactive({
+  selectedRowKeys: bulkSelectedRowKeys.value,
+  preserveSelectedRowKeys: true,
+  onChange: keys => {
+    const keySet = new Set(keys);
+    const nextKeys = new Set(bulkSelectedRowKeys.value);
+    const currentPageKeys = bulkDataSource.value.map(item => item.id);
+
+    currentPageKeys.forEach(key => {
+      if (!keySet.has(key)) nextKeys.delete(key);
+    });
+
+    keys.forEach(key => nextKeys.add(key));
+
+    const merged = Array.from(nextKeys);
+    bulkSelectedRowKeys.value = merged;
+    bulkRowSelection.selectedRowKeys = merged;
+  },
+});
+
+watch(
+  bulkSelectedRowKeys,
+  keys => {
+    bulkRowSelection.selectedRowKeys = keys;
+  },
+  { immediate: true },
+);
+
+const fetchBulkData = async () => {
+  try {
+    bulkModalLoading.value = true;
+    const params = { PageIndex: bulkPagination.current, PageSize: bulkPagination.pageSize };
+    const search = (bulkSearchText.value || "").trim();
+    if (search) params.search = search;
+    const { data } = await RestApi.subject.list({ params });
+    if (data.value?.status === "success") {
+      const items = data.value.data.items || [];
+      bulkDataSource.value = items.map(item => ({
+        ...item,
+        ten_theo_nganh: hasBulkEdit(item.id) ? bulkEdits[String(item.id)] : item.ten_theo_nganh || "",
+      }));
+      bulkPagination.total = data.value.data.totalrecord || 0;
+    } else {
+      bulkDataSource.value = [];
+      bulkPagination.total = 0;
+    }
+  } catch (error) {
+    bulkDataSource.value = [];
+    bulkPagination.total = 0;
+    message.error("Lỗi khi tải dữ liệu");
+  } finally {
+    bulkModalLoading.value = false;
+  }
+};
+
+const openBulkModal = async () => {
+  bulkModalOpen.value = true;
+  bulkSearchText.value = "";
+  bulkPagination.current = 1;
+  bulkPagination.pageSize = 10;
+  bulkSelectedRowKeys.value = [];
+  resetBulkEdits();
+  await fetchBulkData();
+};
+
+const closeBulkModal = () => {
+  bulkModalOpen.value = false;
+  bulkSelectedRowKeys.value = [];
+  resetBulkEdits();
+};
+
+const handleBulkSearch = async () => {
+  bulkPagination.current = 1;
+  await fetchBulkData();
+};
+
+const handleBulkTableChange = async pag => {
+  bulkPagination.current = pag.current;
+  bulkPagination.pageSize = pag.pageSize;
+  await fetchBulkData();
+};
+
+const resetBulkSelection = () => {
+  bulkSelectedRowKeys.value = [];
+};
+
+const buildBulkPayload = detail => ({
+  id: detail.id,
+  ma: detail.ma,
+  ten: detail.ten,
+  ten_theo_nganh: hasBulkEdit(detail.id) ? bulkEdits[String(detail.id)] : detail.ten_theo_nganh || "",
+  Id_loai_phong_hoc: detail.id_loai_phong_hoc != 0 ? detail.id_loai_phong_hoc : undefined,
+  Id_khoi_kien_thuc: detail.id_khoi_kien_thuc,
+  Do_GVCN_phu_trach: detail.do_GVCN_phu_trach,
+  Hoc_cach_ngay: detail.hoc_cach_ngay,
+  Xep_thanh_cap: detail.xep_thanh_cap,
+  So_tiet_toi_da_mot_ca: detail.so_tiet_toi_da_mot_ca,
+  So_tiet_toi_da_hai_ca: detail.so_tiet_toi_da_hai_ca,
+  La_mon_tu_chon: detail.la_mon_tu_chon,
+  id_phong: detail.id_phong,
+});
+
+const handleBulkUpdate = async () => {
+  if (!bulkSelectedRowKeys.value.length) {
+    message.warning("Vui lòng chọn ít nhất 1 môn học");
+    return;
+  }
+  let success = 0;
+  let failed = 0;
+  try {
+    bulkModalSaving.value = true;
+    for (const id of bulkSelectedRowKeys.value) {
+      try {
+        const detailRes = await RestApi.subject.detail({ params: { Id: id } });
+        if (detailRes.data.value?.status !== "success") {
+          failed += 1;
+          continue;
+        }
+        const payload = buildBulkPayload(detailRes.data.value.data);
+        const updateRes = await RestApi.subject.update({ body: payload });
+        if (updateRes.data.value?.status === "success") {
+          success += 1;
+        } else {
+          failed += 1;
+        }
+      } catch (err) {
+        failed += 1;
+      }
+    }
+    if (success) {
+      message.success(`Đã cập nhật ${success} môn học`);
+    }
+    if (failed) {
+      message.error(`Không cập nhật được ${failed} môn học`);
+    }
+    if (success) {
+      await fetchData({ ...param.value });
+      await fetchBulkData();
+      resetBulkSelection();
+      resetBulkEdits();
+    }
+  } catch (error) {
+    message.error(error.message || "Lỗi khi cập nhật hàng loạt");
+  } finally {
+    bulkModalSaving.value = false;
+  }
+};
 
 const showModal = () => {
   isEdit.value = false;
