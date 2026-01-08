@@ -127,6 +127,14 @@
           <a-button type="primary" class="bg-blue-500" :loading="exportModal.loadingKey === 'teacher'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'teacher'" @click="exportTeacher"> Xuất TKB Giáo viên </a-button>
         </a-card>
 
+        <!-- CSDL ngành -->
+        <a-card type="inner" title="CSDL ngành">
+          <div class="mb-3 text-gray-600">Xuất dữ liệu CSDL ngành theo thời khóa biểu.</div>
+          <a-button type="primary" class="bg-blue-500" :loading="exportModal.loadingKey === 'csdl-nganh'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'csdl-nganh'" @click="exportCsdlNganh">
+            Xuất CSDL ngành
+          </a-button>
+        </a-card>
+
         <!-- Ma trận thời khóa biểu -->
         <a-card type="inner" title="Ma trận thời khóa biểu">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -227,7 +235,7 @@ const exportModal = reactive({
   visible: false,
   timetableId: null,
   timetableName: "",
-  loadingKey: null, // 'class' | 'school' | 'teacher' | 'matrix-school' | 'matrix-teacher' | 'matrix-grade' | 'matrix-expertise' | 'matrix-class' | 'matrix-class-vertical' | null
+  loadingKey: null, // 'class' | 'school' | 'teacher' | 'matrix-school' | 'matrix-teacher' | 'matrix-grade' | 'matrix-expertise' | 'matrix-class' | 'matrix-class-vertical' | 'csdl-nganh' | null
   options: {
     class: { showRoom: false, showTeacher: false },
     school: { showRoom: false, showTeacher: false },
@@ -358,6 +366,7 @@ const exportTeacher = () =>
       }),
     "teacher",
   );
+const exportCsdlNganh = () => exportFile(() => RestApi.timetable.export_csdl_nganh({ params: { idtkb: exportModal.timetableId } }), "csdl-nganh");
 
 const fetchData = async p => {
   try {
