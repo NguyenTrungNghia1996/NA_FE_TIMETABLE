@@ -4,6 +4,7 @@
     <div class="flex justify-end">
       <div class="flex space-x-3">
         <a-button type="primary" class="bg-orange-500 border-orange-500 hover:bg-orange-600" @click="handleAvoid"> Tiết tránh xếp </a-button>
+        <a-button type="primary" class="bg-emerald-600 border-emerald-600 hover:bg-emerald-700" :disabled="!canSync || syncing" :loading="syncing" @click="openSyncConfirm"> Đồng bộ </a-button>
         <a-button type="primary" class="bg-blue-600 border-blue-600 hover:bg-blue-700" @click="handleUpdate"> Cập nhật </a-button>
       </div>
     </div>
@@ -87,6 +88,8 @@
 </template>
 
 <script setup>
+import { Modal } from "ant-design-vue";
+
 const { RestApi } = useApi();
 const filterForm = ref();
 const filters = reactive({
@@ -109,6 +112,11 @@ const summary = reactive({
 const subjects = ref([]);
 const availableShifts = ref([]);
 const MAX_NATURAL_VALUE = 99;
+const syncing = ref(false);
+const selectedGradeLabel = ref("");
+const selectedMajorLabel = ref("");
+const gradeLabelCache = new Map();
+const majorLabelCache = new Map();
 
 const drawerAvoidOpen = ref(false);
 const avoidRef = ref(null);
@@ -211,6 +219,33 @@ const onShiftNumberChange = (record, shiftId, field, value) => {
   record.shifts[shiftId][field] = sanitized;
 };
 
+const canSync = computed(() => {
+  const hasGrade = filters.grade !== undefined && filters.grade !== null && filters.grade !== "";
+  const hasMajor = filters.major !== undefined && filters.major !== null && filters.major !== "";
+  return hasGrade && hasMajor;
+});
+
+const formatGradeLabel = label => {
+  const text = String(label ?? "").trim();
+  if (!text) return "";
+  return text.toLowerCase().startsWith("khối") ? text : `khối ${text}`;
+};
+
+const formatMajorLabel = label => {
+  const text = String(label ?? "").trim();
+  if (!text) return "";
+  return text.toLowerCase().startsWith("ban") ? text : `ban ${text}`;
+};
+
+const syncConfirmContent = computed(() => {
+  if (!canSync.value) {
+    return "Vui lòng chọn khối lớp và ban học trước khi đồng bộ";
+  }
+  const gradeText = formatGradeLabel(selectedGradeLabel.value || filters.grade);
+  const majorText = formatMajorLabel(selectedMajorLabel.value || filters.major);
+  return `Bạn có chắc chắn muốn đồng bộ số tiết học từ môn học của khối sang môn học của lớp thuộc ${gradeText} - ${majorText}`;
+});
+
 // Keep summary totals regardless of selected shift
 watch(
   subjects,
@@ -251,6 +286,92 @@ const handleUpdate = async () => {
     }
   } catch (err) {
     message.error(err.message || err.response?.data?.message || "Đã xảy ra lỗi khi cập nhật");
+  }
+};
+
+const openSyncConfirm = () => {
+  if (!canSync.value) {
+    message.warning("Vui lòng chọn khối lớp và ban học trước khi đồng bộ");
+    return;
+  }
+  Modal.confirm({
+    title: "Xác nhận đồng bộ",
+    content: syncConfirmContent.value,
+    okText: "Đồng ý",
+    cancelText: "Hủy",
+    onOk: handleSync,
+  });
+};
+
+const fetchGradeLabel = async id => {
+  const currentId = id ?? null;
+  if (!currentId) {
+    selectedGradeLabel.value = "";
+    return;
+  }
+  if (gradeLabelCache.has(currentId)) {
+    selectedGradeLabel.value = gradeLabelCache.get(currentId);
+    return;
+  }
+  try {
+    const { data } = await RestApi.grade_level.detail({ params: { id: currentId } });
+    if (filters.grade !== currentId) return;
+    if (data.value?.status === "success") {
+      const label = data.value?.data?.ten || "";
+      gradeLabelCache.set(currentId, label);
+      selectedGradeLabel.value = label;
+    } else {
+      selectedGradeLabel.value = "";
+    }
+  } catch (err) {
+    selectedGradeLabel.value = "";
+  }
+};
+
+const fetchMajorLabel = async id => {
+  const currentId = id ?? null;
+  if (!currentId) {
+    selectedMajorLabel.value = "";
+    return;
+  }
+  if (majorLabelCache.has(currentId)) {
+    selectedMajorLabel.value = majorLabelCache.get(currentId);
+    return;
+  }
+  try {
+    const { data } = await RestApi.school_ship.detail({ params: { id: currentId } });
+    if (filters.major !== currentId) return;
+    if (data.value?.status === "success") {
+      const label = data.value?.data?.ten || "";
+      majorLabelCache.set(currentId, label);
+      selectedMajorLabel.value = label;
+    } else {
+      selectedMajorLabel.value = "";
+    }
+  } catch (err) {
+    selectedMajorLabel.value = "";
+  }
+};
+
+const handleSync = async () => {
+  if (!canSync.value) {
+    message.warning("Vui lòng chọn khối lớp và ban học trước khi đồng bộ");
+    return;
+  }
+  try {
+    syncing.value = true;
+    const payload = { id_khoi: filters.grade, id_ban: filters.major };
+    const { data, error } = await RestApi.subject_grade_level.sync({ body: payload });
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Đồng bộ thành công");
+      await fetchSubjects();
+    } else {
+      throw new Error(error.value?.data?.message || "Đồng bộ không thành công");
+    }
+  } catch (err) {
+    message.error(err.message || err.response?.data?.message || "Đã xảy ra lỗi khi đồng bộ");
+  } finally {
+    syncing.value = false;
   }
 };
 
@@ -364,6 +485,22 @@ watch(
     if (grade !== undefined && major !== undefined) {
       await fetchSubjects();
     }
+  },
+  { immediate: true },
+);
+
+watch(
+  () => filters.grade,
+  async grade => {
+    await fetchGradeLabel(grade);
+  },
+  { immediate: true },
+);
+
+watch(
+  () => filters.major,
+  async major => {
+    await fetchMajorLabel(major);
   },
   { immediate: true },
 );

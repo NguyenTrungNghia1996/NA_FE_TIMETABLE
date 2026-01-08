@@ -65,6 +65,7 @@ let ENDPOINTS = {
 
   SUBJECT_GRADE_LEVEL: "/api/monhoc/monkhoilop",
   SUBJECT_GRADE_LEVEL_AVOID: "/api/monhoc/monkhoilop/tiettranhxep",
+  SUBJECT_GRADE_LEVEL_SYNC: "/api/monhoc/monkhoilop/dongbo",
 
   SUBJECT_COMBINATION: "/api/tohopmon",
 
@@ -752,6 +753,9 @@ class SubjectGradeLevel {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.SUBJECT_GRADE_LEVEL, data);
+  }
+  async sync(data) {
+    return await this.request.post(ENDPOINTS.SUBJECT_GRADE_LEVEL_SYNC, data);
   }
   async get_avoid(data) {
     return await this.request.get(ENDPOINTS.SUBJECT_GRADE_LEVEL_AVOID, data);
