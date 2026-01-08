@@ -46,27 +46,11 @@
             </template>
             <template v-else-if="isShiftColumn(column.key)">
               <template v-if="getShiftField(column.key) === 'period'">
-                <a-input-number
-                  v-if="record.editable"
-                  v-model:value="record.shifts[getShiftId(column.key)].period"
-                  :min="0"
-                  :max="MAX_NATURAL_VALUE"
-                  size="small"
-                  class="w-full"
-                  @change="value => onShiftNumberChange(record, getShiftId(column.key), 'period', value)"
-                />
+                <a-input-number v-if="record.editable" v-model:value="record.shifts[getShiftId(column.key)].period" :min="0" :max="MAX_NATURAL_VALUE" size="small" class="w-full" @change="value => onShiftNumberChange(record, getShiftId(column.key), 'period', value)" />
                 <span v-else>{{ record.shifts[getShiftId(column.key)]?.period ?? "-" }}</span>
               </template>
               <template v-else>
-                <a-input-number
-                  v-if="record.editable"
-                  v-model:value="record.shifts[getShiftId(column.key)].group"
-                  :min="0"
-                  :max="MAX_NATURAL_VALUE"
-                  size="small"
-                  class="w-full"
-                  @change="value => onShiftNumberChange(record, getShiftId(column.key), 'group', value)"
-                />
+                <a-input-number v-if="record.editable" v-model:value="record.shifts[getShiftId(column.key)].group" :min="0" :max="MAX_NATURAL_VALUE" size="small" class="w-full" @change="value => onShiftNumberChange(record, getShiftId(column.key), 'group', value)" />
                 <span v-else>{{ record.shifts[getShiftId(column.key)]?.group ?? "-" }}</span>
               </template>
             </template>
@@ -360,8 +344,8 @@ const handleSync = async () => {
   }
   try {
     syncing.value = true;
-    const payload = { id_khoi: filters.grade, id_ban: filters.major };
-    const { data, error } = await RestApi.subject_grade_level.sync({ body: payload });
+    const payload = { idKhoi: filters.grade, idBan: filters.major };
+    const { data, error } = await RestApi.subject_grade_level.sync({ params: payload });
     if (data.value?.status === "success") {
       message.success(data.value?.message || "Đồng bộ thành công");
       await fetchSubjects();
