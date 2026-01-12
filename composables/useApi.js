@@ -82,6 +82,8 @@ let ENDPOINTS = {
   CLASS_BREAK: "/api/lophoc/tietnghi",
   CLASS_SUBJECT: "/api/lopmon",
   CLASS_SUBJECT_AVOID: "/api/lopmon/tiettranhxep",
+  // REVIEW CLASS (Lớp ôn tập)
+  REVIEW_CLASS: "/api/lopontap",
 
   //TIMETABLE
   TIMETABLE: "/api/thoikhoabieu",
@@ -297,6 +299,7 @@ class RestApi {
     this.subject_combination = new SubjectCombination(this.request);
     this.teacher = new Teacher(this.request);
     this.class = new Class(this.request);
+    this.review_class = new ReviewClass(this.request);
     this.timetable = new Timetable(this.request);
     this.year = new Year(this.request);
     this.holiday = new Holiday(this.request);
@@ -863,6 +866,24 @@ class Class {
   }
   async update_subject_avoid(data) {
     return await this.request.post(ENDPOINTS.CLASS_SUBJECT_AVOID, data);
+  }
+}
+
+class ReviewClass {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.REVIEW_CLASS, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.REVIEW_CLASS, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.REVIEW_CLASS, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.REVIEW_CLASS, data);
   }
 }
 
