@@ -84,6 +84,9 @@ let ENDPOINTS = {
   CLASS_SUBJECT_AVOID: "/api/lopmon/tiettranhxep",
   // REVIEW CLASS (Lớp ôn tập)
   REVIEW_CLASS: "/api/lopontap",
+  REVIEW_CLASS_BREAK: "/api/lopontap/tietnghi",
+  // REVIEW SCHEDULE (Lịch ôn tập)
+  REVIEW_SCHEDULE: "/api/lichontap",
 
   //TIMETABLE
   TIMETABLE: "/api/thoikhoabieu",
@@ -300,6 +303,7 @@ class RestApi {
     this.teacher = new Teacher(this.request);
     this.class = new Class(this.request);
     this.review_class = new ReviewClass(this.request);
+    this.review_schedule = new ReviewSchedule(this.request);
     this.timetable = new Timetable(this.request);
     this.year = new Year(this.request);
     this.holiday = new Holiday(this.request);
@@ -876,14 +880,38 @@ class ReviewClass {
   async list(data) {
     return await this.request.get(ENDPOINTS.REVIEW_CLASS, data);
   }
+  async get_break(data) {
+    return await this.request.get(ENDPOINTS.REVIEW_CLASS_BREAK, data);
+  }
   async create(data) {
     return await this.request.post(ENDPOINTS.REVIEW_CLASS, data);
   }
   async update(data) {
     return await this.request.put(ENDPOINTS.REVIEW_CLASS, data);
   }
+  async update_break(data) {
+    return await this.request.post(ENDPOINTS.REVIEW_CLASS_BREAK, data);
+  }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.REVIEW_CLASS, data);
+  }
+}
+
+class ReviewSchedule {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.REVIEW_SCHEDULE, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.REVIEW_SCHEDULE, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.REVIEW_SCHEDULE, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.REVIEW_SCHEDULE, data);
   }
 }
 
