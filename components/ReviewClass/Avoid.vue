@@ -4,17 +4,7 @@
       <div class="mb-2">
         <SelectGradeLevelByUnit v-model="gradeId" />
       </div>
-      <a-table
-        :columns="columns"
-        :data-source="classes"
-        :loading="loading"
-        :pagination="pagination"
-        size="small"
-        row-key="id"
-        @change="handleTableChange"
-        :customRow="onRow"
-        :row-class-name="rowClassName"
-      >
+      <a-table :columns="columns" :data-source="classes" :loading="loading" :pagination="pagination" size="small" row-key="id" @change="handleTableChange" :customRow="onRow" :row-class-name="rowClassName">
         <template #bodyCell="{ column, record, index }">
           <template v-if="column.key === 'stt'">
             {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
@@ -86,7 +76,7 @@ async function fetchClasses() {
       pagination.total = 0;
     }
   } catch (err) {
-    console.error("Fetch review classes error", err);
+    message.error(err.message || "Fetch review classes error");
   } finally {
     loading.value = false;
   }
@@ -105,7 +95,7 @@ async function selectClass(record) {
       schedule.value = undefined;
     }
   } catch (err) {
-    console.error("Fetch review class avoid error", err);
+    message.error(err.message || "Fetch review class avoid error");
   }
 }
 
@@ -124,7 +114,7 @@ async function handleSave() {
       throw new Error(error.value?.data?.message || data.value?.message || "Cập nhật không thành công");
     }
   } catch (err) {
-    console.error("Update review class avoid error", err);
+    // console.error("Update review class avoid error", err);
     message.error(err.message || "Lỗi cập nhật");
   } finally {
     saving.value = false;
