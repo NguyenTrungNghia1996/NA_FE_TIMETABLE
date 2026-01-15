@@ -61,6 +61,52 @@ export const useSettingStore = defineStore(
           },
         },
       },
+      // Review timetable color settings (separate from main timetable)
+      reviewTimetableTheme: {
+        activePalette: 'default',
+        palettes: {
+          default: {
+            errorBg: '#FCA5A5',
+            dragBg: '#AFFF2C',
+            lockBg: '#FEE2E2',
+            sameSubjectBg: '#20B1AA',
+            selectedBg: '#60A5FA',
+            emptyBg: '#FFF9ED',
+          },
+          default_old: {
+            errorBg: '#FCA5A5',
+            dragBg: '#AFFF2C',
+            lockBg: '#FEE2E2',
+            sameSubjectBg: '#20B1AA',
+            selectedBg: '#60A5FA',
+            emptyBg: '#FFFFFF',
+          },
+          pastel: {
+            errorBg: '#FFB3BA',
+            dragBg: '#BAFFC9',
+            lockBg: '#FFE0BA',
+            sameSubjectBg: '#BFE6FF',
+            selectedBg: '#C6C6FF',
+            emptyBg: '#FFFFFF',
+          },
+          contrast: {
+            errorBg: '#FF5C5C',
+            dragBg: '#B4FF00',
+            lockBg: '#FFB3B3',
+            sameSubjectBg: '#00B3AD',
+            selectedBg: '#1D4ED8',
+            emptyBg: '#FFFFFF',
+          },
+          warm: {
+            errorBg: '#F4B1B1',
+            dragBg: '#FFF3B0',
+            lockBg: '#FFE3B3',
+            sameSubjectBg: '#F8E89A',
+            selectedBg: '#F6D365',
+            emptyBg: '#FFF9ED',
+          },
+        },
+      },
       // Timetable structure settings (centralized)
       timetableConfig: {
         daysCount: 7,
@@ -100,6 +146,22 @@ export const useSettingStore = defineStore(
       updateTimetableColor(name, value) {
         const current = this.timetableTheme.palettes[this.timetableTheme.activePalette] || {};
         this.timetableTheme.palettes[this.timetableTheme.activePalette] = {
+          ...current,
+          [name]: value,
+        };
+      },
+      // Review timetable theme actions
+      setActiveReviewTimetablePalette(key) {
+        if (this.reviewTimetableTheme.palettes[key]) {
+          this.reviewTimetableTheme.activePalette = key;
+        }
+      },
+      setReviewTimetablePalette(key, palette) {
+        this.reviewTimetableTheme.palettes[key] = { ...palette };
+      },
+      updateReviewTimetableColor(name, value) {
+        const current = this.reviewTimetableTheme.palettes[this.reviewTimetableTheme.activePalette] || {};
+        this.reviewTimetableTheme.palettes[this.reviewTimetableTheme.activePalette] = {
           ...current,
           [name]: value,
         };
@@ -158,6 +220,10 @@ export const useSettingStore = defineStore(
       },
       activeTimetablePalette: state => {
         const { activePalette, palettes } = state.timetableTheme;
+        return palettes[activePalette] || palettes.default;
+      },
+      activeReviewTimetablePalette: state => {
+        const { activePalette, palettes } = state.reviewTimetableTheme;
         return palettes[activePalette] || palettes.default;
       },
       // pageBackground getter removed
