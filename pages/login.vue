@@ -30,9 +30,9 @@
             <a-button type="primary" html-type="submit" size="large" block :loading="loading"> Đăng nhập </a-button>
           </a-form-item>
         </a-form>
-        <div class="flex justify-end">
+        <!-- <div class="flex justify-end">
           <a-button type="link" @click="visible = true">Đăng ký dùng thử</a-button>
-        </div>
+        </div> -->
       </a-card>
     </div>
     <a-modal v-model:open="visible" title="Đăng ký tài khoản dùng thử" @cancel="visible = false" :width="800" :footer="null">
