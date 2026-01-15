@@ -939,8 +939,8 @@ class ReviewTimetable {
     const res = { ...(params || {}) };
     if (res.idtkb && !res.idlich) res.idlich = res.idtkb;
     if (res.Idtkb && !res.Idlich) res.Idlich = res.Idtkb;
-    if (res.idlich && !res.idtkb) res.idtkb = res.idlich;
-    if (res.Idlich && !res.Idtkb) res.Idtkb = res.Idlich;
+    delete res.idtkb;
+    delete res.Idtkb;
     return res;
   }
   normalizeBody(body = {}) {

@@ -82,7 +82,8 @@
         </div>
       </div>
       <div class="h-[calc(100vh-110px)] flex flex-col">
-        <div class="py-1 flex justify-end w-full">
+        <div class="py-1 flex justify-end w-full gap-2">
+          <a-button :disabled="!canUndo || undoLoading" :loading="undoLoading" @click.stop="undoLastAction">Hoàn tác</a-button>
           <a-button @click.stop="openThemeModal">Cài đặt màu lịch ôn tập</a-button>
         </div>
         <div class="h-1/3 overflow-auto m-3 shadow-xl">
@@ -194,7 +195,6 @@ const props = defineProps({
 const scheduleId = computed(() => props.timetableId);
 const buildScheduleParams = (extra = {}) => ({
   idlich: scheduleId.value,
-  idtkb: scheduleId.value,
   ...extra,
 });
 
@@ -613,7 +613,7 @@ async function handleUndoClassUpdate(payload) {
     const idSchedule = payload.timetable?.[0]?.id_tkb || scheduleId.value;
     if (idLop && idSchedule) {
       const { data: listData, error: listError } = await Api.get_class({
-        params: buildScheduleParams({ idLop, idlich: idSchedule, idtkb: idSchedule }),
+        params: buildScheduleParams({ idLop, idlich: idSchedule }),
       });
       if (listData.value?.status === "success") {
         const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], transformOpts.value);
@@ -696,13 +696,76 @@ async function handleUndoClearPeriod(payload) {
   }
 }
 
-async function handleUndoAddPeriod() {
-  message.info("Hoàn tác chưa hỗ trợ cho lịch ôn tập");
-  return false;
+async function handleUndoAddPeriod(payload) {
+  const cell = payload?.cell ?? payload;
+  if (!cell?.id_chitiet) {
+    message.info("Không có dữ liệu để hoàn tác");
+    return false;
+  }
+  const body = {
+    id: cell.id_chitiet,
+    id_don_vi: cell.id_don_vi,
+    id_tkb: cell.id_tkb,
+    id_lop: cell.id_lop ?? 0,
+    ten_lop: cell.ten_lop ?? "",
+    id_mon: 0,
+    ten_mon: "",
+    id_giao_vien: 0,
+    ten_giao_vien: "",
+    id_phong: 0,
+    ten_phong: "",
+    tiet_thu_may: cell.tiet_thu_may,
+    id_ca: cell.id_ca,
+    ngay: cell.ngay,
+    tiet: cell.tiet,
+    khoa: !!cell.isLock,
+    ds_vi_tri_xep_duoc: [],
+  };
+  try {
+    const { data, error } = await Api.update_period({ body });
+    if (data.value?.status !== "success") {
+      message.error("Hoàn tác thêm tiết thất bại", error.value || data.value);
+      return false;
+    }
+    await fetchClassTimetable();
+    if (selectedTeacherId.value && scheduleId.value) {
+      await fetchTeacherTimetable(selectedTeacherId.value);
+    }
+    await fetchAllUnscheduled();
+    return true;
+  } catch (err) {
+    message.error("Hoàn tác thêm tiết thất bại", err);
+    return false;
+  }
 }
 
 async function undoLastAction() {
-  message.info("Hoàn tác chưa hỗ trợ cho lịch ôn tập");
+  if (undoLoading.value) return;
+  const lastAction = timetableStore.lastAction;
+  if (!lastAction) {
+    message.info("Không có thao tác để hoàn tác");
+    return;
+  }
+  let success = false;
+  undoLoading.value = true;
+  try {
+    switch (lastAction.type) {
+      case "classUpdate":
+        success = await handleUndoClassUpdate(lastAction.payload);
+        break;
+      case "addPeriod":
+        success = await handleUndoAddPeriod(lastAction.payload);
+        break;
+      default:
+        message.warning("Chưa hỗ trợ hoàn tác cho thao tác này");
+        break;
+    }
+    if (success) {
+      timetableStore.popLastAction();
+    }
+  } finally {
+    undoLoading.value = false;
+  }
 }
 
 async function fetchTeacherTimetable(teacherId) {
@@ -872,7 +935,7 @@ async function onDrop(caId, dayId, pIdx) {
     } else {
       try {
         const { data: listData, error: listError } = await Api.get_class({
-          params: buildScheduleParams({ idLop: selectedClassId.value, idtkb: dstClone.id_tkb, idlich: dstClone.id_tkb }),
+          params: buildScheduleParams({ idLop: selectedClassId.value }),
         });
         if (listData.value?.status === "success") {
           const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], transformOpts.value);
@@ -936,7 +999,7 @@ async function onTeacherDrop(caId, dayId, pIdx) {
       if (selectedClassId.value && scheduleId.value) {
         try {
           const { data: listData, error: listError } = await Api.get_class({
-            params: buildScheduleParams({ idLop: selectedClassId.value, idtkb: dstClone.id_tkb, idlich: dstClone.id_tkb }),
+            params: buildScheduleParams({ idLop: selectedClassId.value }),
           });
           if (listData.value?.status === "success") {
             const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], transformOpts.value);
@@ -1391,7 +1454,7 @@ async function confirmAdd() {
         await fetchAllUnscheduled();
         if (selectedClassId.value && scheduleId.value) {
           const { data: listData, error: listError } = await Api.get_class({
-            params: buildScheduleParams({ idLop: selectedClassId.value, idtkb: cell.id_tkb, idlich: cell.id_tkb }),
+            params: buildScheduleParams({ idLop: selectedClassId.value }),
           });
           if (listData.value?.status === "success") {
             const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], transformOpts.value);
@@ -1403,7 +1466,7 @@ async function confirmAdd() {
         }
       } else {
         const { data: listData, error: listError } = await Api.get_class({
-          params: buildScheduleParams({ idLop: selectedClassId.value, idtkb: cell.id_tkb, idlich: cell.id_tkb }),
+          params: buildScheduleParams({ idLop: selectedClassId.value }),
         });
         if (listData.value?.status === "success") {
           const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], transformOpts.value);
