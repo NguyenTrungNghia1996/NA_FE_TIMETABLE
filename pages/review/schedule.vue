@@ -7,16 +7,7 @@
     </div>
 
     <ClientOnly class="overflow-x-auto">
-      <a-table
-        :columns="columns"
-        :data-source="dataSource"
-        :pagination="pagination"
-        :loading="loading"
-        :scroll="{ x: '900' }"
-        @change="handleTableChange"
-        bordered
-        size="small"
-      >
+      <a-table :columns="columns" :data-source="dataSource" :pagination="pagination" :loading="loading" :scroll="{ x: '900' }" @change="handleTableChange" bordered size="small">
         <template #bodyCell="{ column, record, index }">
           <template v-if="column.key === 'stt'">
             {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
@@ -31,6 +22,13 @@
           <template v-if="column.key === 'action'">
             <div class="flex justify-center">
               <div class="md:flex space-x-2">
+                <a-tooltip title="Chi tiết">
+                  <a-button type="link" size="small" @click="openDetailDrawer(record)">
+                    <template #icon>
+                      <InfoCircleOutlined />
+                    </template>
+                  </a-button>
+                </a-tooltip>
                 <a-tooltip title="Tinh chỉnh lịch">
                   <a-button type="link" size="small" @click="openAdjustDrawer(record)" :disabled="!settingStore.currentPermission">
                     <template #icon>
@@ -76,29 +74,54 @@
         </div>
       </template>
     </a-modal>
-    <a-drawer
-      v-model:open="adjustDrawerOpen"
-      title="Tinh chỉnh lịch ôn tập"
-      :footer="null"
-      height="100vh"
-      placement="bottom"
-      :header-style="{ padding: '0px 0px' }"
-      :body-style="{ padding: '4px 4px' }"
-      :destroyOnClose="true"
-      @close="closeAdjustDrawer"
-    >
-      <template #extra>
-        <a-button type="primary" :loading="arrangeLoading" :disabled="!adjustScheduleId" @click="arrangeAll">
-          Xếp toàn bộ
-        </a-button>
-      </template>
+    <a-drawer v-model:open="adjustDrawerOpen" title="Tinh chỉnh lịch ôn tập" :footer="null" height="100vh" placement="bottom" :header-style="{ padding: '0px 0px' }" :body-style="{ padding: '4px 4px' }" :destroyOnClose="true" @close="closeAdjustDrawer">
       <ClientOnly>
-        <ReviewTimetableGrid
-          :key="gridKey"
-          v-model:classId="adjustClassId"
-          :timetableId="adjustScheduleId"
-        />
+        <ReviewTimetableGrid v-model:classId="adjustClassId" :timetableId="adjustScheduleId" />
       </ClientOnly>
+    </a-drawer>
+
+    <a-drawer v-model:open="detailDrawerOpen" title="Chi tiết lịch ôn tập" :footer="null" height="100vh" placement="bottom" @close="closeDetailDrawer">
+      <template #extra>
+        <a-button type="primary" @click="openAdjustFromInfo" :disabled="!settingStore.currentPermission || !infoScheduleId">Tinh chỉnh lịch ôn tập</a-button>
+      </template>
+      <a-spin :spinning="detailLoading">
+        <div v-if="detailData" class="space-y-6">
+          <div class="bg-white p-4 rounded-md shadow-lg">
+            <p class="mb-2">
+              <span class="font-semibold">Tên lịch ôn tập:</span>
+              <span class="ml-2">{{ detailData.ten }}</span>
+            </p>
+            <!-- <p class="mb-2">
+              <span class="font-semibold">Trạng thái:</span>
+              <a-tag class="ml-2" :color="detailData.trang_thai ? 'green' : 'red'">
+                {{ detailData.trang_thai ? "Hoạt động" : "Không hoạt động" }}
+              </a-tag>
+            </p> -->
+            <p class="mb-2">
+              <span class="font-semibold">Tổng số tiết:</span>
+              <span class="ml-2 text-blue-500">{{ detailData.tong_tat_ca_tiet }} tiết</span>
+            </p>
+            <p class="mb-2">
+              <span class="font-semibold">Tiết đã xếp:</span>
+              <span class="ml-2 text-green-500">{{ detailData.tong_tiet_da_xep }} tiết</span>
+            </p>
+            <p>
+              <span class="font-semibold">Tiết chưa xếp:</span>
+              <span class="ml-2 text-red-500">{{ detailData.tong_tiet_chua_xep }} tiết</span>
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white p-4 rounded-md shadow-lg flex flex-col items-center">
+              <h2 class="text-lg font-semibold mb-4 text-gray-700">Xếp toàn trường <span class="text-sm text-gray-500">(Xếp tự động)</span></h2>
+              <a-button type="primary" class="bg-blue-600 border-blue-600" :loading="arrangeLoading" @click="arrangeAll">Xếp Thời khóa biểu</a-button>
+            </div>
+            <div class="bg-white p-4 rounded-md shadow-lg col-span-2">
+              <h2 class="text-lg font-semibold mb-4 text-gray-700">Xếp cục bộ <span class="text-sm text-gray-500">(Xếp từng phần)</span></h2>
+            </div>
+          </div>
+        </div>
+      </a-spin>
     </a-drawer>
   </div>
 </template>
@@ -112,7 +135,7 @@ const columns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
   { title: "Tên lịch ôn tập", dataIndex: "ten", key: "ten", ellipsis: true },
   { title: "Trạng thái", dataIndex: "trang_thai", key: "trang_thai", width: 140, align: "center" },
-  { title: "Thao tác", key: "action", width: 140, align: "center", fixed: "right" },
+  { title: "Thao tác", key: "action", width: 170, align: "center", fixed: "right" },
 ];
 
 const dataSource = ref([]);
@@ -125,8 +148,11 @@ const formRef = ref();
 const adjustDrawerOpen = ref(false);
 const adjustScheduleId = ref(null);
 const adjustClassId = ref(null);
+const detailDrawerOpen = ref(false);
+const detailLoading = ref(false);
+const detailData = ref(null);
+const infoScheduleId = ref(null);
 const arrangeLoading = ref(false);
-const gridKey = ref(0);
 
 const pagination = reactive({
   current: 1,
@@ -210,25 +236,60 @@ const openAdjustDrawer = record => {
   adjustDrawerOpen.value = true;
 };
 
+const openAdjustFromInfo = () => {
+  if (!infoScheduleId.value) return;
+  openAdjustDrawer({ id: infoScheduleId.value });
+};
+
 const closeAdjustDrawer = () => {
   adjustDrawerOpen.value = false;
   adjustClassId.value = null;
   adjustScheduleId.value = null;
 };
 
-const arrangeAll = async () => {
-  if (!adjustScheduleId.value) return;
+const fetchDetail = async id => {
+  if (!id) return;
+  detailLoading.value = true;
+  detailData.value = null;
   try {
-    arrangeLoading.value = true;
-    const { data, error } = await RestApi.review_timetable.arrange_all({ params: { Idlich: adjustScheduleId.value } });
+    const { data, error } = await RestApi.review_schedule.detail({ params: { Id: id } });
     if (data.value?.status === "success") {
-      message.success(data.value?.message || "Xếp lịch thành công");
-      gridKey.value += 1; // reload grid to reflect changes
+      detailData.value = data.value?.data || null;
     } else {
-      throw new Error(error.value?.data?.message || "Xếp lịch không thành công");
+      throw new Error(error.value?.data?.message || "Không tải được chi tiết");
     }
   } catch (err) {
-    message.error(err?.message || "Xếp lịch không thành công");
+    message.error(err?.message || "Không tải được chi tiết");
+  } finally {
+    detailLoading.value = false;
+  }
+};
+
+const openDetailDrawer = async record => {
+  detailDrawerOpen.value = true;
+  infoScheduleId.value = record?.id ?? null;
+  await fetchDetail(infoScheduleId.value);
+};
+
+const closeDetailDrawer = () => {
+  detailDrawerOpen.value = false;
+  detailData.value = null;
+  infoScheduleId.value = null;
+};
+
+const arrangeAll = async () => {
+  if (!infoScheduleId.value) return;
+  try {
+    arrangeLoading.value = true;
+    const { data, error } = await RestApi.review_timetable.arrange_all({ params: { Idlich: infoScheduleId.value } });
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Xếp thời khóa biểu thành công");
+      await fetchDetail(infoScheduleId.value);
+    } else {
+      throw new Error(error.value?.data?.message || "Xếp thời khóa biểu không thành công");
+    }
+  } catch (err) {
+    message.error(err?.message || "Xếp thời khóa biểu không thành công");
   } finally {
     arrangeLoading.value = false;
   }
