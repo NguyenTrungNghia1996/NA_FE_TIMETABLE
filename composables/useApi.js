@@ -88,6 +88,7 @@ let ENDPOINTS = {
   // REVIEW SCHEDULE (Lịch ôn tập)
   REVIEW_SCHEDULE: "/api/lichontap",
   REVIEW_SCHEDULE_DETAIL: "/api/lichontap/detail",
+  REVIEW_SCHEDULE_CANCEL_RESULT: "/api/lichontap/huykq",
 
   // REVIEW TIMETABLE (Lịch ôn tập - sắp xếp)
   REVIEW_TIMETABLE: "/api/lich",
@@ -935,6 +936,9 @@ class ReviewSchedule {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.REVIEW_SCHEDULE, data);
+  }
+  async cancel_result(data) {
+    return await this.request.put(ENDPOINTS.REVIEW_SCHEDULE_CANCEL_RESULT, data);
   }
 }
 

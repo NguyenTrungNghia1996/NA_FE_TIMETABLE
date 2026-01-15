@@ -82,7 +82,12 @@
 
     <a-drawer v-model:open="detailDrawerOpen" title="Chi tiết lịch ôn tập" :footer="null" height="100vh" placement="bottom" @close="closeDetailDrawer">
       <template #extra>
-        <a-button type="primary" @click="openAdjustFromInfo" :disabled="!settingStore.currentPermission || !infoScheduleId">Tinh chỉnh lịch ôn tập</a-button>
+        <div class="flex items-center gap-2">
+          <a-button type="primary" @click="openAdjustFromInfo" :disabled="!settingStore.currentPermission || !infoScheduleId">Tinh chỉnh lịch ôn tập</a-button>
+          <a-popconfirm placement="topRight" title="Bạn chắc chắn muốn hủy kết quả xếp?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="cancelArrange">
+            <a-button danger :loading="cancelArrangeLoading" :disabled="!settingStore.currentPermission || !infoScheduleId">Hủy kết quả xếp</a-button>
+          </a-popconfirm>
+        </div>
       </template>
       <a-spin :spinning="detailLoading">
         <div v-if="detailData" class="space-y-6">
@@ -179,6 +184,7 @@ const detailLoading = ref(false);
 const detailData = ref(null);
 const infoScheduleId = ref(null);
 const arrangeLoading = ref(false);
+const cancelArrangeLoading = ref(false);
 const arrangeClassModal = reactive({
   visible: false,
   loading: false,
@@ -394,6 +400,26 @@ const arrangeAll = async () => {
     message.error(err?.message || "Xếp thời khóa biểu không thành công");
   } finally {
     arrangeLoading.value = false;
+  }
+};
+
+const cancelArrange = async () => {
+  if (!infoScheduleId.value) return;
+  const scheduleId = infoScheduleId.value;
+  try {
+    cancelArrangeLoading.value = true;
+    const { data, error } = await RestApi.review_schedule.cancel_result({
+      params: { id: scheduleId },
+    });
+    if (error.value || data.value?.status !== "success") {
+      throw new Error(error.value?.data?.message || data.value?.message || "Hủy kết quả xếp không thành công");
+    }
+    message.success(data.value?.message || "Hủy kết quả xếp thành công");
+  } catch (err) {
+    message.error(err?.message || "Hủy kết quả xếp không thành công");
+  } finally {
+    cancelArrangeLoading.value = false;
+    await fetchDetail(scheduleId);
   }
 };
 
