@@ -96,6 +96,42 @@
       </div>
     </section>
 
+    <!-- Contact -->
+    <section class="container mx-auto px-4 pb-16">
+      <div class="mb-6">
+        <h2 class="text-xl md:text-2xl font-bold text-gray-900">Liên hệ</h2>
+      </div>
+      <div class="grid gap-6 md:grid-cols-3">
+        <a-card :bordered="false" class="bg-white/80 shadow">
+          <div class="flex items-start gap-3">
+            <Icon name="ant-design:environment-outlined" class="text-blue-600 text-2xl mt-0.5" />
+            <div>
+              <h3 class="font-semibold">Địa chỉ</h3>
+              <p class="text-gray-600 text-sm">Số 51, Ngách 562/59, Thụy Khuê, Tây Hồ, Hà Nội</p>
+            </div>
+          </div>
+        </a-card>
+        <a-card :bordered="false" class="bg-white/80 shadow">
+          <div class="flex items-start gap-3">
+            <Icon name="ant-design:phone-outlined" class="text-blue-600 text-2xl mt-0.5" />
+            <div>
+              <h3 class="font-semibold">Điện thoại</h3>
+              <p class="text-gray-600 text-sm">0973.052.270</p>
+            </div>
+          </div>
+        </a-card>
+        <a-card :bordered="false" class="bg-white/80 shadow">
+          <div class="flex items-start gap-3">
+            <Icon name="ant-design:mail-outlined" class="text-blue-600 text-2xl mt-0.5" />
+            <div>
+              <h3 class="font-semibold">E-mail</h3>
+              <p class="text-gray-600 text-sm">info.nguyenanhest@gmail.com</p>
+            </div>
+          </div>
+        </a-card>
+      </div>
+    </section>
+
     <!-- CTA -->
     <section class="container mx-auto px-4 pb-20">
       <a-card class="shadow-lg">
