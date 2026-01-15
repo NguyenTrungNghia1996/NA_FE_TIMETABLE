@@ -5,7 +5,7 @@
         <a-form-item label="Tên trường" name="ten_truong">
           <a-input v-model:value="form.ten_truong" placeholder="Nhập tên trường" />
         </a-form-item>
-        <SelectProvince v-model="form.id_tinh" name="id_tinh" :rules="rules.id_tinh" />
+        <!-- <SelectProvince v-model="form.id_tinh" name="id_tinh" :rules="rules.id_tinh" /> -->
         <a-form-item label="Địa chỉ" name="dia_chi">
           <a-input v-model:value="form.dia_chi" placeholder="Nhập địa chỉ" />
         </a-form-item>
@@ -18,8 +18,8 @@
         <a-form-item label="Email" name="email">
           <a-input v-model:value="form.email" placeholder="Nhập email" />
         </a-form-item>
-        <SelectSchoolShiftByUnit v-model="form.id_ca" name="id_ca" :rules="rules.id_ca" :multiple="true" />
-        <SelectSchoolLevelByUnit v-model="form.id_cap" name="id_cap" :rules="rules.id_cap" :multiple="true" />
+        <SchoolShift v-model="form.id_ca" name="id_ca" :rules="rules.id_ca" :multiple="true" />
+        <SelectSchoolLevel v-model="form.id_cap" name="id_cap" :rules="rules.id_cap" :multiple="true" />
       </a-card>
       <a-card title="Thông tin tài khoản" size="small">
         <a-form-item label="Tên tài khoản" name="ten_tai_khoan">
