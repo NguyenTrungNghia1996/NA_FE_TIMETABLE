@@ -934,11 +934,11 @@ class ReviewSchedule {
   async update(data) {
     return await this.request.put(ENDPOINTS.REVIEW_SCHEDULE, data);
   }
-  async cancel_result(data) {
-    return await this.request.put(ENDPOINTS.REVIEW_SCHEDULE_CANCEL_RESULT, data);
-  }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.REVIEW_SCHEDULE, data);
+  }
+  async cancel_result(data) {
+    return await this.request.put(ENDPOINTS.REVIEW_SCHEDULE_CANCEL_RESULT, data);
   }
 }
 
