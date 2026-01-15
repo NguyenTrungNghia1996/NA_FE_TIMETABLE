@@ -87,6 +87,7 @@ let ENDPOINTS = {
   REVIEW_CLASS_BREAK: "/api/lopontap/tietnghi",
   // REVIEW SCHEDULE (Lịch ôn tập)
   REVIEW_SCHEDULE: "/api/lichontap",
+  REVIEW_SCHEDULE_DETAIL: "/api/lichontap/detail",
 
   // REVIEW TIMETABLE (Lịch ôn tập - sắp xếp)
   REVIEW_TIMETABLE: "/api/lich",
@@ -919,6 +920,9 @@ class ReviewSchedule {
   }
   async list(data) {
     return await this.request.get(ENDPOINTS.REVIEW_SCHEDULE, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.REVIEW_SCHEDULE_DETAIL, data);
   }
   async create(data) {
     return await this.request.post(ENDPOINTS.REVIEW_SCHEDULE, data);
