@@ -103,6 +103,9 @@ let ENDPOINTS = {
   REVIEW_TIMETABLE_UPDATE_TEACHER: "/api/lich/update/giaovien",
   REVIEW_TIMETABLE_UPDATE: "/api/lich/update",
   REVIEW_TIMETABLE_UNSCHEDULED: "/api/lich/tietchuaxep",
+  REVIEW_TIMETABLE_ARRANGE_CLASS: "/api/lich/xeptheolop",
+  REVIEW_TIMETABLE_ARRANGE_ROOM: "/api/lich/xeptheophong",
+  REVIEW_TIMETABLE_ARRANGE_TEACHER: "/api/lich/xeptheogv",
 
   //TIMETABLE
   TIMETABLE: "/api/thoikhoabieu",
@@ -939,6 +942,12 @@ class ReviewTimetable {
   constructor() {
     this.request = new Request();
   }
+  normalizeArrangeBody(body = {}) {
+    const res = { ...(body || {}) };
+    if (res.id_tkb && !res.id_lich) res.id_lich = res.id_tkb;
+    delete res.id_tkb;
+    return res;
+  }
   normalizeParams(params = {}) {
     const res = { ...(params || {}) };
     if (res.idtkb && !res.idlich) res.idlich = res.idtkb;
@@ -1015,6 +1024,18 @@ class ReviewTimetable {
   async unscheduled(data) {
     const params = this.normalizeParams(data?.params || {});
     return await this.request.get(ENDPOINTS.REVIEW_TIMETABLE_UNSCHEDULED, { ...data, params });
+  }
+  async arrange_class(data) {
+    const body = this.normalizeArrangeBody(data?.body || {});
+    return await this.request.post(ENDPOINTS.REVIEW_TIMETABLE_ARRANGE_CLASS, { ...data, body });
+  }
+  async arrange_room(data) {
+    const body = this.normalizeArrangeBody(data?.body || {});
+    return await this.request.post(ENDPOINTS.REVIEW_TIMETABLE_ARRANGE_ROOM, { ...data, body });
+  }
+  async arrange_teacher(data) {
+    const body = this.normalizeArrangeBody(data?.body || {});
+    return await this.request.post(ENDPOINTS.REVIEW_TIMETABLE_ARRANGE_TEACHER, { ...data, body });
   }
 }
 
