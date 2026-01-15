@@ -121,8 +121,13 @@
     <!-- Context Menu -->
     <div v-if="contextMenu.show" class="absolute bg-white border shadow rounded text-sm z-50" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
       <ul class="min-w-[150px] py-1 select-none">
-        <li v-if="!contextMenu.cell?.ten_mon" class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click="addLesson">Xếp tiết</li>
-        <li v-else class="px-3 py-1 text-gray-400 cursor-not-allowed">Chưa hỗ trợ thao tác</li>
+        <template v-if="contextMenu.cell?.id_chitiet">
+          <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click="clearCell">Huỷ xếp</li>
+        </template>
+        <template v-else>
+          <li v-if="!contextMenu.cell?.ten_mon" class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click="addLesson">Xếp tiết</li>
+          <li v-else class="px-3 py-1 text-gray-400 cursor-not-allowed">Chưa hỗ trợ thao tác</li>
+        </template>
       </ul>
     </div>
 
@@ -753,6 +758,9 @@ async function undoLastAction() {
       case "classUpdate":
         success = await handleUndoClassUpdate(lastAction.payload);
         break;
+      case "clearPeriod":
+        success = await handleUndoClearPeriod(lastAction.payload);
+        break;
       case "addPeriod":
         success = await handleUndoAddPeriod(lastAction.payload);
         break;
@@ -1331,7 +1339,46 @@ async function unlockTeacherPeriods() {
 }
 
 async function clearCell() {
-  message.info("Huỷ xếp chưa hỗ trợ cho lịch ôn tập");
+  const cell = contextMenu.isTeacher ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx) : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
+  const targetId = cell?.id_chitiet;
+  if (!cell || !targetId) {
+    message.info("Không có dữ liệu để huỷ xếp");
+    contextMenu.show = false;
+    return;
+  }
+  const snapshot = JSON.parse(JSON.stringify(cell));
+  snapshot.id_lop = selectedClassId.value ?? snapshot.id_lop;
+  snapshot.ten_lop = selectedClassName.value ?? snapshot.ten_lop;
+  try {
+    const { data, error } = await RestApi.review_schedule.cancel_result({ params: { id: targetId } });
+    if (data.value?.status === "success") {
+      timetableStore.pushClearPeriod({ cell: snapshot });
+      if (selectedClassId.value && scheduleId.value) {
+        const { data: listData, error: listError } = await Api.get_class({
+          params: buildScheduleParams({ idLop: selectedClassId.value }),
+        });
+        if (listData.value?.status === "success") {
+          const { ds_Ca } = transformTimetable(listData.value.data.timetable || [], transformOpts.value);
+          dsCa.value = ds_Ca;
+          classUnscheduled.value = Array.isArray(listData.value.data.ds_chua_xep) ? listData.value.data.ds_chua_xep : [];
+          selectedSubjectId.value = null;
+          selectedCellPos.value = null;
+        } else {
+          message.error("Load timetable error", listError.value || listData.value);
+        }
+      } else {
+        await fetchClassTimetable();
+      }
+      if (selectedTeacherId.value && scheduleId.value) {
+        await fetchTeacherTimetable(selectedTeacherId.value);
+      }
+      await fetchAllUnscheduled();
+    } else {
+      message.error("Huỷ xếp thất bại", error.value || data.value);
+    }
+  } catch (err) {
+    message.error("Huỷ xếp thất bại", err);
+  }
   contextMenu.show = false;
 }
 
