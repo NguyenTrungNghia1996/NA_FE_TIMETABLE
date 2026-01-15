@@ -31,6 +31,13 @@
           <template v-if="column.key === 'action'">
             <div class="flex justify-center">
               <div class="md:flex space-x-2">
+                <a-tooltip title="Tinh chỉnh lịch">
+                  <a-button type="link" size="small" @click="openAdjustDrawer(record)" :disabled="!settingStore.currentPermission">
+                    <template #icon>
+                      <SettingOutlined />
+                    </template>
+                  </a-button>
+                </a-tooltip>
                 <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission">
                   <template #icon>
                     <EditOutlined />
@@ -69,6 +76,30 @@
         </div>
       </template>
     </a-modal>
+    <a-drawer
+      v-model:open="adjustDrawerOpen"
+      title="Tinh chỉnh lịch ôn tập"
+      :footer="null"
+      height="100vh"
+      placement="bottom"
+      :header-style="{ padding: '0px 0px' }"
+      :body-style="{ padding: '4px 4px' }"
+      :destroyOnClose="true"
+      @close="closeAdjustDrawer"
+    >
+      <template #extra>
+        <a-button type="primary" :loading="arrangeLoading" :disabled="!adjustScheduleId" @click="arrangeAll">
+          Xếp toàn bộ
+        </a-button>
+      </template>
+      <ClientOnly>
+        <ReviewTimetableGrid
+          :key="gridKey"
+          v-model:classId="adjustClassId"
+          :timetableId="adjustScheduleId"
+        />
+      </ClientOnly>
+    </a-drawer>
   </div>
 </template>
 <script setup>
@@ -81,7 +112,7 @@ const columns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
   { title: "Tên lịch ôn tập", dataIndex: "ten", key: "ten", ellipsis: true },
   { title: "Trạng thái", dataIndex: "trang_thai", key: "trang_thai", width: 140, align: "center" },
-  { title: "Thao tác", key: "action", width: 90, align: "center", fixed: "right" },
+  { title: "Thao tác", key: "action", width: 140, align: "center", fixed: "right" },
 ];
 
 const dataSource = ref([]);
@@ -91,6 +122,11 @@ const visible = ref(false);
 const confirmLoading = ref(false);
 const isEdit = ref(false);
 const formRef = ref();
+const adjustDrawerOpen = ref(false);
+const adjustScheduleId = ref(null);
+const adjustClassId = ref(null);
+const arrangeLoading = ref(false);
+const gridKey = ref(0);
 
 const pagination = reactive({
   current: 1,
@@ -167,6 +203,35 @@ const editItem = record => {
     trang_thai: Boolean(record.trang_thai),
   });
   visible.value = true;
+};
+
+const openAdjustDrawer = record => {
+  adjustScheduleId.value = record?.id ?? null;
+  adjustDrawerOpen.value = true;
+};
+
+const closeAdjustDrawer = () => {
+  adjustDrawerOpen.value = false;
+  adjustClassId.value = null;
+  adjustScheduleId.value = null;
+};
+
+const arrangeAll = async () => {
+  if (!adjustScheduleId.value) return;
+  try {
+    arrangeLoading.value = true;
+    const { data, error } = await RestApi.review_timetable.arrange_all({ params: { Idlich: adjustScheduleId.value } });
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Xếp lịch thành công");
+      gridKey.value += 1; // reload grid to reflect changes
+    } else {
+      throw new Error(error.value?.data?.message || "Xếp lịch không thành công");
+    }
+  } catch (err) {
+    message.error(err?.message || "Xếp lịch không thành công");
+  } finally {
+    arrangeLoading.value = false;
+  }
 };
 
 const handleOk = async () => {

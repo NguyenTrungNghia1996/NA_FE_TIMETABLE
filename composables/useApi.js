@@ -88,6 +88,21 @@ let ENDPOINTS = {
   // REVIEW SCHEDULE (Lịch ôn tập)
   REVIEW_SCHEDULE: "/api/lichontap",
 
+  // REVIEW TIMETABLE (Lịch ôn tập - sắp xếp)
+  REVIEW_TIMETABLE: "/api/lich",
+  REVIEW_TIMETABLE_CLASS: "/api/lich/lop",
+  REVIEW_TIMETABLE_TEACHER: "/api/lich/giaovien",
+  REVIEW_TIMETABLE_FIND_CLASS_POSITION: "/api/lich/timvitri/lop",
+  REVIEW_TIMETABLE_FIND_TEACHER_POSITION: "/api/lich/timvitri/giaovien",
+  REVIEW_TIMETABLE_FIND_CLASS_UNSCHEDULED_POSITION: "/api/lich/timvitri/chuaxep/lop",
+  REVIEW_TIMETABLE_FIND_TEACHER_UNSCHEDULED_POSITION: "/api/lich/timvitri/chuaxep/giaovien",
+  REVIEW_TIMETABLE_FIND_CLASS_LESSON: "/api/lich/timtiet/lop",
+  REVIEW_TIMETABLE_FIND_TEACHER_LESSON: "/api/lich/timtiet/giaovien",
+  REVIEW_TIMETABLE_UPDATE_CLASS: "/api/lich/update/lop",
+  REVIEW_TIMETABLE_UPDATE_TEACHER: "/api/lich/update/giaovien",
+  REVIEW_TIMETABLE_UPDATE: "/api/lich/update",
+  REVIEW_TIMETABLE_UNSCHEDULED: "/api/lich/tietchuaxep",
+
   //TIMETABLE
   TIMETABLE: "/api/thoikhoabieu",
   TIMETABLE_DETAIL: "/api/thoikhoabieu/detail",
@@ -304,6 +319,7 @@ class RestApi {
     this.class = new Class(this.request);
     this.review_class = new ReviewClass(this.request);
     this.review_schedule = new ReviewSchedule(this.request);
+    this.review_timetable = new ReviewTimetable(this.request);
     this.timetable = new Timetable(this.request);
     this.year = new Year(this.request);
     this.holiday = new Holiday(this.request);
@@ -912,6 +928,89 @@ class ReviewSchedule {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.REVIEW_SCHEDULE, data);
+  }
+}
+
+class ReviewTimetable {
+  constructor() {
+    this.request = new Request();
+  }
+  normalizeParams(params = {}) {
+    const res = { ...(params || {}) };
+    if (res.idtkb && !res.idlich) res.idlich = res.idtkb;
+    if (res.Idtkb && !res.Idlich) res.Idlich = res.Idtkb;
+    if (res.idlich && !res.idtkb) res.idtkb = res.idlich;
+    if (res.Idlich && !res.Idtkb) res.Idtkb = res.Idlich;
+    return res;
+  }
+  normalizeBody(body = {}) {
+    const res = { ...(body || {}) };
+    if (res.id_tkb && !res.id_lich) res.id_lich = res.id_tkb;
+    if (res.id_lich && !res.id_tkb) res.id_tkb = res.id_lich;
+    return res;
+  }
+  async arrange_all(data) {
+    const params = this.normalizeParams(data?.params || {});
+    const cloned = { ...(data || {}) };
+    delete cloned.params;
+    return await this.request.post(ENDPOINTS.REVIEW_TIMETABLE, { ...cloned, params });
+  }
+  async get_class(data) {
+    const params = this.normalizeParams(data?.params || {});
+    return await this.request.get(ENDPOINTS.REVIEW_TIMETABLE_CLASS, { ...data, params });
+  }
+  async get_teacher(data) {
+    const params = this.normalizeParams(data?.params || {});
+    return await this.request.get(ENDPOINTS.REVIEW_TIMETABLE_TEACHER, { ...data, params });
+  }
+  async find_class_position(data) {
+    const body = this.normalizeBody(data?.body || {});
+    const params = this.normalizeParams(data?.params || {});
+    return await this.request.post(ENDPOINTS.REVIEW_TIMETABLE_FIND_CLASS_POSITION, { ...data, body, params });
+  }
+  async find_teacher_position(data) {
+    const body = this.normalizeBody(data?.body || {});
+    const params = this.normalizeParams(data?.params || {});
+    return await this.request.post(ENDPOINTS.REVIEW_TIMETABLE_FIND_TEACHER_POSITION, { ...data, body, params });
+  }
+  async find_class_unscheduled_position(data) {
+    const body = this.normalizeBody(data?.body || {});
+    const params = this.normalizeParams(data?.params || {});
+    return await this.request.post(ENDPOINTS.REVIEW_TIMETABLE_FIND_CLASS_UNSCHEDULED_POSITION, { ...data, body, params });
+  }
+  async find_teacher_unscheduled_position(data) {
+    const body = this.normalizeBody(data?.body || {});
+    const params = this.normalizeParams(data?.params || {});
+    return await this.request.post(ENDPOINTS.REVIEW_TIMETABLE_FIND_TEACHER_UNSCHEDULED_POSITION, { ...data, body, params });
+  }
+  async find_class_lesson(data) {
+    const body = this.normalizeBody(data?.body || {});
+    const params = this.normalizeParams(data?.params || {});
+    return await this.request.post(ENDPOINTS.REVIEW_TIMETABLE_FIND_CLASS_LESSON, { ...data, body, params });
+  }
+  async find_teacher_lesson(data) {
+    const body = this.normalizeBody(data?.body || {});
+    const params = this.normalizeParams(data?.params || {});
+    return await this.request.post(ENDPOINTS.REVIEW_TIMETABLE_FIND_TEACHER_LESSON, { ...data, body, params });
+  }
+  async update_class(data) {
+    const body = this.normalizeBody(data?.body || {});
+    const params = this.normalizeParams(data?.params || {});
+    return await this.request.post(ENDPOINTS.REVIEW_TIMETABLE_UPDATE_CLASS, { ...data, body, params });
+  }
+  async update_teacher(data) {
+    const body = this.normalizeBody(data?.body || {});
+    const params = this.normalizeParams(data?.params || {});
+    return await this.request.post(ENDPOINTS.REVIEW_TIMETABLE_UPDATE_TEACHER, { ...data, body, params });
+  }
+  async update_period(data) {
+    const body = this.normalizeBody(data?.body || {});
+    const params = this.normalizeParams(data?.params || {});
+    return await this.request.put(ENDPOINTS.REVIEW_TIMETABLE_UPDATE, { ...data, body, params });
+  }
+  async unscheduled(data) {
+    const params = this.normalizeParams(data?.params || {});
+    return await this.request.get(ENDPOINTS.REVIEW_TIMETABLE_UNSCHEDULED, { ...data, params });
   }
 }
 
