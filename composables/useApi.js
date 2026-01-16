@@ -76,6 +76,8 @@ let ENDPOINTS = {
   // Teacher assignment by teacher
   TEACHER_ASSIGNMENT: "/api/phanconggv",
   TEACHER_ASSIGNMENT_CLASS: "/api/phanconggv/lop",
+  // STUDENT
+  STUDENT: "/api/hocsinh",
   // CLASS
   CLASS: "/api/lophoc",
   CLASS_DETAIL: "/api/lophoc/detail",
@@ -103,6 +105,7 @@ let ENDPOINTS = {
   REVIEW_TIMETABLE_UPDATE_CLASS: "/api/lich/update/lop",
   REVIEW_TIMETABLE_UPDATE_TEACHER: "/api/lich/update/giaovien",
   REVIEW_TIMETABLE_UPDATE: "/api/lich/update",
+  REVIEW_TIMETABLE_CANCEL_PERIOD: "/api/lich/huytiet",
   REVIEW_TIMETABLE_UNSCHEDULED: "/api/lich/tietchuaxep",
   REVIEW_TIMETABLE_ARRANGE_CLASS: "/api/lich/xeptheolop",
   REVIEW_TIMETABLE_ARRANGE_ROOM: "/api/lich/xeptheophong",
@@ -321,6 +324,7 @@ class RestApi {
     this.subject_grade_level = new SubjectGradeLevel(this.request);
     this.subject_combination = new SubjectCombination(this.request);
     this.teacher = new Teacher(this.request);
+    this.student = new Student(this.request);
     this.class = new Class(this.request);
     this.review_class = new ReviewClass(this.request);
     this.review_schedule = new ReviewSchedule(this.request);
@@ -855,6 +859,24 @@ class Teacher {
   }
 }
 
+class Student {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.STUDENT, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.STUDENT, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.STUDENT, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.STUDENT, data);
+  }
+}
+
 class Class {
   constructor() {
     this.request = new Request();
@@ -1024,6 +1046,9 @@ class ReviewTimetable {
     const body = this.normalizeBody(data?.body || {});
     const params = this.normalizeParams(data?.params || {});
     return await this.request.put(ENDPOINTS.REVIEW_TIMETABLE_UPDATE, { ...data, body, params });
+  }
+  async cancel_period(data) {
+    return await this.request.put(ENDPOINTS.REVIEW_TIMETABLE_CANCEL_PERIOD, data);
   }
   async unscheduled(data) {
     const params = this.normalizeParams(data?.params || {});

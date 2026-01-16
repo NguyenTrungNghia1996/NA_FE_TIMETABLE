@@ -121,8 +121,12 @@
     <!-- Context Menu -->
     <div v-if="contextMenu.show" class="absolute bg-white border shadow rounded text-sm z-50" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
       <ul class="min-w-[150px] py-1 select-none">
-        <li v-if="!contextMenu.cell?.ten_mon" class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click="addLesson">Xếp tiết</li>
-        <li v-else class="px-3 py-1 text-gray-400 cursor-not-allowed">Chưa hỗ trợ thao tác</li>
+        <template v-if="contextMenu.cell?.id_chitiet">
+          <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click="clearCell">Hủy tiết</li>
+        </template>
+        <template v-else>
+          <li class="px-3 py-1 hover:bg-gray-100 cursor-pointer" @click="addLesson">Xếp tiết</li>
+        </template>
       </ul>
     </div>
 
@@ -703,28 +707,8 @@ async function handleUndoAddPeriod(payload) {
     message.info("Không có dữ liệu để hoàn tác");
     return false;
   }
-  const body = {
-    id: cell.id_chitiet,
-    id_don_vi: cell.id_don_vi,
-    id_tkb: cell.id_tkb,
-    id_lich: scheduleId.value ?? cell.id_lich ?? cell.id_tkb,
-    id_lop: cell.id_lop ?? 0,
-    ten_lop: cell.ten_lop ?? "",
-    id_mon: 0,
-    ten_mon: "",
-    id_giao_vien: 0,
-    ten_giao_vien: "",
-    id_phong: 0,
-    ten_phong: "",
-    tiet_thu_may: cell.tiet_thu_may,
-    id_ca: cell.id_ca,
-    ngay: cell.ngay,
-    tiet: cell.tiet,
-    khoa: !!cell.isLock,
-    ds_vi_tri_xep_duoc: [],
-  };
   try {
-    const { data, error } = await Api.update_period({ body });
+    const { data, error } = await Api.cancel_period({ params: { id: cell.id_chitiet } });
     if (data.value?.status !== "success") {
       message.error("Hoàn tác thêm tiết thất bại", error.value || data.value);
       return false;
@@ -754,6 +738,9 @@ async function undoLastAction() {
     switch (lastAction.type) {
       case "classUpdate":
         success = await handleUndoClassUpdate(lastAction.payload);
+        break;
+      case "clearPeriod":
+        success = await handleUndoClearPeriod(lastAction.payload);
         break;
       case "addPeriod":
         success = await handleUndoAddPeriod(lastAction.payload);
@@ -1333,7 +1320,26 @@ async function unlockTeacherPeriods() {
 }
 
 async function clearCell() {
-  message.info("Huỷ xếp chưa hỗ trợ cho lịch ôn tập");
+  const cell = contextMenu.isTeacher ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx) : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
+  if (!cell?.id_chitiet) return;
+  const snapshot = JSON.parse(JSON.stringify(cell));
+  snapshot.id_lop = selectedClassId.value ?? snapshot.id_lop;
+  snapshot.ten_lop = selectedClassName.value ?? snapshot.ten_lop;
+  try {
+    const { data, error } = await Api.cancel_period({ params: { id: cell.id_chitiet } });
+    if (data.value?.status === "success") {
+      timetableStore.pushClearPeriod({ cell: snapshot });
+      await fetchClassTimetable();
+      if (selectedTeacherId.value && scheduleId.value) {
+        await fetchTeacherTimetable(selectedTeacherId.value);
+      }
+      await fetchAllUnscheduled();
+    } else {
+      message.error("Hủy tiết thất bại", error.value || data.value);
+    }
+  } catch (err) {
+    message.error("Hủy tiết thất bại", err);
+  }
   contextMenu.show = false;
 }
 
