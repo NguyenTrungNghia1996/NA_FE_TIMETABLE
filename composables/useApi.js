@@ -87,6 +87,8 @@ let ENDPOINTS = {
   // REVIEW CLASS (Lớp ôn tập)
   REVIEW_CLASS: "/api/lopontap",
   REVIEW_CLASS_BREAK: "/api/lopontap/tietnghi",
+  REVIEW_CLASS_STUDENT: "/api/lopontap/hocsinh",
+  REVIEW_CLASS_STUDENT_LIST: "/api/lopontap/hocsinh/list",
   // REVIEW SCHEDULE (Lịch ôn tập)
   REVIEW_SCHEDULE: "/api/lichontap",
   REVIEW_SCHEDULE_DETAIL: "/api/lichontap/detail",
@@ -922,6 +924,21 @@ class ReviewClass {
   }
   async list(data) {
     return await this.request.get(ENDPOINTS.REVIEW_CLASS, data);
+  }
+  async list_students(data) {
+    return await this.request.get(ENDPOINTS.REVIEW_CLASS_STUDENT, data);
+  }
+  async list_student_ids(data) {
+    return await this.request.get(ENDPOINTS.REVIEW_CLASS_STUDENT_LIST, data);
+  }
+  async update_student(data) {
+    return await this.request.put(ENDPOINTS.REVIEW_CLASS_STUDENT, data);
+  }
+  async update_students(data) {
+    return await this.request.post(ENDPOINTS.REVIEW_CLASS_STUDENT, data);
+  }
+  async delete_student(data) {
+    return await this.request.delete(ENDPOINTS.REVIEW_CLASS_STUDENT, data);
   }
   async get_break(data) {
     return await this.request.get(ENDPOINTS.REVIEW_CLASS_BREAK, data);
