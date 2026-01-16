@@ -3,6 +3,7 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4">
       <a-input-search v-model:value="searchText" placeholder="Tìm kiếm học sinh..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
       <a-button @click="resetForm" class="w-full md:w-auto">Đặt lại</a-button>
+      <a-button @click="reviewStudentDrawerOpen = true" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Học sinh - Lớp ôn tập</a-button>
       <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Thêm mới</a-button>
     </div>
 
@@ -55,6 +56,12 @@
         </div>
       </template>
     </a-modal>
+
+    <a-drawer v-model:open="reviewStudentDrawerOpen" title="Học sinh - Lớp ôn tập" :footer="null" height="100vh" placement="bottom" :destroyOnClose="true" @close="closeReviewStudentDrawer">
+      <ClientOnly>
+        <ReviewStudentClass ref="reviewStudentRef" />
+      </ClientOnly>
+    </a-drawer>
   </div>
 </template>
 
@@ -79,6 +86,8 @@ const visible = ref(false);
 const confirmLoading = ref(false);
 const isEdit = ref(false);
 const formRef = ref();
+const reviewStudentDrawerOpen = ref(false);
+const reviewStudentRef = ref(null);
 
 const pagination = reactive({
   current: 1,
@@ -191,6 +200,16 @@ const handleCancel = () => {
   formRef.value.resetFields();
   visible.value = false;
 };
+
+const closeReviewStudentDrawer = () => {
+  reviewStudentRef.value?.reset();
+};
+
+watch(reviewStudentDrawerOpen, val => {
+  if (val) {
+    reviewStudentRef.value?.refresh();
+  }
+});
 
 const deleteItem = async id => {
   try {
