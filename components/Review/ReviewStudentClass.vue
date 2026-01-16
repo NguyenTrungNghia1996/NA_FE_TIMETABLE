@@ -85,7 +85,7 @@
         </a-form-item>
         <SelectReviewClass v-model="editModal.form.id_lop_on" name="id_lop_on" label="Lớp ôn tập" :rules="editRules.id_lop_on" />
       </a-form>
-      <div class="flex justify-center gap-2 mt-4">
+      <div class="flex justify-end gap-2 mt-4">
         <a-button type="primary" :loading="editModal.saving" @click="saveEditStudent">Lưu</a-button>
         <a-button danger @click="closeEditModal">Hủy</a-button>
       </div>
