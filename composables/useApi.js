@@ -76,6 +76,8 @@ let ENDPOINTS = {
   // Teacher assignment by teacher
   TEACHER_ASSIGNMENT: "/api/phanconggv",
   TEACHER_ASSIGNMENT_CLASS: "/api/phanconggv/lop",
+  // STUDENT
+  STUDENT: "/api/hocsinh",
   // CLASS
   CLASS: "/api/lophoc",
   CLASS_DETAIL: "/api/lophoc/detail",
@@ -322,6 +324,7 @@ class RestApi {
     this.subject_grade_level = new SubjectGradeLevel(this.request);
     this.subject_combination = new SubjectCombination(this.request);
     this.teacher = new Teacher(this.request);
+    this.student = new Student(this.request);
     this.class = new Class(this.request);
     this.review_class = new ReviewClass(this.request);
     this.review_schedule = new ReviewSchedule(this.request);
@@ -853,6 +856,24 @@ class Teacher {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.TEACHER, data);
+  }
+}
+
+class Student {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.STUDENT, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.STUDENT, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.STUDENT, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.STUDENT, data);
   }
 }
 
