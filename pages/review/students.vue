@@ -3,6 +3,7 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-4">
       <a-input-search v-model:value="searchText" placeholder="Tìm kiếm học sinh..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
       <a-button @click="resetForm" class="w-full md:w-auto">Đặt lại</a-button>
+      <a-button @click="openImportModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Import học sinh</a-button>
       <a-button @click="reviewStudentDrawerOpen = true" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Học sinh - Lớp ôn tập</a-button>
       <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Thêm mới</a-button>
     </div>
@@ -57,6 +58,17 @@
       </template>
     </a-modal>
 
+    <a-modal v-model:open="importModal.open" title="Import học sinh" :footer="null" width="520px" :destroyOnClose="true" @cancel="closeImportModal">
+      <div class="text-sm text-gray-600 mb-3">Chọn file Excel (.xlsx, .xls) để import danh sách học sinh.</div>
+      <a-upload :beforeUpload="beforeImportUpload" :maxCount="1" :file-list="importModal.fileList" @remove="removeImportFile" :accept="'.xlsx,.xls'" :showUploadList="{ showRemoveIcon: true }">
+        <a-button>Chọn file</a-button>
+      </a-upload>
+      <div class="flex justify-end gap-2 mt-4">
+        <a-button type="primary" :loading="importModal.uploading" :disabled="!importModal.file" @click="handleImportStudents">Lưu</a-button>
+        <a-button danger @click="closeImportModal">Hủy</a-button>
+      </div>
+    </a-modal>
+
     <a-drawer v-model:open="reviewStudentDrawerOpen" title="Học sinh - Lớp ôn tập" :footer="null" height="100vh" placement="bottom" :destroyOnClose="true" @close="closeReviewStudentDrawer">
       <ClientOnly>
         <ReviewStudentClass ref="reviewStudentRef" />
@@ -88,6 +100,12 @@ const isEdit = ref(false);
 const formRef = ref();
 const reviewStudentDrawerOpen = ref(false);
 const reviewStudentRef = ref(null);
+const importModal = reactive({
+  open: false,
+  file: null,
+  fileList: [],
+  uploading: false,
+});
 
 const pagination = reactive({
   current: 1,
@@ -150,6 +168,62 @@ const handleSearch = async () => {
   pagination.current = 1;
   param.value.pageIndex = 1;
   await fetchData({ ...param.value });
+};
+
+const openImportModal = () => {
+  importModal.open = true;
+};
+
+const closeImportModal = () => {
+  importModal.open = false;
+  importModal.file = null;
+  importModal.fileList = [];
+  importModal.uploading = false;
+};
+
+const beforeImportUpload = file => {
+  const originFile = file?.originFileObj || file;
+  const extIndex = originFile.name?.lastIndexOf(".") ?? -1;
+  const ext = extIndex >= 0 ? originFile.name.slice(extIndex) : "";
+  const renamedFile = new File([originFile], `${Date.now()}${ext}`, {
+    type: originFile.type,
+    lastModified: originFile.lastModified,
+  });
+  importModal.file = renamedFile;
+  importModal.fileList = [{ ...file, name: originFile.name }];
+  return false;
+};
+
+const removeImportFile = () => {
+  importModal.file = null;
+  importModal.fileList = [];
+};
+
+const handleImportStudents = async () => {
+  if (!importModal.file) {
+    message.warning("Vui lòng chọn file để import");
+    return;
+  }
+  try {
+    importModal.uploading = true;
+    const form = new FormData();
+    form.append("file", importModal.file);
+    const { data, error } = await RestApi.student.import_file({ body: form });
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Import thành công");
+      closeImportModal();
+      await fetchData({ ...param.value });
+      if (reviewStudentDrawerOpen.value) {
+        reviewStudentRef.value?.refresh();
+      }
+    } else {
+      throw new Error(error.value?.data?.message || data.value?.message || "Import không thành công");
+    }
+  } catch (err) {
+    message.error(err.message || "Import không thành công");
+  } finally {
+    importModal.uploading = false;
+  }
 };
 
 const showModal = () => {

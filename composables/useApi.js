@@ -78,6 +78,7 @@ let ENDPOINTS = {
   TEACHER_ASSIGNMENT_CLASS: "/api/phanconggv/lop",
   // STUDENT
   STUDENT: "/api/hocsinh",
+  STUDENT_IMPORT: "/api/hocsinh/import",
   // CLASS
   CLASS: "/api/lophoc",
   CLASS_DETAIL: "/api/lophoc/detail",
@@ -873,6 +874,9 @@ class Student {
   }
   async update(data) {
     return await this.request.put(ENDPOINTS.STUDENT, data);
+  }
+  async import_file(data) {
+    return await this.request.postForm(ENDPOINTS.STUDENT_IMPORT, data);
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.STUDENT, data);
