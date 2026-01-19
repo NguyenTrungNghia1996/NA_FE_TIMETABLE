@@ -23,6 +23,7 @@
       <div class="flex flex-col md:flex-row gap-2 mb-2">
         <a-input-search v-model:value="searchText" placeholder="Tìm kiếm học sinh..." enter-button @search="handleSearch" class="w-full md:w-1/2" />
         <a-button @click="resetSearch">Đặt lại</a-button>
+        <a-button @click="openImportModal">Import học sinh - lớp ôn tập</a-button>
       </div>
 
       <a-table :columns="studentColumns" :data-source="students" :loading="studentLoading" :pagination="studentPagination" size="small" row-key="id" @change="handleStudentTableChange">
@@ -49,6 +50,17 @@
         </template>
       </a-table>
     </a-card>
+
+    <a-modal v-model:open="importModal.open" title="Import học sinh - lớp ôn tập" :footer="null" width="520px" :destroyOnClose="true" @cancel="closeImportModal">
+      <div class="text-sm text-gray-600 mb-3">Chọn file Excel (.xlsx, .xls) để import danh sách học sinh - lớp ôn tập.</div>
+      <a-upload :beforeUpload="beforeImportUpload" :maxCount="1" :file-list="importModal.fileList" @remove="removeImportFile" :accept="'.xlsx,.xls'" :showUploadList="{ showRemoveIcon: true }">
+        <a-button>Chọn file</a-button>
+      </a-upload>
+      <div class="flex justify-end gap-2 mt-4">
+        <a-button type="primary" :loading="importModal.uploading" :disabled="!importModal.file" @click="handleImportStudents">Lưu</a-button>
+        <a-button danger @click="closeImportModal">Hủy</a-button>
+      </div>
+    </a-modal>
 
     <a-modal v-model:open="assignModal.visible" title="Thêm học sinh vào lớp ôn tập" :footer="null" width="720px" :destroyOnClose="true" @cancel="closeAssignModal">
       <div class="text-center text-sm text-gray-600 mb-3">
@@ -104,6 +116,12 @@ const students = ref([]);
 const studentLoading = ref(false);
 const searchText = ref("");
 const editFormRef = ref();
+const importModal = reactive({
+  open: false,
+  file: null,
+  fileList: [],
+  uploading: false,
+});
 const assignModal = reactive({
   visible: false,
   loading: false,
@@ -255,6 +273,60 @@ const resetSearch = async () => {
   searchText.value = "";
   studentPagination.current = 1;
   await fetchStudents();
+};
+
+const openImportModal = () => {
+  importModal.open = true;
+};
+
+const closeImportModal = () => {
+  importModal.open = false;
+  importModal.file = null;
+  importModal.fileList = [];
+  importModal.uploading = false;
+};
+
+const beforeImportUpload = file => {
+  const originFile = file?.originFileObj || file;
+  const extIndex = originFile.name?.lastIndexOf(".") ?? -1;
+  const ext = extIndex >= 0 ? originFile.name.slice(extIndex) : "";
+  const renamedFile = new File([originFile], `${Date.now()}${ext}`, {
+    type: originFile.type,
+    lastModified: originFile.lastModified,
+  });
+  importModal.file = renamedFile;
+  importModal.fileList = [{ ...file, name: originFile.name }];
+  return false;
+};
+
+const removeImportFile = () => {
+  importModal.file = null;
+  importModal.fileList = [];
+};
+
+const handleImportStudents = async () => {
+  if (!importModal.file) {
+    message.warning("Vui lòng chọn file để import");
+    return;
+  }
+  try {
+    importModal.uploading = true;
+    const form = new FormData();
+    form.append("file", importModal.file);
+    const { data, error } = await RestApi.review_class.import_students({ body: form });
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Import thành công");
+      closeImportModal();
+      studentPagination.current = 1;
+      await fetchStudents();
+    } else {
+      throw new Error(error.value?.data?.message || data.value?.message || "Import không thành công");
+    }
+  } catch (err) {
+    message.error(err.message || "Import không thành công");
+  } finally {
+    importModal.uploading = false;
+  }
 };
 
 const fetchAssignStudentIds = async () => {
@@ -452,6 +524,7 @@ const reset = () => {
   studentPagination.current = 1;
   studentPagination.total = 0;
   searchText.value = "";
+  closeImportModal();
   closeAssignModal();
   closeEditModal();
 };
