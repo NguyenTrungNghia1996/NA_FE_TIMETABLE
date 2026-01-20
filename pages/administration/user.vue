@@ -310,6 +310,7 @@ const editItem = async record => {
 };
 
 const handleOk = async () => {
+  let shouldClose = false;
   try {
     await formRef.value.validate();
     confirmLoading.value = true;
@@ -318,6 +319,7 @@ const handleOk = async () => {
       const { data, error } = await RestApi.user.update({ body: { ...formState } });
       if (data.value?.status === "success") {
         message.success(data.value.message || "Cập nhật người dùng thành công");
+        shouldClose = true;
       } else {
         throw new Error(error.value?.data?.message || "Cập nhật không thành công");
       }
@@ -328,6 +330,7 @@ const handleOk = async () => {
       const { data, error } = await RestApi.user.create({ body: { ...formState } });
       if (data.value?.status === "success") {
         message.success(data.value.message || "Thêm mới người dùng thành công");
+        shouldClose = true;
       } else {
         throw new Error(error.value?.data?.message || "Thêm mới không thành công");
       }
@@ -335,9 +338,11 @@ const handleOk = async () => {
   } catch (error) {
     message.error(error.message || error.response?.data?.message || "Đã xảy ra lỗi khi lưu thông tin người dùng");
   } finally {
-    visible.value = false;
-    await fetchData({ ...param.value });
     confirmLoading.value = false;
+    if (shouldClose) {
+      visible.value = false;
+      await fetchData({ ...param.value });
+    }
   }
 };
 
