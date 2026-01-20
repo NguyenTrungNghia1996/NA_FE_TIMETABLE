@@ -93,6 +93,8 @@ let ENDPOINTS = {
   REVIEW_CLASS_STUDENT_LIST: "/api/lopontap/hocsinh/list",
   // REVIEW TEST TYPE (Loại bài test)
   REVIEW_TEST_TYPE: "/api/loaikiemtra",
+  // REVIEW TEST (Bài kiểm tra)
+  REVIEW_TEST: "/api/baikiemtra",
   // REVIEW SCHEDULE (Lịch ôn tập)
   REVIEW_SCHEDULE: "/api/lichontap",
   REVIEW_SCHEDULE_DETAIL: "/api/lichontap/detail",
@@ -332,6 +334,7 @@ class RestApi {
     this.teacher = new Teacher(this.request);
     this.student = new Student(this.request);
     this.class = new Class(this.request);
+    this.review_test = new ReviewTest(this.request);
     this.review_test_type = new ReviewTestType(this.request);
     this.review_class = new ReviewClass(this.request);
     this.review_schedule = new ReviewSchedule(this.request);
@@ -923,6 +926,24 @@ class Class {
   }
   async update_subject_avoid(data) {
     return await this.request.post(ENDPOINTS.CLASS_SUBJECT_AVOID, data);
+  }
+}
+
+class ReviewTest {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.REVIEW_TEST, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.REVIEW_TEST, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.REVIEW_TEST, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.REVIEW_TEST, data);
   }
 }
 
