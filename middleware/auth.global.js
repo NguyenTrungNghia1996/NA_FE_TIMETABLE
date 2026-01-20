@@ -63,7 +63,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
 
   // 2) Bỏ qua route public
-  if (to.path === "/" || to.path === "/login" || to.path.startsWith("/test/")) return;
+  if (to.path === "/" || to.path === "/login") return;
 
   // 3) Auth + nạp menu/quyền
   const userStore = useUserStore();
