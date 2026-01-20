@@ -211,6 +211,7 @@ const buildPayload = () => {
 };
 
 const handleOk = async () => {
+  let shouldClose = false;
   try {
     await formRef.value?.validate();
     confirmLoading.value = true;
@@ -220,6 +221,7 @@ const handleOk = async () => {
       const { data, error } = await RestApi.holiday.update({ body: payload });
       if (data.value?.status === 'success') {
         message.success(data.value?.message || 'Cập nhật ngày nghỉ thành công');
+        shouldClose = true;
       } else {
         throw new Error(error.value?.data?.message || 'Cập nhật không thành công');
       }
@@ -227,6 +229,7 @@ const handleOk = async () => {
       const { data, error } = await RestApi.holiday.create({ body: payload });
       if (data.value?.status === 'success') {
         message.success(data.value?.message || 'Thêm ngày nghỉ thành công');
+        shouldClose = true;
       } else {
         throw new Error(error.value?.data?.message || 'Thêm mới không thành công');
       }
@@ -234,10 +237,12 @@ const handleOk = async () => {
   } catch (error) {
     message.error(error.message || error?.response?.data?.message || 'Đã xảy ra lỗi khi lưu');
   } finally {
-    await fetchData({ ...param.value });
     confirmLoading.value = false;
-    visible.value = false;
-    formRef.value?.resetFields?.();
+    if (shouldClose) {
+      await fetchData({ ...param.value });
+      visible.value = false;
+      formRef.value?.resetFields?.();
+    }
   }
 };
 
