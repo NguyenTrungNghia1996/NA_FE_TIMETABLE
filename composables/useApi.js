@@ -96,7 +96,7 @@ let ENDPOINTS = {
   // REVIEW TEST (Bài kiểm tra)
   REVIEW_TEST: "/api/baikiemtra",
   REVIEW_TEST_RESULT_TEMPLATE: "/api/baikiemtra/ketqua/mau",
-  REVIEW_TEST_RESULT_IMPORT: "/api/baikiemtra/ketqua",
+  REVIEW_TEST_RESULT_IMPORT: "/api/baikiemtra/ketqua/import",
   REVIEW_TEST_RESULT: "/api/baikiemtra/ketqua",
   // REVIEW SCHEDULE (Lịch ôn tập)
   REVIEW_SCHEDULE: "/api/lichontap",
