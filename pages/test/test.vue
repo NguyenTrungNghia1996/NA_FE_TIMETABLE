@@ -15,6 +15,18 @@
           <template v-if="column.key === 'action'">
             <div class="flex justify-center">
               <div class="md:flex space-x-2">
+                <a-tooltip title="Kết quả kiểm tra">
+                  <a-button type="link" size="small" @click="openResultModal(record)" :disabled="!settingStore.currentPermission">
+                    <template #icon>
+                      <FileSearchOutlined />
+                    </template>
+                  </a-button>
+                </a-tooltip>
+                <a-button type="link" size="small" @click="openImportModal(record)" :disabled="!settingStore.currentPermission">
+                  <template #icon>
+                    <UploadOutlined />
+                  </template>
+                </a-button>
                 <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission">
                   <template #icon>
                     <EditOutlined />
@@ -54,6 +66,49 @@
         </div>
       </template>
     </a-modal>
+
+    <a-modal v-model:open="importModal.open" title="IMPORT ĐIỂM KIỂM TRA" :footer="null" width="520px" :destroyOnClose="true" @cancel="closeImportModal">
+      <div class="flex justify-end mb-2">
+        <a-button type="link" class="p-0" :loading="importModal.downloading" @click="downloadTemplate">Tải file mẫu</a-button>
+      </div>
+      <div class="space-y-2 text-sm text-gray-700 mb-4">
+        <div><span class="font-medium">Tên bài kiểm tra:</span> {{ importModal.record?.ten || "-" }}</div>
+        <div><span class="font-medium">Loại bài kiểm tra:</span> {{ importModal.record?.ten_loai_kiem_tra || "-" }}</div>
+        <div><span class="font-medium">Lớp ôn tập:</span> {{ importModal.record?.ten_lop_on || "-" }}</div>
+      </div>
+      <a-upload :beforeUpload="beforeImportUpload" :maxCount="1" :file-list="importModal.fileList" @remove="removeImportFile" :accept="'.xlsx,.xls'" :showUploadList="{ showRemoveIcon: true }">
+        <a-button>Chọn file</a-button>
+      </a-upload>
+      <div class="flex justify-end gap-2 mt-4">
+        <a-button type="primary" :loading="importModal.uploading" :disabled="!importModal.file || !settingStore.currentPermission" @click="handleImportScores">Import</a-button>
+        <a-button danger @click="closeImportModal">Hủy</a-button>
+      </div>
+    </a-modal>
+
+    <a-modal v-model:open="resultModal.open" title="KẾT QUẢ KIỂM TRA" :footer="null" width="760px" :destroyOnClose="true" @cancel="closeResultModal">
+      <div class="space-y-2 text-sm text-gray-700 mb-4">
+        <div>
+          <span class="font-medium">Bài kiểm tra:</span>
+          {{ `${resultModal.record?.ten || "-"} - ${resultModal.record?.ten_loai_kiem_tra || "-"} - ${resultModal.record?.ten_lop_on || "-"}` }}
+        </div>
+      </div>
+      <ClientOnly>
+        <a-table :columns="resultColumns" :data-source="resultModal.data" :loading="resultModal.loading" :pagination="false" row-key="id" bordered size="small">
+          <template #bodyCell="{ column, record, index }">
+            <template v-if="column.key === 'stt'">
+              {{ index + 1 }}
+            </template>
+            <template v-if="column.key === 'diem'">
+              <a-input-number v-model:value="record.diem" :min="0" :max="10" :step="0.1" class="!w-full" />
+            </template>
+          </template>
+        </a-table>
+      </ClientOnly>
+      <div class="flex justify-end gap-2 mt-4">
+        <a-button type="primary" :loading="resultModal.saving" :disabled="!settingStore.currentPermission" @click="saveResultScores">Lưu</a-button>
+        <a-button danger @click="closeResultModal">Hủy</a-button>
+      </div>
+    </a-modal>
   </div>
 </template>
 
@@ -67,7 +122,7 @@ const columns = [
   { title: "Tên bài kiểm tra", dataIndex: "ten", key: "ten", ellipsis: true },
   { title: "Loại bài kiểm tra", dataIndex: "ten_loai_kiem_tra", key: "ten_loai_kiem_tra", ellipsis: true },
   { title: "Lớp ôn tập", dataIndex: "ten_lop_on", key: "ten_lop_on", ellipsis: true },
-  { title: "Thao tác", key: "action", width: 90, align: "center", fixed: "right" },
+  { title: "Thao tác", key: "action", width: 150, align: "center", fixed: "right" },
 ];
 
 const dataSource = ref([]);
@@ -77,6 +132,28 @@ const visible = ref(false);
 const confirmLoading = ref(false);
 const isEdit = ref(false);
 const formRef = ref();
+const importModal = reactive({
+  open: false,
+  file: null,
+  fileList: [],
+  uploading: false,
+  downloading: false,
+  record: null,
+});
+const resultModal = reactive({
+  open: false,
+  loading: false,
+  saving: false,
+  record: null,
+  data: [],
+});
+
+const resultColumns = [
+  { title: "STT", key: "stt", width: 60, align: "center" },
+  { title: "Mã học sinh", dataIndex: "ma_hoc_sinh", key: "ma_hoc_sinh", width: 160 },
+  { title: "Họ và tên học sinh", dataIndex: "ten_hoc_sinh", key: "ten_hoc_sinh" },
+  { title: "Điểm", key: "diem", width: 140, align: "center" },
+];
 
 const pagination = reactive({
   current: 1,
@@ -203,6 +280,165 @@ const handleOk = async () => {
 const handleCancel = () => {
   formRef.value?.resetFields?.();
   visible.value = false;
+};
+
+const openImportModal = record => {
+  importModal.record = record ? { ...record } : null;
+  importModal.open = true;
+};
+
+const closeImportModal = () => {
+  importModal.open = false;
+  importModal.file = null;
+  importModal.fileList = [];
+  importModal.uploading = false;
+  importModal.downloading = false;
+  importModal.record = null;
+};
+
+const beforeImportUpload = file => {
+  const originFile = file?.originFileObj || file;
+  const extIndex = originFile.name?.lastIndexOf(".") ?? -1;
+  const ext = extIndex >= 0 ? originFile.name.slice(extIndex) : "";
+  const renamedFile = new File([originFile], `${Date.now()}${ext}`, {
+    type: originFile.type,
+    lastModified: originFile.lastModified,
+  });
+  importModal.file = renamedFile;
+  importModal.fileList = [{ ...file, name: originFile.name }];
+  return false;
+};
+
+const removeImportFile = () => {
+  importModal.file = null;
+  importModal.fileList = [];
+};
+
+const downloadTemplate = async () => {
+  // console.log(importModal.record);
+  const classId = importModal.record?.id_lop_on;
+  if (!classId) {
+    message.warning("Vui lòng chọn lớp ôn tập để tải file mẫu");
+    return;
+  }
+  try {
+    importModal.downloading = true;
+    const { data, error } = await RestApi.review_test.download_result_template({ params: { idlop: classId } });
+    if (error.value) {
+      throw new Error(error.value?.data?.message || "Không tải được file mẫu");
+    }
+    const { blob: blobData, headers } = data.value || {};
+    if (!blobData) {
+      throw new Error("Không tải được file mẫu");
+    }
+    const blob = blobData instanceof Blob ? blobData : new Blob([blobData]);
+    const cd = headers && (headers["content-disposition"] || headers["Content-Disposition"]);
+    const filename = (cd && (decodeURIComponent(/filename\*=UTF-8''([^;]+)/.exec(cd)?.[1] || "") || /filename=\"([^"]+)\"/.exec(cd)?.[1])) || "mau-import.xlsx";
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    message.error(err.message || "Không tải được file mẫu");
+  } finally {
+    importModal.downloading = false;
+  }
+};
+
+const handleImportScores = async () => {
+  const testId = importModal.record?.id;
+  if (!testId) {
+    message.warning("Vui lòng chọn bài kiểm tra để import");
+    return;
+  }
+  if (!importModal.file) {
+    message.warning("Vui lòng chọn file để import");
+    return;
+  }
+  try {
+    importModal.uploading = true;
+    const form = new FormData();
+    form.append("file", importModal.file);
+    form.append("idbai", String(testId));
+    const { data, error } = await RestApi.review_test.import_result({ body: form });
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Import thành công");
+      closeImportModal();
+      await fetchData({ ...param.value });
+    } else {
+      throw new Error(error.value?.data?.message || data.value?.message || "Import không thành công");
+    }
+  } catch (err) {
+    message.error(err.message || "Import không thành công");
+  } finally {
+    importModal.uploading = false;
+  }
+};
+
+const openResultModal = async record => {
+  if (!record?.id) {
+    message.warning("Vui lòng chọn bài kiểm tra");
+    return;
+  }
+  resultModal.record = { ...record };
+  resultModal.open = true;
+  await fetchResultScores(record.id);
+};
+
+const closeResultModal = () => {
+  resultModal.open = false;
+  resultModal.loading = false;
+  resultModal.saving = false;
+  resultModal.record = null;
+  resultModal.data = [];
+};
+
+const fetchResultScores = async testId => {
+  try {
+    resultModal.loading = true;
+    const { data, error } = await RestApi.review_test.list_results({ params: { idbai: testId } });
+    if (data.value?.status === "success") {
+      resultModal.data = (data.value.data || []).map(item => ({ ...item }));
+    } else {
+      throw new Error(error.value?.data?.message || "Không tải được kết quả kiểm tra");
+    }
+  } catch (err) {
+    resultModal.data = [];
+    message.error(err.message || "Không tải được kết quả kiểm tra");
+  } finally {
+    resultModal.loading = false;
+  }
+};
+
+const saveResultScores = async () => {
+  if (!resultModal.record?.id) {
+    message.warning("Vui lòng chọn bài kiểm tra");
+    return;
+  }
+  try {
+    resultModal.saving = true;
+    const payload = resultModal.data.map(item => ({
+      id: item.id,
+      ma_hoc_sinh: item.ma_hoc_sinh,
+      ten_hoc_sinh: item.ten_hoc_sinh,
+      diem: item.diem,
+    }));
+    const { data, error } = await RestApi.review_test.save_results({ body: payload });
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Lưu kết quả thành công");
+      closeResultModal();
+    } else {
+      throw new Error(error.value?.data?.message || data.value?.message || "Lưu kết quả không thành công");
+    }
+  } catch (err) {
+    message.error(err.message || "Lưu kết quả không thành công");
+  } finally {
+    resultModal.saving = false;
+  }
 };
 
 const deleteItem = async id => {

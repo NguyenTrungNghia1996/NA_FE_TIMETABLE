@@ -95,6 +95,9 @@ let ENDPOINTS = {
   REVIEW_TEST_TYPE: "/api/loaikiemtra",
   // REVIEW TEST (Bài kiểm tra)
   REVIEW_TEST: "/api/baikiemtra",
+  REVIEW_TEST_RESULT_TEMPLATE: "/api/baikiemtra/ketqua/mau",
+  REVIEW_TEST_RESULT_IMPORT: "/api/baikiemtra/ketqua",
+  REVIEW_TEST_RESULT: "/api/baikiemtra/ketqua",
   // REVIEW SCHEDULE (Lịch ôn tập)
   REVIEW_SCHEDULE: "/api/lichontap",
   REVIEW_SCHEDULE_DETAIL: "/api/lichontap/detail",
@@ -944,6 +947,18 @@ class ReviewTest {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.REVIEW_TEST, data);
+  }
+  async download_result_template(data) {
+    return await this.request.download(ENDPOINTS.REVIEW_TEST_RESULT_TEMPLATE, data);
+  }
+  async import_result(data) {
+    return await this.request.postForm(ENDPOINTS.REVIEW_TEST_RESULT_IMPORT, data);
+  }
+  async list_results(data) {
+    return await this.request.get(ENDPOINTS.REVIEW_TEST_RESULT, data);
+  }
+  async save_results(data) {
+    return await this.request.post(ENDPOINTS.REVIEW_TEST_RESULT, data);
   }
 }
 
