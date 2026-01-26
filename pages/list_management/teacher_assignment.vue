@@ -5,6 +5,9 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <!-- Left: Teacher list -->
       <a-card :title="'DANH SÁCH GIÁO VIÊN'">
+        <template #extra>
+          <a-button size="small" :loading="exporting" @click="exportAssignment">Xuất Excel</a-button>
+        </template>
         <div class="flex items-center gap-2 mb-2">
           <SelectSubject v-model="selectedSubjectId" :multiple="false" label="" placeholder="-- Chọn môn học --" class="flex-1" />
         </div>
@@ -23,11 +26,6 @@
 
       <!-- Right: Assignment result -->
       <a-card :title="'KẾT QUẢ PHÂN CÔNG'">
-        <!-- <template #extra>
-          <a-space>
-            <a-button type="primary" :loading="saving" @click="handleUpdate" :disabled="!selectedTeacher">Cập nhật</a-button>
-          </a-space>
-        </template> -->
 
         <div v-if="!selectedTeacher" class="text-gray-500">Vui lòng chọn một giáo viên bên trái.</div>
 
@@ -139,6 +137,7 @@ const teacherRowClassName = record => (selectedTeacher.value && record.id === se
 const mode = ref("subject"); // 'subject' | 'all'
 const subjectRows = ref([]);
 const saving = ref(false);
+const exporting = ref(false);
 const subjectColumns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
   { title: "Tên môn", dataIndex: "ten_mon", key: "name" },
@@ -261,6 +260,42 @@ async function handleUpdate() {
     saving.value = false;
   }
 }
+
+const exportFile = async apiFn => {
+  try {
+    exporting.value = true;
+    const { data, error } = await apiFn();
+    if (error.value) {
+      throw new Error(error.value?.data?.message || "Xuất file không thành công");
+    }
+    const { blob: blobData, headers } = data.value || {};
+    if (!blobData) {
+      throw new Error("Xuất file không thành công");
+    }
+    const blob = blobData instanceof Blob ? blobData : new Blob([blobData]);
+    const cd = headers?.["content-disposition"] || headers?.["Content-Disposition"];
+    const filename = (cd && (decodeURIComponent(/filename\*=UTF-8''([^;]+)/.exec(cd)?.[1] || "") || /filename="([^"]+)"/.exec(cd)?.[1])) || "phanconggv.xlsx";
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    message.error(error?.message || "Xuất file không thành công");
+  } finally {
+    exporting.value = false;
+  }
+};
+
+const exportAssignment = async () => {
+  const type = mode.value === "subject" ? 1 : 2;
+  const params = { type };
+  if (selectedTeacher.value?.id) params.idgv = selectedTeacher.value.id;
+  await exportFile(() => RestApi.teacher.export_assignment({ params }));
+};
 
 onMounted(fetchTeachers);
 </script>

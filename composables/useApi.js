@@ -76,6 +76,7 @@ let ENDPOINTS = {
   // Teacher assignment by teacher
   TEACHER_ASSIGNMENT: "/api/phanconggv",
   TEACHER_ASSIGNMENT_CLASS: "/api/phanconggv/lop",
+  TEACHER_ASSIGNMENT_EXPORT: "/api/phanconggv/export",
   // STUDENT
   STUDENT: "/api/hocsinh",
   STUDENT_IMPORT: "/api/hocsinh/import",
@@ -866,6 +867,9 @@ class Teacher {
   // Update assignments (body is subjectRows)
   async update_assignment(data) {
     return await this.request.post(ENDPOINTS.TEACHER_ASSIGNMENT, data);
+  }
+  async export_assignment(data) {
+    return await this.request.download(ENDPOINTS.TEACHER_ASSIGNMENT_EXPORT, data);
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.TEACHER, data);
