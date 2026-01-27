@@ -195,6 +195,7 @@ let ENDPOINTS = {
   // BACKUP
   BACKUP_EXPORT: "/api/export/backup",
   BACKUP_IMPORT: "/api/file/backup/import",
+  FILE_IMPORT: "/api/file/import",
   // UNIT INFO (Thông tin đơn vị)
   UNIT_INFO: "/api/thongtin_donvi",
 };
@@ -520,6 +521,9 @@ class Unit {
   }
   async update(data) {
     return await this.request.put(ENDPOINTS.UNIT, data);
+  }
+  async import_file(data) {
+    return await this.request.postForm(ENDPOINTS.FILE_IMPORT, data);
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.UNIT, data);
