@@ -8,28 +8,17 @@
             <img :src="unitStore.logo" alt="VN Timetable" class="h-14 w-auto" />
             <span class="text-xs uppercase tracking-widest text-gray-500">Phiên bản Web</span>
           </div>
-          <h1 class="text-3xl md:text-5xl font-extrabold leading-tight text-gray-900">
-            VN Timetable — Xếp thời khóa biểu tự động, linh hoạt, chính xác
-          </h1>
-          <p class="text-gray-600 text-base md:text-lg">
-            Nền tảng quản lý và xếp thời khóa biểu dành cho trường học. Hỗ trợ ca sáng/chiều, ràng buộc phòng học, giáo viên, lớp; tối ưu
-            xung đột và xuất báo cáo nhanh chóng.
-          </p>
+          <h1 class="text-3xl md:text-5xl font-extrabold leading-tight text-gray-900">VN Timetable — Xếp thời khóa biểu tự động, linh hoạt, chính xác</h1>
+          <p class="text-gray-600 text-base md:text-lg">Nền tảng quản lý và xếp thời khóa biểu dành cho trường học. Hỗ trợ ca sáng/chiều, ràng buộc phòng học, giáo viên, lớp; tối ưu xung đột và xuất báo cáo nhanh chóng.</p>
           <div class="flex flex-wrap gap-3 pt-2">
             <NuxtLink to="/login">
               <a-button type="primary" size="large">Đăng nhập</a-button>
             </NuxtLink>
           </div>
           <div class="flex flex-wrap gap-4 pt-3 text-sm text-gray-600">
-            <div class="flex items-center gap-2">
-              <Icon name="ant-design:check-circle-filled" class="text-green-600" /> Tự động xếp lịch theo ràng buộc
-            </div>
-            <div class="flex items-center gap-2">
-              <Icon name="ant-design:check-circle-filled" class="text-green-600" /> Quản lý giáo viên, lớp, phòng học
-            </div>
-            <div class="flex items-center gap-2">
-              <Icon name="ant-design:check-circle-filled" class="text-green-600" /> Hỗ trợ ca sáng/chiều, hai ca
-            </div>
+            <div class="flex items-center gap-2"><Icon name="ant-design:check-circle-filled" class="text-green-600" /> Tự động xếp lịch theo ràng buộc</div>
+            <div class="flex items-center gap-2"><Icon name="ant-design:check-circle-filled" class="text-green-600" /> Quản lý giáo viên, lớp, phòng học</div>
+            <div class="flex items-center gap-2"><Icon name="ant-design:check-circle-filled" class="text-green-600" /> Hỗ trợ ca sáng/chiều, hai ca</div>
           </div>
         </div>
         <div>
@@ -107,7 +96,7 @@
             <Icon name="ant-design:environment-outlined" class="text-blue-600 text-2xl mt-0.5" />
             <div>
               <h3 class="font-semibold">Địa chỉ</h3>
-              <p class="text-gray-600 text-sm">Số 51, Ngách 562/59, Thụy Khuê, Tây Hồ, Hà Nội</p>
+              <p class="text-gray-600 text-sm">{{ settingStore.info?.address || "" }}</p>
             </div>
           </div>
         </a-card>
@@ -116,7 +105,7 @@
             <Icon name="ant-design:phone-outlined" class="text-blue-600 text-2xl mt-0.5" />
             <div>
               <h3 class="font-semibold">Điện thoại</h3>
-              <p class="text-gray-600 text-sm">0973.052.270</p>
+              <p class="text-gray-600 text-sm">{{ settingStore.info?.phone || "" }}</p>
             </div>
           </div>
         </a-card>
@@ -125,7 +114,7 @@
             <Icon name="ant-design:mail-outlined" class="text-blue-600 text-2xl mt-0.5" />
             <div>
               <h3 class="font-semibold">E-mail</h3>
-              <p class="text-gray-600 text-sm">info.nguyenanhest@gmail.com</p>
+              <p class="text-gray-600 text-sm">{{ settingStore.info?.email || "" }}</p>
             </div>
           </div>
         </a-card>
@@ -146,18 +135,18 @@
         </div>
       </a-card>
     </section>
-
+    <ScrollToTop />
   </div>
-  
 </template>
 
 <script setup>
-definePageMeta({ layout: 'auth' })
+definePageMeta({ layout: "auth" });
 
 const userStore = useUserStore();
 const unitStore = useUnitStore();
+const settingStore = useSettingStore();
 // Nếu đã đăng nhập, chuyển đến dashboard
 if (process.client ? !!userStore.token : Boolean(userStore.token)) {
-  await navigateTo('/dashboard');
+  await navigateTo("/dashboard");
 }
 </script>
