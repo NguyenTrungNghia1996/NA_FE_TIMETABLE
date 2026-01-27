@@ -3,9 +3,13 @@
     <div class="px-0 pb-6 pt-8">
       <slot />
       <div class="mx-0 mb-6 mt-12 py-0 px-4 bottom-0 text-center w-full absolute">
-        <div class="text-sm text-black">Copyright &copy; 2025 Produced by Nguyen Anh EST</div>
+        <div class="text-sm text-black">Copyright &copy; {{ currentYear }} Produced by Nguyen Anh EST</div>
       </div>
     </div>
     <ScrollToTop />
   </div>
 </template>
+
+<script setup>
+const currentYear = new Date().getFullYear()
+</script>
