@@ -103,7 +103,7 @@
     </a-modal>
 
     <a-modal v-model:open="importModal.open" title="Import đơn vị" :footer="null" width="520px" :destroyOnClose="true" @cancel="closeImportModal">
-      <div class="text-sm text-gray-600 mb-3">Chọn file Excel (.xlsx, .xls) để import danh sách đơn vị.</div>
+      <div class="text-sm text-gray-600 mb-3">Chọn file Excel (.xlsx, .xls) để import đữ liệu đơn vị.</div>
       <a-form layout="vertical">
         <SelectUnit v-model="importModal.unitId" name="id_don_vi" label="Đơn vị" placeholder="Chọn đơn vị" />
         <a-form-item label="File import">
