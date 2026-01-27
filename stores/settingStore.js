@@ -3,6 +3,13 @@ export const useSettingStore = defineStore(
   "setting",
   {
     state: () => ({
+      info: {
+        phone: "0976214911",
+        address: "Số 51, Ngách 562/59, Thụy Khuê, Tây Hồ, Hà Nội",
+        email: "info.nguyenanhest@gmail.com",
+        facebook: "",
+        message: "https://www.facebook.com/messages/t/181503228370847"
+      },
       loading: {
         title: "Đang xử lý",
         description: "Vui lòng chờ trong giây lát...",
