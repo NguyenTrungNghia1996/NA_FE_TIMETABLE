@@ -4,6 +4,7 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 mb-6">
       <a-input-search v-model:value="searchText" placeholder="Tìm kiếm đơn vị..." enter-button @search="handleSearch" class="w-full md:w-1/3" />
       <a-button @click="resetSearch" class="w-full md:w-auto">Đặt lại</a-button>
+      <a-button @click="openImportModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Import</a-button>
       <a-button type="primary" @click="showModal" class="w-full md:w-auto" :disabled="!settingStore.currentPermission">Thêm mới</a-button>
     </div>
 
@@ -20,6 +21,13 @@
                   <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission">
                     <template #icon>
                       <EditOutlined />
+                    </template>
+                  </a-button>
+                </a-tooltip>
+                <a-tooltip title="Import">
+                  <a-button type="link" size="small" @click="openImportModal(record)" :disabled="!settingStore.currentPermission">
+                    <template #icon>
+                      <UploadOutlined />
                     </template>
                   </a-button>
                 </a-tooltip>
@@ -93,6 +101,22 @@
         </div>
       </a-form>
     </a-modal>
+
+    <a-modal v-model:open="importModal.open" title="Import đơn vị" :footer="null" width="520px" :destroyOnClose="true" @cancel="closeImportModal">
+      <div class="text-sm text-gray-600 mb-3">Chọn file Excel (.xlsx, .xls) để import danh sách đơn vị.</div>
+      <a-form layout="vertical">
+        <SelectUnit v-model="importModal.unitId" name="id_don_vi" label="Đơn vị" placeholder="Chọn đơn vị" />
+        <a-form-item label="File import">
+          <a-upload :beforeUpload="beforeImportUpload" :maxCount="1" :file-list="importModal.fileList" @remove="removeImportFile" :accept="'.xlsx,.xls'" :showUploadList="{ showRemoveIcon: true }">
+            <a-button>Chọn file</a-button>
+          </a-upload>
+        </a-form-item>
+      </a-form>
+      <div class="flex justify-end gap-2 mt-4">
+        <a-button type="primary" :loading="importModal.uploading" :disabled="!importModal.file || !importModal.unitId || !settingStore.currentPermission" @click="handleImport">Import</a-button>
+        <a-button danger @click="closeImportModal">Hủy</a-button>
+      </div>
+    </a-modal>
   </div>
 </template>
 
@@ -161,6 +185,13 @@ const visible = ref(false);
 const confirmLoading = ref(false);
 const isEdit = ref(false);
 const formRef = ref();
+const importModal = reactive({
+  open: false,
+  file: null,
+  fileList: [],
+  uploading: false,
+  unitId: null,
+});
 
 const pagination = reactive({
   current: 1,
@@ -346,6 +377,63 @@ const handleOk = async () => {
 const handleCancel = () => {
   formRef.value?.resetFields();
   visible.value = false;
+};
+
+const openImportModal = record => {
+  importModal.file = null;
+  importModal.fileList = [];
+  importModal.uploading = false;
+  importModal.unitId = record?.id ?? null;
+  importModal.open = true;
+};
+
+const closeImportModal = () => {
+  importModal.open = false;
+  importModal.file = null;
+  importModal.fileList = [];
+  importModal.uploading = false;
+  importModal.unitId = null;
+};
+
+const beforeImportUpload = file => {
+  const origin = file?.originFileObj || file;
+  importModal.file = origin;
+  importModal.fileList = [{ ...file, name: origin?.name || file.name }];
+  return false;
+};
+
+const removeImportFile = () => {
+  importModal.file = null;
+  importModal.fileList = [];
+};
+
+const handleImport = async () => {
+  if (!importModal.unitId) {
+    message.warning("Vui lòng chọn đơn vị");
+    return;
+  }
+  if (!importModal.file) {
+    message.warning("Vui lòng chọn file để import");
+    return;
+  }
+  try {
+    importModal.uploading = true;
+    const form = new FormData();
+    form.append("file", importModal.file);
+    form.append("id_don_vi", String(importModal.unitId));
+    const { data, error } = await RestApi.unit.import_file({ body: form });
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Import thành công");
+      closeImportModal();
+      await fetchData({ ...param.value });
+    } else {
+      throw new Error(error.value?.data?.message || data.value?.message || "Import không thành công");
+    }
+  } catch (err) {
+    message.error(err?.message || err?.response?.data?.message || "Import không thành công");
+  } finally {
+    importModal.uploading = false;
+  }
 };
 
 const deleteItem = async id => {
