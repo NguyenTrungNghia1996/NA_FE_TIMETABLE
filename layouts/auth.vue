@@ -6,5 +6,6 @@
         <div class="text-sm text-black">Copyright &copy; 2025 Produced by Nguyen Anh EST</div>
       </div>
     </div>
+    <ScrollToTop />
   </div>
 </template>
