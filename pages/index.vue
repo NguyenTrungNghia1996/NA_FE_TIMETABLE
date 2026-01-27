@@ -135,7 +135,6 @@
         </div>
       </a-card>
     </section>
-    <ScrollToTop />
   </div>
 </template>
 
