@@ -99,6 +99,9 @@ let ENDPOINTS = {
   REVIEW_TEST_RESULT_TEMPLATE: "/api/baikiemtra/ketqua/mau",
   REVIEW_TEST_RESULT_IMPORT: "/api/baikiemtra/ketqua/import",
   REVIEW_TEST_RESULT: "/api/baikiemtra/ketqua",
+  // REVIEW SUBJECT COMBINATION (Tổ hợp môn ôn)
+  REVIEW_SUBJECT_COMBINATION: "/api/thm/on",
+  REVIEW_SUBJECT_COMBINATION_DETAIL: "/api/thm/on/detail",
   // REVIEW SCHEDULE (Lịch ôn tập)
   REVIEW_SCHEDULE: "/api/lichontap",
   REVIEW_SCHEDULE_DETAIL: "/api/lichontap/detail",
@@ -342,6 +345,7 @@ class RestApi {
     this.review_test = new ReviewTest(this.request);
     this.review_test_type = new ReviewTestType(this.request);
     this.review_class = new ReviewClass(this.request);
+    this.review_subject_combination = new ReviewSubjectCombination(this.request);
     this.review_schedule = new ReviewSchedule(this.request);
     this.review_timetable = new ReviewTimetable(this.request);
     this.timetable = new Timetable(this.request);
@@ -985,6 +989,27 @@ class ReviewTestType {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.REVIEW_TEST_TYPE, data);
+  }
+}
+
+class ReviewSubjectCombination {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.REVIEW_SUBJECT_COMBINATION, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.REVIEW_SUBJECT_COMBINATION_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.REVIEW_SUBJECT_COMBINATION, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.REVIEW_SUBJECT_COMBINATION, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.REVIEW_SUBJECT_COMBINATION, data);
   }
 }
 
