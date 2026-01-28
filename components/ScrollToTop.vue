@@ -38,6 +38,9 @@
       <a-form-item label="Tên đơn vị" name="ten_don_vi">
         <a-input v-model:value="contactForm.ten_don_vi" placeholder="Nhập tên đơn vị" :maxlength="200" />
       </a-form-item>
+      <a-form-item label="Ghi chú" name="ghi_chu">
+        <a-textarea v-model:value="contactForm.ghi_chu" placeholder="Nhập ghi chú" :maxlength="500" show-count :auto-size="{ minRows: 3, maxRows: 5 }" />
+      </a-form-item>
       <div class="flex justify-end gap-2">
         <a-button @click="closeContactModal">Hủy</a-button>
         <a-button type="primary" :loading="contactSubmitting" @click="submitContact">Gửi liên hệ</a-button>
@@ -57,11 +60,12 @@ const contactModalOpen = ref(false);
 const contactSubmitting = ref(false);
 const contactFormRef = ref();
 const contactForm = reactive({
-  ho_ten: "",
-  so_dien_thoai: "",
-  email: "",
+  ho_ten: "", // bắt buộc
+  so_dien_thoai: "", // bắt buộc
+  email: "", // bắt buộc
   dia_chi: "",
   ten_don_vi: "",
+  ghi_chu: "", // bắt buộc
 });
 const contactRules = {
   ho_ten: [
@@ -81,6 +85,7 @@ const contactRules = {
     { max: 20, message: "Số điện thoại tối đa 20 ký tự" },
   ],
   email: [
+    { required: true, message: "Vui lòng nhập email" },
     {
       validator: (_rule, value) => {
         if (!value) return Promise.resolve();
@@ -92,6 +97,10 @@ const contactRules = {
   ],
   dia_chi: [{ max: 200, message: "Địa chỉ tối đa 200 ký tự" }],
   ten_don_vi: [{ max: 200, message: "Tên đơn vị tối đa 200 ký tự" }],
+  ghi_chu: [
+    // { required: true, message: "Vui lòng nhập ghi chú" },
+    { max: 500, message: "Ghi chú tối đa 500 ký tự" },
+  ],
 };
 
 const zaloLink = computed(() => {
@@ -149,6 +158,7 @@ const submitContact = async () => {
       email: contactForm.email?.trim() || undefined,
       dia_chi: contactForm.dia_chi?.trim() || undefined,
       ten_don_vi: contactForm.ten_don_vi?.trim() || undefined,
+      ghi_chu: contactForm.ghi_chu.trim(),
     };
     const { data, error } = await RestApi.request.post("/api/lienhe", { body: payload });
     if (data.value?.status === "success") {
