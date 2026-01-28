@@ -155,9 +155,9 @@ const submitContact = async () => {
     const payload = {
       ho_ten: contactForm.ho_ten.trim(),
       so_dien_thoai: contactForm.so_dien_thoai.trim(),
-      email: contactForm.email?.trim() || undefined,
-      dia_chi: contactForm.dia_chi?.trim() || undefined,
-      ten_don_vi: contactForm.ten_don_vi?.trim() || undefined,
+      email: contactForm.email?.trim(),
+      dia_chi: contactForm.dia_chi?.trim(),
+      ten_don_vi: contactForm.ten_don_vi?.trim(),
       ghi_chu: contactForm.ghi_chu.trim(),
     };
     const { data, error } = await RestApi.request.post("/api/lienhe", { body: payload });
