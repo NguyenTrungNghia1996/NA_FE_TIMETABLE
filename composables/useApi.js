@@ -80,6 +80,9 @@ let ENDPOINTS = {
   // STUDENT
   STUDENT: "/api/hocsinh",
   STUDENT_IMPORT: "/api/hocsinh/import",
+  STUDENT_SUBJECT_COMBINATION_TEMPLATE: "/api/hocsinh/tohopmon/mau",
+  STUDENT_SUBJECT_COMBINATION_IMPORT: "/api/hocsinh/tohopmon/import",
+  STUDENT_SUBJECT_COMBINATION: "/api/hocsinh/tohopmon",
   // CLASS
   CLASS: "/api/lophoc",
   CLASS_DETAIL: "/api/lophoc/detail",
@@ -899,6 +902,18 @@ class Student {
   }
   async import_file(data) {
     return await this.request.postForm(ENDPOINTS.STUDENT_IMPORT, data);
+  }
+  async download_subject_combination_template(data) {
+    return await this.request.download(ENDPOINTS.STUDENT_SUBJECT_COMBINATION_TEMPLATE, data);
+  }
+  async import_subject_combination(data) {
+    return await this.request.postForm(ENDPOINTS.STUDENT_SUBJECT_COMBINATION_IMPORT, data);
+  }
+  async get_subject_combination(data) {
+    return await this.request.get(ENDPOINTS.STUDENT_SUBJECT_COMBINATION, data);
+  }
+  async save_subject_combination(data) {
+    return await this.request.post(ENDPOINTS.STUDENT_SUBJECT_COMBINATION, data);
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.STUDENT, data);
