@@ -19,7 +19,7 @@
       </a-card>
 
       <a-card title="Khôi phục danh mục" class="h-full shadow-sm">
-        <div class="space-y-4">
+        <div class="flex flex-col gap-1.5">
           <a-alert type="warning" show-icon message="Khôi phục sẽ ghi đè danh mục hiện tại. Hãy chắc chắn bạn đã sao lưu trước khi thực hiện." />
           <a-upload class="w-full" :before-upload="beforeUpload" :file-list="fileList" :on-remove="handleRemove" :max-count="1" :show-upload-list="{ showRemoveIcon: true }">
             <a-button class="flex w-full items-center justify-center sm:w-auto">
