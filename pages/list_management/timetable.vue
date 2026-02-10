@@ -103,7 +103,11 @@
           <div class="mb-3 text-gray-600">Chọn thông tin hiển thị trên thời khóa biểu:</div>
           <div class="flex flex-col gap-2 mb-4">
             <a-checkbox v-model:checked="exportModal.options.class.showRoom">Phòng học</a-checkbox>
-            <a-checkbox v-model:checked="exportModal.options.class.showTeacher">Tên Giáo viên</a-checkbox>
+            <a-radio-group v-model:value="exportModal.options.class.showTeacher" class="flex flex-col gap-2">
+              <a-radio :value="0">Không hiển thị tên giáo viên</a-radio>
+              <a-radio :value="1">Hiển thị tên giáo viên</a-radio>
+              <a-radio :value="2">Hiển thị họ và tên giáo viên</a-radio>
+            </a-radio-group>
           </div>
           <a-button type="primary" class="bg-blue-500" :loading="exportModal.loadingKey === 'class'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'class'" @click="exportClass"> Xuất TKB Lớp </a-button>
         </a-card>
@@ -113,7 +117,11 @@
           <div class="mb-3 text-gray-600">Chọn thông tin hiển thị trên thời khóa biểu:</div>
           <div class="flex flex-col gap-2 mb-4">
             <a-checkbox v-model:checked="exportModal.options.school.showRoom">Phòng học</a-checkbox>
-            <a-checkbox v-model:checked="exportModal.options.school.showTeacher">Tên Giáo viên</a-checkbox>
+            <a-radio-group v-model:value="exportModal.options.school.showTeacher" class="flex flex-col gap-2">
+              <a-radio :value="0">Không hiển thị tên giáo viên</a-radio>
+              <a-radio :value="1">Hiển thị tên giáo viên</a-radio>
+              <a-radio :value="2">Hiển thị họ và tên giáo viên</a-radio>
+            </a-radio-group>
           </div>
           <a-button type="primary" class="bg-blue-500" :loading="exportModal.loadingKey === 'school'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'school'" @click="exportAll"> Xuất TKB Toàn trường </a-button>
         </a-card>
@@ -237,8 +245,8 @@ const exportModal = reactive({
   timetableName: "",
   loadingKey: null, // 'class' | 'school' | 'teacher' | 'matrix-school' | 'matrix-teacher' | 'matrix-grade' | 'matrix-expertise' | 'matrix-class' | 'matrix-class-vertical' | 'csdl-nganh' | null
   options: {
-    class: { showRoom: false, showTeacher: false },
-    school: { showRoom: false, showTeacher: false },
+    class: { showRoom: false, showTeacher: 0 },
+    school: { showRoom: false, showTeacher: 0 },
     teacher: { showRoom: false },
   },
 });
@@ -292,9 +300,9 @@ const openExportModal = record => {
   exportModal.loadingKey = null;
   // reset options each open
   exportModal.options.class.showRoom = false;
-  exportModal.options.class.showTeacher = false;
+  exportModal.options.class.showTeacher = 0;
   exportModal.options.school.showRoom = false;
-  exportModal.options.school.showTeacher = false;
+  exportModal.options.school.showTeacher = 0;
   exportModal.options.teacher.showRoom = false;
 };
 const closeExportModal = () => {
@@ -338,7 +346,7 @@ const exportAll = () =>
         params: {
           idtkb: exportModal.timetableId,
           show_room: exportModal.options.school.showRoom ? 1 : 0,
-          show_teacher: exportModal.options.school.showTeacher ? 1 : 0,
+          show_teacher: exportModal.options.school.showTeacher,
         },
       }),
     "school",
@@ -350,7 +358,7 @@ const exportClass = () =>
         params: {
           idtkb: exportModal.timetableId,
           show_room: exportModal.options.class.showRoom ? 1 : 0,
-          show_teacher: exportModal.options.class.showTeacher ? 1 : 0,
+          show_teacher: exportModal.options.class.showTeacher,
         },
       }),
     "class",
