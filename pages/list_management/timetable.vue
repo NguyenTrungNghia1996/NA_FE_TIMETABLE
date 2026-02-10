@@ -102,17 +102,11 @@
         <a-card type="inner" title="Thời khóa biểu của lớp">
           <div class="mb-3 text-gray-600">Chọn thông tin hiển thị trên thời khóa biểu:</div>
           <div class="flex flex-col gap-2 mb-4">
-            <div class="text-gray-600 text-sm">Phòng học</div>
-            <a-select v-model:value="exportModal.options.class.showRoom" style="width: 100%">
-              <a-select-option :value="0">Không hiển thị</a-select-option>
-              <a-select-option :value="1">Hiển thị</a-select-option>
-            </a-select>
-            <div class="text-gray-600 text-sm">Tên giáo viên</div>
-            <a-select v-model:value="exportModal.options.class.showTeacher" style="width: 100%">
-              <a-select-option :value="0">Không hiển thị</a-select-option>
-              <a-select-option :value="1">Hiển thị tên</a-select-option>
-              <a-select-option :value="2">Hiển thị họ và tên</a-select-option>
-            </a-select>
+            <a-checkbox :checked="exportModal.options.class.showRoom === 1" @change="exportModal.options.class.showRoom = $event.target.checked ? 1 : 0">Hiển thị phòng học</a-checkbox>
+            <div class="flex flex-col gap-2">
+              <a-checkbox :checked="exportModal.options.class.showTeacher === 1" @change="toggleShowTeacher('class', 1, $event)">Hiển thị tên giáo viên</a-checkbox>
+              <a-checkbox :checked="exportModal.options.class.showTeacher === 2" @change="toggleShowTeacher('class', 2, $event)">Hiển thị họ và tên giáo viên</a-checkbox>
+            </div>
           </div>
           <a-button type="primary" class="bg-blue-500" :loading="exportModal.loadingKey === 'class'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'class'" @click="exportClass"> Xuất TKB Lớp </a-button>
         </a-card>
@@ -121,17 +115,11 @@
         <a-card type="inner" title="Thời khóa biểu toàn trường">
           <div class="mb-3 text-gray-600">Chọn thông tin hiển thị trên thời khóa biểu:</div>
           <div class="flex flex-col gap-2 mb-4">
-            <div class="text-gray-600 text-sm">Phòng học</div>
-            <a-select v-model:value="exportModal.options.school.showRoom" style="width: 100%">
-              <a-select-option :value="0">Không hiển thị</a-select-option>
-              <a-select-option :value="1">Hiển thị</a-select-option>
-            </a-select>
-            <div class="text-gray-600 text-sm">Tên giáo viên</div>
-            <a-select v-model:value="exportModal.options.school.showTeacher" style="width: 100%">
-              <a-select-option :value="0">Không hiển thị</a-select-option>
-              <a-select-option :value="1">Hiển thị tên</a-select-option>
-              <a-select-option :value="2">Hiển thị họ và tên</a-select-option>
-            </a-select>
+            <a-checkbox :checked="exportModal.options.school.showRoom === 1" @change="exportModal.options.school.showRoom = $event.target.checked ? 1 : 0">Hiển thị phòng học</a-checkbox>
+            <div class="flex flex-col gap-2">
+              <a-checkbox :checked="exportModal.options.school.showTeacher === 1" @change="toggleShowTeacher('school', 1, $event)">Hiển thị tên giáo viên</a-checkbox>
+              <a-checkbox :checked="exportModal.options.school.showTeacher === 2" @change="toggleShowTeacher('school', 2, $event)">Hiển thị họ và tên giáo viên</a-checkbox>
+            </div>
           </div>
           <a-button type="primary" class="bg-blue-500" :loading="exportModal.loadingKey === 'school'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'school'" @click="exportAll"> Xuất TKB Toàn trường </a-button>
         </a-card>
@@ -141,10 +129,7 @@
           <div class="mb-3 text-gray-600">Chọn thông tin hiển thị trên thời khóa biểu:</div>
           <div class="flex flex-col gap-2 mb-4">
             <div class="text-gray-600 text-sm">Phòng học</div>
-            <a-select v-model:value="exportModal.options.teacher.showRoom" style="width: 100%">
-              <a-select-option :value="0">Không hiển thị</a-select-option>
-              <a-select-option :value="1">Hiển thị</a-select-option>
-            </a-select>
+            <a-checkbox :checked="exportModal.options.teacher.showRoom === 1" @change="exportModal.options.teacher.showRoom = $event.target.checked ? 1 : 0">Hiển thị phòng học</a-checkbox>
           </div>
           <a-button type="primary" class="bg-blue-500" :loading="exportModal.loadingKey === 'teacher'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'teacher'" @click="exportTeacher"> Xuất TKB Giáo viên </a-button>
         </a-card>
@@ -304,6 +289,17 @@ const openCloneFromInfo = () => {
     openCloneModal(record);
   } else {
     message.warning("Không tìm thấy thời khóa biểu để sao chép");
+  }
+};
+
+const toggleShowTeacher = (scope, value, event) => {
+  const checked = event?.target?.checked;
+  if (checked) {
+    exportModal.options[scope].showTeacher = value;
+    return;
+  }
+  if (exportModal.options[scope].showTeacher === value) {
+    exportModal.options[scope].showTeacher = 0;
   }
 };
 
