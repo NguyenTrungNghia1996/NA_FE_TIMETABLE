@@ -102,12 +102,17 @@
         <a-card type="inner" title="Thời khóa biểu của lớp">
           <div class="mb-3 text-gray-600">Chọn thông tin hiển thị trên thời khóa biểu:</div>
           <div class="flex flex-col gap-2 mb-4">
-            <a-checkbox v-model:checked="exportModal.options.class.showRoom">Phòng học</a-checkbox>
-            <a-radio-group v-model:value="exportModal.options.class.showTeacher" class="flex flex-col gap-2">
-              <a-radio :value="0">Không hiển thị tên giáo viên</a-radio>
-              <a-radio :value="1">Hiển thị tên giáo viên</a-radio>
-              <a-radio :value="2">Hiển thị họ và tên giáo viên</a-radio>
-            </a-radio-group>
+            <div class="text-gray-600 text-sm">Phòng học</div>
+            <a-select v-model:value="exportModal.options.class.showRoom" style="width: 100%">
+              <a-select-option :value="0">Không hiển thị</a-select-option>
+              <a-select-option :value="1">Hiển thị</a-select-option>
+            </a-select>
+            <div class="text-gray-600 text-sm">Tên giáo viên</div>
+            <a-select v-model:value="exportModal.options.class.showTeacher" style="width: 100%">
+              <a-select-option :value="0">Không hiển thị</a-select-option>
+              <a-select-option :value="1">Hiển thị tên</a-select-option>
+              <a-select-option :value="2">Hiển thị họ và tên</a-select-option>
+            </a-select>
           </div>
           <a-button type="primary" class="bg-blue-500" :loading="exportModal.loadingKey === 'class'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'class'" @click="exportClass"> Xuất TKB Lớp </a-button>
         </a-card>
@@ -116,12 +121,17 @@
         <a-card type="inner" title="Thời khóa biểu toàn trường">
           <div class="mb-3 text-gray-600">Chọn thông tin hiển thị trên thời khóa biểu:</div>
           <div class="flex flex-col gap-2 mb-4">
-            <a-checkbox v-model:checked="exportModal.options.school.showRoom">Phòng học</a-checkbox>
-            <a-radio-group v-model:value="exportModal.options.school.showTeacher" class="flex flex-col gap-2">
-              <a-radio :value="0">Không hiển thị tên giáo viên</a-radio>
-              <a-radio :value="1">Hiển thị tên giáo viên</a-radio>
-              <a-radio :value="2">Hiển thị họ và tên giáo viên</a-radio>
-            </a-radio-group>
+            <div class="text-gray-600 text-sm">Phòng học</div>
+            <a-select v-model:value="exportModal.options.school.showRoom" style="width: 100%">
+              <a-select-option :value="0">Không hiển thị</a-select-option>
+              <a-select-option :value="1">Hiển thị</a-select-option>
+            </a-select>
+            <div class="text-gray-600 text-sm">Tên giáo viên</div>
+            <a-select v-model:value="exportModal.options.school.showTeacher" style="width: 100%">
+              <a-select-option :value="0">Không hiển thị</a-select-option>
+              <a-select-option :value="1">Hiển thị tên</a-select-option>
+              <a-select-option :value="2">Hiển thị họ và tên</a-select-option>
+            </a-select>
           </div>
           <a-button type="primary" class="bg-blue-500" :loading="exportModal.loadingKey === 'school'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'school'" @click="exportAll"> Xuất TKB Toàn trường </a-button>
         </a-card>
@@ -130,7 +140,11 @@
         <a-card type="inner" title="Thời khóa biểu của giáo viên">
           <div class="mb-3 text-gray-600">Chọn thông tin hiển thị trên thời khóa biểu:</div>
           <div class="flex flex-col gap-2 mb-4">
-            <a-checkbox v-model:checked="exportModal.options.teacher.showRoom">Phòng học</a-checkbox>
+            <div class="text-gray-600 text-sm">Phòng học</div>
+            <a-select v-model:value="exportModal.options.teacher.showRoom" style="width: 100%">
+              <a-select-option :value="0">Không hiển thị</a-select-option>
+              <a-select-option :value="1">Hiển thị</a-select-option>
+            </a-select>
           </div>
           <a-button type="primary" class="bg-blue-500" :loading="exportModal.loadingKey === 'teacher'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'teacher'" @click="exportTeacher"> Xuất TKB Giáo viên </a-button>
         </a-card>
@@ -245,9 +259,9 @@ const exportModal = reactive({
   timetableName: "",
   loadingKey: null, // 'class' | 'school' | 'teacher' | 'matrix-school' | 'matrix-teacher' | 'matrix-grade' | 'matrix-expertise' | 'matrix-class' | 'matrix-class-vertical' | 'csdl-nganh' | null
   options: {
-    class: { showRoom: false, showTeacher: 0 },
-    school: { showRoom: false, showTeacher: 0 },
-    teacher: { showRoom: false },
+    class: { showRoom: 0, showTeacher: 0 },
+    school: { showRoom: 0, showTeacher: 0 },
+    teacher: { showRoom: 0 },
   },
 });
 
@@ -299,11 +313,11 @@ const openExportModal = record => {
   exportModal.visible = true;
   exportModal.loadingKey = null;
   // reset options each open
-  exportModal.options.class.showRoom = false;
+  exportModal.options.class.showRoom = 0;
   exportModal.options.class.showTeacher = 0;
-  exportModal.options.school.showRoom = false;
+  exportModal.options.school.showRoom = 0;
   exportModal.options.school.showTeacher = 0;
-  exportModal.options.teacher.showRoom = false;
+  exportModal.options.teacher.showRoom = 0;
 };
 const closeExportModal = () => {
   exportModal.visible = false;
@@ -345,7 +359,7 @@ const exportAll = () =>
       RestApi.timetable.export({
         params: {
           idtkb: exportModal.timetableId,
-          show_room: exportModal.options.school.showRoom ? 1 : 0,
+          show_room: exportModal.options.school.showRoom,
           show_teacher: exportModal.options.school.showTeacher,
         },
       }),
@@ -357,7 +371,7 @@ const exportClass = () =>
       RestApi.timetable.export_class({
         params: {
           idtkb: exportModal.timetableId,
-          show_room: exportModal.options.class.showRoom ? 1 : 0,
+          show_room: exportModal.options.class.showRoom,
           show_teacher: exportModal.options.class.showTeacher,
         },
       }),
@@ -369,7 +383,7 @@ const exportTeacher = () =>
       RestApi.timetable.export_teacher({
         params: {
           idtkb: exportModal.timetableId,
-          show_room: exportModal.options.teacher.showRoom ? 1 : 0,
+          show_room: exportModal.options.teacher.showRoom,
         },
       }),
     "teacher",
