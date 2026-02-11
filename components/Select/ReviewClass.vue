@@ -15,10 +15,10 @@
     </a-form-item>
   </template>
   <template v-else>
-    <div v-if="inlineLabel" class="flex items-center gap-2 py-3">
+    <div v-if="inlineLabel" class="flex items-center gap-2 py-3 w-full">
       <label v-if="label" class="text-sm font-medium min-w-[50px]">{{ label }}</label>
-      <div class="flex items-center gap-2 flex-1">
-        <a-select :value="modelValue" @update:value="handleUpdateValue" v-model:searchValue="search" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="flex-1" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
+      <div class="flex items-center gap-2 flex-1 w-full">
+        <a-select :value="modelValue" @update:value="handleUpdateValue" v-model:searchValue="search" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="flex-1" style="width: 100%" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
         <template v-if="hasNavigation">
           <a-button :size="size" :disabled="!canSelectPrev" @click.stop="selectPrevious" title="Trước">
             <Icon name="ant-design:left-outlined" />
@@ -31,8 +31,8 @@
     </div>
     <template v-else>
       <label v-if="label" class="block text-sm font-medium mb-1">{{ label }}</label>
-      <div class="flex items-center gap-2">
-        <a-select :value="modelValue" @update:value="handleUpdateValue" v-model:searchValue="search" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="w-full" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
+      <div class="flex items-center gap-2 w-full">
+        <a-select :value="modelValue" @update:value="handleUpdateValue" v-model:searchValue="search" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="disabled" allow-clear class="flex-1" style="width: 100%" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
         <template v-if="hasNavigation">
           <a-button :size="size" :disabled="!canSelectPrev" @click.stop="selectPrevious" title="Trước">
             <Icon name="ant-design:left-outlined" />
