@@ -204,6 +204,8 @@ let ENDPOINTS = {
   FILE_IMPORT: "/api/file/import",
   // UNIT INFO (Thông tin đơn vị)
   UNIT_INFO: "/api/thongtin_donvi",
+  // STATISTICAL RESULT (Tổng hợp kết quả ôn tập)
+  STATISTICAL_RESULT: "/api/tonghop/ketqua",
 };
 import { useUserStore } from "~~/stores/userStore";
 import { useUnitStore } from "~~/stores/unitStore";
@@ -351,6 +353,7 @@ class RestApi {
     this.review_subject_combination = new ReviewSubjectCombination(this.request);
     this.review_schedule = new ReviewSchedule(this.request);
     this.review_timetable = new ReviewTimetable(this.request);
+    this.statistical = new Statistical(this.request);
     this.timetable = new Timetable(this.request);
     this.year = new Year(this.request);
     this.holiday = new Holiday(this.request);
@@ -1195,6 +1198,15 @@ class ReviewTimetable {
   async arrange_teacher(data) {
     const body = this.normalizeArrangeBody(data?.body || {});
     return await this.request.post(ENDPOINTS.REVIEW_TIMETABLE_ARRANGE_TEACHER, { ...data, body });
+  }
+}
+
+class Statistical {
+  constructor() {
+    this.request = new Request();
+  }
+  async result(data) {
+    return await this.request.get(ENDPOINTS.STATISTICAL_RESULT, data);
   }
 }
 
