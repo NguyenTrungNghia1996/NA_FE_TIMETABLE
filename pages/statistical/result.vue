@@ -36,7 +36,7 @@
               <td :colspan="4 + totalScoreColumns" class="empty-cell">Không có dữ liệu</td>
             </tr>
             <tr v-for="(student, rowIndex) in students" :key="student.ma || rowIndex">
-              <td class="text-center">{{ rowIndex + 1 }}</td>
+              <td class="text-center">{{ (pagination.current - 1) * pagination.pageSize + rowIndex + 1 }}</td>
               <td class="text-center">{{ student.ma || '-' }}</td>
               <td>{{ student.ten || '-' }}</td>
               <td>{{ student.lop_on || '-' }}</td>
@@ -55,6 +55,18 @@
           </tbody>
         </table>
       </div>
+      <div class="flex justify-end mt-3">
+        <a-pagination
+          v-model:current="pagination.current"
+          v-model:pageSize="pagination.pageSize"
+          size="small"
+          :total="pagination.total"
+          :show-size-changer="true"
+          :page-size-options="pagination.pageSizeOptions"
+          :show-total="pagination.showTotal"
+          @change="handlePaginationChange"
+        />
+      </div>
     </a-spin>
   </div>
 </template>
@@ -68,6 +80,17 @@ const testTypes = ref([]);
 const students = ref([]);
 const selectedSubjectId = ref(null);
 const selectedReviewClassId = ref(null);
+const params = ref({
+  pageIndex: 1,
+  pageSize: 10,
+});
+const pagination = reactive({
+  current: 1,
+  pageSize: 10,
+  total: 0,
+  pageSizeOptions: ["10", "20", "50"],
+  showTotal: total => `Tổng ${total} bản ghi`,
+});
 
 const normalizeCount = value => {
   const n = Number(value);
@@ -123,12 +146,15 @@ const fetchData = async () => {
     loading.value = true;
     settingStore.setLoading(true);
 
-    const params = {};
+    const query = {
+      pageIndex: params.value.pageIndex,
+      pageSize: params.value.pageSize,
+    };
     if (selectedReviewClassId.value !== null && selectedReviewClassId.value !== undefined && selectedReviewClassId.value !== "") {
-      params.Id_lop_on = selectedReviewClassId.value;
+      query.Id_lop_on = selectedReviewClassId.value;
     }
 
-    const { data, error } = await RestApi.statistical.result({ params });
+    const { data, error } = await RestApi.statistical.result({ params: query });
 
     if (data.value?.status !== "success") {
       throw new Error(error.value?.data?.message || data.value?.message || "Không tải được dữ liệu tổng hợp kết quả");
@@ -137,9 +163,11 @@ const fetchData = async () => {
     const items = data.value?.data?.items || {};
     testTypes.value = Array.isArray(items.loai_kiem_tra) ? items.loai_kiem_tra : [];
     students.value = Array.isArray(items.rows) ? items.rows : [];
+    pagination.total = Number(items.total) || 0;
   } catch (err) {
     testTypes.value = [];
     students.value = [];
+    pagination.total = 0;
     message.error(err.message || "Không tải được dữ liệu tổng hợp kết quả");
   } finally {
     loading.value = false;
@@ -147,12 +175,24 @@ const fetchData = async () => {
   }
 };
 
+const handlePaginationChange = async (page, pageSize) => {
+  pagination.current = page;
+  pagination.pageSize = pageSize;
+  params.value.pageIndex = page;
+  params.value.pageSize = pageSize;
+  await fetchData();
+};
+
 const handleReviewClassChange = async () => {
+  params.value.pageIndex = 1;
+  pagination.current = 1;
   await fetchData();
 };
 
 const handleSubjectChange = async () => {
   selectedReviewClassId.value = null;
+  params.value.pageIndex = 1;
+  pagination.current = 1;
   await fetchData();
 };
 
