@@ -1,9 +1,12 @@
 <template>
   <div class="p-2 md:p-4 bg-white min-h-full">
     <div class="mb-3 w-full">
-      <div class="w-full">
-        <div class="w-full">
-          <SelectReviewClass v-model="selectedReviewClassId" no-form-item label="" @update:modelValue="handleReviewClassChange" />
+      <div class="w-full flex flex-col md:flex-row gap-2">
+        <div class="w-full md:w-1/3 subject-filter">
+          <SelectSubject v-model="selectedSubjectId" label="" @update:modelValue="handleSubjectChange" />
+        </div>
+        <div class="w-full md:w-2/3">
+          <SelectReviewClass v-model="selectedReviewClassId" :id_mon="selectedSubjectId" no-form-item label="" @update:modelValue="handleReviewClassChange" />
         </div>
         <!-- <a-button :loading="loading" @click="fetchData">Tải lại</a-button> -->
       </div>
@@ -63,6 +66,7 @@ const settingStore = useSettingStore();
 const loading = ref(false);
 const testTypes = ref([]);
 const students = ref([]);
+const selectedSubjectId = ref(null);
 const selectedReviewClassId = ref(null);
 
 const normalizeCount = value => {
@@ -147,10 +151,19 @@ const handleReviewClassChange = async () => {
   await fetchData();
 };
 
+const handleSubjectChange = async () => {
+  selectedReviewClassId.value = null;
+  await fetchData();
+};
+
 onMounted(fetchData);
 </script>
 
 <style scoped>
+.subject-filter :deep(.ant-form-item) {
+  margin-bottom: 0;
+}
+
 .result-table th,
 .result-table td {
   border: 1px solid #d5dce1;

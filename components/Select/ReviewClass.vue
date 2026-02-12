@@ -63,6 +63,8 @@ const props = defineProps({
   disabled: { type: Boolean, default: false },
   /** ID khối lớp để lọc danh sách lớp ôn tập */
   id_khoi: { type: [Number, String], default: null },
+  /** ID môn học để lọc danh sách lớp ôn tập */
+  id_mon: { type: [Number, String], default: null },
   /** Tự động chọn lớp đầu tiên nếu chưa chọn giá trị */
   autoSelectFirst: { type: Boolean, default: false },
   /** Hiển thị chỉ label + select, không bọc trong a-form-item */
@@ -82,6 +84,7 @@ const hasNavigation = computed(() => props.showNavigationButtons && !props.multi
 const currentIndex = computed(() => options.value.findIndex(option => option.value == props.modelValue));
 const canSelectPrev = computed(() => hasNavigation.value && options.value.length > 0 && (currentIndex.value > 0 || currentIndex.value === -1));
 const canSelectNext = computed(() => hasNavigation.value && options.value.length > 0 && (currentIndex.value === -1 || currentIndex.value < options.value.length - 1));
+const hasValue = value => value !== undefined && value !== null && value !== "";
 
 const fetchReviewClasses = async (search = "") => {
   loading.value = true;
@@ -89,7 +92,8 @@ const fetchReviewClasses = async (search = "") => {
     const params = {};
     const searchTerm = (search || "").trim();
     if (searchTerm) params.search = searchTerm;
-    if (props.id_khoi) params.id_khoi = props.id_khoi;
+    if (hasValue(props.id_khoi)) params.id_khoi = props.id_khoi;
+    if (hasValue(props.id_mon)) params.id_mon = props.id_mon;
     const { data, error } = await RestApi.review_class.list({ params });
     if (data.value?.status === "success") {
       const items = Array.isArray(data.value?.data?.items) ? data.value.data.items : [];
@@ -162,6 +166,13 @@ const selectNext = () => {
 
 watch(
   () => props.id_khoi,
+  () => {
+    fetchReviewClasses();
+  },
+);
+
+watch(
+  () => props.id_mon,
   () => {
     fetchReviewClasses();
   },
