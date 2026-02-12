@@ -206,6 +206,7 @@ let ENDPOINTS = {
   UNIT_INFO: "/api/thongtin_donvi",
   // STATISTICAL RESULT (Tổng hợp kết quả ôn tập)
   STATISTICAL_RESULT: "/api/tonghop/ketqua",
+  STATISTICAL_RESULT_SUBJECT_COMBINATION: "/api/tonghop/ketqua/tohopmon",
 };
 import { useUserStore } from "~~/stores/userStore";
 import { useUnitStore } from "~~/stores/unitStore";
@@ -1207,6 +1208,9 @@ class Statistical {
   }
   async result(data) {
     return await this.request.get(ENDPOINTS.STATISTICAL_RESULT, data);
+  }
+  async result_subject_combination(data) {
+    return await this.request.get(ENDPOINTS.STATISTICAL_RESULT_SUBJECT_COMBINATION, data);
   }
 }
 
