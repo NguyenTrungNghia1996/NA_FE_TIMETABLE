@@ -51,7 +51,7 @@
             <template v-for="(student, studentIndex) in students" :key="student.ma || studentIndex">
               <tr v-for="(subjectRow, subjectIndex) in getSubjectRows(student)" :key="`${student.ma || studentIndex}-${subjectRow.ten_mon || subjectIndex}`">
                 <template v-if="subjectIndex === 0">
-                  <td :rowspan="getSubjectRowSpan(student)" class="text-center">{{ studentIndex + 1 }}</td>
+                  <td :rowspan="getSubjectRowSpan(student)" class="text-center">{{ (pagination.current - 1) * pagination.pageSize + studentIndex + 1 }}</td>
                   <td :rowspan="getSubjectRowSpan(student)" class="text-center">{{ student.ma || "-" }}</td>
                   <td :rowspan="getSubjectRowSpan(student)">{{ student.ten || "-" }}</td>
                 </template>
@@ -73,6 +73,18 @@
           </tbody>
         </table>
       </div>
+      <div class="flex justify-end mt-3">
+        <a-pagination
+          v-model:current="pagination.current"
+          v-model:pageSize="pagination.pageSize"
+          :total="pagination.total"
+          :show-size-changer="true"
+          size="small"
+          :page-size-options="pagination.pageSizeOptions"
+          :show-total="pagination.showTotal"
+          @change="handlePaginationChange"
+        />
+      </div>
     </a-spin>
   </div>
 </template>
@@ -86,6 +98,17 @@ const testTypes = ref([]);
 const students = ref([]);
 const selectedSubjectCombinationId = ref(null);
 const selectedGradeLevelId = ref(null);
+const params = ref({
+  pageIndex: 1,
+  pageSize: 10,
+});
+const pagination = reactive({
+  current: 1,
+  pageSize: 10,
+  total: 0,
+  pageSizeOptions: ["10", "20", "50"],
+  showTotal: total => `Tổng ${total} bản ghi`,
+});
 
 const hasEnoughFilters = computed(
   () =>
@@ -158,6 +181,7 @@ const formatScore = value => {
 const resetData = () => {
   testTypes.value = [];
   students.value = [];
+  pagination.total = 0;
 };
 
 const fetchData = async () => {
@@ -172,12 +196,14 @@ const fetchData = async () => {
     loading.value = true;
     settingStore.setLoading(true);
 
-    const params = {
+    const query = {
+      pageIndex: params.value.pageIndex,
+      pageSize: params.value.pageSize,
       Id_to_hop: selectedSubjectCombinationId.value,
       Id_khoi: selectedGradeLevelId.value,
     };
 
-    const { data, error } = await RestApi.statistical.result_subject_combination({ params });
+    const { data, error } = await RestApi.statistical.result_subject_combination({ params: query });
 
     if (data.value?.status !== "success") {
       throw new Error(error.value?.data?.message || data.value?.message || "Không tải được dữ liệu tổng hợp kết quả theo tổ hợp môn");
@@ -186,6 +212,7 @@ const fetchData = async () => {
     const items = data.value?.data?.items || {};
     testTypes.value = Array.isArray(items.loai_kiem_tra) ? items.loai_kiem_tra : [];
     students.value = Array.isArray(items.rows) ? items.rows : [];
+    pagination.total = Number(items.total) || 0;
   } catch (err) {
     resetData();
     message.error(err.message || "Không tải được dữ liệu tổng hợp kết quả theo tổ hợp môn");
@@ -195,7 +222,17 @@ const fetchData = async () => {
   }
 };
 
+const handlePaginationChange = async (page, pageSize) => {
+  pagination.current = page;
+  pagination.pageSize = pageSize;
+  params.value.pageIndex = page;
+  params.value.pageSize = pageSize;
+  await fetchData();
+};
+
 const handleFiltersChange = async () => {
+  params.value.pageIndex = 1;
+  pagination.current = 1;
   await fetchData();
 };
 </script>
