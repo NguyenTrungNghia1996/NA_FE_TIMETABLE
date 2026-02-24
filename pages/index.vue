@@ -5,7 +5,7 @@
       <div class="grid md:grid-cols-2 gap-10 items-center">
         <div class="space-y-5">
           <div class="flex items-center gap-3">
-            <img :src="unitStore.logo" alt="VN Timetable" class="h-14 w-auto" />
+            <NuxtImg :src="unitStore.logo" alt="VN Timetable" class="h-14 w-auto" loading="eager" />
             <span class="text-xs uppercase tracking-widest text-gray-500">Phiên bản Web</span>
           </div>
           <h1 class="text-3xl md:text-5xl font-extrabold leading-tight text-gray-900">VN Timetable — Xếp thời khóa biểu tự động, linh hoạt, chính xác</h1>
@@ -53,6 +53,7 @@
     </section>
 
     <!-- Features -->
+    <Lazy>
     <section class="container mx-auto px-4 pb-16">
       <div class="grid md:grid-cols-3 gap-6">
         <a-card :bordered="false" class="bg-white/80 shadow">
@@ -84,8 +85,10 @@
         </a-card>
       </div>
     </section>
+    </Lazy>
 
     <!-- Contact -->
+    <Lazy>
     <section class="container mx-auto px-4 pb-16">
       <div class="mb-6">
         <h2 class="text-xl md:text-2xl font-bold text-gray-900">Liên hệ</h2>
@@ -120,8 +123,10 @@
         </a-card>
       </div>
     </section>
+    </Lazy>
 
     <!-- CTA -->
+    <Lazy>
     <section class="container mx-auto px-4 pb-20">
       <a-card class="shadow-lg">
         <div class="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -135,11 +140,12 @@
         </div>
       </a-card>
     </section>
+    </Lazy>
   </div>
 </template>
 
 <script setup>
-definePageMeta({ layout: "auth" });
+definePageMeta({ layout: "auth", prerender: true });
 
 const userStore = useUserStore();
 const unitStore = useUnitStore();
