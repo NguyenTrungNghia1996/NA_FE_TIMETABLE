@@ -1,15 +1,29 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: "2025-05-15",
-  devtools: { enabled: true },
+  devtools: { enabled: process.env.NODE_ENV !== "production" },
   app: {
     head: {
+      htmlAttrs: {
+        lang: "vi",
+      },
       titleTemplate: "%s - VnTimeTable",
       title: "Nguyên Anh EST",
       link: [
         {
-          rel: "stylesheet",
+          rel: "preconnect",
+          href: "https://fonts.googleapis.com",
+        },
+        {
+          rel: "preconnect",
+          href: "https://fonts.gstatic.com",
+          crossorigin: "",
+        },
+        {
+          rel: "preload",
+          as: "style",
           href: "https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap",
+          onload: "this.onload=null;this.rel='stylesheet'",
         },
         // { rel: "icon", type: "image/x-icon", href: "/logo.png" },
       ],
@@ -36,6 +50,15 @@ export default defineNuxtConfig({
       buildTime: process.env.NUXT_PUBLIC_BUILD_TIME || "",
     },
     // https://api.testtkb.nguyenanh-est.com //https://api.dungthutkb.nguyenanh-est.com
+  },
+  routeRules: {
+    "/": { prerender: true },
+  },
+  experimental: {
+    payloadExtraction: true,
+  },
+  nitro: {
+    compressPublicAssets: true,
   },
   vite: {
     build: {
