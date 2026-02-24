@@ -56,6 +56,7 @@ function getHostname() {
 }
 
 export default defineNuxtRouteMiddleware(async (to) => {
+    const userStore = useUserStore();
   const unitStore = useUnitStore();
   const hostname = getHostname();
   const sub = hostname.split('.')[0];
@@ -63,10 +64,27 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
 
   // 2) Bỏ qua route public
-  if (to.path === "/" || to.path === "/login") return;
+  if (to.path === "/") return;
+
+  // Nếu truy cập /login và đã đăng nhập, chuyển hướng về /dashboard
+  if (to.path === "/login") {
+    const token = userStore.token;
+    if (token) {
+      try {
+        const { payload } = useJwt(token);
+        const exp = payload.value && payload.value.exp;
+        const isTokenValid = typeof exp === "number" && Date.now() / 1000 < exp;
+        if (isTokenValid) {
+          return navigateTo("/dashboard");
+        }
+      } catch (error) {
+        // Token không hợp lệ, cho phép truy cập /login
+      }
+    }
+    return; // Cho phép truy cập /login nếu chưa đăng nhập hoặc token không hợp lệ
+  }
 
   // 3) Auth + nạp menu/quyền
-  const userStore = useUserStore();
   const settingStore = useSettingStore();
   const { loadMenu } = useMenu();
   const { loadPermissions, setPermissions } = usePermissions();
