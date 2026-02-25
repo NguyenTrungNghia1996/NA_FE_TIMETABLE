@@ -51,6 +51,16 @@ export default defineNuxtConfig({
     },
     // https://api.testtkb.nguyenanh-est.com //https://api.dungthutkb.nguyenanh-est.com
   },
+  routeRules: {
+    "/": { prerender: true },
+  },
+  experimental: {
+    payloadExtraction: true,
+  },
+  nitro: {
+    compressPublicAssets: true,
+  },
+
   vite: {
     build: {
       sourcemap: false
