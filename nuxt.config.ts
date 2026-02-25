@@ -66,7 +66,6 @@ export default defineNuxtConfig({
   nitro: {
     compressPublicAssets: true,
   },
-
   vite: {
     build: {
       sourcemap: false
