@@ -44,7 +44,11 @@
                 </li>
               </ul>
               <div class="pt-2">
-                <NuxtLink to="/login"><a-button type="link">Đăng nhập để bắt đầu →</a-button></NuxtLink>
+                <NuxtLink to="/login">
+                  <a-button type="link" class="!text-blue-700 hover:!text-blue-800 !px-0 font-medium">
+                    Đăng nhập để bắt đầu →
+                  </a-button>
+                </NuxtLink>
               </div>
             </div>
           </a-card>

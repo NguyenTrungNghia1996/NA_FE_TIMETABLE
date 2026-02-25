@@ -9,6 +9,12 @@ export default defineNuxtConfig({
       },
       titleTemplate: "%s - VnTimeTable",
       title: "Nguyên Anh EST",
+      meta: [
+        {
+          name: "description",
+          content: "VN Timetable là nền tảng web quản lý và xếp thời khóa biểu tự động cho trường học, hỗ trợ tối ưu ràng buộc giáo viên, lớp, phòng học và xuất báo cáo nhanh.",
+        },
+      ],
       link: [
         {
           rel: "preconnect",
