@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: "2025-05-15",
-  devtools: { enabled: process.env.NODE_ENV !== "production" },
+  devtools: { enabled: true },
   app: {
     head: {
       htmlAttrs: {
@@ -9,6 +9,12 @@ export default defineNuxtConfig({
       },
       titleTemplate: "%s - VnTimeTable",
       title: "Nguyên Anh EST",
+      meta: [
+        {
+          name: "description",
+          content: "VN Timetable là nền tảng web quản lý và xếp thời khóa biểu tự động cho trường học, hỗ trợ tối ưu ràng buộc giáo viên, lớp, phòng học và xuất báo cáo nhanh.",
+        },
+      ],
       link: [
         {
           rel: "preconnect",
