@@ -139,7 +139,8 @@
 </template>
 
 <script setup>
-definePageMeta({ layout: "auth" });
+// definePageMeta({ layout: "auth" });
+definePageMeta({ layout: "auth", prerender: true });
 
 const userStore = useUserStore();
 const unitStore = useUnitStore();
