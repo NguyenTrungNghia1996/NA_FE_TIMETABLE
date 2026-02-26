@@ -146,16 +146,6 @@
 // definePageMeta({ layout: "auth" });
 definePageMeta({ layout: "auth", prerender: true });
 
-const userStore = useUserStore();
 const unitStore = useUnitStore();
 const settingStore = useSettingStore();
-// Nếu đã đăng nhập, chuyển đến dashboard
-// if (process.client ? !!userStore.token : Boolean(userStore.token)) {
-//   await navigateTo("/dashboard");
-// }
-onMounted(() => {
-  if (userStore.token) {
-    navigateTo("/dashboard");
-  }
-});
 </script>
