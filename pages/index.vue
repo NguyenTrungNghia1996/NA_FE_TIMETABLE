@@ -11,8 +11,8 @@
           <h1 class="text-3xl md:text-5xl font-extrabold leading-tight text-gray-900">VN Timetable — Xếp thời khóa biểu tự động, linh hoạt, chính xác</h1>
           <p class="text-gray-600 text-base md:text-lg">Nền tảng quản lý và xếp thời khóa biểu dành cho trường học. Hỗ trợ ca sáng/chiều, ràng buộc phòng học, giáo viên, lớp; tối ưu xung đột và xuất báo cáo nhanh chóng.</p>
           <div class="flex flex-wrap gap-3 pt-2">
-            <NuxtLink to="/login">
-              <a-button type="primary" size="large">Đăng nhập</a-button>
+            <NuxtLink :to="primaryAction.to">
+              <a-button type="primary" size="large">{{ primaryAction.label }}</a-button>
             </NuxtLink>
           </div>
           <div class="flex flex-wrap gap-4 pt-3 text-sm text-gray-600">
@@ -44,9 +44,9 @@
                 </li>
               </ul>
               <div class="pt-2">
-                <NuxtLink to="/login">
+                <NuxtLink :to="primaryAction.to">
                   <a-button type="link" class="!text-blue-700 hover:!text-blue-800 !px-0 font-medium">
-                    Đăng nhập để bắt đầu →
+                    {{ secondaryActionLabel }}
                   </a-button>
                 </NuxtLink>
               </div>
@@ -134,7 +134,7 @@
             <p class="text-gray-600">Đăng nhập để bắt đầu hoặc đăng ký dùng thử ngay hôm nay.</p>
           </div>
           <div class="flex gap-3">
-            <NuxtLink to="/login"><a-button type="primary">Đăng nhập</a-button></NuxtLink>
+            <NuxtLink :to="primaryAction.to"><a-button type="primary">{{ primaryAction.label }}</a-button></NuxtLink>
           </div>
         </div>
       </a-card>
@@ -145,7 +145,30 @@
 <script setup>
 // definePageMeta({ layout: "auth" });
 definePageMeta({ layout: "auth", prerender: true });
+import { useJwt } from "@vueuse/integrations/useJwt";
 
 const unitStore = useUnitStore();
 const settingStore = useSettingStore();
+const userStore = useUserStore();
+
+const isLoggedIn = computed(() => {
+  const token = userStore.token;
+  if (!token) return false;
+  try {
+    const { payload } = useJwt(token);
+    const exp = payload.value?.exp;
+    return typeof exp === "number" && Date.now() / 1000 < exp;
+  } catch {
+    return false;
+  }
+});
+
+const primaryAction = computed(() => ({
+  to: isLoggedIn.value ? "/dashboard" : "/login",
+  label: isLoggedIn.value ? "Bảng điều khiển" : "Đăng nhập",
+}));
+
+const secondaryActionLabel = computed(() =>
+  isLoggedIn.value ? "Vào bảng điều khiển →" : "Đăng nhập để bắt đầu →"
+);
 </script>
