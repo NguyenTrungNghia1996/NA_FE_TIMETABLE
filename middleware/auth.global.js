@@ -56,7 +56,7 @@ function getHostname() {
 }
 
 export default defineNuxtRouteMiddleware(async (to) => {
-    const userStore = useUserStore();
+  const userStore = useUserStore();
   const unitStore = useUnitStore();
   const hostname = getHostname();
   const sub = hostname.split('.')[0];
@@ -64,10 +64,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
 
   // 2) Bỏ qua route public
-  if (to.path === "/") return;
+  // if () return;
 
   // Nếu truy cập /login và đã đăng nhập, chuyển hướng về /dashboard
-  if (to.path === "/login") {
+  if (to.path === "/login" || to.path === "/") {
     const token = userStore.token;
     if (token) {
       try {
