@@ -41,15 +41,15 @@
             </tr>
           </thead>
 
-          <tbody>
+          <tbody :key="tableBodyKey">
             <tr v-if="!students.length">
               <td :colspan="4 + totalScoreColumns" class="empty-cell">
                 {{ hasEnoughFilters ? "Không có dữ liệu" : "Vui lòng chọn tổ hợp môn ôn và khối lớp" }}
               </td>
             </tr>
 
-            <template v-for="(student, studentIndex) in students" :key="student.ma || studentIndex">
-              <tr v-for="(subjectRow, subjectIndex) in getSubjectRows(student)" :key="`${student.ma || studentIndex}-${subjectRow.ten_mon || subjectIndex}`">
+            <template v-for="(student, studentIndex) in students" :key="`${student.ma || 'row'}-${studentIndex}`">
+              <tr v-for="(subjectRow, subjectIndex) in getSubjectRows(student)" :key="`${student.ma || 'row'}-${studentIndex}-${subjectRow.ten_mon || 'mon'}-${subjectIndex}`">
                 <template v-if="subjectIndex === 0">
                   <td :rowspan="getSubjectRowSpan(student)" class="text-center">{{ (pagination.current - 1) * pagination.pageSize + studentIndex + 1 }}</td>
                   <td :rowspan="getSubjectRowSpan(student)" class="text-center">{{ student.ma || "-" }}</td>
@@ -96,8 +96,10 @@ const settingStore = useSettingStore();
 const loading = ref(false);
 const testTypes = ref([]);
 const students = ref([]);
+const tableBodyKey = ref(0);
 const selectedSubjectCombinationId = ref(null);
 const selectedGradeLevelId = ref(null);
+let latestFetchId = 0;
 const params = ref({
   pageIndex: 1,
   pageSize: 10,
@@ -182,13 +184,17 @@ const resetData = () => {
   testTypes.value = [];
   students.value = [];
   pagination.total = 0;
+  tableBodyKey.value += 1;
 };
 
 const fetchData = async () => {
+  const fetchId = ++latestFetchId;
   if (!hasEnoughFilters.value) {
     resetData();
-    loading.value = false;
-    settingStore.setLoading(false);
+    if (fetchId === latestFetchId) {
+      loading.value = false;
+      settingStore.setLoading(false);
+    }
     return;
   }
 
@@ -204,19 +210,29 @@ const fetchData = async () => {
     };
 
     const { data, error } = await RestApi.statistical.result_subject_combination({ params: query });
+    if (fetchId !== latestFetchId) {
+      return;
+    }
 
     if (data.value?.status !== "success") {
       throw new Error(error.value?.data?.message || data.value?.message || "Không tải được dữ liệu tổng hợp kết quả theo tổ hợp môn");
     }
 
     const items = data.value?.data?.items || {};
-    testTypes.value = Array.isArray(items.loai_kiem_tra) ? items.loai_kiem_tra : [];
-    students.value = Array.isArray(items.rows) ? items.rows : [];
+    testTypes.value = Array.isArray(items.loai_kiem_tra) ? [...items.loai_kiem_tra] : [];
+    students.value = Array.isArray(items.rows) ? [...items.rows] : [];
     pagination.total = Number(items.total) || 0;
+    tableBodyKey.value += 1;
   } catch (err) {
+    if (fetchId !== latestFetchId) {
+      return;
+    }
     resetData();
     message.error(err.message || "Không tải được dữ liệu tổng hợp kết quả theo tổ hợp môn");
   } finally {
+    if (fetchId !== latestFetchId) {
+      return;
+    }
     loading.value = false;
     settingStore.setLoading(false);
   }
