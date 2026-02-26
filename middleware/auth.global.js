@@ -63,8 +63,13 @@ export default defineNuxtRouteMiddleware(async (to) => {
   unitStore.setUnit(sub || "default");
 
 
-  // 2) Route public (/, /login): nếu đã đăng nhập thì chuyển về dashboard
-  if (to.path === "/" || to.path === "/login") {
+  // 2) Route public cho trang chủ: luôn cho phép truy cập (không tự động chuyển dashboard)
+  if (to.path === "/" || to.path === "/index") {
+    return;
+  }
+
+  // 2b) Route login: nếu đã đăng nhập thì chuyển về dashboard
+  if (to.path === "/login") {
     const token = userStore.token;
     if (token) {
       try {
@@ -79,7 +84,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
         return;
       }
     }
-    return; // Cho phép truy cập route public nếu chưa đăng nhập hoặc token không hợp lệ
+    return; // Cho phép truy cập /login nếu chưa đăng nhập hoặc token không hợp lệ
   }
 
   // 3) Auth + nạp menu/quyền
