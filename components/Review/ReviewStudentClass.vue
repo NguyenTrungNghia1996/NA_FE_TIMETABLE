@@ -53,6 +53,9 @@
 
     <a-modal v-model:open="importModal.open" title="Import học sinh - lớp ôn tập" :footer="null" width="520px" :destroyOnClose="true" @cancel="closeImportModal">
       <div class="text-sm text-gray-600 mb-3">Chọn file Excel (.xlsx, .xls) để import danh sách học sinh - lớp ôn tập.</div>
+      <div class="flex justify-end mb-3">
+        <a-button type="primary" ghost @click="downloadStudentReviewTemplate">Tải file mẫu</a-button>
+      </div>
       <a-upload :beforeUpload="beforeImportUpload" :maxCount="1" :file-list="importModal.fileList" @remove="removeImportFile" :accept="'.xlsx,.xls'" :showUploadList="{ showRemoveIcon: true }">
         <a-button>Chọn file</a-button>
       </a-upload>
@@ -302,6 +305,15 @@ const beforeImportUpload = file => {
 const removeImportFile = () => {
   importModal.file = null;
   importModal.fileList = [];
+};
+
+const downloadStudentReviewTemplate = () => {
+  const link = document.createElement("a");
+  link.href = encodeURI("/Import Học sinh ôn tập.xlsx");
+  link.download = "Import Học sinh ôn tập.xlsx";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 };
 
 const handleImportStudents = async () => {
