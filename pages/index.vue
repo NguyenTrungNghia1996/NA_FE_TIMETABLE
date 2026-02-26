@@ -153,4 +153,9 @@ const settingStore = useSettingStore();
 // if (process.client ? !!userStore.token : Boolean(userStore.token)) {
 //   await navigateTo("/dashboard");
 // }
+onMounted(() => {
+  if (userStore.token) {
+    navigateTo("/dashboard");
+  }
+});
 </script>
