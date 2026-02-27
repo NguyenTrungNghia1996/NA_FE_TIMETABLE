@@ -277,6 +277,7 @@ const openStudentCombinationModal = async record => {
   combinationModal.studentName = record?.ten || "";
   combinationModal.selectedIds = [];
   await Promise.all([fetchCombinationList(), fetchStudentCombinations(record?.id)]);
+  sanitizeSelectedCombinationIds();
 };
 
 const closeCombinationModal = () => {
@@ -379,6 +380,23 @@ const fetchStudentCombinations = async studentId => {
   }
 };
 
+const sanitizeSelectedCombinationIds = () => {
+  const validIdMap = new Map(
+    combinationList.value
+      .filter(item => item?.id !== undefined && item?.id !== null)
+      .map(item => [String(item.id), item.id])
+  );
+  const uniqueValidIds = [];
+  const seen = new Set();
+  for (const id of combinationModal.selectedIds) {
+    const key = String(id);
+    if (!validIdMap.has(key) || seen.has(key)) continue;
+    uniqueValidIds.push(validIdMap.get(key));
+    seen.add(key);
+  }
+  combinationModal.selectedIds = uniqueValidIds;
+};
+
 const isCombinationSelected = id => combinationModal.selectedIds.includes(id);
 
 const toggleCombination = (id, checked) => {
@@ -398,6 +416,7 @@ const saveStudentCombinations = async () => {
   }
   try {
     combinationModal.saving = true;
+    sanitizeSelectedCombinationIds();
     const payload = {
       id_hoc_sinh: combinationModal.studentId,
       to_hop_mon: combinationModal.selectedIds,
