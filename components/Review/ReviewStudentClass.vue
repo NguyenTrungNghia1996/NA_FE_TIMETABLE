@@ -15,6 +15,17 @@
           <template v-else-if="column.key === 'ten'">
             {{ record.ten }}
           </template>
+          <template v-else-if="column.key === 'action'">
+            <div class="flex justify-center">
+              <a-tooltip title="Thêm học sinh vào lớp ôn tập">
+                <a-button type="link" size="small" @click="openAssignModal(record)">
+                  <template #icon>
+                    <PlusOutlined />
+                  </template>
+                </a-button>
+              </a-tooltip>
+            </div>
+          </template>
         </template>
       </a-table>
     </a-card>
@@ -152,7 +163,16 @@ const editModal = reactive({
     id_lop_on: null,
   },
 });
-
+const id_review_class = ref(null);
+const onClassRow = record => ({
+  onClick: async () => {
+    id_review_class.value = record.id;
+    await fetchStudents();
+  },
+  style: {
+    cursor: "pointer",
+  },
+});
 const classPagination = reactive({
   current: 1,
   pageSize: 10,
@@ -175,6 +195,7 @@ const classColumns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
   { title: "Mã lớp ôn tập", dataIndex: "ma", key: "ma", ellipsis: true },
   { title: "Tên lớp ôn tập", dataIndex: "ten", key: "ten", ellipsis: true },
+  { title: "Thao tác", key: "action", width: 90, align: "center" },
 ];
 
 const studentColumns = [
@@ -235,9 +256,14 @@ const fetchStudents = async () => {
     studentLoading.value = true;
     const params = {
       pageIndex: studentPagination.current,
-      pageSize: studentPagination.pageSize,
-      search: (searchText.value || "").trim(),
+      pageSize: studentPagination.pageSize
     };
+    if (id_review_class.value) {
+      params.Id_lop_on = id_review_class.value;
+    }
+    if(searchText.value) {
+      params.search = searchText.value.trim();
+    }
     const { data } = await RestApi.review_class.list_students({ params });
     if (data.value?.status === "success") {
       students.value = data.value.data.items || [];
@@ -363,7 +389,7 @@ const fetchAssignStudents = async () => {
       pageIndex: assignModal.pagination.current,
       pageSize: assignModal.pagination.pageSize,
       search: (assignModal.search || "").trim(),
-      id_khoi:assignModal.classRecord?.id_khoi || null,
+      id_khoi: assignModal.classRecord?.id_khoi || null,
     };
     const { data } = await RestApi.student.list({ params });
     if (data.value?.status === "success") {
@@ -383,7 +409,6 @@ const fetchAssignStudents = async () => {
 };
 
 const openAssignModal = async record => {
-  console.log(record);
   assignModal.classRecord = record || null;
   assignModal.visible = true;
   assignModal.search = "";
@@ -523,15 +548,6 @@ const saveEditStudent = async () => {
     editModal.saving = false;
   }
 };
-
-const onClassRow = record => ({
-  onClick: () => {
-    openAssignModal(record);
-  },
-  style: {
-    cursor: "pointer",
-  },
-});
 
 const reset = () => {
   students.value = [];
