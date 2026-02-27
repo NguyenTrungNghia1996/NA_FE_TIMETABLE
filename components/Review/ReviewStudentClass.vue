@@ -98,7 +98,7 @@
         <a-form-item label="Lớp chính khóa">
           <a-input :value="editModal.record?.ten_lop_chinh || ''" disabled />
         </a-form-item>
-        <SelectReviewClass v-model="editModal.form.id_lop_on" name="id_lop_on" label="Lớp ôn tập" :rules="editRules.id_lop_on" />
+        <SelectReviewClass v-model="editModal.form.id_lop_on" :id_khoi="editModal.record.id_khoi" name="id_lop_on" label="Lớp ôn tập" :rules="editRules.id_lop_on" />
       </a-form>
       <div class="flex justify-end gap-2 mt-4">
         <a-button type="primary" :loading="editModal.saving" @click="saveEditStudent">Lưu</a-button>
@@ -363,6 +363,7 @@ const fetchAssignStudents = async () => {
       pageIndex: assignModal.pagination.current,
       pageSize: assignModal.pagination.pageSize,
       search: (assignModal.search || "").trim(),
+      id_khoi:assignModal.classRecord?.id_khoi || null,
     };
     const { data } = await RestApi.student.list({ params });
     if (data.value?.status === "success") {
@@ -382,6 +383,7 @@ const fetchAssignStudents = async () => {
 };
 
 const openAssignModal = async record => {
+  console.log(record);
   assignModal.classRecord = record || null;
   assignModal.visible = true;
   assignModal.search = "";
