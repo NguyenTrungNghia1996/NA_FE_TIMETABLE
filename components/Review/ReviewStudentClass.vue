@@ -4,7 +4,7 @@
       <div class="mb-2">
         <SelectGradeLevelByUnit v-model="gradeId" />
       </div>
-      <a-table :columns="classColumns" :data-source="classes" :loading="classLoading" :pagination="classPagination" size="small" row-key="id" @change="handleClassTableChange" :customRow="onClassRow">
+      <a-table :columns="classColumns" :data-source="classes" :loading="classLoading" :pagination="classPagination" size="small" row-key="id" @change="handleClassTableChange" :customRow="onClassRow" :rowClassName="classRowClassName">
         <template #bodyCell="{ column, record, index }">
           <template v-if="column.key === 'stt'">
             {{ (classPagination.current - 1) * classPagination.pageSize + index + 1 }}
@@ -18,7 +18,7 @@
           <template v-else-if="column.key === 'action'">
             <div class="flex justify-center">
               <a-tooltip title="Thêm học sinh vào lớp ôn tập">
-                <a-button type="link" size="small" @click="openAssignModal(record)">
+                <a-button type="link" size="small" @click.stop="openAssignModal(record)">
                   <template #icon>
                     <PlusOutlined />
                   </template>
@@ -167,12 +167,14 @@ const id_review_class = ref(null);
 const onClassRow = record => ({
   onClick: async () => {
     id_review_class.value = record.id;
+    studentPagination.current = 1;
     await fetchStudents();
   },
   style: {
     cursor: "pointer",
   },
 });
+const classRowClassName = record => (record?.id === id_review_class.value ? "review-class-row-selected" : "");
 const classPagination = reactive({
   current: 1,
   pageSize: 10,
@@ -238,13 +240,18 @@ const fetchClasses = async () => {
     if (data.value?.status === "success") {
       classes.value = data.value.data.items || [];
       classPagination.total = data.value.data.totalrecord || 0;
+      if (id_review_class.value && !classes.value.some(item => item.id === id_review_class.value)) {
+        id_review_class.value = null;
+      }
     } else {
       classes.value = [];
       classPagination.total = 0;
+      id_review_class.value = null;
     }
   } catch (err) {
     classes.value = [];
     classPagination.total = 0;
+    id_review_class.value = null;
     message.error(err.message || "Không thể tải danh sách lớp ôn tập");
   } finally {
     classLoading.value = false;
@@ -571,6 +578,7 @@ defineExpose({
 
 watch(gradeId, async () => {
   classPagination.current = 1;
+  id_review_class.value = null;
   await fetchClasses();
 });
 
@@ -579,3 +587,9 @@ onMounted(() => {
   fetchStudents();
 });
 </script>
+
+<style scoped>
+:deep(.review-class-row-selected > td) {
+  background-color: #e6f4ff !important;
+}
+</style>
