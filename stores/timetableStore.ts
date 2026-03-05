@@ -31,7 +31,13 @@ export interface ClassUpdatePayload {
   [key: string]: unknown;
 }
 
-export type TimetableUndoType = "classUpdate" | "lockPeriod" | "unlockPeriod" | "clearPeriod" | "addPeriod" | string;
+export interface TeacherUpdatePayload {
+  id_giao_vien?: number;
+  timetable: TimetablePeriod[];
+  [key: string]: unknown;
+}
+
+export type TimetableUndoType = "classUpdate" | "teacherUpdate" | "lockPeriod" | "unlockPeriod" | "clearPeriod" | "addPeriod" | string;
 
 export interface TimetableUndoEntry<T = unknown> {
   type: TimetableUndoType;
@@ -93,6 +99,14 @@ export const useTimetableStore = defineStore("timetable", {
       if (!payload?.timetable?.length) return false;
       return this.pushUndoAction({
         type: "classUpdate",
+        payload,
+        meta,
+      });
+    },
+    pushTeacherUpdate(payload?: TeacherUpdatePayload | null, meta?: Record<string, unknown>) {
+      if (!payload?.timetable?.length) return false;
+      return this.pushUndoAction({
+        type: "teacherUpdate",
         payload,
         meta,
       });

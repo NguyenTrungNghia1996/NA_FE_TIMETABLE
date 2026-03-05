@@ -579,6 +579,10 @@ function saveClassUpdatePayload(payload) {
   return timetableStore.pushClassUpdate(payload);
 }
 
+function saveTeacherUpdatePayload(payload) {
+  return timetableStore.pushTeacherUpdate(payload);
+}
+
 function buildUndoTimetablePayload(timetable = []) {
   if (!Array.isArray(timetable) || !timetable.length) return [];
   const keysToPreserve = ["ngay", "tiet", "id_ca"];
@@ -637,6 +641,42 @@ async function handleUndoClassUpdate(payload) {
       const targetTeacher = teacherIds.includes(selectedTeacherId.value) ? selectedTeacherId.value : teacherIds[0];
       await fetchTeacherTimetable(targetTeacher);
     }
+    return true;
+  } catch (err) {
+    message.error("Hoàn tác thất bại", err);
+    return false;
+  }
+}
+
+async function handleUndoTeacherUpdate(payload) {
+  if (!payload?.timetable?.length) {
+    message.info("Không có dữ liệu để hoàn tác");
+    return false;
+  }
+  const reversedTimetable = buildUndoTimetablePayload(payload.timetable);
+  if (!reversedTimetable.length) {
+    message.info("Không có dữ liệu để hoàn tác");
+    return false;
+  }
+  const body = {
+    ...payload,
+    timetable: reversedTimetable,
+  };
+  try {
+    const { data, error } = await Api.update_teacher({ body });
+    if (data.value?.status !== "success") {
+      message.error("Hoàn tác thất bại", error.value || data.value);
+      return false;
+    }
+    const teacherId = payload.id_giao_vien || selectedTeacherId.value;
+    if (teacherId && scheduleId.value) {
+      await fetchTeacherTimetable(teacherId);
+    }
+    const classIds = Array.isArray(payload.timetable) ? [...new Set(payload.timetable.map(t => t?.id_lop).filter(Boolean))] : [];
+    if (selectedClassId.value && classIds.includes(selectedClassId.value)) {
+      await fetchClassTimetable();
+    }
+    await fetchAllUnscheduled();
     return true;
   } catch (err) {
     message.error("Hoàn tác thất bại", err);
@@ -738,6 +778,9 @@ async function undoLastAction() {
     switch (lastAction.type) {
       case "classUpdate":
         success = await handleUndoClassUpdate(lastAction.payload);
+        break;
+      case "teacherUpdate":
+        success = await handleUndoTeacherUpdate(lastAction.payload);
         break;
       case "clearPeriod":
         success = await handleUndoClearPeriod(lastAction.payload);
@@ -978,8 +1021,14 @@ async function onTeacherDrop(caId, dayId, pIdx) {
       id_giao_vien: selectedTeacherId.value,
       timetable: [{ ...srcClone }, { ...dstClone }],
     };
+    const historyAdded = saveTeacherUpdatePayload(body);
     const { data, error } = await Api.update_teacher({ body });
     if (data.value?.status !== "success") {
+      if (historyAdded) {
+        if (timetableStore.lastAction?.type === "teacherUpdate") {
+          timetableStore.popLastAction();
+        }
+      }
       message.error("Update teacher timetable error", error.value || data.value);
     } else {
       await fetchTeacherTimetable(selectedTeacherId.value);
@@ -1323,8 +1372,19 @@ async function clearCell() {
   const cell = contextMenu.isTeacher ? getTeacherCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx) : getCell(contextMenu.ca, contextMenu.ngay, contextMenu.pIdx);
   if (!cell?.id_chitiet) return;
   const snapshot = JSON.parse(JSON.stringify(cell));
-  snapshot.id_lop = selectedClassId.value ?? snapshot.id_lop;
-  snapshot.ten_lop = selectedClassName.value ?? snapshot.ten_lop;
+  // Preserve original class binding for teacher-view undo; only backfill if missing.
+  if (!snapshot.id_lop && selectedClassId.value) {
+    snapshot.id_lop = selectedClassId.value;
+  }
+  if (!snapshot.ten_lop && selectedClassName.value) {
+    snapshot.ten_lop = selectedClassName.value;
+  }
+  if (selectedTeacherId.value) {
+    snapshot.id_giao_vien = selectedTeacherId.value;
+  }
+  if (selectedTeacherName.value) {
+    snapshot.ten_giao_vien = selectedTeacherName.value;
+  }
   try {
     const { data, error } = await Api.cancel_period({ params: { id: cell.id_chitiet } });
     if (data.value?.status === "success") {
