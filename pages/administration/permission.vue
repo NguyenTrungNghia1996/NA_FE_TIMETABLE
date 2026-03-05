@@ -144,6 +144,7 @@ const handleSearch = async () => {
   } else {
     delete param.value.search;
   }
+  param.value.PageIndex = 1;
   pagination.current = 1;
   await fetchData({ ...param.value });
 };
