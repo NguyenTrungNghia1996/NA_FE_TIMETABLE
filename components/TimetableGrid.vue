@@ -1044,6 +1044,13 @@ function teacherCellClasses(caId, dayId, pIdx, cell) {
   };
 }
 
+function logInvalidDrop(src, dst, type) {
+  console.log(`=== DỮ LIỆU KÉO THẢ KHÔNG ĐƯỢC PHÉP (${type}) ===`);
+  console.log("Dữ liệu ô gốc:", src);
+  console.log("Dữ liệu ô được kéo đến:", dst);
+  console.log("=======================================");
+}
+
 function onDragStart(caId, dayId, pIdx) {
   const cell = getCell(caId, dayId, pIdx);
   if (!isDraggable(cell)) return;
@@ -1060,7 +1067,11 @@ async function onDrop(caId, dayId, pIdx) {
   if (!src || !dst) return;
   const srcClone = { ...src };
   const dstClone = { ...dst };
-  if (!isDraggable(src) || !canReceiveDrop(dst)) return;
+
+  if (!isDraggable(src) || !canReceiveDrop(dst)) {
+    logInvalidDrop(srcClone, dstClone, "Lớp");
+    return;
+  }
 
   const keys = Object.keys(src).filter(k => !["id_ca", "ngay", "tiet"].includes(k));
   const temp = {};
@@ -1126,7 +1137,10 @@ async function onTeacherDrop(caId, dayId, pIdx) {
   const srcClone = { ...src };
   const dstClone = { ...dst };
 
-  if (!teacherIsDraggable(src) || !teacherIsDraggable(dst)) return;
+  if (!teacherIsDraggable(src) || !teacherIsDraggable(dst)) {
+    logInvalidDrop(srcClone, dstClone, "Giáo viên");
+    return;
+  }
 
   const keys = Object.keys(src).filter(k => !["id_ca", "ngay", "tiet"].includes(k));
   const temp = {};
@@ -1176,17 +1190,11 @@ async function onTeacherDrop(caId, dayId, pIdx) {
 }
 
 function onTeacherDragOver(event, caId, dayId, pIdx) {
-  const cell = getTeacherCell(caId, dayId, pIdx);
-  if (teacherIsDraggable(cell)) {
-    event.preventDefault();
-  }
+  event.preventDefault();
 }
 
 function onDragOver(event, caId, dayId, pIdx) {
-  const cell = getCell(caId, dayId, pIdx);
-  if (canReceiveDrop(cell)) {
-    event.preventDefault();
-  }
+  event.preventDefault();
 }
 
 function openContextMenu(event, caId, dayId, pIdx, isTeacher = false) {
@@ -1783,7 +1791,7 @@ async function confirmAdd() {
     ten_lop: lesson.ten_lop,
     id_mon: cell.id_mon,
     ten_mon: cell.ten_mon,
-    id_giao_vien: cell.id_giao_vien ?? (contextMenu.isTeacher ? selectedTeacherId.value ?? lesson.id_giao_vien : lesson.id_giao_vien),
+    id_giao_vien: cell.id_giao_vien ?? (contextMenu.isTeacher ? (selectedTeacherId.value ?? lesson.id_giao_vien) : lesson.id_giao_vien),
     ten_giao_vien: cell.ten_giao_vien,
     id_phong: cell.id_phong,
     ten_phong: cell.ten_phong,
