@@ -81,7 +81,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
         }
       } catch (error) {
         // Token không hợp lệ, cho phép truy cập route public
-        return;
+        userStore.logout();
+        return navigateTo("/login");
       }
     }
     return; // Cho phép truy cập /login nếu chưa đăng nhập hoặc token không hợp lệ
