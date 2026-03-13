@@ -56,6 +56,7 @@ export default defineNuxtConfig({
       buildTime: process.env.NUXT_PUBLIC_BUILD_TIME || "",
     },
     // https://api.testtkb.nguyenanh-est.com //https://api.dungthutkb.nguyenanh-est.com
+    // https://api.testtkb.nguyenanh-est.com //https://api.dungthutkb.nguyenanh-est.com
   },
   routeRules: {
     "/": { prerender: true },
