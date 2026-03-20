@@ -92,6 +92,17 @@
             <a-input v-model:value="formState.email" placeholder="Nhập email" />
           </a-form-item>
           <SelectSchoolShift v-model="formState.id_cahoc" name="id_cahoc" :rules="rules.id_cahoc" :multiple="true" />
+           <a-form-item label="Loại đơn vị" name="la_so_giao_duc">
+            <a-switch v-model:checked="formState.la_so_giao_duc" checked-children="Sở giáo dục" un-checked-children="Đơn vị trực thuộc" />
+          </a-form-item>
+
+          <SelectDepartmentOfEducation
+            v-if="!formState.la_so_giao_duc"
+            v-model="formState.id_cha"
+            name="id_cha"
+            :rules="rules.id_cha"
+            :multiple="false"
+          />
         </div>
         <div class="flex justify-end gap-2 mt-6">
           <a-button @click="handleCancel">Hủy</a-button>
@@ -209,11 +220,24 @@ const formState = reactive({
   email: "",
   idCap: undefined,
   id_cahoc: undefined,
+  id_cha: undefined,
+  la_so_giao_duc: false,
 });
 
 const rules = {
   idCap: [{ required: true, message: "Vui lòng chọn cấp học", trigger: "blur", type: "array" }],
   id_cahoc: [{ required: true, message: "Vui lòng chọn ca học", trigger: "blur" }],
+  id_cha: [
+    {
+      validator: async (_, value) => {
+        if (!formState.la_so_giao_duc && (value === undefined || value === null || value === "")) {
+          return Promise.reject(new Error("Vui lòng chọn sở giáo dục"));
+        }
+        return Promise.resolve();
+      },
+      trigger: "change",
+    },
+  ],
   tenDonvi: [
     { required: true, message: "Vui lòng chọn đơn vị", trigger: "blur" },
     { max: 100, message: "Tên đơn vị không quá 100 kí tự", trigger: "blur" },
@@ -235,6 +259,24 @@ const rules = {
       trigger: "blur",
     },
   ],
+};
+
+watch(
+  () => formState.la_so_giao_duc,
+  value => {
+    if (value) {
+      formState.id_cha = undefined;
+      formRef.value?.clearValidate?.(["id_cha"]);
+    }
+  }
+);
+
+const getPayload = () => {
+  const payload = { ...formState };
+  if (payload.la_so_giao_duc) {
+    payload.id_cha = null;
+  }
+  return payload;
 };
 
 // Methods
@@ -294,6 +336,8 @@ const showModal = () => {
     email: "",
     idCap: undefined,
     id_cahoc: undefined,
+    id_cha: undefined,
+    la_so_giao_duc: false,
   });
   visible.value = true;
 };
@@ -312,6 +356,8 @@ const editItem = async record => {
         email: unitData.email,
         idCap: unitData.idCap,
         id_cahoc: unitData.id_cahoc,
+        id_cha: unitData.id_cha,
+        la_so_giao_duc: Boolean(unitData.la_so_giao_duc),
       });
       isEdit.value = true;
       visible.value = true;
@@ -347,7 +393,7 @@ const handleOk = async () => {
   confirmLoading.value = true;
   try {
     if (isEdit.value) {
-      const payload = { ...formState };
+      const payload = getPayload();
       const { data, error } = await RestApi.unit.update({ body: payload });
       if (data.value?.status === "success") {
         message.success(data.value?.message || "Cập nhật thành công");
@@ -355,7 +401,7 @@ const handleOk = async () => {
         throw new Error(error.value?.data?.message || "Cập nhật không thành công");
       }
     } else {
-      const payload = { ...formState };
+      const payload = getPayload();
       if ("id" in payload) delete payload.id;
       const { data, error } = await RestApi.unit.create({ body: payload });
       if (data.value?.status === "success") {
