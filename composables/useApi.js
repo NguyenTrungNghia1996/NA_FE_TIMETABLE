@@ -20,6 +20,7 @@ let ENDPOINTS = {
   //UNIT
   UNIT: "/api/donvi",
   UNIT_DETAIL: "/api/donvi/detail",
+  UNIT_SOGIAODUC: "/api/donvi/sogiaoduc",
   //SCHOOL_SITE
   SCHOOL_SITE: "/api/diemtruong",
   SCHOOL_SITE_DETAIL: "/api/diemtruong/detail",
@@ -523,6 +524,9 @@ class Unit {
   }
   async list(data) {
     return await this.request.get(ENDPOINTS.UNIT, data);
+  }
+  async list_sogiaoduc(data) {
+    return await this.request.get(ENDPOINTS.UNIT_SOGIAODUC, data);
   }
   async detail(data) {
     return await this.request.get(ENDPOINTS.UNIT_DETAIL, data);
