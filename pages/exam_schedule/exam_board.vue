@@ -38,7 +38,7 @@
     <a-modal v-model:open="visible" :title="isEdit ? 'Chỉnh sửa hội đồng thi' : 'Thêm mới hội đồng thi'" @cancel="handleCancel" :width="720">
       <a-form ref="formRef" :model="formState" layout="vertical" :rules="rules" class="grid grid-cols-1 md:grid-cols-2 gap-2">
         <a-form-item label="Mã hội đồng" name="ma">
-          <a-input-number v-model:value="formState.ma" class="!w-full" :min="0" :max="99" :precision="0" placeholder="Nhập mã hội đồng" />
+          <a-input v-model:value="formState.ma" :maxlength="2" inputmode="numeric" placeholder="Nhập mã hội đồng" @input="handleMaInput" />
         </a-form-item>
 
         <a-form-item label="Tên hội đồng thi" name="ten">
@@ -96,7 +96,7 @@ const pagination = reactive({
 
 const defaultFormState = () => ({
   id: undefined,
-  ma: undefined,
+  ma: "",
   ten: "",
   id_don_vi: undefined,
   id_nam: undefined,
@@ -112,12 +112,8 @@ const rules = reactive({
         if (value === undefined || value === null || value === "") {
           return Promise.reject("Vui lòng nhập mã hội đồng");
         }
-        const numberValue = Number(value);
-        if (!Number.isInteger(numberValue)) {
-          return Promise.reject("Mã hội đồng phải là số nguyên");
-        }
-        if (numberValue < 0 || numberValue > 99) {
-          return Promise.reject("Mã hội đồng tối đa 2 chữ số");
+        if (!/^\d{1,2}$/.test(String(value))) {
+          return Promise.reject("Mã hội đồng phải là số nguyên, tối đa 2 chữ số");
         }
         return Promise.resolve();
       },
@@ -175,6 +171,11 @@ const handleSearch = async () => {
   await fetchData({ ...param.value });
 };
 
+const handleMaInput = event => {
+  const rawValue = event?.target?.value ?? "";
+  formState.ma = String(rawValue).replace(/\D/g, "").slice(0, 2);
+};
+
 const showModal = () => {
   isEdit.value = false;
   resetFormState();
@@ -192,7 +193,7 @@ const editItem = async record => {
     isEdit.value = true;
     Object.assign(formState, {
       id: data.value?.data?.id,
-      ma: data.value?.data?.ma ?? undefined,
+      ma: data.value?.data?.ma !== undefined && data.value?.data?.ma !== null ? String(data.value.data.ma) : "",
       ten: data.value?.data?.ten || "",
       id_don_vi: data.value?.data?.id_don_vi ?? undefined,
       id_nam: data.value?.data?.id_nam ?? undefined,
