@@ -186,6 +186,9 @@ let ENDPOINTS = {
   YEAR_MAX_WEEK: "/api/namhoc/tuanmax",
   // HOLIDAY (Ngày nghỉ)
   HOLIDAY: "/api/ngaynghi",
+  // EXAM BOARD (Hội đồng thi)
+  EXAM_BOARD: "/api/hoidong",
+  EXAM_BOARD_DETAIL: "/api/hoidong/detail",
   // PHANPHOI_CHUONGTRINH
   PHANPHOI_CHUONGTRINH: "/api/phanphoi_chuongtrinh",
   PHANPHOI_CHUONGTRINH_EXPORT: "/api/phanphoi_chuongtrinh/export",
@@ -359,6 +362,7 @@ class RestApi {
     this.timetable = new Timetable(this.request);
     this.year = new Year(this.request);
     this.holiday = new Holiday(this.request);
+    this.exam_board = new ExamBoard(this.request);
     this.phanphoi_chuongtrinh = new PhanphoiChuongtrinh(this.request);
     this.phanphoi_chuongtrinh_chitiet = new PhanphoiChuongtrinhChitiet(this.request);
     this.lecture_schedule = new LectureSchedule(this.request);
@@ -1420,6 +1424,28 @@ class Holiday {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.HOLIDAY, data);
+  }
+}
+
+// EXAM BOARD CLASS
+class ExamBoard {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.EXAM_BOARD, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.EXAM_BOARD_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.EXAM_BOARD, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.EXAM_BOARD, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.EXAM_BOARD, data);
   }
 }
 
