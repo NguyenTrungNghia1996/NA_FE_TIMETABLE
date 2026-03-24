@@ -45,7 +45,6 @@
           <a-input v-model:value="formState.ten" placeholder="Nhập tên hội đồng thi" :maxlength="100" show-count />
         </a-form-item>
 
-        <SelectUnit v-model="formState.id_don_vi" label="Đơn vị" name="id_don_vi" :rules="rules.id_don_vi" />
         <SelectYear v-model="formState.id_nam" label="Năm học" name="id_nam" :rules="rules.id_nam" />
       </a-form>
 
@@ -98,7 +97,6 @@ const defaultFormState = () => ({
   id: undefined,
   ma: "",
   ten: "",
-  id_don_vi: undefined,
   id_nam: undefined,
 });
 
@@ -124,7 +122,6 @@ const rules = reactive({
     { required: true, message: "Vui lòng nhập tên hội đồng thi", trigger: "blur" },
     { max: 100, message: "Tên hội đồng thi không quá 100 ký tự", trigger: "blur" },
   ],
-  id_don_vi: [{ required: true, message: "Vui lòng chọn đơn vị", trigger: "change" }],
   id_nam: [{ required: true, message: "Vui lòng chọn năm học", trigger: "change" }],
 });
 
@@ -195,7 +192,6 @@ const editItem = async record => {
       id: data.value?.data?.id,
       ma: data.value?.data?.ma !== undefined && data.value?.data?.ma !== null ? String(data.value.data.ma) : "",
       ten: data.value?.data?.ten || "",
-      id_don_vi: data.value?.data?.id_don_vi ?? undefined,
       id_nam: data.value?.data?.id_nam ?? undefined,
     });
     visible.value = true;
@@ -210,7 +206,6 @@ const buildPayload = () => ({
   ...(isEdit.value ? { id: formState.id } : {}),
   ma: Number(formState.ma),
   ten: (formState.ten || "").trim(),
-  id_don_vi: formState.id_don_vi,
   id_nam: formState.id_nam,
 });
 
