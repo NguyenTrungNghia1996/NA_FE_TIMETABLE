@@ -111,7 +111,7 @@ const rules = reactive({
           return Promise.reject("Vui lòng nhập mã hội đồng");
         }
         if (!/^\d{1,2}$/.test(String(value))) {
-          return Promise.reject("Mã hội đồng phải là số nguyên, tối đa 2 chữ số");
+          return Promise.reject("Mã hội đồng phải là chuỗi số, tối đa 2 ký tự");
         }
         return Promise.resolve();
       },
@@ -190,7 +190,7 @@ const editItem = async record => {
     isEdit.value = true;
     Object.assign(formState, {
       id: data.value?.data?.id,
-      ma: data.value?.data?.ma !== undefined && data.value?.data?.ma !== null ? String(data.value.data.ma) : "",
+      ma: data.value?.data?.ma !== undefined && data.value?.data?.ma !== null ? data.value.data.ma : "",
       ten: data.value?.data?.ten || "",
       id_nam: data.value?.data?.id_nam ?? undefined,
     });
@@ -204,7 +204,7 @@ const editItem = async record => {
 
 const buildPayload = () => ({
   ...(isEdit.value ? { id: formState.id } : {}),
-  ma: Number(formState.ma),
+  ma: formState.ma,
   ten: (formState.ten || "").trim(),
   id_nam: formState.id_nam,
 });

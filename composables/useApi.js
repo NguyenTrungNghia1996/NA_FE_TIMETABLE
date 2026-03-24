@@ -189,6 +189,9 @@ let ENDPOINTS = {
   // EXAM BOARD (Hội đồng thi)
   EXAM_BOARD: "/api/hoidong",
   EXAM_BOARD_DETAIL: "/api/hoidong/detail",
+  // EXAM LOCATION (Điểm thi)
+  EXAM_LOCATION: "/api/diemthi",
+  EXAM_LOCATION_DETAIL: "/api/diemthi/detail",
   // PHANPHOI_CHUONGTRINH
   PHANPHOI_CHUONGTRINH: "/api/phanphoi_chuongtrinh",
   PHANPHOI_CHUONGTRINH_EXPORT: "/api/phanphoi_chuongtrinh/export",
@@ -363,6 +366,7 @@ class RestApi {
     this.year = new Year(this.request);
     this.holiday = new Holiday(this.request);
     this.exam_board = new ExamBoard(this.request);
+    this.exam_location = new ExamLocation(this.request);
     this.phanphoi_chuongtrinh = new PhanphoiChuongtrinh(this.request);
     this.phanphoi_chuongtrinh_chitiet = new PhanphoiChuongtrinhChitiet(this.request);
     this.lecture_schedule = new LectureSchedule(this.request);
@@ -1446,6 +1450,28 @@ class ExamBoard {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.EXAM_BOARD, data);
+  }
+}
+
+// EXAM LOCATION CLASS
+class ExamLocation {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.EXAM_LOCATION, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.EXAM_LOCATION_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.EXAM_LOCATION, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.EXAM_LOCATION, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.EXAM_LOCATION, data);
   }
 }
 
