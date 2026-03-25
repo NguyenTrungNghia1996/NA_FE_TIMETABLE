@@ -189,6 +189,10 @@ let ENDPOINTS = {
   // EXAM BOARD (Hội đồng thi)
   EXAM_BOARD: "/api/hoidong",
   EXAM_BOARD_DETAIL: "/api/hoidong/detail",
+  // EXAM SUBJECT (Môn thi)
+  EXAM_SUBJECT: "/api/monthi",
+  EXAM_SUBJECT_DETAIL: "/api/monthi/detail",
+  EXAM_SUBJECT_LIST: "/api/monthi/list",
   // EXAM LOCATION (Điểm thi)
   EXAM_LOCATION: "/api/diemthi",
   EXAM_LOCATION_DETAIL: "/api/diemthi/detail",
@@ -366,6 +370,7 @@ class RestApi {
     this.year = new Year(this.request);
     this.holiday = new Holiday(this.request);
     this.exam_board = new ExamBoard(this.request);
+    this.exam_subject = new ExamSubject(this.request);
     this.exam_location = new ExamLocation(this.request);
     this.phanphoi_chuongtrinh = new PhanphoiChuongtrinh(this.request);
     this.phanphoi_chuongtrinh_chitiet = new PhanphoiChuongtrinhChitiet(this.request);
@@ -1472,6 +1477,34 @@ class ExamLocation {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.EXAM_LOCATION, data);
+  }
+}
+
+// EXAM SUBJECT CLASS
+class ExamSubject {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.EXAM_SUBJECT, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.EXAM_SUBJECT_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.EXAM_SUBJECT, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.EXAM_SUBJECT, data);
+  }
+  async list_from_subject(data) {
+    return await this.request.get(ENDPOINTS.EXAM_SUBJECT_LIST, data);
+  }
+  async save_subject_list(data) {
+    return await this.request.post(ENDPOINTS.EXAM_SUBJECT_LIST, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.EXAM_SUBJECT, data);
   }
 }
 
