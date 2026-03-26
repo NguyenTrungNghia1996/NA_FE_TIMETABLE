@@ -196,6 +196,11 @@ let ENDPOINTS = {
   // EXAM LOCATION (Điểm thi)
   EXAM_LOCATION: "/api/diemthi",
   EXAM_LOCATION_DETAIL: "/api/diemthi/detail",
+  // SUPERVISORY (Giám thị)
+  SUPERVISORY: "/api/giamthi",
+  SUPERVISORY_DETAIL: "/api/giamthi/detail",
+  SUPERVISORY_LIST: "/api/giamthi/list",
+  SUPERVISORY_IMPORT: "/api/giamthi/import",
   // PHANPHOI_CHUONGTRINH
   PHANPHOI_CHUONGTRINH: "/api/phanphoi_chuongtrinh",
   PHANPHOI_CHUONGTRINH_EXPORT: "/api/phanphoi_chuongtrinh/export",
@@ -372,6 +377,7 @@ class RestApi {
     this.exam_board = new ExamBoard(this.request);
     this.exam_subject = new ExamSubject(this.request);
     this.exam_location = new ExamLocation(this.request);
+    this.supervisory = new Supervisory(this.request);
     this.phanphoi_chuongtrinh = new PhanphoiChuongtrinh(this.request);
     this.phanphoi_chuongtrinh_chitiet = new PhanphoiChuongtrinhChitiet(this.request);
     this.lecture_schedule = new LectureSchedule(this.request);
@@ -1477,6 +1483,34 @@ class ExamLocation {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.EXAM_LOCATION, data);
+  }
+}
+
+// SUPERVISORY CLASS
+class Supervisory {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.SUPERVISORY, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.SUPERVISORY_DETAIL, data);
+  }
+  async list_teacher_ids(data) {
+    return await this.request.get(ENDPOINTS.SUPERVISORY_LIST, data);
+  }
+  async save_teacher_ids(data) {
+    return await this.request.post(ENDPOINTS.SUPERVISORY_LIST, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.SUPERVISORY, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.SUPERVISORY, data);
+  }
+  async import_file(data) {
+    return await this.request.postForm(ENDPOINTS.SUPERVISORY_IMPORT, data);
   }
 }
 
