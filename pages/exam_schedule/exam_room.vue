@@ -1,8 +1,26 @@
 <template>
   <div class="p-2 md:p-4 bg-white min-h-full">
-    <div class="mb-4">
-      <div class="w-full md:w-[360px]">
-        <SelectExamBoard v-model="listFilter.id_hoi_dong" label="Hội đồng thi" name="list_filter_id_hoi_dong" no-form-item placeholder="Lọc theo hội đồng thi" />
+    <div class="mb-4 bg-slate-50 border border-slate-200 rounded-lg p-3">
+      <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3">
+        <div>
+          <div class="text-sm font-semibold text-slate-700">Bộ lọc dữ liệu</div>
+          <div class="text-xs text-slate-500">Chọn hội đồng thi để lọc đồng thời danh sách điểm thi và phòng thi.</div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:items-end gap-2 lg:min-w-[480px]">
+          <div class="flex-1 min-w-0">
+            <SelectExamBoard
+              v-model="listFilter.id_hoi_dong"
+              label="Hội đồng thi"
+              name="list_filter_id_hoi_dong"
+              no-form-item
+              placeholder="Lọc theo hội đồng thi"
+            />
+          </div>
+          <a-button @click="listFilter.id_hoi_dong = undefined" :disabled="!listFilter.id_hoi_dong">
+            Xóa lọc
+          </a-button>
+        </div>
       </div>
     </div>
 
