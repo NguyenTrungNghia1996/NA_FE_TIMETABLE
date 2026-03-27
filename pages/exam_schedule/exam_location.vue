@@ -55,6 +55,10 @@
           <a-input-number v-model:value="formState.so_giam_thi_1_phong" :min="1" :max="99" :precision="0" class="!w-full" />
         </a-form-item>
 
+        <a-form-item label="Số thí sinh/1 phòng" name="so_thi_sinh_1_phong">
+          <a-input-number v-model:value="formState.so_thi_sinh_1_phong" :min="1" :max="99" :precision="0" class="!w-full" />
+        </a-form-item>
+
         <SelectUnit v-model="formState.id_don_vi" label="Đơn vị" name="id_don_vi" :rules="rules.id_don_vi" />
 
         <SelectYear v-model="examBoardYearFilter" label="Năm học" name="filter_id_nam" />
@@ -97,6 +101,7 @@ const columns = [
   { title: "Đơn vị", dataIndex: "ten_don_vi", key: "ten_don_vi", width: 220, ellipsis: true },
   { title: "Hội đồng thi", dataIndex: "ten_hoi_dong", key: "ten_hoi_dong", width: 180, ellipsis: true },
   { title: "Số giám thị/1 phòng", dataIndex: "so_giam_thi_1_phong", key: "so_giam_thi_1_phong", width: 140, align: "center" },
+  { title: "Số thí sinh/1 phòng", dataIndex: "so_thi_sinh_1_phong", key: "so_thi_sinh_1_phong", width: 140, align: "center" },
   { title: "Giám sát", key: "co_giam_sat", width: 110, align: "center" },
   { title: "Số phòng giám sát tối đa", dataIndex: "so_phong_giam_sat_toi_da", key: "so_phong_giam_sat_toi_da", width: 170, align: "center" },
   { title: "Thao tác", key: "action", width: 90, align: "center", fixed: "right" },
@@ -126,6 +131,7 @@ const defaultFormState = () => ({
   ma: "",
   ten: "",
   so_giam_thi_1_phong: 1,
+  so_thi_sinh_1_phong: 1,
   co_giam_sat: false,
   so_phong_giam_sat_toi_da: 0,
   id_don_vi: undefined,
@@ -165,6 +171,19 @@ const rules = reactive({
           max: 99,
           requiredMessage: "Vui lòng nhập số giám thị/1 phòng",
           rangeMessage: "Số giám thị/1 phòng phải từ 1 đến 99",
+        }),
+      trigger: ["blur", "change"],
+    },
+  ],
+  so_thi_sinh_1_phong: [
+    { required: true, message: "Vui lòng nhập số thí sinh/1 phòng", trigger: "blur" },
+    {
+      validator: (_rule, value) =>
+        validateInteger(value, {
+          min: 1,
+          max: 99,
+          requiredMessage: "Vui lòng nhập số thí sinh/1 phòng",
+          rangeMessage: "Số thí sinh/1 phòng phải từ 1 đến 99",
         }),
       trigger: ["blur", "change"],
     },
@@ -275,6 +294,7 @@ const editItem = async record => {
       ma: data.value?.data?.ma || "",
       ten: data.value?.data?.ten || "",
       so_giam_thi_1_phong: data.value?.data?.so_giam_thi_1_phong ?? 1,
+      so_thi_sinh_1_phong: data.value?.data?.so_thi_sinh_1_phong ?? 1,
       co_giam_sat: !!data.value?.data?.co_giam_sat,
       so_phong_giam_sat_toi_da: data.value?.data?.so_phong_giam_sat_toi_da ?? 0,
       id_don_vi: data.value?.data?.id_don_vi ?? undefined,
@@ -293,6 +313,7 @@ const buildPayload = () => ({
   ma: (formState.ma || "").trim(),
   ten: (formState.ten || "").trim(),
   so_giam_thi_1_phong: formState.so_giam_thi_1_phong,
+  so_thi_sinh_1_phong: formState.so_thi_sinh_1_phong,
   co_giam_sat: formState.co_giam_sat,
   so_phong_giam_sat_toi_da: formState.co_giam_sat ? formState.so_phong_giam_sat_toi_da : 0,
   id_don_vi: formState.id_don_vi,
