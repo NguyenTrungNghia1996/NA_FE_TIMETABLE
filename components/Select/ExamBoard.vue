@@ -91,6 +91,35 @@ const loading = ref(false);
 const search = ref("");
 
 const hasValue = value => value !== undefined && value !== null && value !== "";
+const normalizeValue = value => (value !== undefined && value !== null ? String(value) : value);
+
+const ensureSelectedOption = async () => {
+  if (props.multiple || !hasValue(props.modelValue)) return;
+
+  const selectedValue = normalizeValue(props.modelValue);
+  const hasSelectedOption = options.value.some(option => normalizeValue(option.value) === selectedValue);
+  if (hasSelectedOption) return;
+
+  try {
+    const { data, error } = await RestApi.exam_board.detail({ params: { Id: props.modelValue } });
+    if (data.value?.status !== "success") {
+      throw new Error(error?.value?.data?.message || "Không thể tải thông tin hội đồng thi");
+    }
+
+    const selectedBoard = data.value?.data;
+    if (!selectedBoard?.id) return;
+
+    options.value = [
+      {
+        label: selectedBoard.ten,
+        value: selectedBoard.id,
+      },
+      ...options.value,
+    ];
+  } catch (err) {
+    message.error(err?.message || err?.value?.data?.message || "Không thể tải thông tin hội đồng thi");
+  }
+};
 
 const fetchExamBoards = async (q = "") => {
   loading.value = true;
@@ -109,6 +138,7 @@ const fetchExamBoards = async (q = "") => {
         label: item.ten,
         value: item.id,
       }));
+      await ensureSelectedOption();
       emit("update:modelValue", props.modelValue);
     } else {
       throw new Error(error?.value?.data?.message || "Không thể tải danh sách hội đồng thi");
