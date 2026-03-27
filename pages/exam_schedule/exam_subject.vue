@@ -143,6 +143,8 @@ const visible = ref(false);
 const confirmLoading = ref(false);
 const isEdit = ref(false);
 const formRef = ref();
+const syncingEditForm = ref(false);
+const syncingSubjectImportForm = ref(false);
 const subjectImportVisible = ref(false);
 const subjectImportLoading = ref(false);
 const subjectImportSaving = ref(false);
@@ -333,23 +335,28 @@ const showSubjectImportModal = async () => {
 watch(
   () => formState.id_nam,
   (value, oldValue) => {
+    if (syncingEditForm.value) return;
     if (value !== oldValue) {
       formState.id_hoi_dong = undefined;
     }
   },
 );
 
-watch(() => subjectImportForm.id_nam, (value, oldValue) => {
-  if (value !== oldValue) {
-    subjectImportForm.id_hoi_dong = undefined;
-    subjectImportForm.id_mon = [];
-  }
-});
+watch(
+  () => subjectImportForm.id_nam,
+  (value, oldValue) => {
+    if (syncingSubjectImportForm.value) return;
+    if (value !== oldValue) {
+      subjectImportForm.id_hoi_dong = undefined;
+      subjectImportForm.id_mon = [];
+    }
+  },
+);
 
 watch(
   () => subjectImportForm.id_hoi_dong,
   async (value, oldValue) => {
-    if (value === oldValue) return;
+    if (syncingSubjectImportForm.value || value === oldValue) return;
     await fetchSubjectImportSelection(value);
   },
 );
@@ -363,6 +370,7 @@ const editItem = async record => {
     }
 
     isEdit.value = true;
+    syncingEditForm.value = true;
     Object.assign(formState, {
       id: data.value?.data?.id,
       ma: data.value?.data?.ma || "",
@@ -371,9 +379,11 @@ const editItem = async record => {
       id_nam: data.value?.data?.id_nam ?? undefined,
     });
     visible.value = true;
+    await nextTick();
   } catch (error) {
     message.error(error?.message || "Không tải được chi tiết môn thi");
   } finally {
+    syncingEditForm.value = false;
     detailLoading.value = false;
   }
 };

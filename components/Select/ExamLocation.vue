@@ -91,6 +91,35 @@ const loading = ref(false);
 const search = ref("");
 
 const hasValue = value => value !== undefined && value !== null && value !== "";
+const normalizeValue = value => (value !== undefined && value !== null ? String(value) : value);
+
+const ensureSelectedOption = async () => {
+  if (props.multiple || !hasValue(props.modelValue)) return;
+
+  const selectedValue = normalizeValue(props.modelValue);
+  const hasSelectedOption = options.value.some(option => normalizeValue(option.value) === selectedValue);
+  if (hasSelectedOption) return;
+
+  try {
+    const { data, error } = await RestApi.exam_location.detail({ params: { Id: props.modelValue } });
+    if (data.value?.status !== "success") {
+      throw new Error(error?.value?.data?.message || "Không thể tải thông tin điểm thi");
+    }
+
+    const selectedLocation = data.value?.data;
+    if (!selectedLocation?.id) return;
+
+    options.value = [
+      {
+        label: selectedLocation.ten || selectedLocation.ma || `Điểm thi ${selectedLocation.id}`,
+        value: selectedLocation.id,
+      },
+      ...options.value,
+    ];
+  } catch (err) {
+    message.error(err?.message || err?.value?.data?.message || "Không thể tải thông tin điểm thi");
+  }
+};
 
 const fetchExamLocations = async (q = "") => {
   loading.value = true;
@@ -109,6 +138,7 @@ const fetchExamLocations = async (q = "") => {
         label: item.ten || item.ma || `Điểm thi ${item.id}`,
         value: item.id,
       }));
+      await ensureSelectedOption();
       emit("update:modelValue", props.modelValue);
     } else {
       throw new Error(error?.value?.data?.message || "Không thể tải danh sách điểm thi");

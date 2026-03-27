@@ -308,23 +308,23 @@ watch(
   },
 );
 
-// watch(() => formState.id_nam, (value, oldValue) => {
-//   if (syncingFormFilters.value) return;
-//   if (value !== oldValue) {
-//     formState.id_hoi_dong = undefined;
-//     formState.id_diem_thi = undefined;
-//   }
-// });
+watch(() => formState.id_nam, (value, oldValue) => {
+  if (syncingFormFilters.value) return;
+  if (value !== oldValue) {
+    formState.id_hoi_dong = undefined;
+    formState.id_diem_thi = undefined;
+  }
+});
 
-// watch(
-//   () => formState.id_hoi_dong,
-//   (value, oldValue) => {
-//     if (syncingFormFilters.value) return;
-//     if (value !== oldValue) {
-//       formState.id_diem_thi = undefined;
-//     }
-//   },
-// );
+watch(
+  () => formState.id_hoi_dong,
+  (value, oldValue) => {
+    if (syncingFormFilters.value) return;
+    if (value !== oldValue) {
+      formState.id_diem_thi = undefined;
+    }
+  },
+);
 
 const syncSelectedLocation = items => {
   if (!Array.isArray(items) || !items.length) {
@@ -596,11 +596,12 @@ const editRoom = async record => {
       id_hoi_dong: data.value?.data?.id_hoi_dong ?? undefined,
       id_diem_thi: data.value?.data?.id_diem_thi ?? selectedLocation.value?.id,
     });
-    syncingFormFilters.value = false;
     visible.value = true;
+    await nextTick();
   } catch (err) {
     message.error(err?.message || "Không tải được chi tiết phòng thi");
   } finally {
+    syncingFormFilters.value = false;
     detailLoading.value = false;
   }
 };
