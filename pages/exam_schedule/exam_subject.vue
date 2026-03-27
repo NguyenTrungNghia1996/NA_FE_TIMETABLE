@@ -46,9 +46,9 @@
           <a-input v-model:value="formState.ten" placeholder="Nhập tên môn thi" :maxlength="255" show-count />
         </a-form-item>
 
-        <SelectYear v-model="examBoardYearFilter" label="Năm học" name="filter_id_nam" />
+        <SelectYear v-model="formState.id_nam" label="Năm học" name="id_nam" :rules="rules.id_nam" />
 
-        <SelectExamBoard v-model="formState.id_hoi_dong" label="Hội đồng thi" name="id_hoi_dong" :rules="rules.id_hoi_dong" :id-nam="examBoardYearFilter" />
+        <SelectExamBoard v-model="formState.id_hoi_dong" label="Hội đồng thi" name="id_hoi_dong" :rules="rules.id_hoi_dong" :id-nam="formState.id_nam" />
       </a-form>
 
       <template #footer>
@@ -143,7 +143,6 @@ const visible = ref(false);
 const confirmLoading = ref(false);
 const isEdit = ref(false);
 const formRef = ref();
-const examBoardYearFilter = ref(undefined);
 const subjectImportVisible = ref(false);
 const subjectImportLoading = ref(false);
 const subjectImportSaving = ref(false);
@@ -163,6 +162,7 @@ const defaultFormState = () => ({
   ma: "",
   ten: "",
   id_hoi_dong: undefined,
+  id_nam: undefined,
 });
 
 const formState = reactive(defaultFormState());
@@ -200,6 +200,7 @@ const rules = reactive({
     { max: 255, message: "Tên môn thi không quá 255 ký tự", trigger: "blur" },
   ],
   id_hoi_dong: [{ required: true, message: "Vui lòng chọn hội đồng thi", trigger: "change" }],
+  id_nam: [{ required: true, message: "Vui lòng chọn năm học", trigger: "change" }],
 });
 
 const subjectImportRules = reactive({
@@ -278,7 +279,6 @@ const resetSearch = async () => {
 const showModal = () => {
   isEdit.value = false;
   resetFormState();
-  examBoardYearFilter.value = undefined;
   visible.value = true;
 };
 
@@ -330,11 +330,14 @@ const showSubjectImportModal = async () => {
   await fetchSubjects({ ...subjectParam.value });
 };
 
-watch(examBoardYearFilter, (value, oldValue) => {
-  if (value !== oldValue) {
-    formState.id_hoi_dong = undefined;
-  }
-});
+watch(
+  () => formState.id_nam,
+  (value, oldValue) => {
+    if (value !== oldValue) {
+      formState.id_hoi_dong = undefined;
+    }
+  },
+);
 
 watch(() => subjectImportForm.id_nam, (value, oldValue) => {
   if (value !== oldValue) {
@@ -365,6 +368,7 @@ const editItem = async record => {
       ma: data.value?.data?.ma || "",
       ten: data.value?.data?.ten || "",
       id_hoi_dong: data.value?.data?.id_hoi_dong ?? undefined,
+      id_nam: data.value?.data?.id_nam ?? undefined,
     });
     visible.value = true;
   } catch (error) {
@@ -379,6 +383,7 @@ const buildPayload = () => ({
   ma: (formState.ma || "").trim(),
   ten: (formState.ten || "").trim(),
   id_hoi_dong: formState.id_hoi_dong,
+  id_nam: formState.id_nam,
 });
 
 const handleOk = async () => {
@@ -414,7 +419,6 @@ const handleOk = async () => {
       visible.value = false;
       formRef.value?.resetFields?.();
       resetFormState();
-      examBoardYearFilter.value = undefined;
     }
   }
 };
@@ -422,7 +426,6 @@ const handleOk = async () => {
 const handleCancel = () => {
   formRef.value?.resetFields?.();
   resetFormState();
-  examBoardYearFilter.value = undefined;
   visible.value = false;
 };
 
