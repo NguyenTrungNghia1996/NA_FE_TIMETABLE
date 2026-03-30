@@ -280,31 +280,18 @@
             </a-form-item>
           </div>
 
-          <div class="contestant-form-row">
-            <label class="contestant-form-label">Môn thi 1 <span class="text-red-500">*</span></label>
-            <a-form-item name="mon_thi_1" class="contestant-form-control">
+          <div class="contestant-form-row items-start">
+            <label class="contestant-form-label pt-2">Môn thi <span class="text-red-500">*</span></label>
+            <a-form-item name="selected_subjects" class="contestant-form-control">
               <a-select
-                v-model:value="formState.mon_thi_1"
+                v-model:value="formState.selected_subjects"
+                mode="multiple"
                 show-search
                 allow-clear
+                :max-tag-count="2"
                 :options="subjectOptions"
                 :loading="subjectLoading"
-                placeholder="-- Chọn môn thi 1 --"
-                :filter-option="filterOptionByLabel"
-              />
-            </a-form-item>
-          </div>
-
-          <div class="contestant-form-row">
-            <label class="contestant-form-label">Môn thi 2 <span class="text-red-500">*</span></label>
-            <a-form-item name="mon_thi_2" class="contestant-form-control">
-              <a-select
-                v-model:value="formState.mon_thi_2"
-                show-search
-                allow-clear
-                :options="subjectOptions"
-                :loading="subjectLoading"
-                placeholder="-- Chọn môn thi 2 --"
+                placeholder="-- Chọn đủ 2 môn thi --"
                 :filter-option="filterOptionByLabel"
               />
             </a-form-item>
@@ -313,7 +300,7 @@
       </a-form>
 
       <template #footer>
-        <div class="flex justify-center gap-2">
+        <div class="flex justify-end gap-2">
           <a-button type="primary" :loading="confirmLoading || detailLoading" @click="handleOk">
             {{ isEdit ? "Lưu" : "Lưu" }}
           </a-button>
@@ -433,8 +420,7 @@ const defaultFormState = () => ({
   thuong_tru_tinh: undefined,
   thuong_tru_xa: undefined,
   id_diem_thi: undefined,
-  mon_thi_1: undefined,
-  mon_thi_2: undefined,
+  selected_subjects: [],
 });
 
 const formState = reactive(defaultFormState());
@@ -454,8 +440,20 @@ const rules = reactive({
   thuong_tru_tinh: [{ required: true, message: "Vui lòng chọn tỉnh thường trú", trigger: "change" }],
   thuong_tru_xa: [{ required: true, message: "Vui lòng chọn nơi thường trú", trigger: "change" }],
   id_diem_thi: [{ required: true, message: "Vui lòng chọn điểm thi", trigger: "change" }],
-  mon_thi_1: [{ required: true, message: "Vui lòng chọn môn thi 1", trigger: "change" }],
-  mon_thi_2: [{ required: true, message: "Vui lòng chọn môn thi 2", trigger: "change" }],
+  selected_subjects: [
+    {
+      validator: (_rule, value) => {
+        if (!Array.isArray(value) || value.length !== 2) {
+          return Promise.reject("Vui lòng chọn đúng 2 môn thi");
+        }
+        if (new Set(value).size !== 2) {
+          return Promise.reject("Hai môn thi không được trùng nhau");
+        }
+        return Promise.resolve();
+      },
+      trigger: "change",
+    },
+  ],
 });
 
 const contestantTitle = computed(() => {
@@ -820,8 +818,8 @@ const buildPayload = () => ({
   cccd: (formState.cccd || "").trim(),
   thuong_tru_xa: formState.thuong_tru_xa,
   id_diem_thi: formState.id_diem_thi,
-  mon_thi_1: formState.mon_thi_1,
-  mon_thi_2: formState.mon_thi_2,
+  mon_thi_1: formState.selected_subjects?.[0],
+  mon_thi_2: formState.selected_subjects?.[1],
 });
 
 const showModal = async () => {
@@ -885,8 +883,7 @@ const editItem = async record => {
       thuong_tru_tinh: residenceXaDetail?.id_tinh ?? undefined,
       thuong_tru_xa: detail.thuong_tru_xa ?? undefined,
       id_diem_thi: detail.id_diem_thi ?? selectedLocation.value?.id,
-      mon_thi_1: detail.mon_thi_1 ?? undefined,
-      mon_thi_2: detail.mon_thi_2 ?? undefined,
+      selected_subjects: [detail.mon_thi_1, detail.mon_thi_2].filter(Boolean),
     });
 
     await Promise.all([
@@ -993,6 +990,7 @@ watch(
       if (syncingForm.value) return;
       formState.id_hoi_dong = undefined;
       formState.id_diem_thi = undefined;
+      formState.selected_subjects = [];
       boardOptions.value = [];
       examLocationOptions.value = [];
       subjectOptions.value = [];
@@ -1007,6 +1005,7 @@ watch(
     if (value !== oldValue) {
       if (syncingForm.value) return;
       formState.id_diem_thi = undefined;
+      formState.selected_subjects = [];
       examLocationOptions.value = [];
       subjectOptions.value = [];
       if (value) {
