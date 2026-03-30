@@ -189,28 +189,17 @@
             <label class="contestant-form-label pt-2">Nơi sinh <span class="text-red-500">*</span></label>
             <div class="contestant-form-control space-y-2">
               <a-form-item name="noi_sinh_tinh" class="mb-0">
-                <a-select
-                  v-model:value="formState.noi_sinh_tinh"
-                  show-search
-                  allow-clear
-                  :options="provinceOptions"
-                  :loading="provinceLoading"
-                  placeholder="-- Chọn tỉnh --"
-                  :filter-option="filterOptionByLabel"
-                  @search="handleProvinceSearch"
-                />
+                <SelectTinh v-model="formState.noi_sinh_tinh" name="noi_sinh_tinh_select" label="" :no-form-item="true" placeholder="-- Chọn tỉnh --" />
               </a-form-item>
               <a-form-item name="noi_sinh_xa" class="mb-0">
-                <a-select
-                  v-model:value="formState.noi_sinh_xa"
-                  show-search
-                  allow-clear
-                  :options="birthPlaceOptions"
-                  :loading="birthPlaceLoading"
+                <SelectXa
+                  v-model="formState.noi_sinh_xa"
+                  name="noi_sinh_xa_select"
+                  label=""
+                  :no-form-item="true"
+                  :id-tinh="formState.noi_sinh_tinh"
                   placeholder="-- Chọn xã --"
-                  :filter-option="filterOptionByLabel"
                   :disabled="!formState.noi_sinh_tinh"
-                  @search="handleBirthPlaceSearch"
                 />
               </a-form-item>
             </div>
@@ -220,28 +209,17 @@
             <label class="contestant-form-label pt-2">Nơi thường trú <span class="text-red-500">*</span></label>
             <div class="contestant-form-control space-y-2">
               <a-form-item name="thuong_tru_tinh" class="mb-0">
-                <a-select
-                  v-model:value="formState.thuong_tru_tinh"
-                  show-search
-                  allow-clear
-                  :options="provinceOptions"
-                  :loading="provinceLoading"
-                  placeholder="-- Chọn tỉnh --"
-                  :filter-option="filterOptionByLabel"
-                  @search="handleProvinceSearch"
-                />
+                <SelectTinh v-model="formState.thuong_tru_tinh" name="thuong_tru_tinh_select" label="" :no-form-item="true" placeholder="-- Chọn tỉnh --" />
               </a-form-item>
               <a-form-item name="thuong_tru_xa" class="mb-0">
-                <a-select
-                  v-model:value="formState.thuong_tru_xa"
-                  show-search
-                  allow-clear
-                  :options="permanentResidenceOptions"
-                  :loading="permanentResidenceLoading"
+                <SelectXa
+                  v-model="formState.thuong_tru_xa"
+                  name="thuong_tru_xa_select"
+                  label=""
+                  :no-form-item="true"
+                  :id-tinh="formState.thuong_tru_tinh"
                   placeholder="-- Chọn xã --"
-                  :filter-option="filterOptionByLabel"
                   :disabled="!formState.thuong_tru_tinh"
-                  @search="handlePermanentResidenceSearch"
                 />
               </a-form-item>
             </div>
@@ -250,32 +228,23 @@
           <div class="contestant-form-row">
             <label class="contestant-form-label">Dân tộc <span class="text-red-500">*</span></label>
             <a-form-item name="dan_toc" class="contestant-form-control">
-              <a-select
-                v-model:value="formState.dan_toc"
-                show-search
-                allow-clear
-                :options="ethnicityOptions"
-                :loading="ethnicityLoading"
-                placeholder="-- Chọn dân tộc --"
-                :filter-option="filterOptionByLabel"
-                @search="handleEthnicitySearch"
-              />
+              <SelectDanToc v-model="formState.dan_toc" name="dan_toc_select" label="" :no-form-item="true" placeholder="-- Chọn dân tộc --" />
             </a-form-item>
           </div>
 
           <div class="contestant-form-row items-start">
             <label class="contestant-form-label pt-2">Môn thi <span class="text-red-500">*</span></label>
             <a-form-item name="selected_subjects" class="contestant-form-control">
-              <a-select
-                v-model:value="formState.selected_subjects"
-                mode="multiple"
-                show-search
-                allow-clear
-                :max-tag-count="2"
-                :options="subjectOptions"
-                :loading="subjectLoading"
+              <SelectExamSubject
+                v-model="formState.selected_subjects"
+                name="selected_subjects_select"
+                label=""
+                :no-form-item="true"
+                multiple
+                :id-hoi-dong="formState.id_hoi_dong"
+                :disabled="!formState.id_hoi_dong"
                 placeholder="-- Chọn đủ 2 môn thi --"
-                :filter-option="filterOptionByLabel"
+                :max-tag-count="2"
               />
             </a-form-item>
           </div>
@@ -352,17 +321,6 @@ const contestantColumns = [
 const locationDataSource = ref([]);
 const contestantDataSource = ref([]);
 const selectedLocation = ref(null);
-const subjectOptions = ref([]);
-const subjectLoading = ref(false);
-
-const provinceOptions = ref([]);
-const provinceLoading = ref(false);
-const birthPlaceOptions = ref([]);
-const birthPlaceLoading = ref(false);
-const permanentResidenceOptions = ref([]);
-const permanentResidenceLoading = ref(false);
-const ethnicityOptions = ref([]);
-const ethnicityLoading = ref(false);
 
 const locationPagination = reactive({
   current: 1,
@@ -442,20 +400,9 @@ const formatDate = value => {
   return dayjs(value).isValid() ? dayjs(value).format("DD/MM/YYYY") : "";
 };
 
-const filterOptionByLabel = (input, option) => {
-  const label = String(option?.label || "").toLowerCase();
-  return label.includes(String(input || "").toLowerCase());
-};
-
 const resetFormState = () => {
   Object.assign(formState, defaultFormState());
 };
-
-const mapCommonOptions = (items, labelKey = "ten") =>
-  (items || []).map(item => ({
-    label: item[labelKey] || item.ten_day_du || item.ten || `${item.id}`,
-    value: item.id,
-  }));
 
 const fetchXaDetail = async id => {
   if (!id) return null;
@@ -527,115 +474,6 @@ const fetchContestants = async params => {
     message.error(error?.message || "Không tải được danh sách thí sinh");
   } finally {
     contestantLoading.value = false;
-  }
-};
-
-const fetchSubjects = async idHoiDong => {
-  try {
-    subjectLoading.value = true;
-    const params = { pageIndex: 1, pageSize: 500 };
-    if (idHoiDong) params.idHoiDong = idHoiDong;
-
-    const { data, error } = await RestApi.exam_subject.list({ params });
-    if (data.value?.status === "success") {
-      subjectOptions.value = (data.value?.data?.items || []).map(item => ({
-        label: item.ten,
-        value: item.id,
-      }));
-    } else {
-      throw new Error(error.value?.data?.message || "Không tải được danh sách môn thi");
-    }
-  } catch (error) {
-    subjectOptions.value = [];
-    message.error(error?.message || "Không tải được danh sách môn thi");
-  } finally {
-    subjectLoading.value = false;
-  }
-};
-
-const fetchProvinces = async searchValue => {
-  try {
-    provinceLoading.value = true;
-    const { data, error } = await RestApi.tinh.list({ params: { search: (searchValue || "").trim() } });
-    if (data.value?.status === "success") {
-      provinceOptions.value = mapCommonOptions(data.value?.data?.items || []);
-    } else {
-      throw new Error(error.value?.data?.message || "Không tải được danh sách tỉnh");
-    }
-  } catch (error) {
-    provinceOptions.value = [];
-    message.error(error?.message || "Không tải được danh sách tỉnh");
-  } finally {
-    provinceLoading.value = false;
-  }
-};
-
-const fetchBirthPlaces = async searchValue => {
-  if (!formState.noi_sinh_tinh) {
-    birthPlaceOptions.value = [];
-    return;
-  }
-  try {
-    birthPlaceLoading.value = true;
-    const params = { search: (searchValue || "").trim(), idTinh: formState.noi_sinh_tinh };
-    const { data, error } = await RestApi.xa.list({ params });
-    if (data.value?.status === "success") {
-      birthPlaceOptions.value = mapCommonOptions(data.value?.data?.items || []);
-    } else {
-      throw new Error(error.value?.data?.message || "Không tải được danh sách nơi sinh");
-    }
-  } catch (error) {
-    birthPlaceOptions.value = [];
-    message.error(error?.message || "Không tải được danh sách nơi sinh");
-  } finally {
-    birthPlaceLoading.value = false;
-  }
-};
-
-const fetchPermanentResidences = async searchValue => {
-  if (!formState.thuong_tru_tinh) {
-    permanentResidenceOptions.value = [];
-    return;
-  }
-  try {
-    permanentResidenceLoading.value = true;
-    const params = { search: (searchValue || "").trim(), idTinh: formState.thuong_tru_tinh };
-    const { data, error } = await RestApi.xa.list({ params });
-    if (data.value?.status === "success") {
-      permanentResidenceOptions.value = mapCommonOptions(data.value?.data?.items || []);
-    } else {
-      throw new Error(error.value?.data?.message || "Không tải được danh sách nơi thường trú");
-    }
-  } catch (error) {
-    permanentResidenceOptions.value = [];
-    message.error(error?.message || "Không tải được danh sách nơi thường trú");
-  } finally {
-    permanentResidenceLoading.value = false;
-  }
-};
-
-const debouncedFetchBirthPlaces = debounce(value => {
-  fetchBirthPlaces(value);
-}, 300);
-
-const debouncedFetchPermanentResidences = debounce(value => {
-  fetchPermanentResidences(value);
-}, 300);
-
-const fetchEthnicities = async searchValue => {
-  try {
-    ethnicityLoading.value = true;
-    const { data, error } = await RestApi.dan_toc.list({ params: { search: (searchValue || "").trim() } });
-    if (data.value?.status === "success") {
-      ethnicityOptions.value = mapCommonOptions(data.value?.data?.items || []);
-    } else {
-      throw new Error(error.value?.data?.message || "Không tải được dân tộc");
-    }
-  } catch (error) {
-    ethnicityOptions.value = [];
-    message.error(error?.message || "Không tải được dân tộc");
-  } finally {
-    ethnicityLoading.value = false;
   }
 };
 
@@ -737,11 +575,6 @@ const showModal = async () => {
     }
   }
   visible.value = true;
-  await Promise.all([
-    fetchSubjects(formState.id_hoi_dong),
-    fetchProvinces(""),
-    fetchEthnicities(""),
-  ]);
   syncingForm.value = false;
 };
 
@@ -791,14 +624,6 @@ const editItem = async record => {
       id_diem_thi: detail.id_diem_thi ?? selectedLocation.value?.id,
       selected_subjects: [detail.mon_thi_1, detail.mon_thi_2].filter(Boolean),
     });
-
-    await Promise.all([
-      fetchSubjects(formState.id_hoi_dong),
-      fetchProvinces(""),
-      fetchBirthPlaces(""),
-      fetchPermanentResidences(""),
-      fetchEthnicities(""),
-    ]);
 
     visible.value = true;
     syncingForm.value = false;
@@ -860,22 +685,6 @@ const deleteItem = async id => {
   }
 };
 
-const handleBirthPlaceSearch = value => {
-  debouncedFetchBirthPlaces(value);
-};
-
-const handlePermanentResidenceSearch = value => {
-  debouncedFetchPermanentResidences(value);
-};
-
-const handleProvinceSearch = value => {
-  fetchProvinces(value);
-};
-
-const handleEthnicitySearch = value => {
-  fetchEthnicities(value);
-};
-
 watch(
   () => formState.id_nam,
   async (value, oldValue) => {
@@ -884,7 +693,6 @@ watch(
       formState.id_hoi_dong = undefined;
       formState.id_diem_thi = undefined;
       formState.selected_subjects = [];
-      subjectOptions.value = [];
     }
   },
 );
@@ -896,31 +704,7 @@ watch(
       if (syncingForm.value) return;
       formState.id_diem_thi = undefined;
       formState.selected_subjects = [];
-      subjectOptions.value = [];
-      if (value) {
-        await fetchSubjects(value);
-      }
     }
-  },
-);
-
-watch(
-  () => formState.noi_sinh_tinh,
-  value => {
-    if (syncingForm.value) return;
-    formState.noi_sinh_xa = undefined;
-    birthPlaceOptions.value = [];
-    if (value) fetchBirthPlaces("");
-  },
-);
-
-watch(
-  () => formState.thuong_tru_tinh,
-  value => {
-    if (syncingForm.value) return;
-    formState.thuong_tru_xa = undefined;
-    permanentResidenceOptions.value = [];
-    if (value) fetchPermanentResidences("");
   },
 );
 
@@ -959,7 +743,7 @@ watch(
   },
 );
 
-await Promise.all([fetchLocationTable(), fetchProvinces(""), fetchEthnicities("")]);
+await Promise.all([fetchLocationTable()]);
 </script>
 
 <style scoped>
