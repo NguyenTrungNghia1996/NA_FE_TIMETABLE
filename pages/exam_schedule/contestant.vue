@@ -53,7 +53,10 @@
 
       <a-card :title="contestantTitle" class="xl:col-span-8">
         <template #extra>
-          <a-button type="primary" :disabled="!settingStore.currentPermission" @click="showModal">Thêm mới</a-button>
+          <div class="flex gap-2">
+            <a-button :disabled="!settingStore.currentPermission" @click="openImportModal">Import thí sinh</a-button>
+            <a-button type="primary" :disabled="!settingStore.currentPermission" @click="showModal">Thêm mới</a-button>
+          </div>
         </template>
 
         <div class="flex flex-col sm:flex-row gap-2 mb-3">
@@ -260,6 +263,59 @@
         </div>
       </template>
     </a-modal>
+
+    <a-modal v-model:open="importModal.open" title="Import thí sinh" :footer="null" :width="1000" :destroyOnClose="true" @cancel="closeImportModal">
+      <div class="space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div class="text-sm text-gray-600">Chọn file Excel (.xlsx, .xls) để import danh sách thí sinh.</div>
+          <a-upload :beforeUpload="beforeImportUpload" :maxCount="1" :file-list="importModal.fileList" @remove="removeImportFile" :accept="'.xlsx,.xls'" :showUploadList="{ showRemoveIcon: true }">
+            <a-button>Chọn file</a-button>
+          </a-upload>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <a-button
+            type="primary"
+            ghost
+            :loading="importModal.saving"
+            :disabled="!importModal.results.length || !importModal.selectedRowKeys.length || !settingStore.currentPermission"
+            @click="handleSaveImportedContestants"
+          >
+            Lưu
+          </a-button>
+          <a-button type="primary" :loading="importModal.uploading" :disabled="!importModal.file || !settingStore.currentPermission" @click="handleImportContestants">
+            Import
+          </a-button>
+          <a-button danger @click="closeImportModal">Hủy</a-button>
+        </div>
+
+        <a-table
+          v-if="importModal.results.length"
+          :columns="importColumns"
+          :data-source="importModal.results"
+          :pagination="false"
+          :scroll="{ x: '1100' }"
+          :row-key="buildImportRowKey"
+          :row-selection="importRowSelection"
+          size="small"
+          bordered
+        >
+          <template #bodyCell="{ column, record, index }">
+            <template v-if="column.key === 'stt'">
+              {{ index + 1 }}
+            </template>
+            <template v-else-if="column.key === 'ngay_sinh'">
+              {{ formatDate(record.ngay_sinh) }}
+            </template>
+            <template v-else-if="column.key === 'isDuplicate'">
+              <a-tag :color="record.isDuplicate ? 'red' : 'green'">
+                {{ record.isDuplicate ? "Trùng" : "Hợp lệ" }}
+              </a-tag>
+            </template>
+          </template>
+        </a-table>
+      </div>
+    </a-modal>
   </div>
 </template>
 
@@ -298,29 +354,18 @@ const contestantParam = ref({
   search: "",
 });
 
-const locationColumns = [
-  { title: "STT", key: "stt", width: 60, align: "center" },
-  { title: "Mã điểm thi", dataIndex: "ma", key: "ma", width: 130, align: "center" },
-  { title: "Tên điểm thi", dataIndex: "ten", key: "ten", ellipsis: true },
-];
-
-const contestantColumns = [
-  { title: "STT", key: "stt", width: 60, align: "center" },
-  { title: "Số báo danh", dataIndex: "so_bao_danh", key: "so_bao_danh", width: 120, align: "center" },
-  { title: "Họ và tên", dataIndex: "ho_va_ten", key: "ho_va_ten", width: 180, ellipsis: true },
-  { title: "CCCD", dataIndex: "cccd", key: "cccd", width: 150, align: "center" },
-  { title: "Ngày sinh", dataIndex: "ngay_sinh", key: "ngay_sinh", width: 120, align: "center" },
-  { title: "Nơi sinh", dataIndex: "ten_noi_sinh", key: "ten_noi_sinh", width: 180, ellipsis: true },
-  { title: "Nơi thường trú", dataIndex: "ten_thuong_tru", key: "ten_thuong_tru", width: 180, ellipsis: true },
-  { title: "Dân tộc", dataIndex: "ten_dan_toc", key: "ten_dan_toc", width: 110, align: "center" },
-  { title: "Môn thi 1", dataIndex: "ten_mon_1", key: "ten_mon_1", width: 120, align: "center" },
-  { title: "Môn thi 2", dataIndex: "ten_mon_2", key: "ten_mon_2", width: 120, align: "center" },
-  { title: "Thao tác", key: "action", width: 100, align: "center", fixed: "right" },
-];
-
 const locationDataSource = ref([]);
 const contestantDataSource = ref([]);
 const selectedLocation = ref(null);
+const importModal = reactive({
+  open: false,
+  file: null,
+  fileList: [],
+  uploading: false,
+  saving: false,
+  results: [],
+  selectedRowKeys: [],
+});
 
 const locationPagination = reactive({
   current: 1,
@@ -339,6 +384,16 @@ const contestantPagination = reactive({
   pageSizeOptions: ["10", "20", "50"],
   showTotal: total => `Tổng ${total} bản ghi`,
 });
+
+const importRowSelection = computed(() => ({
+  selectedRowKeys: importModal.selectedRowKeys,
+  onChange: keys => {
+    importModal.selectedRowKeys = keys;
+  },
+  getCheckboxProps: record => ({
+    disabled: !!record?.isDuplicate,
+  }),
+}));
 
 const defaultFormState = () => ({
   id: undefined,
@@ -398,6 +453,202 @@ const contestantTitle = computed(() => {
 const formatDate = value => {
   if (!value) return "";
   return dayjs(value).isValid() ? dayjs(value).format("DD/MM/YYYY") : "";
+};
+
+const normalizeText = value => String(value || "").trim().toLowerCase();
+const compareText = (a, b) => normalizeText(a).localeCompare(normalizeText(b), "vi");
+const compareDate = (a, b) => dayjs(a || 0).valueOf() - dayjs(b || 0).valueOf();
+const includesText = (source, keyword) => normalizeText(source).includes(normalizeText(keyword));
+const buildColumnFilters = (items, key) =>
+  [...new Set((items || []).map(item => item?.[key]).filter(Boolean))].map(value => ({
+    text: value,
+    value,
+  }));
+
+const locationColumns = computed(() => [
+  { title: "STT", key: "stt", width: 60, align: "center" },
+  {
+    title: "Mã điểm thi",
+    dataIndex: "ma",
+    key: "ma",
+    width: 130,
+    align: "center",
+    sorter: (a, b) => compareText(a.ma, b.ma),
+    filters: buildColumnFilters(locationDataSource.value, "ma"),
+    onFilter: (value, record) => includesText(record.ma, value),
+  },
+  {
+    title: "Tên điểm thi",
+    dataIndex: "ten",
+    key: "ten",
+    ellipsis: true,
+    sorter: (a, b) => compareText(a.ten, b.ten),
+    filters: buildColumnFilters(locationDataSource.value, "ten"),
+    onFilter: (value, record) => includesText(record.ten, value),
+  },
+]);
+
+const contestantColumns = computed(() => [
+  { title: "STT", key: "stt", width: 60, align: "center" },
+  {
+    title: "Số báo danh",
+    dataIndex: "so_bao_danh",
+    key: "so_bao_danh",
+    width: 120,
+    align: "center",
+    sorter: (a, b) => compareText(a.so_bao_danh, b.so_bao_danh),
+  },
+  {
+    title: "Họ và tên",
+    dataIndex: "ho_va_ten",
+    key: "ho_va_ten",
+    width: 180,
+    ellipsis: true,
+    sorter: (a, b) => compareText(a.ho_va_ten, b.ho_va_ten),
+    filters: buildColumnFilters(contestantDataSource.value, "ho_va_ten"),
+    onFilter: (value, record) => includesText(record.ho_va_ten, value),
+  },
+  {
+    title: "CCCD",
+    dataIndex: "cccd",
+    key: "cccd",
+    width: 150,
+    align: "center",
+    sorter: (a, b) => compareText(a.cccd, b.cccd),
+    filters: buildColumnFilters(contestantDataSource.value, "cccd"),
+    onFilter: (value, record) => includesText(record.cccd, value),
+  },
+  {
+    title: "Ngày sinh",
+    dataIndex: "ngay_sinh",
+    key: "ngay_sinh",
+    width: 120,
+    align: "center",
+    sorter: (a, b) => compareDate(a.ngay_sinh, b.ngay_sinh),
+  },
+  {
+    title: "Nơi sinh",
+    dataIndex: "ten_noi_sinh",
+    key: "ten_noi_sinh",
+    width: 180,
+    ellipsis: true,
+    sorter: (a, b) => compareText(a.ten_noi_sinh, b.ten_noi_sinh),
+    filters: buildColumnFilters(contestantDataSource.value, "ten_noi_sinh"),
+    onFilter: (value, record) => includesText(record.ten_noi_sinh, value),
+  },
+  {
+    title: "Nơi thường trú",
+    dataIndex: "ten_thuong_tru",
+    key: "ten_thuong_tru",
+    width: 180,
+    ellipsis: true,
+    sorter: (a, b) => compareText(a.ten_thuong_tru, b.ten_thuong_tru),
+    filters: buildColumnFilters(contestantDataSource.value, "ten_thuong_tru"),
+    onFilter: (value, record) => includesText(record.ten_thuong_tru, value),
+  },
+  {
+    title: "Dân tộc",
+    dataIndex: "ten_dan_toc",
+    key: "ten_dan_toc",
+    width: 110,
+    align: "center",
+    sorter: (a, b) => compareText(a.ten_dan_toc, b.ten_dan_toc),
+    filters: buildColumnFilters(contestantDataSource.value, "ten_dan_toc"),
+    onFilter: (value, record) => includesText(record.ten_dan_toc, value),
+  },
+  {
+    title: "Môn thi 1",
+    dataIndex: "ten_mon_1",
+    key: "ten_mon_1",
+    width: 120,
+    align: "center",
+    sorter: (a, b) => compareText(a.ten_mon_1, b.ten_mon_1),
+    filters: buildColumnFilters(contestantDataSource.value, "ten_mon_1"),
+    onFilter: (value, record) => includesText(record.ten_mon_1, value),
+  },
+  {
+    title: "Môn thi 2",
+    dataIndex: "ten_mon_2",
+    key: "ten_mon_2",
+    width: 120,
+    align: "center",
+    sorter: (a, b) => compareText(a.ten_mon_2, b.ten_mon_2),
+    filters: buildColumnFilters(contestantDataSource.value, "ten_mon_2"),
+    onFilter: (value, record) => includesText(record.ten_mon_2, value),
+  },
+  { title: "Thao tác", key: "action", width: 100, align: "center", fixed: "right" },
+]);
+
+const importColumns = computed(() => [
+  { title: "STT", key: "stt", width: 60, align: "center" },
+  {
+    title: "Họ và tên",
+    dataIndex: "ho_va_ten",
+    key: "ho_va_ten",
+    width: 180,
+    ellipsis: true,
+    sorter: (a, b) => compareText(a.ho_va_ten, b.ho_va_ten),
+    filters: buildColumnFilters(importModal.results, "ho_va_ten"),
+    onFilter: (value, record) => includesText(record.ho_va_ten, value),
+  },
+  {
+    title: "Ngày sinh",
+    dataIndex: "ngay_sinh",
+    key: "ngay_sinh",
+    width: 120,
+    align: "center",
+    sorter: (a, b) => compareDate(a.ngay_sinh, b.ngay_sinh),
+  },
+  {
+    title: "CCCD",
+    dataIndex: "cccd",
+    key: "cccd",
+    width: 140,
+    align: "center",
+    sorter: (a, b) => compareText(a.cccd, b.cccd),
+    filters: buildColumnFilters(importModal.results, "cccd"),
+    onFilter: (value, record) => includesText(record.cccd, value),
+  },
+  {
+    title: "Mã điểm thi",
+    dataIndex: "ma_diem_thi",
+    key: "ma_diem_thi",
+    width: 130,
+    align: "center",
+    sorter: (a, b) => compareText(a.ma_diem_thi, b.ma_diem_thi),
+    filters: buildColumnFilters(importModal.results, "ma_diem_thi"),
+    onFilter: (value, record) => includesText(record.ma_diem_thi, value),
+  },
+  {
+    title: "Trạng thái",
+    key: "isDuplicate",
+    width: 120,
+    align: "center",
+    filters: [
+      { text: "Hợp lệ", value: false },
+      { text: "Trùng", value: true },
+    ],
+    onFilter: (value, record) => record.isDuplicate === value,
+    sorter: (a, b) => Number(!!a.isDuplicate) - Number(!!b.isDuplicate),
+  },
+]);
+
+const buildImportRowKey = record =>
+  [
+    String(record?.ho_va_ten || "").trim().toLowerCase(),
+    String(record?.ngay_sinh || "").trim(),
+    String(record?.cccd || "").trim(),
+    String(record?.ma_diem_thi || "").trim().toLowerCase(),
+  ].join("|");
+
+const dedupeImportResults = items => {
+  const seen = new Set();
+  return (items || []).filter(item => {
+    const key = buildImportRowKey(item);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 };
 
 const resetFormState = () => {
@@ -662,6 +913,139 @@ const handleCancel = () => {
   visible.value = false;
   resetFormState();
   formRef.value?.clearValidate?.();
+};
+
+const openImportModal = () => {
+  importModal.open = true;
+};
+
+const closeImportModal = () => {
+  importModal.open = false;
+  importModal.file = null;
+  importModal.fileList = [];
+  importModal.uploading = false;
+  importModal.saving = false;
+  importModal.results = [];
+  importModal.selectedRowKeys = [];
+};
+
+const beforeImportUpload = file => {
+  const originFile = file?.originFileObj || file;
+  const extIndex = originFile.name?.lastIndexOf(".") ?? -1;
+  const ext = extIndex >= 0 ? originFile.name.slice(extIndex) : "";
+  const renamedFile = new File([originFile], `${Date.now()}${ext}`, {
+    type: originFile.type,
+    lastModified: originFile.lastModified,
+  });
+  importModal.file = renamedFile;
+  importModal.fileList = [{ ...file, name: originFile.name }];
+  importModal.results = [];
+  importModal.selectedRowKeys = [];
+  return false;
+};
+
+const removeImportFile = () => {
+  importModal.file = null;
+  importModal.fileList = [];
+  importModal.results = [];
+  importModal.selectedRowKeys = [];
+};
+
+const handleImportContestants = async () => {
+  if (!importModal.file) return;
+
+  try {
+    importModal.uploading = true;
+    const formData = new FormData();
+    formData.append("file", importModal.file);
+
+    const { data, error } = await RestApi.contestant.import_file({ body: formData });
+    if (data.value?.status === "success") {
+      importModal.results = dedupeImportResults(data.value?.data?.item || []);
+      importModal.selectedRowKeys = [];
+      message.success("Import thí sinh thành công");
+      if (selectedLocation.value?.id) {
+        await fetchContestants({ ...contestantParam.value });
+      }
+    } else {
+      throw new Error(error.value?.data?.message || "Import thí sinh thất bại");
+    }
+  } catch (error) {
+    importModal.results = [];
+    message.error(error?.message || "Import thí sinh thất bại");
+  } finally {
+    importModal.uploading = false;
+  }
+};
+
+const resolveExamLocationIdByCode = async maDiemThi => {
+  const code = String(maDiemThi || "").trim();
+  if (!code) {
+    throw new Error("Thiếu mã điểm thi");
+  }
+
+  const { data, error } = await RestApi.exam_location.list({
+    params: {
+      pageIndex: 1,
+      pageSize: 100,
+      search: code,
+    },
+  });
+
+  if (data.value?.status !== "success") {
+    throw new Error(error.value?.data?.message || `Không tìm được điểm thi ${code}`);
+  }
+
+  const items = data.value?.data?.items || [];
+  const normalizedCode = code.toLowerCase();
+  const matched = items.find(item => String(item.ma || "").trim().toLowerCase() === normalizedCode) || items.find(item => String(item.ten || "").trim().toLowerCase() === normalizedCode);
+
+  if (!matched?.id) {
+    throw new Error(`Không tìm được điểm thi ${code}`);
+  }
+
+  return matched.id;
+};
+
+const handleSaveImportedContestants = async () => {
+  const selectedItems = dedupeImportResults(importModal.results.filter(record => importModal.selectedRowKeys.includes(buildImportRowKey(record))));
+
+  if (!selectedItems.length) {
+    message.warning("Vui lòng chọn ít nhất 1 thí sinh");
+    return;
+  }
+
+  try {
+    importModal.saving = true;
+
+    for (const item of selectedItems) {
+      const idDiemThi = await resolveExamLocationIdByCode(item.ma_diem_thi);
+      const payload = {
+        ho_va_ten: item.ho_va_ten,
+        ngay_sinh: item.ngay_sinh ? dayjs(item.ngay_sinh).format("YYYY-MM-DDT00:00:00") : null,
+        noi_sinh_xa: item.noi_sinh,
+        dan_toc: item.dan_toc,
+        cccd: item.cccd,
+        thuong_tru_xa: item.noi_thuong_tru,
+        id_diem_thi: idDiemThi,
+        mon_thi_1: item.mon_1,
+        mon_thi_2: item.mon_2,
+      };
+
+      const { data, error } = await RestApi.contestant.create({ body: payload });
+      if (data.value?.status !== "success") {
+        throw new Error(error.value?.data?.message || `Không thể tạo thí sinh ${item.ho_va_ten || ""}`.trim());
+      }
+    }
+
+    message.success(`Đã tạo ${selectedItems.length} thí sinh`);
+    await fetchContestants({ ...contestantParam.value });
+    closeImportModal();
+  } catch (error) {
+    message.error(error?.message || "Lưu danh sách import thất bại");
+  } finally {
+    importModal.saving = false;
+  }
 };
 
 const deleteItem = async id => {

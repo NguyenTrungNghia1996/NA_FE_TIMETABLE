@@ -203,6 +203,7 @@ let ENDPOINTS = {
   // CONTESTANT (Thí sinh)
   CONTESTANT: "/api/thisinh",
   CONTESTANT_DETAIL: "/api/thisinh/detail",
+  CONTESTANT_IMPORT: "/api/thisinh/import",
   // SUPERVISORY (Giám thị)
   SUPERVISORY: "/api/giamthi",
   SUPERVISORY_DETAIL: "/api/giamthi/detail",
@@ -1545,6 +1546,9 @@ class Contestant {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.CONTESTANT, data);
+  }
+  async import_file(data) {
+    return await this.request.postForm(ENDPOINTS.CONTESTANT_IMPORT, data);
   }
 }
 
