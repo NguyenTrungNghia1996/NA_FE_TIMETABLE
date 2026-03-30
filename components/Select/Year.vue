@@ -1,24 +1,67 @@
 <template>
-  <a-form-item :label="label" :name="name" :rules="rules">
-    <a-select
-      :value="modelValue"
-      @update:value="handleUpdateValue"
-      v-model:searchValue="search"
-      :mode="multiple ? 'multiple' : undefined"
-      show-search
-      :placeholder="placeholder"
-      :size="size"
-      :loading="loading"
-      :disabled="disabled"
-      allow-clear
-      class="w-full"
-      :options="options"
-      @search="onSearch"
-      @clear="onClear"
-      :filter-option="false"
-    />
-  </a-form-item>
-  
+  <template v-if="!noFormItem">
+    <a-form-item :label="label" :name="name" :rules="rules" :label-col="inlineLabel ? { span: 8 } : { span: 24 }" :wrapper-col="inlineLabel ? { span: 16 } : { span: 24 }">
+      <a-select
+        :value="modelValue"
+        @update:value="handleUpdateValue"
+        v-model:searchValue="search"
+        :mode="multiple ? 'multiple' : undefined"
+        show-search
+        :placeholder="placeholder"
+        :size="size"
+        :loading="loading"
+        :disabled="disabled"
+        allow-clear
+        class="w-full"
+        :options="options"
+        @search="onSearch"
+        @clear="onClear"
+        :filter-option="false"
+      />
+    </a-form-item>
+  </template>
+  <template v-else>
+    <div v-if="inlineLabel" class="flex items-center gap-2 py-3">
+      <label v-if="label" class="text-sm font-medium min-w-[120px]">{{ label }}</label>
+      <a-select
+        :value="modelValue"
+        @update:value="handleUpdateValue"
+        v-model:searchValue="search"
+        :mode="multiple ? 'multiple' : undefined"
+        show-search
+        :placeholder="placeholder"
+        :size="size"
+        :loading="loading"
+        :disabled="disabled"
+        allow-clear
+        class="flex-1"
+        :options="options"
+        @search="onSearch"
+        @clear="onClear"
+        :filter-option="false"
+      />
+    </div>
+    <template v-else>
+      <label v-if="label" class="block text-sm font-medium mb-1">{{ label }}</label>
+      <a-select
+        :value="modelValue"
+        @update:value="handleUpdateValue"
+        v-model:searchValue="search"
+        :mode="multiple ? 'multiple' : undefined"
+        show-search
+        :placeholder="placeholder"
+        :size="size"
+        :loading="loading"
+        :disabled="disabled"
+        allow-clear
+        class="w-full"
+        :options="options"
+        @search="onSearch"
+        @clear="onClear"
+        :filter-option="false"
+      />
+    </template>
+  </template>
 </template>
 
 <script setup>
@@ -36,6 +79,8 @@ const props = defineProps({
   size: { type: String, default: "middle" },
   rules: { type: Array, default: () => [] },
   disabled: { type: Boolean, default: false },
+  noFormItem: { type: Boolean, default: false },
+  inlineLabel: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(["update:modelValue"]);
@@ -101,4 +146,3 @@ const handleUpdateValue = val => {
 
 await fetchYears();
 </script>
-

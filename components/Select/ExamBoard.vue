@@ -72,7 +72,7 @@ const { RestApi } = useApi();
 
 const props = defineProps({
   modelValue: [Array, Number, String],
-  label: { type: String, default: "Hội đồng thi" },
+  label: { type: String, default: "Hội đồng thi:" },
   name: { type: String, default: "hoidongthi" },
   multiple: { type: Boolean, default: false },
   placeholder: { type: String, default: "Chọn hội đồng thi" },

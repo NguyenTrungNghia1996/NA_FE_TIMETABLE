@@ -3,26 +3,19 @@
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
       <a-card title="DANH SÁCH ĐIỂM THI" class="xl:col-span-4">
         <div class="space-y-3">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 items-start">
-            <div class="flex items-center gap-2 py-3">
-              <label class="text-sm font-medium min-w-[72px]">Năm học:</label>
-              <a-select
-                v-model:value="locationFilter.yearId"
-                show-search
-                allow-clear
-                :options="yearOptions"
-                :loading="yearLoading"
-                placeholder="Chọn năm học"
-                :filter-option="false"
-                class="flex-1"
-                @search="handleYearSearch"
-                @clear="handleYearClear"
-              />
-            </div>
+          <div class="grid grid-cols-1 gap-2 items-start">
+            <SelectYear
+              v-model="locationFilter.yearId"
+              label="Năm học:"
+              name="location_filter_year"
+              :no-form-item="true"
+              :inline-label="true"
+              placeholder="Chọn năm học"
+            />
 
             <SelectExamBoard
               v-model="locationFilter.boardId"
-              label="Hội đồng thi"
+              label="Hội đồng thi:"
               name="location_filter_board"
               :no-form-item="true"
               :inline-label="true"
@@ -130,29 +123,20 @@
           <div class="contestant-form-row">
             <label class="contestant-form-label">Năm học <span class="text-red-500">*</span></label>
             <a-form-item name="id_nam" class="contestant-form-control">
-              <a-select
-                v-model:value="formState.id_nam"
-                show-search
-                allow-clear
-                :options="yearOptions"
-                :loading="yearLoading"
-                placeholder="-- Chọn năm học --"
-                :filter-option="filterOptionByLabel"
-              />
+              <SelectYear v-model="formState.id_nam" name="id_nam_select" :no-form-item="true" label="" placeholder="-- Chọn năm học --" />
             </a-form-item>
           </div>
 
           <div class="contestant-form-row">
             <label class="contestant-form-label">Hội đồng thi <span class="text-red-500">*</span></label>
             <a-form-item name="id_hoi_dong" class="contestant-form-control">
-              <a-select
-                v-model:value="formState.id_hoi_dong"
-                show-search
-                allow-clear
-                :options="boardOptions"
-                :loading="boardLoading"
+              <SelectExamBoard
+                v-model="formState.id_hoi_dong"
+                name="id_hoi_dong_select"
+                label=""
+                :no-form-item="true"
                 placeholder="-- Chọn hội đồng thi --"
-                :filter-option="filterOptionByLabel"
+                :id-nam="formState.id_nam"
                 :disabled="!formState.id_nam"
               />
             </a-form-item>
@@ -161,14 +145,13 @@
           <div class="contestant-form-row">
             <label class="contestant-form-label">Điểm thi <span class="text-red-500">*</span></label>
             <a-form-item name="id_diem_thi" class="contestant-form-control">
-              <a-select
-                v-model:value="formState.id_diem_thi"
-                show-search
-                allow-clear
-                :options="examLocationOptions"
-                :loading="examLocationLoading"
+              <SelectExamLocation
+                v-model="formState.id_diem_thi"
+                name="id_diem_thi_select"
+                label=""
+                :no-form-item="true"
                 placeholder="-- Chọn điểm thi --"
-                :filter-option="filterOptionByLabel"
+                :id-hoi-dong="formState.id_hoi_dong"
                 :disabled="!formState.id_hoi_dong"
               />
             </a-form-item>
@@ -326,8 +309,6 @@ const detailLoading = ref(false);
 const contestantLoading = ref(false);
 const locationLoading = ref(false);
 const confirmLoading = ref(false);
-const yearLoading = ref(false);
-const yearSearch = ref("");
 const syncingForm = ref(false);
 const formRef = ref();
 
@@ -371,11 +352,6 @@ const contestantColumns = [
 const locationDataSource = ref([]);
 const contestantDataSource = ref([]);
 const selectedLocation = ref(null);
-const yearOptions = ref([]);
-const boardOptions = ref([]);
-const boardLoading = ref(false);
-const examLocationOptions = ref([]);
-const examLocationLoading = ref(false);
 const subjectOptions = ref([]);
 const subjectLoading = ref(false);
 
@@ -490,80 +466,6 @@ const fetchXaDetail = async id => {
     return items.find(item => item.id === id) || items[0] || null;
   } catch (_error) {
     return null;
-  }
-};
-
-const fetchYears = async searchValue => {
-  try {
-    yearLoading.value = true;
-    const params = {};
-    const keyword = (searchValue || "").trim();
-    if (keyword) params.search = keyword;
-    const { data, error } = await RestApi.year.list({ params });
-    const raw = data.value?.data;
-    const items = Array.isArray(raw?.items) ? raw.items : Array.isArray(raw) ? raw : [];
-    if (data.value?.status === "success") {
-      yearOptions.value = items.map(item => ({
-        label: item.ten,
-        value: item.id,
-      }));
-    } else {
-      throw new Error(error.value?.data?.message || "Không tải được năm học");
-    }
-  } catch (error) {
-    yearOptions.value = [];
-    message.error(error?.message || "Không tải được năm học");
-  } finally {
-    yearLoading.value = false;
-  }
-};
-
-const debouncedFetchYears = debounce(value => {
-  fetchYears(value);
-}, 300);
-
-const fetchBoards = async idNam => {
-  if (!idNam) {
-    boardOptions.value = [];
-    return;
-  }
-  try {
-    boardLoading.value = true;
-    const { data, error } = await RestApi.exam_board.list({ params: { idNam, pageIndex: 1, pageSize: 500 } });
-    if (data.value?.status === "success") {
-      boardOptions.value = mapCommonOptions(data.value?.data?.items || []);
-    } else {
-      throw new Error(error.value?.data?.message || "Không tải được hội đồng thi");
-    }
-  } catch (error) {
-    boardOptions.value = [];
-    message.error(error?.message || "Không tải được hội đồng thi");
-  } finally {
-    boardLoading.value = false;
-  }
-};
-
-const fetchExamLocationOptions = async idHoiDong => {
-  if (!idHoiDong) {
-    examLocationOptions.value = [];
-    return;
-  }
-  try {
-    examLocationLoading.value = true;
-    const { data, error } = await RestApi.exam_location.list({ params: { idHoiDong, pageIndex: 1, pageSize: 500 } });
-    if (data.value?.status === "success") {
-      examLocationOptions.value = (data.value?.data?.items || []).map(item => ({
-        label: item.ten || item.ma,
-        value: item.id,
-      }));
-    } else {
-      throw new Error(error.value?.data?.message || "Không tải được điểm thi");
-    }
-  } catch (error) {
-    examLocationOptions.value = [];
-    message.error(error?.message || "Không tải được điểm thi");
-  } finally {
-    examLocationLoading.value = false;
   }
 };
 
@@ -778,7 +680,6 @@ const resetLocationSearch = async () => {
   selectedLocation.value = null;
   contestantDataSource.value = [];
   contestantPagination.total = 0;
-  await fetchYears("");
   await fetchLocationTable();
 };
 
@@ -837,9 +738,6 @@ const showModal = async () => {
   }
   visible.value = true;
   await Promise.all([
-    fetchYears(""),
-    fetchBoards(formState.id_nam),
-    fetchExamLocationOptions(formState.id_hoi_dong),
     fetchSubjects(formState.id_hoi_dong),
     fetchProvinces(""),
     fetchEthnicities(""),
@@ -895,9 +793,6 @@ const editItem = async record => {
     });
 
     await Promise.all([
-      fetchYears(""),
-      fetchBoards(formState.id_nam),
-      fetchExamLocationOptions(formState.id_hoi_dong),
       fetchSubjects(formState.id_hoi_dong),
       fetchProvinces(""),
       fetchBirthPlaces(""),
@@ -965,16 +860,6 @@ const deleteItem = async id => {
   }
 };
 
-const handleYearSearch = value => {
-  yearSearch.value = value;
-  debouncedFetchYears(value);
-};
-
-const handleYearClear = () => {
-  yearSearch.value = "";
-  fetchYears("");
-};
-
 const handleBirthPlaceSearch = value => {
   debouncedFetchBirthPlaces(value);
 };
@@ -999,10 +884,7 @@ watch(
       formState.id_hoi_dong = undefined;
       formState.id_diem_thi = undefined;
       formState.selected_subjects = [];
-      boardOptions.value = [];
-      examLocationOptions.value = [];
       subjectOptions.value = [];
-      if (value) await fetchBoards(value);
     }
   },
 );
@@ -1014,10 +896,9 @@ watch(
       if (syncingForm.value) return;
       formState.id_diem_thi = undefined;
       formState.selected_subjects = [];
-      examLocationOptions.value = [];
       subjectOptions.value = [];
       if (value) {
-        await Promise.all([fetchExamLocationOptions(value), fetchSubjects(value)]);
+        await fetchSubjects(value);
       }
     }
   },
@@ -1078,7 +959,7 @@ watch(
   },
 );
 
-await Promise.all([fetchYears(""), fetchLocationTable(), fetchProvinces(""), fetchEthnicities("")]);
+await Promise.all([fetchLocationTable(), fetchProvinces(""), fetchEthnicities("")]);
 </script>
 
 <style scoped>
