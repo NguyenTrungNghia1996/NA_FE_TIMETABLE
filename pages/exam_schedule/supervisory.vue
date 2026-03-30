@@ -131,6 +131,10 @@
       <div class="space-y-3">
         <!-- <a-alert v-if="selectedLocation" type="info" show-icon :message="`Điểm thi đang chọn: ${selectedLocation.ten || selectedLocation.ma || selectedLocation.id}`" /> -->
 
+        <div class="flex justify-end">
+          <a-button type="primary" ghost @click="downloadSupervisoryTemplate">Tải file mẫu</a-button>
+        </div>
+
         <a-upload :beforeUpload="beforeImportUpload" :maxCount="1" :file-list="importModal.fileList" @remove="removeImportFile" :accept="'.xlsx,.xls'" :showUploadList="{ showRemoveIcon: true }">
           <a-button>Chọn file</a-button>
         </a-upload>
@@ -729,6 +733,15 @@ const beforeImportUpload = file => {
 const removeImportFile = () => {
   importModal.file = null;
   importModal.fileList = [];
+};
+
+const downloadSupervisoryTemplate = () => {
+  const link = document.createElement("a");
+  link.href = encodeURI("/Import Giám thị.xlsx");
+  link.download = "Import Giám thị.xlsx";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 };
 
 const handleImport = async () => {
