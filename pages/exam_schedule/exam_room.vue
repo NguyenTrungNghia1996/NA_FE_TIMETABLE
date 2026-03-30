@@ -163,6 +163,10 @@
 
     <a-modal v-model:open="importModal.open" title="Import phòng thi" :footer="null" width="520px" :destroyOnClose="true" @cancel="closeImportModal">
       <div class="space-y-3">
+        <div class="flex justify-end">
+          <a-button type="primary" ghost @click="downloadRoomTemplate">Tải file mẫu</a-button>
+        </div>
+
         <a-upload :beforeUpload="beforeImportUpload" :maxCount="1" :file-list="importModal.fileList" @remove="removeImportFile" :accept="'.xlsx,.xls'" :showUploadList="{ showRemoveIcon: true }">
           <a-button>Chọn file</a-button>
         </a-upload>
@@ -525,6 +529,15 @@ const beforeImportUpload = file => {
 const removeImportFile = () => {
   importModal.file = null;
   importModal.fileList = [];
+};
+
+const downloadRoomTemplate = () => {
+  const link = document.createElement("a");
+  link.href = encodeURI("/Import Phòng thi.xlsx");
+  link.download = "Import Phòng thi.xlsx";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 };
 
 const handleImport = async () => {
