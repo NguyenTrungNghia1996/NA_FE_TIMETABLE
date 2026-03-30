@@ -1,7 +1,12 @@
 <template>
-  <a-form-item :label="label" :name="name" :rules="rules">
+  <template v-if="!noFormItem">
+    <a-form-item :label="label" :name="name" :rules="rules">
+      <a-select :value="modelValue" @update:value="handleUpdateValue" v-model:searchValue="search" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="selectDisabled" allow-clear class="w-full" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
+    </a-form-item>
+  </template>
+  <template v-else>
     <a-select :value="modelValue" @update:value="handleUpdateValue" v-model:searchValue="search" :mode="multiple ? 'multiple' : undefined" show-search :placeholder="placeholder" :size="size" :loading="loading" :disabled="selectDisabled" allow-clear class="w-full" :options="options" @search="onSearch" @clear="onClear" :filter-option="false" />
-  </a-form-item>
+  </template>
 </template>
 
 <script setup>
@@ -20,6 +25,7 @@ const props = defineProps({
   size: { type: String, default: "middle" },
   rules: { type: Array, default: () => [] },
   disabled: { type: Boolean, default: false },
+  noFormItem: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(["update:modelValue"]);
