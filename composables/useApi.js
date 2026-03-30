@@ -6,6 +6,10 @@ let ENDPOINTS = {
   RESET_PASSWORD: "/api/users/resetPassword",
   //PROVINCE
   PROVINCE: "/api/tinh",
+  HANH_CHINH_TINH: "/api/hanhchinh/tinh",
+  HANH_CHINH_XA: "/api/hanhchinh/xa",
+  // DAN TOC
+  DAN_TOC: "/api/dantoc",
   //SCHOOL_LEVEL
   SCHOOL_LEVEL: "/api/caphoc",
   SCHOOL_LEVEL_DETAIL: "/api/caphoc/detail",
@@ -196,6 +200,9 @@ let ENDPOINTS = {
   // EXAM LOCATION (Điểm thi)
   EXAM_LOCATION: "/api/diemthi",
   EXAM_LOCATION_DETAIL: "/api/diemthi/detail",
+  // CONTESTANT (Thí sinh)
+  CONTESTANT: "/api/thisinh",
+  CONTESTANT_DETAIL: "/api/thisinh/detail",
   // SUPERVISORY (Giám thị)
   SUPERVISORY: "/api/giamthi",
   SUPERVISORY_DETAIL: "/api/giamthi/detail",
@@ -347,6 +354,9 @@ class RestApi {
     this.request = new Request();
     this.user = new User(this.request);
     this.province = new Province(this.request);
+    this.tinh = new Tinh(this.request);
+    this.xa = new Xa(this.request);
+    this.dan_toc = new DanToc(this.request);
     this.school_level = new SchoolLevel(this.request);
     this.school_shift = new SchoolShift(this.request);
     this.school_ship = new SchoolShip(this.request);
@@ -381,6 +391,7 @@ class RestApi {
     this.exam_board = new ExamBoard(this.request);
     this.exam_subject = new ExamSubject(this.request);
     this.exam_location = new ExamLocation(this.request);
+    this.contestant = new Contestant(this.request);
     this.supervisory = new Supervisory(this.request);
     this.exam_room = new ExamRoom(this.request);
     this.phanphoi_chuongtrinh = new PhanphoiChuongtrinh(this.request);
@@ -474,6 +485,30 @@ class Province {
   }
   async list(data) {
     return await this.request.get(ENDPOINTS.PROVINCE, data);
+  }
+}
+class Tinh {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.HANH_CHINH_TINH, data);
+  }
+}
+class Xa {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.HANH_CHINH_XA, data);
+  }
+}
+class DanToc {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.DAN_TOC, data);
   }
 }
 class SchoolLevel {
@@ -1488,6 +1523,28 @@ class ExamLocation {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.EXAM_LOCATION, data);
+  }
+}
+
+// CONTESTANT CLASS
+class Contestant {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.CONTESTANT, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.CONTESTANT_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.CONTESTANT, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.CONTESTANT, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.CONTESTANT, data);
   }
 }
 
