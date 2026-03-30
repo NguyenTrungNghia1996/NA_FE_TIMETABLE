@@ -253,10 +253,10 @@
 
       <template #footer>
         <div class="flex justify-end gap-2">
-          <a-button type="primary" :loading="confirmLoading || detailLoading" @click="handleOk">
-            {{ isEdit ? "Lưu" : "Lưu" }}
-          </a-button>
           <a-button danger @click="handleCancel">Hủy</a-button>
+          <a-button type="primary" :loading="confirmLoading || detailLoading" @click="handleOk">
+            {{ isEdit ? "Cập nhật" : "Thêm mới" }}
+          </a-button>
         </div>
       </template>
     </a-modal>
