@@ -859,11 +859,19 @@ const editItem = async record => {
     syncingForm.value = true;
     let locationDetail = null;
     let boardDetailData = null;
-    const [birthXaDetail, residenceXaDetail] = await Promise.all([fetchXaDetail(detail.noi_sinh_xa), fetchXaDetail(detail.thuong_tru_xa)]);
-    if (detail.id_diem_thi) {
+    let birthXaDetail = null;
+    let residenceXaDetail = null;
+
+    if (!detail.noi_sinh_tinh && detail.noi_sinh_xa) {
+      birthXaDetail = await fetchXaDetail(detail.noi_sinh_xa);
+    }
+    if (!detail.thuong_tru_tinh && detail.thuong_tru_xa) {
+      residenceXaDetail = await fetchXaDetail(detail.thuong_tru_xa);
+    }
+    if ((!detail.id_hoi_dong || !detail.id_nam) && detail.id_diem_thi) {
       const locationResp = await RestApi.exam_location.detail({ params: { Id: detail.id_diem_thi } });
       locationDetail = locationResp.data.value?.data || null;
-      if (locationDetail?.id_hoi_dong) {
+      if (!detail.id_nam && locationDetail?.id_hoi_dong) {
         const boardResp = await RestApi.exam_board.detail({ params: { Id: locationDetail.id_hoi_dong } });
         boardDetailData = boardResp.data.value?.data || null;
       }
@@ -872,15 +880,15 @@ const editItem = async record => {
     Object.assign(formState, {
       id: detail.id,
       so_bao_danh: detail.so_bao_danh || "",
-      id_nam: boardDetailData?.id_nam ?? undefined,
-      id_hoi_dong: locationDetail?.id_hoi_dong ?? undefined,
+      id_nam: detail.id_nam ?? boardDetailData?.id_nam ?? undefined,
+      id_hoi_dong: detail.id_hoi_dong ?? locationDetail?.id_hoi_dong ?? undefined,
       ho_va_ten: detail.ho_va_ten || "",
       ngay_sinh: detail.ngay_sinh ? dayjs(detail.ngay_sinh).format("YYYY-MM-DD") : undefined,
-      noi_sinh_tinh: birthXaDetail?.id_tinh ?? undefined,
+      noi_sinh_tinh: detail.noi_sinh_tinh ?? birthXaDetail?.id_tinh ?? undefined,
       noi_sinh_xa: detail.noi_sinh_xa ?? undefined,
       dan_toc: detail.dan_toc ?? undefined,
       cccd: detail.cccd || "",
-      thuong_tru_tinh: residenceXaDetail?.id_tinh ?? undefined,
+      thuong_tru_tinh: detail.thuong_tru_tinh ?? residenceXaDetail?.id_tinh ?? undefined,
       thuong_tru_xa: detail.thuong_tru_xa ?? undefined,
       id_diem_thi: detail.id_diem_thi ?? selectedLocation.value?.id,
       selected_subjects: [detail.mon_thi_1, detail.mon_thi_2].filter(Boolean),
