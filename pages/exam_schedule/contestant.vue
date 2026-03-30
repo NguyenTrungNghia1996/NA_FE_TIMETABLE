@@ -293,12 +293,13 @@
           v-if="importModal.results.length"
           :columns="importColumns"
           :data-source="importModal.results"
-          :pagination="false"
+          :pagination="importPagination"
           :scroll="{ x: '1100' }"
           :row-key="buildImportRowKey"
           :row-selection="importRowSelection"
           size="small"
           bordered
+          @change="handleImportTableChange"
         >
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'stt'">
@@ -377,6 +378,15 @@ const locationPagination = reactive({
 });
 
 const contestantPagination = reactive({
+  current: 1,
+  pageSize: 10,
+  total: 0,
+  showSizeChanger: true,
+  pageSizeOptions: ["10", "20", "50"],
+  showTotal: total => `Tổng ${total} bản ghi`,
+});
+
+const importPagination = reactive({
   current: 1,
   pageSize: 10,
   total: 0,
@@ -655,6 +665,13 @@ const resetFormState = () => {
   Object.assign(formState, defaultFormState());
 };
 
+watch(
+  () => importModal.results.length,
+  total => {
+    importPagination.total = total;
+  },
+);
+
 const fetchXaDetail = async id => {
   if (!id) return null;
   try {
@@ -742,6 +759,11 @@ const handleContestantTableChange = async pag => {
   contestantParam.value.pageIndex = pag.current;
   contestantParam.value.pageSize = pag.pageSize;
   await fetchContestants({ ...contestantParam.value });
+};
+
+const handleImportTableChange = pag => {
+  importPagination.current = pag.current;
+  importPagination.pageSize = pag.pageSize;
 };
 
 const fetchLocationTable = async () => {
@@ -927,6 +949,7 @@ const closeImportModal = () => {
   importModal.saving = false;
   importModal.results = [];
   importModal.selectedRowKeys = [];
+  importPagination.current = 1;
 };
 
 const beforeImportUpload = file => {
@@ -941,6 +964,7 @@ const beforeImportUpload = file => {
   importModal.fileList = [{ ...file, name: originFile.name }];
   importModal.results = [];
   importModal.selectedRowKeys = [];
+  importPagination.current = 1;
   return false;
 };
 
@@ -949,6 +973,7 @@ const removeImportFile = () => {
   importModal.fileList = [];
   importModal.results = [];
   importModal.selectedRowKeys = [];
+  importPagination.current = 1;
 };
 
 const handleImportContestants = async () => {
@@ -963,6 +988,7 @@ const handleImportContestants = async () => {
     if (data.value?.status === "success") {
       importModal.results = dedupeImportResults(data.value?.data?.item || []);
       importModal.selectedRowKeys = [];
+      importPagination.current = 1;
       message.success("Import thí sinh thành công");
       if (selectedLocation.value?.id) {
         await fetchContestants({ ...contestantParam.value });
