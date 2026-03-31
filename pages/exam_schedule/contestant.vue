@@ -249,7 +249,8 @@
                 multiple
                 :id-hoi-dong="formState.id_hoi_dong"
                 :disabled="!formState.id_hoi_dong"
-                placeholder="-- Chọn đủ 2 môn thi --"
+                placeholder="-- Chọn 1 hoặc 2 môn thi --"
+                :max-count="2"
                 :max-tag-count="2"
               />
             </a-form-item>
@@ -474,11 +475,14 @@ const rules = reactive({
   selected_subjects: [
     {
       validator: (_rule, value) => {
-        if (!Array.isArray(value) || value.length !== 2) {
-          return Promise.reject("Vui lòng chọn đúng 2 môn thi");
+        if (!Array.isArray(value) || value.length < 1) {
+          return Promise.reject("Vui lòng chọn ít nhất 1 môn thi");
         }
-        if (new Set(value).size !== 2) {
-          return Promise.reject("Hai môn thi không được trùng nhau");
+        if (value.length > 2) {
+          return Promise.reject("Chỉ được chọn tối đa 2 môn thi");
+        }
+        if (new Set(value).size !== value.length) {
+          return Promise.reject("Các môn thi không được trùng nhau");
         }
         return Promise.resolve();
       },
@@ -883,7 +887,7 @@ const buildPayload = () => ({
   thuong_tru_xa: formState.thuong_tru_xa,
   id_diem_thi: formState.id_diem_thi,
   mon_thi_1: formState.selected_subjects?.[0],
-  mon_thi_2: formState.selected_subjects?.[1],
+  mon_thi_2: formState.selected_subjects?.[1] ?? null,
 });
 
 const showModal = async () => {
@@ -900,6 +904,7 @@ const showModal = async () => {
     }
   }
   visible.value = true;
+  await nextTick();
   syncingForm.value = false;
 };
 
@@ -951,6 +956,7 @@ const editItem = async record => {
     });
 
     visible.value = true;
+    await nextTick();
     syncingForm.value = false;
   } catch (error) {
     syncingForm.value = false;

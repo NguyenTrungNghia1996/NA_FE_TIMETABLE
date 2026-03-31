@@ -14,7 +14,7 @@
         :max-tag-count="maxTagCount"
         allow-clear
         class="w-full"
-        :options="options"
+        :options="selectOptions"
         @search="onSearch"
         @clear="onClear"
         :filter-option="false"
@@ -37,7 +37,7 @@
         :max-tag-count="maxTagCount"
         allow-clear
         class="flex-1"
-        :options="options"
+        :options="selectOptions"
         @search="onSearch"
         @clear="onClear"
         :filter-option="false"
@@ -58,7 +58,7 @@
         :max-tag-count="maxTagCount"
         allow-clear
         class="w-full"
-        :options="options"
+        :options="selectOptions"
         @search="onSearch"
         @clear="onClear"
         :filter-option="false"
@@ -68,7 +68,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import debounce from "lodash/debounce";
 
 const { RestApi } = useApi();
@@ -85,6 +85,7 @@ const props = defineProps({
   noFormItem: { type: Boolean, default: false },
   inlineLabel: { type: Boolean, default: false },
   idHoiDong: { type: [Number, String], default: null },
+  maxCount: { type: [Number, String], default: undefined },
   maxTagCount: { type: [Number, String], default: undefined },
 });
 
@@ -96,6 +97,21 @@ const search = ref("");
 
 const hasValue = value => value !== undefined && value !== null && value !== "";
 const normalizeValue = value => (value !== undefined && value !== null ? String(value) : value);
+const resolvedMaxCount = computed(() => {
+  const parsed = Number(props.maxCount);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
+});
+const selectedValues = computed(() => (Array.isArray(props.modelValue) ? props.modelValue.filter(hasValue).map(normalizeValue) : []));
+const selectOptions = computed(() => {
+  if (!props.multiple || !resolvedMaxCount.value || selectedValues.value.length < resolvedMaxCount.value) {
+    return options.value;
+  }
+
+  return options.value.map(option => ({
+    ...option,
+    disabled: !selectedValues.value.includes(normalizeValue(option.value)),
+  }));
+});
 
 const ensureSelectedOptions = async () => {
   const selectedValues = Array.isArray(props.modelValue) ? props.modelValue.filter(hasValue) : hasValue(props.modelValue) ? [props.modelValue] : [];
@@ -176,6 +192,12 @@ const onClear = () => {
 };
 
 const handleUpdateValue = val => {
+  if (props.multiple && Array.isArray(val) && resolvedMaxCount.value && val.length > resolvedMaxCount.value) {
+    emit("update:modelValue", val.slice(0, resolvedMaxCount.value));
+    message.warning(`Chỉ được chọn tối đa ${resolvedMaxCount.value} môn thi`);
+    return;
+  }
+
   emit("update:modelValue", val);
   const isCleared = val === undefined || val === null || val === "" || (Array.isArray(val) && val.length === 0);
   if (isCleared) {
