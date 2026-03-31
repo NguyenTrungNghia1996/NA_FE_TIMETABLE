@@ -36,6 +36,41 @@ const search = ref("");
 
 const hasTinh = computed(() => props.idTinh !== undefined && props.idTinh !== null && props.idTinh !== "");
 const selectDisabled = computed(() => props.disabled || !hasTinh.value);
+const hasValue = value => value !== undefined && value !== null && value !== "";
+const normalizeValue = value => (value !== undefined && value !== null ? String(value) : value);
+
+const ensureSelectedOption = async () => {
+  if (props.multiple || !hasTinh.value || !hasValue(props.modelValue)) return;
+
+  const selectedValue = normalizeValue(props.modelValue);
+  const hasSelectedOption = options.value.some(option => normalizeValue(option.value) === selectedValue);
+  if (hasSelectedOption) return;
+
+  try {
+    const { data } = await RestApi.xa.list({
+      params: {
+        Id: props.modelValue,
+        pageIndex: 1,
+        pageSize: 1,
+      },
+    });
+
+    const raw = data.value?.data;
+    const items = Array.isArray(raw?.items) ? raw.items : Array.isArray(raw) ? raw : raw ? [raw] : [];
+    const selectedXa = items.find(item => normalizeValue(item?.id) === selectedValue) || items[0];
+    if (!selectedXa?.id) return;
+
+    options.value = [
+      {
+        label: selectedXa.ten,
+        value: selectedXa.id,
+      },
+      ...options.value,
+    ];
+  } catch (_error) {
+    // Keep the current field value if detail lookup is unavailable.
+  }
+};
 
 const fetchXa = async (searchValue = "") => {
   if (!hasTinh.value) {
@@ -58,6 +93,7 @@ const fetchXa = async (searchValue = "") => {
         label: item.ten,
         value: item.id,
       }));
+      await ensureSelectedOption();
 
       if (props.modelValue === undefined || props.modelValue === null || props.modelValue === "") {
         emit("update:modelValue", props.modelValue);
@@ -102,12 +138,23 @@ const handleUpdateValue = val => {
 
 watch(
   () => props.idTinh,
-  () => {
+  async () => {
     search.value = "";
     options.value = [];
-    emit("update:modelValue", props.multiple ? [] : null);
-    fetchXa("");
-  }
+    if (!hasTinh.value) {
+      emit("update:modelValue", props.multiple ? [] : null);
+      return;
+    }
+
+    await fetchXa("");
+
+    if (!hasValue(props.modelValue)) return;
+
+    const hasSelectedOption = options.value.some(option => normalizeValue(option.value) === normalizeValue(props.modelValue));
+    if (!hasSelectedOption) {
+      emit("update:modelValue", props.multiple ? [] : null);
+    }
+  },
 );
 
 await fetchXa();
