@@ -204,6 +204,7 @@ let ENDPOINTS = {
   CONTESTANT: "/api/thisinh",
   CONTESTANT_DETAIL: "/api/thisinh/detail",
   CONTESTANT_IMPORT: "/api/thisinh/import",
+  CONTESTANT_SBD: "/api/thisinh/sbd",
   // SUPERVISORY (Giám thị)
   SUPERVISORY: "/api/giamthi",
   SUPERVISORY_DETAIL: "/api/giamthi/detail",
@@ -1549,6 +1550,9 @@ class Contestant {
   }
   async import_file(data) {
     return await this.request.postForm(ENDPOINTS.CONTESTANT_IMPORT, data);
+  }
+  async generate_sbd(data) {
+    return await this.request.post(ENDPOINTS.CONTESTANT_SBD, data);
   }
 }
 

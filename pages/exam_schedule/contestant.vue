@@ -54,6 +54,9 @@
       <a-card :title="contestantTitle" class="xl:col-span-8">
         <template #extra>
           <div class="flex gap-2">
+            <a-button :disabled="!settingStore.currentPermission" @click="openAssignSbdModal">
+              Đánh số báo danh
+            </a-button>
             <a-button :disabled="!settingStore.currentPermission" @click="openImportModal">Import thí sinh</a-button>
             <a-button type="primary" :disabled="!settingStore.currentPermission" @click="showModal">Thêm mới</a-button>
           </div>
@@ -264,6 +267,23 @@
       </template>
     </a-modal>
 
+    <a-modal v-model:open="assignSbdModal.open" title="Đánh số báo danh" :confirm-loading="assignSbdLoading" ok-text="Thực hiện" cancel-text="Hủy" @ok="handleAssignSbd" @cancel="closeAssignSbdModal">
+      <div class="space-y-3 py-2">
+        <a-form layout="vertical">
+          <a-form-item label="Hội đồng thi" required>
+            <SelectExamBoard
+              v-model="assignSbdModal.boardId"
+              name="assign_sbd_board"
+              label=""
+              :no-form-item="true"
+              placeholder="-- Chọn hội đồng thi --"
+              :id-nam="locationFilter.yearId"
+            />
+          </a-form-item>
+        </a-form>
+      </div>
+    </a-modal>
+
     <a-modal v-model:open="importModal.open" title="Import thí sinh" :footer="null" :width="1100" :destroyOnClose="true" @cancel="closeImportModal">
       <div class="space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -341,11 +361,17 @@ const detailLoading = ref(false);
 const contestantLoading = ref(false);
 const locationLoading = ref(false);
 const confirmLoading = ref(false);
+const assignSbdLoading = ref(false);
 const syncingForm = ref(false);
 const formRef = ref();
 
 const locationFilter = reactive({
   yearId: undefined,
+  boardId: undefined,
+});
+
+const assignSbdModal = reactive({
+  open: false,
   boardId: undefined,
 });
 
@@ -967,6 +993,16 @@ const openImportModal = () => {
   importModal.open = true;
 };
 
+const openAssignSbdModal = () => {
+  assignSbdModal.open = true;
+  assignSbdModal.boardId = locationFilter.boardId ?? undefined;
+};
+
+const closeAssignSbdModal = () => {
+  assignSbdModal.open = false;
+  assignSbdModal.boardId = locationFilter.boardId ?? undefined;
+};
+
 const closeImportModal = () => {
   importModal.open = false;
   importModal.file = null;
@@ -1137,6 +1173,32 @@ const handleSaveImportedContestants = async () => {
     message.error(error?.message || "Lưu danh sách import thất bại");
   } finally {
     importModal.saving = false;
+  }
+};
+
+const handleAssignSbd = async () => {
+  if (!assignSbdModal.boardId) {
+    message.warning("Vui lòng chọn hội đồng thi");
+    return;
+  }
+
+  try {
+    assignSbdLoading.value = true;
+    const { data, error } = await RestApi.contestant.generate_sbd({
+      params: { idHoiDong: assignSbdModal.boardId },
+    });
+
+    if (data.value?.status === "success") {
+      message.success("Đánh số báo danh thành công");
+      assignSbdModal.open = false;
+      await Promise.all([fetchLocationTable(), fetchContestants({ ...contestantParam.value })]);
+    } else {
+      throw new Error(error.value?.data?.message || "Đánh số báo danh thất bại");
+    }
+  } catch (error) {
+    message.error(error?.message || "Đánh số báo danh thất bại");
+  } finally {
+    assignSbdLoading.value = false;
   }
 };
 
