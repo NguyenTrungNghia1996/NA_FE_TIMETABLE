@@ -264,7 +264,7 @@
       </template>
     </a-modal>
 
-    <a-modal v-model:open="importModal.open" title="Import thí sinh" :footer="null" :width="1000" :destroyOnClose="true" @cancel="closeImportModal">
+    <a-modal v-model:open="importModal.open" title="Import thí sinh" :footer="null" :width="1100" :destroyOnClose="true" @cancel="closeImportModal">
       <div class="space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div class="text-sm text-gray-600">Chọn file Excel (.xlsx, .xls) để import danh sách thí sinh.</div>
@@ -308,10 +308,16 @@
             <template v-else-if="column.key === 'ngay_sinh'">
               {{ formatDate(record.ngay_sinh) }}
             </template>
-            <template v-else-if="column.key === 'isDuplicate'">
+          <template v-else-if="column.key === 'isDuplicate'">
               <a-tag :color="record.isDuplicate ? 'red' : 'green'">
                 {{ record.isDuplicate ? "Trùng" : "Hợp lệ" }}
               </a-tag>
+            </template>
+            <template v-else-if="column.key === 'saveStatus'">
+              <p v-if="record.saveStatus === 'success'" style="color: green">Thành công</p>
+              <p v-else-if="record.saveStatus === 'error'" style="color: red">{{ record.saveMessage || "Lỗi" }}</p>
+              <p v-else-if="record.saveStatus === 'processing'" style="color: blue">Đang xử lý</p>
+              <p v-else class="text-gray-400">Chưa lưu</p>
             </template>
           </template>
         </a-table>
@@ -641,6 +647,19 @@ const importColumns = computed(() => [
     onFilter: (value, record) => record.isDuplicate === value,
     sorter: (a, b) => Number(!!a.isDuplicate) - Number(!!b.isDuplicate),
   },
+  {
+    title: "Kết quả lưu",
+    key: "saveStatus",
+    width: 180,
+    align: "center",
+    filters: [
+      { text: "Thành công", value: "success" },
+      { text: "Lỗi", value: "error" },
+      { text: "Đang xử lý", value: "processing" },
+    ],
+    onFilter: (value, record) => record.saveStatus === value,
+    sorter: (a, b) => compareText(a.saveStatus, b.saveStatus),
+  },
 ]);
 
 const buildImportRowKey = record =>
@@ -658,6 +677,13 @@ const dedupeImportResults = items => {
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
+  });
+};
+
+const updateImportResultStatuses = statusMap => {
+  importModal.results = importModal.results.map(item => {
+    const nextStatus = statusMap.get(buildImportRowKey(item));
+    return nextStatus ? { ...item, ...nextStatus } : item;
   });
 };
 
@@ -986,7 +1012,11 @@ const handleImportContestants = async () => {
 
     const { data, error } = await RestApi.contestant.import_file({ body: formData });
     if (data.value?.status === "success") {
-      importModal.results = dedupeImportResults(data.value?.data?.item || []);
+      importModal.results = dedupeImportResults(data.value?.data?.item || []).map(item => ({
+        ...item,
+        saveStatus: undefined,
+        saveMessage: "",
+      }));
       importModal.selectedRowKeys = [];
       importPagination.current = 1;
       message.success("Import thí sinh thành công");
@@ -1043,30 +1073,66 @@ const handleSaveImportedContestants = async () => {
 
   try {
     importModal.saving = true;
+    const processingMap = new Map(selectedItems.map(item => [buildImportRowKey(item), { saveStatus: "processing", saveMessage: "" }]));
+    updateImportResultStatuses(processingMap);
 
-    for (const item of selectedItems) {
-      const idDiemThi = await resolveExamLocationIdByCode(item.ma_diem_thi);
-      const payload = {
-        ho_va_ten: item.ho_va_ten,
-        ngay_sinh: item.ngay_sinh ? dayjs(item.ngay_sinh).format("YYYY-MM-DDT00:00:00") : null,
-        noi_sinh_xa: item.noi_sinh,
-        dan_toc: item.dan_toc,
-        cccd: item.cccd,
-        thuong_tru_xa: item.noi_thuong_tru,
-        id_diem_thi: idDiemThi,
-        mon_thi_1: item.mon_1,
-        mon_thi_2: item.mon_2,
-      };
+    const results = await Promise.allSettled(
+      selectedItems.map(async item => {
+        const idDiemThi = await resolveExamLocationIdByCode(item.ma_diem_thi);
+        const payload = {
+          ho_va_ten: item.ho_va_ten,
+          ngay_sinh: item.ngay_sinh ? dayjs(item.ngay_sinh).format("YYYY-MM-DDT00:00:00") : null,
+          noi_sinh_xa: item.noi_sinh,
+          dan_toc: item.dan_toc,
+          cccd: item.cccd,
+          thuong_tru_xa: item.noi_thuong_tru,
+          id_diem_thi: idDiemThi,
+          mon_thi_1: item.mon_1,
+          mon_thi_2: item.mon_2,
+        };
 
-      const { data, error } = await RestApi.contestant.create({ body: payload });
-      if (data.value?.status !== "success") {
-        throw new Error(error.value?.data?.message || `Không thể tạo thí sinh ${item.ho_va_ten || ""}`.trim());
+        const { data, error } = await RestApi.contestant.create({ body: payload });
+        if (data.value?.status !== "success") {
+          throw new Error(error.value?.data?.message || `Không thể tạo thí sinh ${item.ho_va_ten || ""}`.trim());
+        }
+
+        return item;
+      }),
+    );
+
+    const statusMap = new Map();
+    let successCount = 0;
+    let errorCount = 0;
+
+    results.forEach((result, index) => {
+      const item = selectedItems[index];
+      const key = buildImportRowKey(item);
+      if (result.status === "fulfilled") {
+        successCount += 1;
+        statusMap.set(key, {
+          saveStatus: "success",
+          saveMessage: "Đã lưu",
+        });
+      } else {
+        errorCount += 1;
+        statusMap.set(key, {
+          saveStatus: "error",
+          saveMessage: result.reason?.message || "Lưu thất bại",
+        });
       }
+    });
+
+    updateImportResultStatuses(statusMap);
+
+    if (successCount > 0 && selectedLocation.value?.id) {
+      await fetchContestants({ ...contestantParam.value });
     }
 
-    message.success(`Đã tạo ${selectedItems.length} thí sinh`);
-    await fetchContestants({ ...contestantParam.value });
-    closeImportModal();
+    if (errorCount > 0) {
+      message.warning(`Đã lưu ${successCount} thí sinh, ${errorCount} bản ghi lỗi`);
+    } else {
+      message.success(`Đã lưu ${successCount} thí sinh`);
+    }
   } catch (error) {
     message.error(error?.message || "Lưu danh sách import thất bại");
   } finally {
