@@ -413,7 +413,7 @@ const handleContestantTableChange = async pag => {
   await fetchContestants({ ...contestantParam.value });
 };
 
-const resetFilters = async () => {
+const resetFilters = () => {
   roomSearchText.value = "";
   contestantSearchText.value = "";
   filterForm.id_nam = undefined;
@@ -445,7 +445,6 @@ const submitAssignRoom = async () => {
   try {
     await assignFormRef.value?.validate();
     assignModal.submitting = true;
-    const submittedYearId = assignModal.form.id_nam;
     const submittedBoardId = assignModal.form.id_hoi_dong;
     const submittedLocationId = assignModal.form.id_diem_thi;
 
@@ -465,7 +464,6 @@ const submitAssignRoom = async () => {
     closeAssignModal();
 
     if (
-      filterForm.id_nam === submittedYearId &&
       filterForm.id_hoi_dong === submittedBoardId &&
       filterForm.id_diem_thi === submittedLocationId
     ) {
@@ -482,44 +480,19 @@ const submitAssignRoom = async () => {
   }
 };
 
-watch(
-  () => filterForm.id_nam,
-  async (value, oldValue) => {
-    if (value === oldValue) return;
-    selectedRoom.value = null;
-    roomPagination.current = 1;
-    contestantPagination.current = 1;
-    roomParam.value.pageIndex = 1;
-    contestantParam.value.pageIndex = 1;
-    await refreshData();
-  },
-);
+const handleFilterChange = async (value, oldValue) => {
+  if (value === oldValue) return;
+  selectedRoom.value = null;
+  roomPagination.current = 1;
+  contestantPagination.current = 1;
+  roomParam.value.pageIndex = 1;
+  contestantParam.value.pageIndex = 1;
+  await refreshData();
+};
 
-watch(
-  () => filterForm.id_hoi_dong,
-  async (value, oldValue) => {
-    if (value === oldValue) return;
-    selectedRoom.value = null;
-    roomPagination.current = 1;
-    contestantPagination.current = 1;
-    roomParam.value.pageIndex = 1;
-    contestantParam.value.pageIndex = 1;
-    await refreshData();
-  },
-);
-
-watch(
-  () => filterForm.id_diem_thi,
-  async (value, oldValue) => {
-    if (value === oldValue) return;
-    selectedRoom.value = null;
-    roomPagination.current = 1;
-    contestantPagination.current = 1;
-    roomParam.value.pageIndex = 1;
-    contestantParam.value.pageIndex = 1;
-    await refreshData();
-  },
-);
+watch(() => filterForm.id_nam, handleFilterChange);
+watch(() => filterForm.id_hoi_dong, handleFilterChange);
+watch(() => filterForm.id_diem_thi, handleFilterChange);
 
 watch(() => assignModal.form.id_nam, (value, oldValue) => {
   if (value !== oldValue) {
