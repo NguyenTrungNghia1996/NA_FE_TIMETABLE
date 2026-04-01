@@ -214,6 +214,7 @@ let ENDPOINTS = {
   EXAM_ROOM: "/api/phongthi",
   EXAM_ROOM_DETAIL: "/api/phongthi/detail",
   EXAM_ROOM_IMPORT: "/api/phongthi/import",
+  EXAM_ROOM_CONTESTANT: "/api/phongthi/thisinh",
   // PHANPHOI_CHUONGTRINH
   PHANPHOI_CHUONGTRINH: "/api/phanphoi_chuongtrinh",
   PHANPHOI_CHUONGTRINH_EXPORT: "/api/phanphoi_chuongtrinh/export",
@@ -1606,6 +1607,9 @@ class ExamRoom {
   }
   async import_file(data) {
     return await this.request.postForm(ENDPOINTS.EXAM_ROOM_IMPORT, data);
+  }
+  async assign_contestants(data) {
+    return await this.request.post(ENDPOINTS.EXAM_ROOM_CONTESTANT, data);
   }
 }
 
