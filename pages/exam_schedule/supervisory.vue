@@ -261,6 +261,7 @@ const teacherAssignModal = reactive({
   saving: false,
   dataSource: [],
   selectedIds: [],
+  selectedTeachers: [],
   searchText: "",
   location: null,
 });
@@ -429,12 +430,13 @@ const fetchAssignedTeacherIds = async idDiemThi => {
   try {
     const { data, error } = await RestApi.supervisory.list_teacher_ids({ params: { idDiemThi } });
     if (data.value?.status === "success") {
-      teacherAssignModal.selectedIds = (data.value?.data?.id_giao_vien || []).filter(id => Number.isInteger(id) && id > 0);
+      syncSelectedTeachers(data.value?.data?.id_giao_vien || []);
     } else {
       throw new Error(error.value?.data?.message || "Không tải được danh sách giáo viên đã chọn");
     }
   } catch (err) {
     teacherAssignModal.selectedIds = [];
+    teacherAssignModal.selectedTeachers = [];
     message.error(err?.message || "Không tải được danh sách giáo viên đã chọn");
   }
 };
@@ -462,10 +464,48 @@ const onLocationRow = record => ({
 
 const locationRowClassName = record => (record.id === selectedLocation.value?.id ? "active-row" : "");
 
+const normalizeTeacherIds = ids =>
+  [...new Set((ids || []).map(id => Number(id)).filter(id => Number.isInteger(id) && id > 0))];
+
+const syncSelectedTeachers = selectedIds => {
+  teacherAssignModal.selectedIds = normalizeTeacherIds(selectedIds);
+  teacherAssignModal.selectedTeachers = teacherAssignModal.selectedTeachers.filter(teacher => teacherAssignModal.selectedIds.includes(Number(teacher?.id)));
+};
+
+const toggleTeacherSelection = (record, selected) => {
+  const teacherId = Number(record?.id);
+  if (!Number.isInteger(teacherId) || teacherId <= 0) return;
+
+  const selectedIds = new Set(teacherAssignModal.selectedIds);
+  const selectedTeachers = new Map(teacherAssignModal.selectedTeachers.map(teacher => [Number(teacher?.id), teacher]));
+
+  if (selected) {
+    selectedIds.add(teacherId);
+    selectedTeachers.set(teacherId, record);
+  } else {
+    selectedIds.delete(teacherId);
+    selectedTeachers.delete(teacherId);
+  }
+
+  teacherAssignModal.selectedIds = [...selectedIds];
+  teacherAssignModal.selectedTeachers = [...selectedTeachers.values()];
+};
+
+const toggleTeachersSelection = (records, selected) => {
+  (records || []).forEach(record => toggleTeacherSelection(record, selected));
+};
+
 const teacherRowSelection = computed(() => ({
   selectedRowKeys: teacherAssignModal.selectedIds,
+  preserveSelectedRowKeys: true,
   onChange: keys => {
-    teacherAssignModal.selectedIds = keys;
+    syncSelectedTeachers(keys);
+  },
+  onSelect: (record, selected) => {
+    toggleTeacherSelection(record, selected);
+  },
+  onSelectAll: (selected, _selectedRows, changeRows) => {
+    toggleTeachersSelection(changeRows, selected);
   },
   type: "checkbox",
 }));
@@ -473,11 +513,7 @@ const teacherRowSelection = computed(() => ({
 const onTeacherRow = record => ({
   onClick: () => {
     const exists = teacherAssignModal.selectedIds.includes(record.id);
-    if (exists) {
-      teacherAssignModal.selectedIds = teacherAssignModal.selectedIds.filter(id => id !== record.id);
-    } else {
-      teacherAssignModal.selectedIds = [...teacherAssignModal.selectedIds, record.id];
-    }
+    toggleTeacherSelection(record, !exists);
   },
   style: {
     cursor: "pointer",
@@ -649,6 +685,7 @@ const openTeacherAssignModal = async record => {
   teacherAssignModal.open = true;
   teacherAssignModal.searchText = "";
   teacherAssignModal.selectedIds = [];
+  teacherAssignModal.selectedTeachers = [];
   teacherAssignParam.value = { PageIndex: 1, PageSize: teacherAssignPagination.pageSize, search: "" };
   teacherAssignPagination.current = 1;
 
@@ -664,6 +701,7 @@ const closeTeacherAssignModal = () => {
   teacherAssignModal.saving = false;
   teacherAssignModal.dataSource = [];
   teacherAssignModal.selectedIds = [];
+  teacherAssignModal.selectedTeachers = [];
   teacherAssignModal.searchText = "";
   teacherAssignModal.location = null;
 };
