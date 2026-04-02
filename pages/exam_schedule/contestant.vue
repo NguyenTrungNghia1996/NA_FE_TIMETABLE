@@ -241,12 +241,13 @@
           <div class="contestant-form-row items-start">
             <label class="contestant-form-label pt-2">Môn thi <span class="text-red-500">*</span></label>
             <a-form-item name="selected_subjects" class="contestant-form-control">
-              <SelectExamSubject
+              <SelectExamSubjectOptional
                 v-model="formState.selected_subjects"
                 name="selected_subjects_select"
                 label=""
                 :no-form-item="true"
                 multiple
+                checkable
                 :id-hoi-dong="formState.id_hoi_dong"
                 :disabled="!formState.id_hoi_dong"
                 placeholder="-- Chọn 1 hoặc 2 môn thi --"

@@ -197,6 +197,8 @@ let ENDPOINTS = {
   EXAM_SUBJECT: "/api/monthi",
   EXAM_SUBJECT_DETAIL: "/api/monthi/detail",
   EXAM_SUBJECT_LIST: "/api/monthi/list",
+  EXAM_SUBJECT_PARENT: "/api/monthi/cha",
+  EXAM_SUBJECT_OPTIONAL: "/api/monthi/tuchon",
   // EXAM LOCATION (Điểm thi)
   EXAM_LOCATION: "/api/diemthi",
   EXAM_LOCATION_DETAIL: "/api/diemthi/detail",
@@ -1632,6 +1634,12 @@ class ExamSubject {
   }
   async list_from_subject(data) {
     return await this.request.get(ENDPOINTS.EXAM_SUBJECT_LIST, data);
+  }
+  async list_parent(data) {
+    return await this.request.get(ENDPOINTS.EXAM_SUBJECT_PARENT, data);
+  }
+  async list_optional(data) {
+    return await this.request.get(ENDPOINTS.EXAM_SUBJECT_OPTIONAL, data);
   }
   async save_subject_list(data) {
     return await this.request.post(ENDPOINTS.EXAM_SUBJECT_LIST, data);
