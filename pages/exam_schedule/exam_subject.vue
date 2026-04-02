@@ -49,6 +49,19 @@
         <SelectYear v-model="formState.id_nam" label="Năm học" name="id_nam" :rules="rules.id_nam" />
 
         <SelectExamBoard v-model="formState.id_hoi_dong" label="Hội đồng thi" name="id_hoi_dong" :rules="rules.id_hoi_dong" :id-nam="formState.id_nam" />
+
+        <SelectExamSubjectParent
+          v-model="formState.id_cha"
+          label="Môn học cha"
+          name="id_cha"
+          placeholder="Chọn môn học cha"
+          :id-hoi-dong="formState.id_hoi_dong"
+          :disabled="!formState.id_hoi_dong"
+        />
+
+        <a-form-item label="Môn tự chọn" name="la_mon_tu_chon">
+          <a-switch v-model:checked="formState.la_mon_tu_chon" checked-children="Có" un-checked-children="Không" />
+        </a-form-item>
       </a-form>
 
       <template #footer>
@@ -165,6 +178,8 @@ const defaultFormState = () => ({
   ten: "",
   id_hoi_dong: undefined,
   id_nam: undefined,
+  id_cha: undefined,
+  la_mon_tu_chon: false,
 });
 
 const formState = reactive(defaultFormState());
@@ -338,6 +353,17 @@ watch(
     if (syncingEditForm.value) return;
     if (value !== oldValue) {
       formState.id_hoi_dong = undefined;
+      formState.id_cha = undefined;
+    }
+  },
+);
+
+watch(
+  () => formState.id_hoi_dong,
+  (value, oldValue) => {
+    if (syncingEditForm.value) return;
+    if (value !== oldValue) {
+      formState.id_cha = undefined;
     }
   },
 );
@@ -377,6 +403,8 @@ const editItem = async record => {
       ten: data.value?.data?.ten || "",
       id_hoi_dong: data.value?.data?.id_hoi_dong ?? undefined,
       id_nam: data.value?.data?.id_nam ?? undefined,
+      id_cha: data.value?.data?.id_cha ?? undefined,
+      la_mon_tu_chon: Boolean(data.value?.data?.la_mon_tu_chon),
     });
     visible.value = true;
     await nextTick();
@@ -393,7 +421,8 @@ const buildPayload = () => ({
   ma: (formState.ma || "").trim(),
   ten: (formState.ten || "").trim(),
   id_hoi_dong: formState.id_hoi_dong,
-  id_nam: formState.id_nam,
+  id_cha: formState.id_cha ?? null,
+  la_mon_tu_chon: Boolean(formState.la_mon_tu_chon),
 });
 
 const handleOk = async () => {
