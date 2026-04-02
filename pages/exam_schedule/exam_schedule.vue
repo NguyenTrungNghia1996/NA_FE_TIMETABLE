@@ -148,7 +148,7 @@
           name="id_mon"
           :rules="rules.id_mon"
           :id-hoi-dong="formState.id_hoi_dong || null"
-          :disabled="!formState.id_hoi_dong"
+          :disabled="!formState.id_hoi_dong || formState.bai_thi_tu_chon"
           placeholder="Chọn môn thi"
         />
 
@@ -338,7 +338,7 @@ const showModal = () => {
 
 const buildPayload = () => ({
   ...(isEdit.value ? { id: formState.id } : {}),
-  id_mon: formState.id_mon || 0,
+  id_mon: formState.id_mon ?? null,
   id_diem_thi: formState.id_diem_thi,
   ngay: formState.ngay ? dayjs(formState.ngay).format("YYYY-MM-DDT00:00:00") : null,
   giam_thi_khong_cung_mon: !!formState.giam_thi_khong_cung_mon,
@@ -507,6 +507,15 @@ watch(
       await fillFormDependenciesFromLocation(value);
     } catch (error) {
       message.error(error?.message || "Không tải được thông tin điểm thi");
+    }
+  },
+);
+
+watch(
+  () => formState.bai_thi_tu_chon,
+  value => {
+    if (value) {
+      formState.id_mon = undefined;
     }
   },
 );
