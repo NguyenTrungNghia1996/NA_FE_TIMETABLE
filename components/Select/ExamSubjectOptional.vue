@@ -4,7 +4,8 @@
       <a-tree-select
         :value="modelValue"
         @update:value="handleUpdateValue"
-        :multiple="multiple"
+        :multiple="isMultiValue"
+        :tree-checkable="checkable"
         show-search
         :placeholder="placeholder"
         :size="size"
@@ -28,7 +29,8 @@
       <a-tree-select
         :value="modelValue"
         @update:value="handleUpdateValue"
-        :multiple="multiple"
+        :multiple="isMultiValue"
+        :tree-checkable="checkable"
         show-search
         :placeholder="placeholder"
         :size="size"
@@ -50,7 +52,8 @@
       <a-tree-select
         :value="modelValue"
         @update:value="handleUpdateValue"
-        :multiple="multiple"
+        :multiple="isMultiValue"
+        :tree-checkable="checkable"
         show-search
         :placeholder="placeholder"
         :size="size"
@@ -81,6 +84,7 @@ const props = defineProps({
   label: { type: String, default: "Môn tự chọn" },
   name: { type: String, default: "mon_tu_chon" },
   multiple: { type: Boolean, default: false },
+  checkable: { type: Boolean, default: false },
   placeholder: { type: String, default: "Chọn môn tự chọn" },
   size: { type: String, default: "middle" },
   rules: { type: Array, default: () => [] },
@@ -106,13 +110,15 @@ const resolvedMaxCount = computed(() => {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
 });
 
+const isMultiValue = computed(() => props.multiple || props.checkable);
+
 const selectedValues = computed(() => {
-  if (!props.multiple || !Array.isArray(props.modelValue)) return [];
+  if (!isMultiValue.value || !Array.isArray(props.modelValue)) return [];
   return props.modelValue.filter(hasValue).map(normalizeValue);
 });
 
 const treeOptions = computed(() => {
-  if (!props.multiple || !resolvedMaxCount.value || selectedValues.value.length < resolvedMaxCount.value) {
+  if (!isMultiValue.value || !resolvedMaxCount.value || selectedValues.value.length < resolvedMaxCount.value) {
     return options.value;
   }
 
@@ -181,6 +187,12 @@ const ensureSelectedOptions = async () => {
 };
 
 const fetchOptions = async (q = "") => {
+  if (!hasValue(props.idHoiDong)) {
+    options.value = [];
+    loading.value = false;
+    return;
+  }
+
   loading.value = true;
   try {
     const params = {};
@@ -217,13 +229,13 @@ const onSearch = val => {
 };
 
 const onClear = () => {
-  emit("update:modelValue", props.multiple ? [] : null);
+  emit("update:modelValue", isMultiValue.value ? [] : null);
   search.value = "";
   fetchOptions("");
 };
 
 const handleUpdateValue = val => {
-  if (props.multiple && Array.isArray(val) && resolvedMaxCount.value && val.length > resolvedMaxCount.value) {
+  if (isMultiValue.value && Array.isArray(val) && resolvedMaxCount.value && val.length > resolvedMaxCount.value) {
     emit("update:modelValue", val.slice(0, resolvedMaxCount.value));
     message.warning(`Chỉ được chọn tối đa ${resolvedMaxCount.value} môn tự chọn`);
     return;
@@ -243,10 +255,19 @@ const handleUpdateValue = val => {
 
 watch(
   () => props.idHoiDong,
-  () => {
+  idHoiDong => {
+    search.value = "";
+
+    if (!hasValue(idHoiDong)) {
+      options.value = [];
+      return;
+    }
+
     fetchOptions("");
   },
 );
 
-await fetchOptions();
+if (hasValue(props.idHoiDong)) {
+  await fetchOptions();
+}
 </script>
