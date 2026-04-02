@@ -217,6 +217,9 @@ let ENDPOINTS = {
   EXAM_ROOM_DETAIL: "/api/phongthi/detail",
   EXAM_ROOM_IMPORT: "/api/phongthi/import",
   EXAM_ROOM_CONTESTANT: "/api/phongthi/thisinh",
+  // EXAM SCHEDULE (Lịch thi)
+  EXAM_SCHEDULE: "/api/lichthi",
+  EXAM_SCHEDULE_DETAIL: "/api/lichthi/detail",
   // PHANPHOI_CHUONGTRINH
   PHANPHOI_CHUONGTRINH: "/api/phanphoi_chuongtrinh",
   PHANPHOI_CHUONGTRINH_EXPORT: "/api/phanphoi_chuongtrinh/export",
@@ -399,6 +402,7 @@ class RestApi {
     this.contestant = new Contestant(this.request);
     this.supervisory = new Supervisory(this.request);
     this.exam_room = new ExamRoom(this.request);
+    this.exam_schedule = new ExamSchedule(this.request);
     this.phanphoi_chuongtrinh = new PhanphoiChuongtrinh(this.request);
     this.phanphoi_chuongtrinh_chitiet = new PhanphoiChuongtrinhChitiet(this.request);
     this.lecture_schedule = new LectureSchedule(this.request);
@@ -1612,6 +1616,28 @@ class ExamRoom {
   }
   async assign_contestants(data) {
     return await this.request.post(ENDPOINTS.EXAM_ROOM_CONTESTANT, data);
+  }
+}
+
+// EXAM SCHEDULE CLASS
+class ExamSchedule {
+  constructor() {
+    this.request = new Request();
+  }
+  async list(data) {
+    return await this.request.get(ENDPOINTS.EXAM_SCHEDULE, data);
+  }
+  async detail(data) {
+    return await this.request.get(ENDPOINTS.EXAM_SCHEDULE_DETAIL, data);
+  }
+  async create(data) {
+    return await this.request.post(ENDPOINTS.EXAM_SCHEDULE, data);
+  }
+  async update(data) {
+    return await this.request.put(ENDPOINTS.EXAM_SCHEDULE, data);
+  }
+  async delete(data) {
+    return await this.request.delete(ENDPOINTS.EXAM_SCHEDULE, data);
   }
 }
 
