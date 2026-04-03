@@ -658,8 +658,6 @@ const importColumns = computed(() => [
     width: 180,
     ellipsis: true,
     sorter: (a, b) => compareText(a.ho_va_ten, b.ho_va_ten),
-    filters: buildColumnFilters(importModal.results, "ho_va_ten"),
-    onFilter: (value, record) => includesText(record.ho_va_ten, value),
   },
   {
     title: "Ngày sinh",
@@ -676,8 +674,6 @@ const importColumns = computed(() => [
     width: 140,
     align: "center",
     sorter: (a, b) => compareText(a.cccd, b.cccd),
-    filters: buildColumnFilters(importModal.results, "cccd"),
-    onFilter: (value, record) => includesText(record.cccd, value),
   },
   {
     title: "Mã điểm thi",
