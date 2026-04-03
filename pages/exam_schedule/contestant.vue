@@ -429,11 +429,34 @@ const importPagination = reactive({
   showTotal: total => `Tổng ${total} bản ghi`,
 });
 
+const selectableImportRowKeys = computed(() =>
+  importModal.results.filter(item => !item?.isDuplicate).map(item => buildImportRowKey(item)),
+);
+
 const importRowSelection = computed(() => ({
   selectedRowKeys: importModal.selectedRowKeys,
   onChange: keys => {
     importModal.selectedRowKeys = keys;
   },
+  hideSelectAll: !settingStore.currentPermission,
+  selections: settingStore.currentPermission
+    ? [
+        {
+          key: "select-all-valid",
+          text: "Chọn tất cả",
+          onSelect: () => {
+            importModal.selectedRowKeys = [...selectableImportRowKeys.value];
+          },
+        },
+        {
+          key: "clear-all-valid",
+          text: "Bỏ chọn tất cả",
+          onSelect: () => {
+            importModal.selectedRowKeys = [];
+          },
+        },
+      ]
+    : [],
   getCheckboxProps: record => ({
     disabled: !!record?.isDuplicate,
   }),
@@ -1077,35 +1100,6 @@ const handleImportContestants = async () => {
   }
 };
 
-const resolveExamLocationIdByCode = async maDiemThi => {
-  const code = String(maDiemThi || "").trim();
-  if (!code) {
-    throw new Error("Thiếu mã điểm thi");
-  }
-
-  const { data, error } = await RestApi.exam_location.list({
-    params: {
-      pageIndex: 1,
-      pageSize: 100,
-      search: code,
-    },
-  });
-
-  if (data.value?.status !== "success") {
-    throw new Error(error.value?.data?.message || `Không tìm được điểm thi ${code}`);
-  }
-
-  const items = data.value?.data?.items || [];
-  const normalizedCode = code.toLowerCase();
-  const matched = items.find(item => String(item.ma || "").trim().toLowerCase() === normalizedCode) || items.find(item => String(item.ten || "").trim().toLowerCase() === normalizedCode);
-
-  if (!matched?.id) {
-    throw new Error(`Không tìm được điểm thi ${code}`);
-  }
-
-  return matched.id;
-};
-
 const handleSaveImportedContestants = async () => {
   const selectedItems = dedupeImportResults(importModal.results.filter(record => importModal.selectedRowKeys.includes(buildImportRowKey(record))));
 
@@ -1121,7 +1115,11 @@ const handleSaveImportedContestants = async () => {
 
     const results = await Promise.allSettled(
       selectedItems.map(async item => {
-        const idDiemThi = await resolveExamLocationIdByCode(item.ma_diem_thi);
+        const idDiemThi = item.id_diem_thi;
+        if (!idDiemThi) {
+          throw new Error("Thiếu id điểm thi");
+        }
+
         const payload = {
           ho_va_ten: item.ho_va_ten,
           ngay_sinh: item.ngay_sinh ? dayjs(item.ngay_sinh).format("YYYY-MM-DDT00:00:00") : null,
