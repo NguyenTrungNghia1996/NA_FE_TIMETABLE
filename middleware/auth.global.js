@@ -64,7 +64,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
 
   // 2) Route public cho trang chủ: luôn cho phép truy cập (không tự động chuyển dashboard)
-  if (to.path === "/" || to.path === "/index") {
+  if (to.path === "/" || to.path === "/index"||to.path === "/preview") {
     return;
   }
 
