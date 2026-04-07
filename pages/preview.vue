@@ -29,7 +29,43 @@
         </div>
       </a-card>
 
-      <section class="grid items-start gap-1.5 xl:grid-cols-[minmax(0,1fr)_340px] pt-3">
+      <section class="grid items-start gap-1.5 pt-3 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <aside class="grid grid-cols-1 gap-1.5 xl:hidden">
+          <a-card :bordered="false" class="side-panel-card" :body-style="{ padding: '0' } ">
+            <template #title>
+              <span class="text-sm font-semibold text-[#16697a]">Phòng chờ</span>
+            </template>
+            <a-table
+              size="small"
+              :columns="waitingColumns"
+              :data-source="waitingRoomInvigilators"
+              :pagination="false"
+              :row-key="record => `mobile-waiting-${record.order}`"
+            />
+          </a-card>
+
+          <a-card :bordered="false" class="side-panel-card" :body-style="{ padding: '0' }">
+            <template #title>
+              <span class="text-sm font-semibold text-[#16697a]">Giám thị chưa xếp phòng</span>
+            </template>
+            <a-table
+              size="small"
+              :columns="unassignedColumns"
+              :data-source="unassignedInvigilators"
+              :pagination="false"
+              :row-key="record => `mobile-unassigned-${record.order}`"
+            >
+              <template #bodyCell="{ column }">
+                <template v-if="column.key === 'action'">
+                  <a-button size="small" class="!bg-[#4b9cc9] !border-[#4b9cc9] !text-white hover:!bg-[#3f86ad] hover:!border-[#3f86ad]">
+                    Chọn
+                  </a-button>
+                </template>
+              </template>
+            </a-table>
+          </a-card>
+        </aside>
+
         <div class="min-w-0">
           <a-collapse v-model:activeKey="activeBuildingKeys" :bordered="false" class="building-collapse">
             <a-collapse-panel v-for="building in filteredBuildings" :key="building.id">
@@ -123,7 +159,7 @@
           </a-collapse>
         </div>
 
-        <aside class="space-y-1.5 xl:sticky xl:top-2 grid grid-cols-1 gap-1.5">
+        <aside class="hidden grid-cols-1 gap-1.5 space-y-1.5 xl:grid xl:sticky xl:top-2">
           <a-card :bordered="false" class="side-panel-card" :body-style="{ padding: '0' } ">
             <template #title>
               <span class="text-sm font-semibold text-[#16697a]">Phòng chờ</span>
