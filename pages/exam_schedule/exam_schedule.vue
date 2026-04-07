@@ -228,16 +228,27 @@
             <div class="rounded-lg border border-slate-200 p-4 text-center">
               <div class="text-sm font-semibold uppercase text-slate-700">Bốc thăm</div>
               <div class="mt-2 text-xs text-slate-500">
-                Chức năng bốc thăm sẽ được bổ sung ở bước tiếp theo.
+                Mở màn hình bốc thăm và theo dõi phân công giám thị theo tòa, tầng, phòng.
               </div>
-              <a-button class="mt-4" disabled>
-                Sắp bổ sung
+              <a-button
+                class="mt-4 !bg-[#4b9cc9] !border-[#4b9cc9] !text-white hover:!bg-[#3f86ad] hover:!border-[#3f86ad]"
+                :disabled="!settingStore.currentPermission"
+                @click="handleOpenLotteryDrawer"
+              >
+                Mở bốc thăm
               </a-button>
             </div>
           </div>
         </div>
       </a-spin>
     </a-modal>
+
+    <ExamScheduleLotteryDrawer
+      v-model:open="lotteryDrawer.open"
+      :schedule-id="lotteryDrawer.scheduleId"
+      :schedule-meta="lotteryDrawer.meta"
+      @close="closeLotteryDrawer"
+    />
   </div>
 </template>
 
@@ -279,6 +290,11 @@ const actionModal = reactive({
   loading: false,
   submitting: false,
   detail: null,
+});
+const lotteryDrawer = reactive({
+  open: false,
+  scheduleId: null,
+  meta: null,
 });
 
 const pagination = reactive({
@@ -570,6 +586,24 @@ const handleAutoAssign = async () => {
   } finally {
     actionModal.submitting = false;
   }
+};
+
+const handleOpenLotteryDrawer = () => {
+  if (!actionModal.detail?.id) {
+    message.warning("Không tìm thấy lịch thi để mở bốc thăm");
+    return;
+  }
+
+  lotteryDrawer.scheduleId = actionModal.detail.id;
+  lotteryDrawer.meta = { ...actionModal.detail };
+  lotteryDrawer.open = true;
+  actionModal.visible = false;
+};
+
+const closeLotteryDrawer = () => {
+  lotteryDrawer.open = false;
+  lotteryDrawer.scheduleId = null;
+  lotteryDrawer.meta = null;
 };
 
 watch(
