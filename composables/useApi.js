@@ -224,9 +224,9 @@ let ENDPOINTS = {
   EXAM_SCHEDULE_ASSIGNMENT_WAITING: "/api/xeplichthi/phongcho",
   EXAM_SCHEDULE_ASSIGNMENT_UNASSIGNED: "/api/xeplichthi/chuaxep",
   EXAM_SCHEDULE_ASSIGNMENT_DRAW: "/api/xeplichthi/le",
-  EXAM_SCHEDULE_CANCEL_RESULT: "/api/huyketqua",
-  EXAM_SCHEDULE_CANCEL_RESULT_SUPERVISOR: "/api/huyketqua/giamsat",
-  EXAM_SCHEDULE_CANCEL_RESULT_ROOM: "/api/huyketqua/phong",
+  EXAM_SCHEDULE_CANCEL_RESULT: "/api/xeplichthi/huyketqua",
+  EXAM_SCHEDULE_CANCEL_RESULT_SUPERVISOR: "/api/xeplichthi/huyketqua/giamsat",
+  EXAM_SCHEDULE_CANCEL_RESULT_ROOM: "/api/xeplichthi/huyketqua/phong",
   // PHANPHOI_CHUONGTRINH
   PHANPHOI_CHUONGTRINH: "/api/phanphoi_chuongtrinh",
   PHANPHOI_CHUONGTRINH_EXPORT: "/api/phanphoi_chuongtrinh/export",
