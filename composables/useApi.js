@@ -220,6 +220,13 @@ let ENDPOINTS = {
   // EXAM SCHEDULE (Lịch thi)
   EXAM_SCHEDULE: "/api/lichthi",
   EXAM_SCHEDULE_DETAIL: "/api/lichthi/detail",
+  EXAM_SCHEDULE_AUTO_ASSIGN: "/api/xeplichthi",
+  EXAM_SCHEDULE_ASSIGNMENT_WAITING: "/api/xeplichthi/phongcho",
+  EXAM_SCHEDULE_ASSIGNMENT_UNASSIGNED: "/api/xeplichthi/chuaxep",
+  EXAM_SCHEDULE_ASSIGNMENT_DRAW: "/api/xeplichthi/le",
+  EXAM_SCHEDULE_CANCEL_RESULT: "/api/huyketqua",
+  EXAM_SCHEDULE_CANCEL_RESULT_SUPERVISOR: "/api/huyketqua/giamsat",
+  EXAM_SCHEDULE_CANCEL_RESULT_ROOM: "/api/huyketqua/phong",
   // PHANPHOI_CHUONGTRINH
   PHANPHOI_CHUONGTRINH: "/api/phanphoi_chuongtrinh",
   PHANPHOI_CHUONGTRINH_EXPORT: "/api/phanphoi_chuongtrinh/export",
@@ -1638,6 +1645,30 @@ class ExamSchedule {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.EXAM_SCHEDULE, data);
+  }
+  async auto_assign(data) {
+    return await this.request.post(ENDPOINTS.EXAM_SCHEDULE_AUTO_ASSIGN, data);
+  }
+  async assignment_detail(data) {
+    return await this.request.get(ENDPOINTS.EXAM_SCHEDULE_AUTO_ASSIGN, data);
+  }
+  async assignment_waiting_room(data) {
+    return await this.request.get(ENDPOINTS.EXAM_SCHEDULE_ASSIGNMENT_WAITING, data);
+  }
+  async assignment_unassigned(data) {
+    return await this.request.get(ENDPOINTS.EXAM_SCHEDULE_ASSIGNMENT_UNASSIGNED, data);
+  }
+  async assignment_draw(data) {
+    return await this.request.post(ENDPOINTS.EXAM_SCHEDULE_ASSIGNMENT_DRAW, data);
+  }
+  async cancel_assignment_result(data) {
+    return await this.request.delete(ENDPOINTS.EXAM_SCHEDULE_CANCEL_RESULT, data);
+  }
+  async cancel_assignment_supervisor(data) {
+    return await this.request.delete(ENDPOINTS.EXAM_SCHEDULE_CANCEL_RESULT_SUPERVISOR, data);
+  }
+  async cancel_assignment_room(data) {
+    return await this.request.delete(ENDPOINTS.EXAM_SCHEDULE_CANCEL_RESULT_ROOM, data);
   }
 }
 

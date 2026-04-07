@@ -87,6 +87,13 @@
             <template v-else-if="column.key === 'action'">
               <div class="flex justify-center">
                 <div class="md:flex space-x-2">
+                  <a-tooltip title="Thao tác xếp lịch">
+                    <a-button type="link" size="small" @click="openActionModal(record)" :disabled="!settingStore.currentPermission || detailLoading">
+                      <template #icon>
+                        <ControlOutlined />
+                      </template>
+                    </a-button>
+                  </a-tooltip>
                   <a-button type="link" size="small" @click="editItem(record)" :disabled="!settingStore.currentPermission || detailLoading">
                     <template #icon>
                       <EditOutlined />
@@ -172,6 +179,76 @@
         </div>
       </template>
     </a-modal>
+
+    <a-modal
+      v-model:open="actionModal.visible"
+      title="Xếp lịch coi thi"
+      :width="760"
+      :footer="null"
+      :confirm-loading="actionModal.loading"
+      @cancel="closeActionModal"
+    >
+      <a-spin :spinning="actionModal.loading">
+        <div class="space-y-4">
+          <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <div class="text-base font-semibold uppercase text-[#16697a]">
+              Thông tin lịch coi thi
+            </div>
+
+            <div v-if="actionModal.detail" class="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-700 md:grid-cols-2">
+              <div><span class="font-semibold">Môn thi:</span> {{ getSubjectDisplay(actionModal.detail) || "--" }}</div>
+              <div><span class="font-semibold">Ngày thi:</span> {{ formatDate(actionModal.detail.ngay) || "--" }}</div>
+              <div><span class="font-semibold">Điểm thi:</span> {{ actionModal.detail.ten_diem_thi || "--" }}</div>
+              <div><span class="font-semibold">Hội đồng thi:</span> {{ actionModal.detail.ten_hoi_dong || "--" }}</div>
+              <div><span class="font-semibold">Năm học:</span> {{ actionModal.detail.ten_nam || "--" }}</div>
+              <div>
+                <span class="font-semibold">Giám thị không cùng môn:</span>
+                {{ actionModal.detail.giam_thi_khong_cung_mon ? "Có" : "Không" }}
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div class="rounded-lg border border-slate-200 p-4 text-center">
+              <div class="text-sm font-semibold uppercase text-slate-700">Xếp tự động</div>
+              <div class="mt-2 text-xs text-slate-500">
+                Hệ thống tự động xếp lịch coi thi theo lịch thi đã chọn.
+              </div>
+              <a-button
+                type="primary"
+                class="mt-4 !bg-[#16a085] !border-[#16a085] hover:!bg-[#12806b] hover:!border-[#12806b]"
+                :loading="actionModal.submitting"
+                :disabled="!settingStore.currentPermission"
+                @click="handleAutoAssign"
+              >
+                Thực hiện xếp
+              </a-button>
+            </div>
+
+            <div class="rounded-lg border border-slate-200 p-4 text-center">
+              <div class="text-sm font-semibold uppercase text-slate-700">Bốc thăm</div>
+              <div class="mt-2 text-xs text-slate-500">
+                Mở màn hình bốc thăm và theo dõi phân công giám thị theo tòa, tầng, phòng.
+              </div>
+              <a-button
+                class="mt-4 !bg-[#4b9cc9] !border-[#4b9cc9] !text-white hover:!bg-[#3f86ad] hover:!border-[#3f86ad]"
+                :disabled="!settingStore.currentPermission"
+                @click="handleOpenLotteryDrawer"
+              >
+                Mở bốc thăm
+              </a-button>
+            </div>
+          </div>
+        </div>
+      </a-spin>
+    </a-modal>
+
+    <ExamScheduleLotteryDrawer
+      v-model:open="lotteryDrawer.open"
+      :schedule-id="lotteryDrawer.scheduleId"
+      :schedule-meta="lotteryDrawer.meta"
+      @close="closeLotteryDrawer"
+    />
   </div>
 </template>
 
@@ -189,7 +266,7 @@ const columns = [
   { title: "Hội đồng thi", dataIndex: "ten_hoi_dong", key: "ten_hoi_dong", width: 220, ellipsis: true },
   { title: "Năm học", dataIndex: "ten_nam", key: "ten_nam", width: 140, ellipsis: true },
   { title: "Giám thị không cùng bộ môn", key: "giam_thi_khong_cung_mon", width: 180, align: "center" },
-  { title: "Thao tác", key: "action", width: 90, align: "center", fixed: "right" },
+  { title: "Thao tác", key: "action", width: 130, align: "center", fixed: "right" },
 ];
 
 const defaultParams = () => ({
@@ -208,6 +285,17 @@ const isEdit = ref(false);
 const searchText = ref("");
 const formRef = ref();
 const syncingEditForm = ref(false);
+const actionModal = reactive({
+  visible: false,
+  loading: false,
+  submitting: false,
+  detail: null,
+});
+const lotteryDrawer = reactive({
+  open: false,
+  scheduleId: null,
+  meta: null,
+});
 
 const pagination = reactive({
   current: 1,
@@ -444,6 +532,78 @@ const deleteItem = async id => {
   } finally {
     await fetchData();
   }
+};
+
+const openActionModal = async record => {
+  try {
+    actionModal.visible = true;
+    actionModal.loading = true;
+    actionModal.detail = null;
+
+    const { data, error } = await RestApi.exam_schedule.detail({ params: { Id: record.id } });
+    if (data.value?.status !== "success") {
+      throw new Error(error.value?.data?.message || "Không tải được chi tiết lịch thi");
+    }
+
+    actionModal.detail = data.value?.data || null;
+  } catch (error) {
+    actionModal.visible = false;
+    message.error(error?.message || "Không tải được chi tiết lịch thi");
+  } finally {
+    actionModal.loading = false;
+  }
+};
+
+const closeActionModal = () => {
+  actionModal.visible = false;
+  actionModal.loading = false;
+  actionModal.submitting = false;
+  actionModal.detail = null;
+};
+
+const handleAutoAssign = async () => {
+  if (!actionModal.detail?.id) {
+    message.warning("Không tìm thấy lịch thi để xếp tự động");
+    return;
+  }
+
+  try {
+    actionModal.submitting = true;
+    const { data, error } = await RestApi.exam_schedule.auto_assign({
+      params: { idLich: actionModal.detail.id },
+    });
+
+    if (data.value?.status === "success") {
+      message.success(data.value?.message || "Xếp lịch coi thi tự động thành công");
+      closeActionModal();
+      await fetchData();
+      return;
+    }
+
+    throw new Error(error.value?.data?.message || "Xếp lịch coi thi tự động không thành công");
+  } catch (error) {
+    message.error(error?.message || "Xếp lịch coi thi tự động không thành công");
+  } finally {
+    actionModal.submitting = false;
+  }
+};
+
+const handleOpenLotteryDrawer = () => {
+  if (!actionModal.detail?.id) {
+    message.warning("Không tìm thấy lịch thi để mở bốc thăm");
+    return;
+  }
+
+  lotteryDrawer.scheduleId = actionModal.detail.id;
+  lotteryDrawer.meta = { ...actionModal.detail };
+  lotteryDrawer.open = true;
+  actionModal.visible = false;
+};
+
+const closeLotteryDrawer = () => {
+  lotteryDrawer.open = false;
+  lotteryDrawer.scheduleId = null;
+  lotteryDrawer.meta = null;
 };
 
 watch(
