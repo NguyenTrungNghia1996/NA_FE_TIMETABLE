@@ -220,6 +220,7 @@ let ENDPOINTS = {
   // EXAM SCHEDULE (Lịch thi)
   EXAM_SCHEDULE: "/api/lichthi",
   EXAM_SCHEDULE_DETAIL: "/api/lichthi/detail",
+  EXAM_SCHEDULE_AUTO_ASSIGN: "/api/xeplichthi",
   // PHANPHOI_CHUONGTRINH
   PHANPHOI_CHUONGTRINH: "/api/phanphoi_chuongtrinh",
   PHANPHOI_CHUONGTRINH_EXPORT: "/api/phanphoi_chuongtrinh/export",
@@ -1638,6 +1639,9 @@ class ExamSchedule {
   }
   async delete(data) {
     return await this.request.delete(ENDPOINTS.EXAM_SCHEDULE, data);
+  }
+  async auto_assign(data) {
+    return await this.request.post(ENDPOINTS.EXAM_SCHEDULE_AUTO_ASSIGN, data);
   }
 }
 
