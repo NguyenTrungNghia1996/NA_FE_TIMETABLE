@@ -120,7 +120,7 @@
                           :key="group.id"
                           class="border border-slate-300 bg-[#fbfcfe]"
                         >
-                          <div class="flex items-center justify-between border-b border-slate-300 bg-[#f1f7f9] px-2.5 py-1.5 text-sm text-slate-700">
+                          <div class="group-header flex items-center justify-between border-b border-slate-300 bg-[#f1f7f9] px-2.5 py-1.5 text-sm text-slate-700">
                             <div class="flex items-center gap-2">
                               <Icon name="ant-design:apartment-outlined" size="16" class="text-[#16697a]" />
                               <span class="font-semibold">GST:</span>
@@ -135,6 +135,7 @@
                               @confirm="emit('reset-supervisor', group)"
                             >
                               <a-button
+                                class="delete-action"
                                 type="text"
                                 danger
                                 size="small"
@@ -155,7 +156,7 @@
                               :bordered="false"
                               class="room-card !shadow-none transition hover:border-slate-400"
                             >
-                              <div class="mb-1.5 flex items-start justify-between gap-1.5">
+                              <div class="room-header mb-1.5 flex items-start justify-between gap-1.5">
                                 <div>
                                   <a-typography-text strong class="!text-base !tracking-tight !text-slate-800">
                                     {{ room.name }}
@@ -170,6 +171,7 @@
                                   @confirm="emit('reset-room', room)"
                                 >
                                   <a-button
+                                    class="delete-action"
                                     type="text"
                                     danger
                                     size="small"
@@ -491,6 +493,19 @@ function filterSideList(items, keyword) {
 .person-card {
   border: 1px solid #e2e8f0;
   background: #f8fafc;
+}
+
+:deep(.delete-action) {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.group-header:hover :deep(.delete-action),
+.room-header:hover :deep(.delete-action),
+:deep(.delete-action.ant-btn-loading) {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 :deep(.person-card > .ant-card-body) {
