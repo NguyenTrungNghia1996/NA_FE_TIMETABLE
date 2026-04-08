@@ -34,17 +34,17 @@
           @confirm="handleCancelAll"
         >
           <a-button danger :loading="cancellingAll" :disabled="!scheduleId || !settingStore.currentPermission || loading">
-            <template #icon>
+            <!-- <template #icon>
               <Icon name="ant-design:delete-outlined" size="16" />
-            </template>
+            </template> -->
             Hủy kết quả
           </a-button>
         </a-popconfirm>
 
         <a-button @click="reloadData" :loading="loading" :disabled="!scheduleId">
-          <template #icon>
+          <!-- <template #icon>
             <Icon name="ant-design:reload-outlined" size="16" />
-          </template>
+          </template> -->
           Tải lại
         </a-button>
       </template>
