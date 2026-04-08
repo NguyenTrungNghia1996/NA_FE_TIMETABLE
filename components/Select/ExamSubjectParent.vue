@@ -225,10 +225,22 @@ const handleUpdateValue = val => {
 
 watch(
   () => props.idHoiDong,
-  () => {
+  async value => {
     options.value = [];
     search.value = "";
     hasFetched.value = false;
+
+    if (hasValue(value) && hasValue(props.modelValue)) {
+      await fetchOptions("");
+    }
+  },
+);
+
+watch(
+  () => props.modelValue,
+  async value => {
+    if (!hasValue(props.idHoiDong) || !hasValue(value)) return;
+    await ensureSelectedOptions();
   },
 );
 </script>
