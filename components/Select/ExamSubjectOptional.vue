@@ -117,15 +117,90 @@ const selectedValues = computed(() => {
   return props.modelValue.filter(hasValue).map(normalizeValue);
 });
 
-const treeOptions = computed(() => {
-  if (!isMultiValue.value || !resolvedMaxCount.value || selectedValues.value.length < resolvedMaxCount.value) {
-    return options.value;
-  }
+const optionByValue = computed(() => {
+  const map = new Map();
+  options.value.forEach(option => {
+    map.set(normalizeValue(option.value), option);
+  });
+  return map;
+});
 
-  return options.value.map(node => ({
-    ...node,
-    disabled: !selectedValues.value.includes(normalizeValue(node.value)),
-  }));
+const childCountByParent = computed(() => {
+  const map = new Map();
+  options.value.forEach(option => {
+    const parentId = normalizeValue(option.pId);
+    if (!hasValue(parentId) || parentId === "0") return;
+    map.set(parentId, (map.get(parentId) || 0) + 1);
+  });
+  return map;
+});
+
+const getParentId = value => {
+  const option = optionByValue.value.get(normalizeValue(value));
+  const parentId = normalizeValue(option?.pId);
+  if (!hasValue(parentId) || parentId === "0") return null;
+  return parentId;
+};
+
+const hasChildren = value => childCountByParent.value.has(normalizeValue(value));
+
+const sanitizeSelectedValues = values => {
+  if (!isMultiValue.value || !Array.isArray(values)) return values;
+
+  const nextValues = [];
+  const selectedIndexByParent = new Map();
+  let replacedSibling = false;
+
+  values.filter(hasValue).forEach(rawValue => {
+    const value = normalizeValue(rawValue);
+    const parentId = getParentId(value);
+
+    if (parentId && !hasChildren(value)) {
+      if (selectedIndexByParent.has(parentId)) {
+        nextValues[selectedIndexByParent.get(parentId)] = rawValue;
+        replacedSibling = true;
+        return;
+      }
+
+      selectedIndexByParent.set(parentId, nextValues.length);
+    }
+
+    if (!nextValues.some(item => normalizeValue(item) === value)) {
+      nextValues.push(rawValue);
+    }
+  });
+
+  return {
+    values: nextValues,
+    replacedSibling,
+  };
+};
+
+const treeOptions = computed(() => {
+  const selectedByParent = new Map();
+
+  selectedValues.value.forEach(value => {
+    const parentId = getParentId(value);
+    if (parentId && !hasChildren(value)) {
+      selectedByParent.set(parentId, value);
+    }
+  });
+
+  const reachedMaxCount = isMultiValue.value && resolvedMaxCount.value && selectedValues.value.length >= resolvedMaxCount.value;
+
+  return options.value.map(node => {
+    const value = normalizeValue(node.value);
+    const parentId = getParentId(value);
+    const selectedSibling = parentId ? selectedByParent.get(parentId) : null;
+    const isSelected = selectedValues.value.includes(value);
+    const disabledByParent = !!selectedSibling && selectedSibling !== value && !hasChildren(value);
+    const disabledByMaxCount = reachedMaxCount && !isSelected;
+
+    return {
+      ...node,
+      disabled: disabledByParent || disabledByMaxCount,
+    };
+  });
 });
 
 const mapOption = item => ({
@@ -207,7 +282,12 @@ const fetchOptions = async (q = "") => {
     if (data.value?.status === "success") {
       options.value = normalizeTreeData(items);
       await ensureSelectedOptions();
-      emit("update:modelValue", props.modelValue);
+      if (isMultiValue.value && Array.isArray(props.modelValue)) {
+        const sanitized = sanitizeSelectedValues(props.modelValue);
+        emit("update:modelValue", sanitized.values);
+      } else {
+        emit("update:modelValue", props.modelValue);
+      }
     } else {
       throw new Error(error?.value?.data?.message || "Không thể tải danh sách môn tự chọn");
     }
@@ -235,7 +315,35 @@ const onClear = () => {
 };
 
 const handleUpdateValue = val => {
-  if (isMultiValue.value && Array.isArray(val) && resolvedMaxCount.value && val.length > resolvedMaxCount.value) {
+  if (isMultiValue.value && Array.isArray(val)) {
+    const sanitized = sanitizeSelectedValues(val);
+    let nextValues = sanitized.values;
+
+    if (sanitized.replacedSibling) {
+      message.warning("Mỗi nhóm môn cha chỉ được chọn 1 môn con");
+    }
+
+    if (resolvedMaxCount.value && nextValues.length > resolvedMaxCount.value) {
+      nextValues = nextValues.slice(0, resolvedMaxCount.value);
+      emit("update:modelValue", nextValues);
+      message.warning(`Chỉ được chọn tối đa ${resolvedMaxCount.value} môn tự chọn`);
+      return;
+    }
+
+    emit("update:modelValue", nextValues);
+
+    const isCleared = nextValues.length === 0;
+    if (isCleared) {
+      search.value = "";
+      fetchOptions("");
+    } else if (search.value) {
+      search.value = "";
+      fetchOptions("");
+    }
+    return;
+  }
+
+  if (resolvedMaxCount.value && Array.isArray(val) && val.length > resolvedMaxCount.value) {
     emit("update:modelValue", val.slice(0, resolvedMaxCount.value));
     message.warning(`Chỉ được chọn tối đa ${resolvedMaxCount.value} môn tự chọn`);
     return;
