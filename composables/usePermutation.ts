@@ -10,7 +10,7 @@
  * 3 ham public:
  * - `encodePermutation(sourceItems, orderedItems)`
  * - `decodePermutation(sourceItems, seed)`
- * - `shuffledItems(items)`
+ * - `shuffleItems(items)`
  *
  * Cach dung:
  *
@@ -18,7 +18,7 @@
  * import {
  *   decodePermutation,
  *   encodePermutation,
- *   shuffledItems,
+ *   shuffleItems,
  * } from "~/composables/usePermutation";
  *
  * const sourceItems = ["A", "B", "C", "D"];
@@ -26,7 +26,7 @@
  *
  * const seed = encodePermutation(sourceItems, orderedItems);
  * const restoredItems = decodePermutation(sourceItems, seed);
- * const randomItems = shuffledItems(sourceItems);
+ * const randomItems = shuffleItems(sourceItems);
  * ```
  *
  * Dieu kien:
@@ -49,7 +49,7 @@ export function decodePermutation<T>(sourceItems: T[], seed: string) {
     .filter((item): item is T => item !== undefined);
 }
 
-export function shuffledItems<T>(items: T[]) {
+export function shuffleItems<T>(items: T[]) {
   const randomizedItems = [...items];
 
   for (let index = randomizedItems.length - 1; index > 0; index -= 1) {

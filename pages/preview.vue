@@ -197,7 +197,7 @@
 import {
   decodePermutation,
   encodePermutation,
-  shuffledItems,
+  shuffleItems,
 } from "~/composables/usePermutation";
 
 const baseQuestions = Array.from({ length: 50 }, (_, index) => makeDemoUuid(index + 1));
@@ -220,7 +220,7 @@ const restoredQuestions = computed(() => {
 });
 
 function shuffleExam() {
-  examQuestions.value = shuffledItems(examQuestions.value);
+  examQuestions.value = shuffleItems(examQuestions.value);
 }
 
 function resetExam() {
