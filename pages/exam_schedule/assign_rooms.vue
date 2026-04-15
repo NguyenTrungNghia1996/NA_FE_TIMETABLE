@@ -4,37 +4,15 @@
       <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
         <div class="flex flex-col xl:flex-row xl:items-end gap-3">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3 flex-1">
-            <SelectYear
-              v-model="filterForm.id_nam"
-              label=""
-              name="assign_room_filter_year"
-              :no-form-item="true"
-              placeholder="-- Chọn năm học --"
-            />
+            <SelectYear v-model="filterForm.id_nam" label="" name="assign_room_filter_year" :no-form-item="true" placeholder="-- Chọn năm học --" />
 
-            <SelectExamBoard
-              v-model="filterForm.id_hoi_dong"
-              label=""
-              name="assign_room_filter_board"
-              :no-form-item="true"
-              placeholder="-- Chọn hội đồng thi --"
-              :id-nam="filterForm.id_nam || null"
-            />
+            <SelectExamBoard v-model="filterForm.id_hoi_dong" label="" name="assign_room_filter_board" :no-form-item="true" placeholder="-- Chọn hội đồng thi --" :id-nam="filterForm.id_nam || null" />
 
-            <SelectExamLocation
-              v-model="filterForm.id_diem_thi"
-              label=""
-              name="assign_room_filter_location"
-              :no-form-item="true"
-              placeholder="-- Chọn điểm thi --"
-              :id-hoi-dong="filterForm.id_hoi_dong || null"
-            />
+            <SelectExamLocation v-model="filterForm.id_diem_thi" label="" name="assign_room_filter_location" :no-form-item="true" placeholder="-- Chọn điểm thi --" :id-hoi-dong="filterForm.id_hoi_dong || null" />
           </div>
           <div class="flex items-center gap-2">
             <a-button @click="resetFilters">Đặt lại</a-button>
-            <a-button type="primary" :disabled="!settingStore.currentPermission" @click="openAssignModal">
-              Xếp phòng thi
-            </a-button>
+            <a-button type="primary" :disabled="!settingStore.currentPermission" @click="openAssignModal"> Xếp phòng thi </a-button>
           </div>
         </div>
       </div>
@@ -42,27 +20,11 @@
       <div class="grid grid-cols-1 xl:grid-cols-[320px_minmax(0,1fr)] gap-4 items-start">
         <a-card title="DANH SÁCH PHÒNG THI">
           <div class="mb-3">
-            <a-input-search
-              v-model:value="roomSearchText"
-              placeholder="Nhập thông tin tìm kiếm phòng thi"
-              enter-button
-              @search="handleRoomSearch"
-            />
+            <a-input-search v-model:value="roomSearchText" placeholder="Nhập thông tin tìm kiếm phòng thi" enter-button @search="handleRoomSearch" />
           </div>
 
           <ClientOnly>
-            <a-table
-              :columns="roomColumns"
-              :data-source="roomDataSource"
-              :pagination="roomPagination"
-              :loading="roomLoading"
-              row-key="id"
-              size="small"
-              bordered
-              :customRow="onRoomRow"
-              :row-class-name="roomRowClassName"
-              @change="handleRoomTableChange"
-            >
+            <a-table :columns="roomColumns" :data-source="roomDataSource" :pagination="roomPagination" :loading="roomLoading" row-key="id" size="small" bordered :customRow="onRoomRow" :row-class-name="roomRowClassName" @change="handleRoomTableChange">
               <template #bodyCell="{ column, record, index }">
                 <template v-if="column.key === 'stt'">
                   {{ (roomPagination.current - 1) * roomPagination.pageSize + index + 1 }}
@@ -77,31 +39,19 @@
         </a-card>
 
         <a-card :title="contestantTitle">
-          <template #extra>
+          <!-- <template #extra>
             <span v-if="selectedRoom" class="text-xs text-slate-500">Đang xem phòng {{ formatRoomNumber(selectedRoom.so_phong) }}</span>
-          </template>
+          </template> -->
 
           <div class="mb-3">
-            <a-input-search
-              v-model:value="contestantSearchText"
-              placeholder="Nhập thông tin tìm kiếm thí sinh"
-              enter-button
-              @search="handleContestantSearch"
-            />
+            <div class="flex flex-col sm:flex-row gap-2">
+              <a-input-search v-model:value="contestantSearchText" placeholder="Nhập thông tin tìm kiếm thí sinh" enter-button class="flex-1" @search="handleContestantSearch" />
+              <a-select v-model:value="contestantParam.trangThai" class="w-full sm:w-[220px]" placeholder="Lọc trạng thái thí sinh" allow-clear :options="contestantStatusOptions" @change="handleContestantStatusChange" />
+            </div>
           </div>
 
           <ClientOnly>
-            <a-table
-              :columns="contestantColumns"
-              :data-source="contestantDataSource"
-              :pagination="contestantPagination"
-              :loading="contestantLoading"
-              row-key="id"
-              size="small"
-              bordered
-              :scroll="{ x: '1100' }"
-              @change="handleContestantTableChange"
-            >
+            <a-table :columns="contestantColumns" :data-source="contestantDataSource" :pagination="contestantPagination" :loading="contestantLoading" row-key="id" size="small" bordered :scroll="{ x: '1100' }" @change="handleContestantTableChange">
               <template #bodyCell="{ column, record, index }">
                 <template v-if="column.key === 'stt'">
                   {{ (contestantPagination.current - 1) * contestantPagination.pageSize + index + 1 }}
@@ -117,40 +67,13 @@
       </div>
     </div>
 
-    <a-modal
-      v-model:open="assignModal.open"
-      title="Xếp phòng thi"
-      :confirm-loading="assignModal.submitting"
-      :destroy-on-close="true"
-      @ok="submitAssignRoom"
-      @cancel="closeAssignModal"
-    >
+    <a-modal v-model:open="assignModal.open" title="Xếp phòng thi" :confirm-loading="assignModal.submitting" :destroy-on-close="true" @ok="submitAssignRoom" @cancel="closeAssignModal">
       <a-form ref="assignFormRef" :model="assignModal.form" :rules="assignRules" layout="vertical">
-        <SelectYear
-          v-model="assignModal.form.id_nam"
-          label="Năm học"
-          name="id_nam"
-          :rules="assignRules.id_nam"
-          placeholder="-- Chọn năm học --"
-        />
+        <SelectYear v-model="assignModal.form.id_nam" label="Năm học" name="id_nam" :rules="assignRules.id_nam" placeholder="-- Chọn năm học --" />
 
-        <SelectExamBoard
-          v-model="assignModal.form.id_hoi_dong"
-          label="Hội đồng thi"
-          name="id_hoi_dong"
-          :rules="assignRules.id_hoi_dong"
-          placeholder="-- Chọn hội đồng thi --"
-          :id-nam="assignModal.form.id_nam || null"
-        />
+        <SelectExamBoard v-model="assignModal.form.id_hoi_dong" label="Hội đồng thi" name="id_hoi_dong" :rules="assignRules.id_hoi_dong" placeholder="-- Chọn hội đồng thi --" :id-nam="assignModal.form.id_nam || null" />
 
-        <SelectExamLocation
-          v-model="assignModal.form.id_diem_thi"
-          label="Điểm thi"
-          name="id_diem_thi"
-          :rules="assignRules.id_diem_thi"
-          placeholder="-- Chọn điểm thi --"
-          :id-hoi-dong="assignModal.form.id_hoi_dong || null"
-        />
+        <SelectExamLocation v-model="assignModal.form.id_diem_thi" label="Điểm thi" name="id_diem_thi" :rules="assignRules.id_diem_thi" placeholder="-- Chọn điểm thi --" :id-hoi-dong="assignModal.form.id_hoi_dong || null" />
       </a-form>
     </a-modal>
   </div>
@@ -171,13 +94,19 @@ const contestantColumns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
   { title: "Số báo danh", dataIndex: "so_bao_danh", key: "so_bao_danh", width: 120, align: "center" },
   { title: "Họ và tên", dataIndex: "ho_va_ten", key: "ho_va_ten", width: 200, ellipsis: true },
+  { title: "Phòng thi", dataIndex: "so_phong", key: "so_phong", width: 110, align: "center" },
   { title: "CCCD", dataIndex: "cccd", key: "cccd", width: 140, align: "center" },
   { title: "Ngày sinh", key: "ngay_sinh", width: 120, align: "center" },
-  { title: "Nơi sinh", dataIndex: "ten_noi_sinh", key: "ten_noi_sinh", width: 180, ellipsis: true },
-  { title: "Nơi thường trú", dataIndex: "ten_thuong_tru", key: "ten_thuong_tru", width: 180, ellipsis: true },
+  // { title: "Nơi sinh", dataIndex: "ten_noi_sinh", key: "ten_noi_sinh", width: 180, ellipsis: true },
+  // { title: "Nơi thường trú", dataIndex: "ten_thuong_tru", key: "ten_thuong_tru", width: 180, ellipsis: true },
   { title: "Dân tộc", dataIndex: "ten_dan_toc", key: "ten_dan_toc", width: 100, align: "center" },
   { title: "Môn thi 1", dataIndex: "ten_mon_1", key: "ten_mon_1", width: 120, align: "center" },
   { title: "Môn thi 2", dataIndex: "ten_mon_2", key: "ten_mon_2", width: 120, align: "center" },
+];
+
+const contestantStatusOptions = [
+  { label: "Đã xếp", value: true },
+  { label: "Chưa xếp", value: false },
 ];
 
 const roomSearchText = ref("");
@@ -205,6 +134,7 @@ const contestantParam = ref({
   pageIndex: 1,
   pageSize: 10,
   search: "",
+  trangThai: undefined,
 });
 
 const roomPagination = reactive({
@@ -346,6 +276,9 @@ const fetchContestants = async params => {
       requestParams.idPhong = selectedRoom.value.id;
     }
 
+    if (!requestParams.search) delete requestParams.search;
+    if (typeof requestParams.trangThai !== "boolean") delete requestParams.trangThai;
+
     const { data, error } = await RestApi.contestant.list({ params: requestParams });
     if (data.value?.status !== "success") {
       throw new Error(error?.value?.data?.message || "Không tải được danh sách thí sinh");
@@ -397,6 +330,12 @@ const handleContestantSearch = async () => {
   await fetchContestants({ ...contestantParam.value });
 };
 
+const handleContestantStatusChange = async () => {
+  contestantPagination.current = 1;
+  contestantParam.value.pageIndex = 1;
+  await fetchContestants({ ...contestantParam.value });
+};
+
 const handleRoomTableChange = async pag => {
   roomPagination.current = pag.current;
   roomPagination.pageSize = pag.pageSize;
@@ -421,7 +360,7 @@ const resetFilters = () => {
   filterForm.id_diem_thi = undefined;
   selectedRoom.value = null;
   roomParam.value = { pageIndex: 1, pageSize: roomPagination.pageSize, search: "" };
-  contestantParam.value = { pageIndex: 1, pageSize: contestantPagination.pageSize, search: "" };
+  contestantParam.value = { pageIndex: 1, pageSize: contestantPagination.pageSize, search: "", trangThai: undefined };
   roomPagination.current = 1;
   contestantPagination.current = 1;
   roomDataSource.value = [];
@@ -463,10 +402,7 @@ const submitAssignRoom = async () => {
     message.success(data.value?.message || "Xếp phòng thi thành công");
     closeAssignModal();
 
-    if (
-      filterForm.id_hoi_dong === submittedBoardId &&
-      filterForm.id_diem_thi === submittedLocationId
-    ) {
+    if (filterForm.id_hoi_dong === submittedBoardId && filterForm.id_diem_thi === submittedLocationId) {
       roomPagination.current = 1;
       contestantPagination.current = 1;
       roomParam.value.pageIndex = 1;
@@ -483,10 +419,13 @@ const submitAssignRoom = async () => {
 const handleFilterChange = async (value, oldValue) => {
   if (value === oldValue) return;
   selectedRoom.value = null;
+  contestantSearchText.value = "";
   roomPagination.current = 1;
   contestantPagination.current = 1;
   roomParam.value.pageIndex = 1;
   contestantParam.value.pageIndex = 1;
+  contestantParam.value.search = "";
+  contestantParam.value.trangThai = undefined;
   await refreshData();
 };
 
@@ -494,29 +433,38 @@ watch(() => filterForm.id_nam, handleFilterChange);
 watch(() => filterForm.id_hoi_dong, handleFilterChange);
 watch(() => filterForm.id_diem_thi, handleFilterChange);
 
-watch(() => assignModal.form.id_nam, (value, oldValue) => {
-  if (value !== oldValue) {
-    assignModal.form.id_hoi_dong = undefined;
-    assignModal.form.id_diem_thi = undefined;
-  }
-});
+watch(
+  () => assignModal.form.id_nam,
+  (value, oldValue) => {
+    if (value !== oldValue) {
+      assignModal.form.id_hoi_dong = undefined;
+      assignModal.form.id_diem_thi = undefined;
+    }
+  },
+);
 
-watch(() => assignModal.form.id_hoi_dong, (value, oldValue) => {
-  if (value !== oldValue) {
-    assignModal.form.id_diem_thi = undefined;
-    nextTick(() => {
-      assignFormRef.value?.validateFields?.(["id_hoi_dong", "id_diem_thi"]);
-    });
-  }
-});
+watch(
+  () => assignModal.form.id_hoi_dong,
+  (value, oldValue) => {
+    if (value !== oldValue) {
+      assignModal.form.id_diem_thi = undefined;
+      nextTick(() => {
+        assignFormRef.value?.validateFields?.(["id_hoi_dong", "id_diem_thi"]);
+      });
+    }
+  },
+);
 
-watch(() => assignModal.form.id_diem_thi, (value, oldValue) => {
-  if (value !== oldValue) {
-    nextTick(() => {
-      assignFormRef.value?.validateFields?.(["id_hoi_dong", "id_diem_thi"]);
-    });
-  }
-});
+watch(
+  () => assignModal.form.id_diem_thi,
+  (value, oldValue) => {
+    if (value !== oldValue) {
+      nextTick(() => {
+        assignFormRef.value?.validateFields?.(["id_hoi_dong", "id_diem_thi"]);
+      });
+    }
+  },
+);
 </script>
 
 <style scoped>
