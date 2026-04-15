@@ -4,23 +4,9 @@
       <a-card title="DANH SÁCH ĐIỂM THI" class="xl:col-span-4">
         <div class="space-y-3">
           <div class="grid grid-cols-1 gap-2 items-start">
-            <SelectYear
-              v-model="locationFilter.yearId"
-              label="Năm học:"
-              name="location_filter_year"
-              :no-form-item="true"
-              :inline-label="true"
-              placeholder="Chọn năm học"
-            />
+            <SelectYear v-model="locationFilter.yearId" label="Năm học:" name="location_filter_year" :no-form-item="true" :inline-label="true" placeholder="Chọn năm học" />
 
-            <SelectExamBoard
-              v-model="locationFilter.boardId"
-              label="Hội đồng thi:"
-              name="location_filter_board"
-              :no-form-item="true"
-              :inline-label="true"
-              :id-nam="locationFilter.yearId"
-            />
+            <SelectExamBoard v-model="locationFilter.boardId" label="Hội đồng thi:" name="location_filter_board" :no-form-item="true" :inline-label="true" :id-nam="locationFilter.yearId" />
           </div>
 
           <div class="flex flex-col sm:flex-row gap-2">
@@ -29,18 +15,7 @@
           </div>
 
           <ClientOnly>
-            <a-table
-              :columns="locationColumns"
-              :data-source="locationDataSource"
-              :pagination="locationPagination"
-              :loading="locationLoading"
-              row-key="id"
-              size="small"
-              bordered
-              :customRow="onLocationRow"
-              :row-class-name="locationRowClassName"
-              @change="handleLocationTableChange"
-            >
+            <a-table :columns="locationColumns" :data-source="locationDataSource" :pagination="locationPagination" :loading="locationLoading" row-key="id" size="small" bordered :customRow="onLocationRow" :row-class-name="locationRowClassName" @change="handleLocationTableChange">
               <template #bodyCell="{ column, record, index }">
                 <template v-if="column.key === 'stt'">
                   {{ (locationPagination.current - 1) * locationPagination.pageSize + index + 1 }}
@@ -54,42 +29,22 @@
       <a-card :title="contestantTitle" class="xl:col-span-8">
         <template #extra>
           <div class="flex gap-2">
-            <a-button :disabled="!settingStore.currentPermission" @click="openAssignSbdModal">
-              Đánh số báo danh
-            </a-button>
+            <a-button :disabled="!settingStore.currentPermission" @click="openAssignSbdModal"> Đánh số báo danh </a-button>
             <a-button :disabled="!settingStore.currentPermission" @click="openImportModal">Import thí sinh</a-button>
             <a-button type="primary" :disabled="!settingStore.currentPermission" @click="showModal">Thêm mới</a-button>
           </div>
         </template>
 
         <div class="flex flex-col sm:flex-row gap-2 mb-3">
-          <a-input-search
-            v-model:value="contestantSearchText"
-            placeholder="Tìm kiếm họ tên hoặc CCCD..."
-            enter-button
-            class="flex-1"
-            :disabled="!selectedLocation"
-            @search="handleContestantSearch"
-          />
+          <a-input-search v-model:value="contestantSearchText" placeholder="Tìm kiếm họ tên hoặc CCCD..." enter-button class="flex-1" :disabled="!selectedLocation" @search="handleContestantSearch" />
+          <a-select v-model:value="contestantParam.trangThai" class="w-full sm:w-[220px]" placeholder="Lọc trạng thái thí sinh" :disabled="!selectedLocation" allow-clear :options="contestantStatusOptions" @change="handleContestantStatusChange" />
           <a-button :disabled="!selectedLocation" @click="resetContestantSearch">Đặt lại</a-button>
         </div>
 
-        <div v-if="!selectedLocation" class="text-gray-500 min-h-[160px] flex items-center justify-center">
-          Vui lòng chọn một điểm thi ở bảng bên trái.
-        </div>
+        <div v-if="!selectedLocation" class="text-gray-500 min-h-[160px] flex items-center justify-center">Vui lòng chọn một điểm thi ở bảng bên trái.</div>
 
         <ClientOnly v-else>
-          <a-table
-            :columns="contestantColumns"
-            :data-source="contestantDataSource"
-            :pagination="contestantPagination"
-            :loading="contestantLoading"
-            row-key="id"
-            size="small"
-            bordered
-            :scroll="{ x: '1200' }"
-            @change="handleContestantTableChange"
-          >
+          <a-table :columns="contestantColumns" :data-source="contestantDataSource" :pagination="contestantPagination" :loading="contestantLoading" row-key="id" size="small" bordered :scroll="{ x: '1200' }" @change="handleContestantTableChange">
             <template #bodyCell="{ column, record, index }">
               <template v-if="column.key === 'stt'">
                 {{ (contestantPagination.current - 1) * contestantPagination.pageSize + index + 1 }}
@@ -136,30 +91,14 @@
           <div class="contestant-form-row">
             <label class="contestant-form-label">Hội đồng thi <span class="text-red-500">*</span></label>
             <a-form-item name="id_hoi_dong" class="contestant-form-control">
-              <SelectExamBoard
-                v-model="formState.id_hoi_dong"
-                name="id_hoi_dong_select"
-                label=""
-                :no-form-item="true"
-                placeholder="-- Chọn hội đồng thi --"
-                :id-nam="formState.id_nam"
-                :disabled="!formState.id_nam"
-              />
+              <SelectExamBoard v-model="formState.id_hoi_dong" name="id_hoi_dong_select" label="" :no-form-item="true" placeholder="-- Chọn hội đồng thi --" :id-nam="formState.id_nam" :disabled="!formState.id_nam" />
             </a-form-item>
           </div>
 
           <div class="contestant-form-row">
             <label class="contestant-form-label">Điểm thi <span class="text-red-500">*</span></label>
             <a-form-item name="id_diem_thi" class="contestant-form-control">
-              <SelectExamLocation
-                v-model="formState.id_diem_thi"
-                name="id_diem_thi_select"
-                label=""
-                :no-form-item="true"
-                placeholder="-- Chọn điểm thi --"
-                :id-hoi-dong="formState.id_hoi_dong"
-                :disabled="!formState.id_hoi_dong"
-              />
+              <SelectExamLocation v-model="formState.id_diem_thi" name="id_diem_thi_select" label="" :no-form-item="true" placeholder="-- Chọn điểm thi --" :id-hoi-dong="formState.id_hoi_dong" :disabled="!formState.id_hoi_dong" />
             </a-form-item>
           </div>
 
@@ -198,15 +137,7 @@
                 <SelectTinh v-model="formState.noi_sinh_tinh" name="noi_sinh_tinh_select" label="" :no-form-item="true" placeholder="-- Chọn tỉnh --" />
               </a-form-item>
               <a-form-item name="noi_sinh_xa" class="mb-0">
-                <SelectXa
-                  v-model="formState.noi_sinh_xa"
-                  name="noi_sinh_xa_select"
-                  label=""
-                  :no-form-item="true"
-                  :id-tinh="formState.noi_sinh_tinh"
-                  placeholder="-- Chọn xã --"
-                  :disabled="!formState.noi_sinh_tinh"
-                />
+                <SelectXa v-model="formState.noi_sinh_xa" name="noi_sinh_xa_select" label="" :no-form-item="true" :id-tinh="formState.noi_sinh_tinh" placeholder="-- Chọn xã --" :disabled="!formState.noi_sinh_tinh" />
               </a-form-item>
             </div>
           </div>
@@ -218,15 +149,7 @@
                 <SelectTinh v-model="formState.thuong_tru_tinh" name="thuong_tru_tinh_select" label="" :no-form-item="true" placeholder="-- Chọn tỉnh --" />
               </a-form-item>
               <a-form-item name="thuong_tru_xa" class="mb-0">
-                <SelectXa
-                  v-model="formState.thuong_tru_xa"
-                  name="thuong_tru_xa_select"
-                  label=""
-                  :no-form-item="true"
-                  :id-tinh="formState.thuong_tru_tinh"
-                  placeholder="-- Chọn xã --"
-                  :disabled="!formState.thuong_tru_tinh"
-                />
+                <SelectXa v-model="formState.thuong_tru_xa" name="thuong_tru_xa_select" label="" :no-form-item="true" :id-tinh="formState.thuong_tru_tinh" placeholder="-- Chọn xã --" :disabled="!formState.thuong_tru_tinh" />
               </a-form-item>
             </div>
           </div>
@@ -241,19 +164,7 @@
           <div class="contestant-form-row items-start">
             <label class="contestant-form-label pt-2">Môn thi <span class="text-red-500">*</span></label>
             <a-form-item name="selected_subjects" class="contestant-form-control">
-              <SelectExamSubjectOptional
-                v-model="formState.selected_subjects"
-                name="selected_subjects_select"
-                label=""
-                :no-form-item="true"
-                multiple
-                checkable
-                :id-hoi-dong="formState.id_hoi_dong"
-                :disabled="!formState.id_hoi_dong"
-                placeholder="-- Chọn 1 hoặc 2 môn thi --"
-                :max-count="2"
-                :max-tag-count="2"
-              />
+              <SelectExamSubjectOptional v-model="formState.selected_subjects" name="selected_subjects_select" label="" :no-form-item="true" multiple checkable :id-hoi-dong="formState.id_hoi_dong" :disabled="!formState.id_hoi_dong" placeholder="-- Chọn 1 hoặc 2 môn thi --" :max-count="2" :max-tag-count="2" />
             </a-form-item>
           </div>
         </div>
@@ -273,14 +184,7 @@
       <div class="space-y-3 py-2">
         <a-form layout="vertical">
           <a-form-item label="Hội đồng thi" required>
-            <SelectExamBoard
-              v-model="assignSbdModal.boardId"
-              name="assign_sbd_board"
-              label=""
-              :no-form-item="true"
-              placeholder="-- Chọn hội đồng thi --"
-              :id-nam="locationFilter.yearId"
-            />
+            <SelectExamBoard v-model="assignSbdModal.boardId" name="assign_sbd_board" label="" :no-form-item="true" placeholder="-- Chọn hội đồng thi --" :id-nam="locationFilter.yearId" />
           </a-form-item>
         </a-form>
       </div>
@@ -296,33 +200,12 @@
         </div>
 
         <div class="flex justify-end gap-2">
-          <a-button
-            type="primary"
-            ghost
-            :loading="importModal.saving"
-            :disabled="!importModal.results.length || !importModal.selectedRowKeys.length || !settingStore.currentPermission"
-            @click="handleSaveImportedContestants"
-          >
-            Lưu
-          </a-button>
-          <a-button type="primary" :loading="importModal.uploading" :disabled="!importModal.file || !settingStore.currentPermission" @click="handleImportContestants">
-            Import
-          </a-button>
+          <a-button type="primary" ghost :loading="importModal.saving" :disabled="!importModal.results.length || !importModal.selectedRowKeys.length || !settingStore.currentPermission" @click="handleSaveImportedContestants"> Lưu </a-button>
+          <a-button type="primary" :loading="importModal.uploading" :disabled="!importModal.file || !settingStore.currentPermission" @click="handleImportContestants"> Import </a-button>
           <a-button danger @click="closeImportModal">Hủy</a-button>
         </div>
 
-        <a-table
-          v-if="importModal.results.length"
-          :columns="importColumns"
-          :data-source="importModal.results"
-          :pagination="importPagination"
-          :scroll="{ x: '1100' }"
-          :row-key="buildImportRowKey"
-          :row-selection="importRowSelection"
-          size="small"
-          bordered
-          @change="handleImportTableChange"
-        >
+        <a-table v-if="importModal.results.length" :columns="importColumns" :data-source="importModal.results" :pagination="importPagination" :scroll="{ x: '1100' }" :row-key="buildImportRowKey" :row-selection="importRowSelection" size="small" bordered @change="handleImportTableChange">
           <template #bodyCell="{ column, record, index }">
             <template v-if="column.key === 'stt'">
               {{ index + 1 }}
@@ -330,7 +213,7 @@
             <template v-else-if="column.key === 'ngay_sinh'">
               {{ formatDate(record.ngay_sinh) }}
             </template>
-          <template v-else-if="column.key === 'isDuplicate'">
+            <template v-else-if="column.key === 'isDuplicate'">
               <a-tag :color="record.isDuplicate ? 'red' : 'green'">
                 {{ record.isDuplicate ? "Trùng" : "Hợp lệ" }}
               </a-tag>
@@ -387,6 +270,7 @@ const contestantParam = ref({
   pageIndex: 1,
   pageSize: 10,
   search: "",
+  trangThai: undefined,
 });
 
 const locationDataSource = ref([]);
@@ -429,9 +313,7 @@ const importPagination = reactive({
   showTotal: total => `Tổng ${total} bản ghi`,
 });
 
-const selectableImportRowKeys = computed(() =>
-  importModal.results.filter(item => !item?.isDuplicate).map(item => buildImportRowKey(item)),
-);
+const selectableImportRowKeys = computed(() => importModal.results.filter(item => !item?.isDuplicate).map(item => buildImportRowKey(item)));
 
 const importRowSelection = computed(() => ({
   selectedRowKeys: importModal.selectedRowKeys,
@@ -525,7 +407,10 @@ const formatDate = value => {
   return dayjs(value).isValid() ? dayjs(value).format("DD/MM/YYYY") : "";
 };
 
-const normalizeText = value => String(value || "").trim().toLowerCase();
+const normalizeText = value =>
+  String(value || "")
+    .trim()
+    .toLowerCase();
 const compareText = (a, b) => normalizeText(a).localeCompare(normalizeText(b), "vi");
 const compareDate = (a, b) => dayjs(a || 0).valueOf() - dayjs(b || 0).valueOf();
 const includesText = (source, keyword) => normalizeText(source).includes(normalizeText(keyword));
@@ -579,6 +464,14 @@ const contestantColumns = computed(() => [
     onFilter: (value, record) => includesText(record.ho_va_ten, value),
   },
   {
+    title: "Phòng thi",
+    dataIndex: "so_phong",
+    key: "so_phong",
+    width: 110,
+    align: "center",
+    sorter: (a, b) => Number(a.so_phong || 0) - Number(b.so_phong || 0),
+  },
+  {
     title: "CCCD",
     dataIndex: "cccd",
     key: "cccd",
@@ -596,26 +489,26 @@ const contestantColumns = computed(() => [
     align: "center",
     sorter: (a, b) => compareDate(a.ngay_sinh, b.ngay_sinh),
   },
-  {
-    title: "Nơi sinh",
-    dataIndex: "ten_noi_sinh",
-    key: "ten_noi_sinh",
-    width: 180,
-    ellipsis: true,
-    sorter: (a, b) => compareText(a.ten_noi_sinh, b.ten_noi_sinh),
-    filters: buildColumnFilters(contestantDataSource.value, "ten_noi_sinh"),
-    onFilter: (value, record) => includesText(record.ten_noi_sinh, value),
-  },
-  {
-    title: "Nơi thường trú",
-    dataIndex: "ten_thuong_tru",
-    key: "ten_thuong_tru",
-    width: 180,
-    ellipsis: true,
-    sorter: (a, b) => compareText(a.ten_thuong_tru, b.ten_thuong_tru),
-    filters: buildColumnFilters(contestantDataSource.value, "ten_thuong_tru"),
-    onFilter: (value, record) => includesText(record.ten_thuong_tru, value),
-  },
+  // {
+  //   title: "Nơi sinh",
+  //   dataIndex: "ten_noi_sinh",
+  //   key: "ten_noi_sinh",
+  //   width: 180,
+  //   ellipsis: true,
+  //   sorter: (a, b) => compareText(a.ten_noi_sinh, b.ten_noi_sinh),
+  //   filters: buildColumnFilters(contestantDataSource.value, "ten_noi_sinh"),
+  //   onFilter: (value, record) => includesText(record.ten_noi_sinh, value),
+  // },
+  // {
+  //   title: "Nơi thường trú",
+  //   dataIndex: "ten_thuong_tru",
+  //   key: "ten_thuong_tru",
+  //   width: 180,
+  //   ellipsis: true,
+  //   sorter: (a, b) => compareText(a.ten_thuong_tru, b.ten_thuong_tru),
+  //   filters: buildColumnFilters(contestantDataSource.value, "ten_thuong_tru"),
+  //   onFilter: (value, record) => includesText(record.ten_thuong_tru, value),
+  // },
   {
     title: "Dân tộc",
     dataIndex: "ten_dan_toc",
@@ -646,8 +539,14 @@ const contestantColumns = computed(() => [
     filters: buildColumnFilters(contestantDataSource.value, "ten_mon_2"),
     onFilter: (value, record) => includesText(record.ten_mon_2, value),
   },
+
   { title: "Thao tác", key: "action", width: 100, align: "center", fixed: "right" },
 ]);
+
+const contestantStatusOptions = [
+  { label: "Đã xếp", value: true },
+  { label: "Chưa xếp", value: false },
+];
 
 const importColumns = computed(() => [
   { title: "STT", key: "stt", width: 60, align: "center" },
@@ -714,10 +613,14 @@ const importColumns = computed(() => [
 
 const buildImportRowKey = record =>
   [
-    String(record?.ho_va_ten || "").trim().toLowerCase(),
+    String(record?.ho_va_ten || "")
+      .trim()
+      .toLowerCase(),
     String(record?.ngay_sinh || "").trim(),
     String(record?.cccd || "").trim(),
-    String(record?.ma_diem_thi || "").trim().toLowerCase(),
+    String(record?.ma_diem_thi || "")
+      .trim()
+      .toLowerCase(),
   ].join("|");
 
 const dedupeImportResults = items => {
@@ -799,12 +702,15 @@ const fetchContestants = async params => {
 
   try {
     contestantLoading.value = true;
-    const { data, error } = await RestApi.contestant.list({
-      params: {
-        ...params,
-        idDiemThi: selectedLocation.value.id,
-      },
-    });
+    const requestParams = {
+      ...params,
+      idDiemThi: selectedLocation.value.id,
+    };
+
+    if (!requestParams.search) delete requestParams.search;
+    if (typeof requestParams.trangThai !== "boolean") delete requestParams.trangThai;
+
+    const { data, error } = await RestApi.contestant.list({ params: requestParams });
 
     if (data.value?.status === "success") {
       contestantDataSource.value = data.value?.data?.items || [];
@@ -877,9 +783,15 @@ const handleContestantSearch = async () => {
   await fetchContestants({ ...contestantParam.value });
 };
 
+const handleContestantStatusChange = async () => {
+  contestantParam.value.pageIndex = 1;
+  contestantPagination.current = 1;
+  await fetchContestants({ ...contestantParam.value });
+};
+
 const resetContestantSearch = async () => {
   contestantSearchText.value = "";
-  contestantParam.value = { pageIndex: 1, pageSize: contestantPagination.pageSize, search: "" };
+  contestantParam.value = { pageIndex: 1, pageSize: contestantPagination.pageSize, search: "", trangThai: undefined };
   contestantPagination.current = 1;
   await fetchContestants({ ...contestantParam.value });
 };
@@ -888,6 +800,7 @@ const onLocationRow = record => ({
   onClick: async () => {
     selectedLocation.value = record;
     contestantParam.value.pageIndex = 1;
+    contestantParam.value.trangThai = undefined;
     contestantPagination.current = 1;
     contestantSearchText.value = "";
     contestantParam.value.search = "";
