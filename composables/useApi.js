@@ -1624,6 +1624,12 @@ class ExamRoom {
   async assign_contestants(data) {
     return await this.request.post(ENDPOINTS.EXAM_ROOM_CONTESTANT, data);
   }
+  async check_contestants(data) {
+    return await this.request.get(ENDPOINTS.EXAM_ROOM_CONTESTANT, data);
+  }
+  async delete_contestant(data) {
+    return await this.request.delete(ENDPOINTS.EXAM_ROOM_CONTESTANT, data);
+  }
 }
 
 // EXAM SCHEDULE CLASS
