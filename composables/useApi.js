@@ -221,6 +221,7 @@ let ENDPOINTS = {
   EXAM_SCHEDULE: "/api/lichthi",
   EXAM_SCHEDULE_DETAIL: "/api/lichthi/detail",
   EXAM_SCHEDULE_AUTO_ASSIGN: "/api/xeplichthi",
+  EXAM_SCHEDULE_CHECK: "/api/xeplichthi/check",
   EXAM_SCHEDULE_ASSIGNMENT_WAITING: "/api/xeplichthi/phongcho",
   EXAM_SCHEDULE_ASSIGNMENT_UNASSIGNED: "/api/xeplichthi/chuaxep",
   EXAM_SCHEDULE_ASSIGNMENT_DRAW: "/api/xeplichthi/le",
@@ -1624,6 +1625,12 @@ class ExamRoom {
   async assign_contestants(data) {
     return await this.request.post(ENDPOINTS.EXAM_ROOM_CONTESTANT, data);
   }
+  async check_contestants(data) {
+    return await this.request.get(ENDPOINTS.EXAM_ROOM_CONTESTANT, data);
+  }
+  async delete_contestant(data) {
+    return await this.request.delete(ENDPOINTS.EXAM_ROOM_CONTESTANT, data);
+  }
 }
 
 // EXAM SCHEDULE CLASS
@@ -1648,6 +1655,9 @@ class ExamSchedule {
   }
   async auto_assign(data) {
     return await this.request.post(ENDPOINTS.EXAM_SCHEDULE_AUTO_ASSIGN, data);
+  }
+  async check(data) {
+    return await this.request.get(ENDPOINTS.EXAM_SCHEDULE_CHECK, data);
   }
   async assignment_detail(data) {
     return await this.request.get(ENDPOINTS.EXAM_SCHEDULE_AUTO_ASSIGN, data);

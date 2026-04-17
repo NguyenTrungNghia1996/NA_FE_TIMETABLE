@@ -60,6 +60,17 @@
                 <template v-else-if="column.key === 'ngay_sinh'">
                   {{ formatDate(record.ngay_sinh) }}
                 </template>
+
+                <template v-else-if="column.key === 'action'">
+                  <a-popconfirm title="Bạn chắc chắn muốn xóa thí sinh khỏi phòng thi?" ok-text="Đồng ý" cancel-text="Hủy" @confirm="deleteContestantFromRoom(record)">
+                    <a-button type="link" danger size="small" :disabled="!settingStore.currentPermission" :loading="deletingContestantId === record.id">
+                      <template #icon>
+                        <DeleteOutlined />
+                      </template>
+                      Xóa
+                    </a-button>
+                  </a-popconfirm>
+                </template>
               </template>
             </a-table>
           </ClientOnly>
@@ -80,6 +91,10 @@
 </template>
 
 <script setup>
+import { h } from "vue";
+import { Modal } from "ant-design-vue";
+import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
+
 const settingStore = useSettingStore();
 const { RestApi } = useApi();
 
@@ -102,6 +117,7 @@ const contestantColumns = [
   { title: "Dân tộc", dataIndex: "ten_dan_toc", key: "ten_dan_toc", width: 100, align: "center" },
   { title: "Môn thi 1", dataIndex: "ten_mon_1", key: "ten_mon_1", width: 120, align: "center" },
   { title: "Môn thi 2", dataIndex: "ten_mon_2", key: "ten_mon_2", width: 120, align: "center" },
+  { title: "Thao tác", key: "action", width: 110, align: "center", fixed: "right" },
 ];
 
 const contestantStatusOptions = [
@@ -116,6 +132,7 @@ const roomDataSource = ref([]);
 const contestantDataSource = ref([]);
 const roomLoading = ref(false);
 const contestantLoading = ref(false);
+const deletingContestantId = ref(null);
 const assignFormRef = ref();
 
 const filterForm = reactive({
@@ -352,6 +369,33 @@ const handleContestantTableChange = async pag => {
   await fetchContestants({ ...contestantParam.value });
 };
 
+const deleteContestantFromRoom = async record => {
+  try {
+    deletingContestantId.value = record.id;
+    const shouldMovePreviousPage = contestantDataSource.value.length === 1 && contestantPagination.current > 1;
+    const nextPageIndex = shouldMovePreviousPage ? contestantPagination.current - 1 : contestantPagination.current;
+
+    const { data, error } = await RestApi.exam_room.delete_contestant({
+      params: {
+        id: record.id,
+      },
+    });
+
+    if (data.value?.status !== "success") {
+      throw new Error(error?.value?.data?.message || data.value?.message || "Xóa thí sinh khỏi phòng thi không thành công");
+    }
+
+    message.success(data.value?.message || "Xóa thí sinh khỏi phòng thi thành công");
+    contestantPagination.current = nextPageIndex;
+    contestantParam.value.pageIndex = nextPageIndex;
+    await fetchContestants({ ...contestantParam.value });
+  } catch (err) {
+    message.error(err?.message || "Xóa thí sinh khỏi phòng thi không thành công");
+  } finally {
+    deletingContestantId.value = null;
+  }
+};
+
 const resetFilters = () => {
   roomSearchText.value = "";
   contestantSearchText.value = "";
@@ -380,6 +424,44 @@ const closeAssignModal = () => {
   assignModal.open = false;
 };
 
+const confirmSkipAssignRoomCheck = content =>
+  new Promise(resolve => {
+    Modal.confirm({
+      title: "Kiểm tra phòng thi",
+      icon: h(ExclamationCircleOutlined),
+      content,
+      okText: "Bỏ qua và tiếp tục",
+      cancelText: "Hủy",
+      onOk: () => resolve(true),
+      onCancel: () => resolve(false),
+    });
+  });
+
+const runAssignRoom = async (submittedBoardId, submittedLocationId) => {
+  const { data, error } = await RestApi.exam_room.assign_contestants({
+    params: {
+      idHoiDong: submittedBoardId,
+      idDiemThi: submittedLocationId,
+    },
+    body: {},
+  });
+
+  if (data.value?.status !== "success") {
+    throw new Error(error?.value?.data?.message || data.value?.message || "Xếp phòng thi không thành công");
+  }
+
+  message.success(data.value?.message || "Xếp phòng thi thành công");
+  closeAssignModal();
+
+  if (filterForm.id_hoi_dong === submittedBoardId && filterForm.id_diem_thi === submittedLocationId) {
+    roomPagination.current = 1;
+    contestantPagination.current = 1;
+    roomParam.value.pageIndex = 1;
+    contestantParam.value.pageIndex = 1;
+    await refreshData();
+  }
+};
+
 const submitAssignRoom = async () => {
   try {
     await assignFormRef.value?.validate();
@@ -387,28 +469,22 @@ const submitAssignRoom = async () => {
     const submittedBoardId = assignModal.form.id_hoi_dong;
     const submittedLocationId = assignModal.form.id_diem_thi;
 
-    const { data, error } = await RestApi.exam_room.assign_contestants({
+    const { data, error } = await RestApi.exam_room.check_contestants({
       params: {
         idHoiDong: submittedBoardId,
         idDiemThi: submittedLocationId,
       },
-      body: {},
     });
 
     if (data.value?.status !== "success") {
-      throw new Error(error?.value?.data?.message || data.value?.message || "Xếp phòng thi không thành công");
+      const confirmMessage = error?.value?.data?.message || data.value?.message || "Kiểm tra phòng thi không thành công";
+      const shouldContinue = await confirmSkipAssignRoomCheck(confirmMessage);
+      if (!shouldContinue) {
+        return;
+      }
     }
 
-    message.success(data.value?.message || "Xếp phòng thi thành công");
-    closeAssignModal();
-
-    if (filterForm.id_hoi_dong === submittedBoardId && filterForm.id_diem_thi === submittedLocationId) {
-      roomPagination.current = 1;
-      contestantPagination.current = 1;
-      roomParam.value.pageIndex = 1;
-      contestantParam.value.pageIndex = 1;
-      await refreshData();
-    }
+    await runAssignRoom(submittedBoardId, submittedLocationId);
   } catch (err) {
     message.error(err?.message || "Xếp phòng thi không thành công");
   } finally {
