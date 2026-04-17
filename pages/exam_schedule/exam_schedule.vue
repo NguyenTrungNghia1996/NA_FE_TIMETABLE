@@ -121,6 +121,7 @@
           label="Năm học"
           name="id_nam"
           :rules="rules.id_nam"
+          :disabled="isEdit"
         />
 
         <SelectExamBoard
@@ -129,6 +130,7 @@
           name="id_hoi_dong"
           :rules="rules.id_hoi_dong"
           :id-nam="formState.id_nam || null"
+          :disabled="isEdit"
         />
 
         <SelectExamLocation
@@ -137,6 +139,7 @@
           name="id_diem_thi"
           :rules="rules.id_diem_thi"
           :id-hoi-dong="formState.id_hoi_dong || null"
+          :disabled="isEdit"
         />
 
         <a-form-item label="Ngày thi" name="ngay">
@@ -253,7 +256,11 @@
 </template>
 
 <script setup>
+import { h } from "vue";
 import dayjs from "dayjs";
+import { Modal } from "ant-design-vue";
+import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
+
 const settingStore = useSettingStore();
 const { RestApi } = useApi();
 
@@ -433,6 +440,19 @@ const buildPayload = () => ({
   bai_thi_tu_chon: !!formState.bai_thi_tu_chon,
 });
 
+const confirmSkipScheduleCheck = content =>
+  new Promise(resolve => {
+    Modal.confirm({
+      title: "Kiểm tra xếp lịch",
+      icon: h(ExclamationCircleOutlined),
+      content,
+      okText: "Bỏ qua và tiếp tục",
+      cancelText: "Hủy",
+      onOk: () => resolve(true),
+      onCancel: () => resolve(false),
+    });
+  });
+
 const handleOk = async () => {
   let shouldClose = false;
   try {
@@ -449,6 +469,20 @@ const handleOk = async () => {
         throw new Error(error.value?.data?.message || "Cập nhật lịch thi không thành công");
       }
     } else {
+      const { data: checkData, error: checkError } = await RestApi.exam_schedule.check({
+        params: {
+          idDiemThi: formState.id_diem_thi,
+        },
+      });
+
+      if (checkData.value?.status !== "success") {
+        const confirmMessage = checkError.value?.data?.message || checkData.value?.message || "Kiểm tra xếp lịch không thành công";
+        const shouldContinue = await confirmSkipScheduleCheck(confirmMessage);
+        if (!shouldContinue) {
+          return;
+        }
+      }
+
       const { data, error } = await RestApi.exam_schedule.create({ body: payload });
       if (data.value?.status === "success") {
         message.success(data.value?.message || "Thêm mới lịch thi thành công");

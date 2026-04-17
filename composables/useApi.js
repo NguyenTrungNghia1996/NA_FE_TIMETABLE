@@ -221,6 +221,7 @@ let ENDPOINTS = {
   EXAM_SCHEDULE: "/api/lichthi",
   EXAM_SCHEDULE_DETAIL: "/api/lichthi/detail",
   EXAM_SCHEDULE_AUTO_ASSIGN: "/api/xeplichthi",
+  EXAM_SCHEDULE_CHECK: "/api/xeplichthi/check",
   EXAM_SCHEDULE_ASSIGNMENT_WAITING: "/api/xeplichthi/phongcho",
   EXAM_SCHEDULE_ASSIGNMENT_UNASSIGNED: "/api/xeplichthi/chuaxep",
   EXAM_SCHEDULE_ASSIGNMENT_DRAW: "/api/xeplichthi/le",
@@ -1654,6 +1655,9 @@ class ExamSchedule {
   }
   async auto_assign(data) {
     return await this.request.post(ENDPOINTS.EXAM_SCHEDULE_AUTO_ASSIGN, data);
+  }
+  async check(data) {
+    return await this.request.get(ENDPOINTS.EXAM_SCHEDULE_CHECK, data);
   }
   async assignment_detail(data) {
     return await this.request.get(ENDPOINTS.EXAM_SCHEDULE_AUTO_ASSIGN, data);

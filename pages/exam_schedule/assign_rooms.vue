@@ -427,7 +427,7 @@ const closeAssignModal = () => {
 const confirmSkipAssignRoomCheck = content =>
   new Promise(resolve => {
     Modal.confirm({
-      title: "Kiểm tra phòng thi có cảnh báo",
+      title: "Kiểm tra phòng thi",
       icon: h(ExclamationCircleOutlined),
       content,
       okText: "Bỏ qua và tiếp tục",
