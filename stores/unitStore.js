@@ -22,7 +22,7 @@ export const useUnitStore = defineStore("unit",
       baseUrl: (state) => {
         switch (state.unit) {
           case "tkb":
-            return "https://api.tkb.nguyenanh-est.com";
+            return "https://api.tkb.xepthoikhoabieu.com";
           case "dungthutkb":
             return "https://api.dungthutkb.nguyenanh-est.com";
           case "testtkb":
