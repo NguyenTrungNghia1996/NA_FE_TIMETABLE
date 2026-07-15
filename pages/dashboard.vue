@@ -127,8 +127,8 @@
             <h3 class="font-semibold">Tài nguyên & Hỗ trợ</h3>
             <p class="text-gray-600 text-sm">Tài liệu hướng dẫn, cập nhật phiên bản và hỗ trợ kỹ thuật.</p>
             <div class="flex flex-wrap gap-2 mt-3">
-              <a href="https://nguyenanh-est.com/vntimetable_web" target="_blank" rel="noopener" class="inline-block"><a-button size="small">Website</a-button></a>
-              <a href="mailto:support@nguyenanh-est.com" class="inline-block"><a-button size="small">Liên hệ hỗ trợ</a-button></a>
+              <a href="https://nguyenanhtsc.com/vntimetable_web" target="_blank" rel="noopener" class="inline-block"><a-button size="small">Website</a-button></a>
+              <a href="mailto:support@nguyenanhtsc.com" class="inline-block"><a-button size="small">Liên hệ hỗ trợ</a-button></a>
             </div>
           </div>
         </div>
