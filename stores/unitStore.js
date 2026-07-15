@@ -24,18 +24,18 @@ export const useUnitStore = defineStore("unit",
           case "tkb":
             return "https://api.tkb.xepthoikhoabieu.com";
           case "dungthutkb":
-            return "https://api.dungthutkb.nguyenanh-est.com";
+            return "https://api.dungthutkb.xepthoikhoabieu.com";
           case "testtkb":
-            return "https://api.testtkb.nguyenanh-est.com";
+            return "https://api.testtkb.xepthoikhoabieu.com";
           case "dungthu":
-            return "https://api.dungthutkb.nguyenanh-est.com";
+            return "https://api.dungthutkb.xepthoikhoabieu.com";
           default:
             return useRuntimeConfig().public.baseURL;
         }
       },
       logo: (state) => {
         return "/logo.png"
-        // return "https://image.nguyenanh-est.com/website/1745742349824_placeholder.png"
+        // return "https://image.nguyenanhtsc.com/website/1745742349824_placeholder.png"
       },
     },
     // persist: {

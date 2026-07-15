@@ -63,7 +63,7 @@ docker build \
 ```bash
 docker run --rm -p 3000:3000 \
   -e NODE_ENV=production \
-  -e NUXT_PUBLIC_BASE_URL=https://api.testtkb.nguyenanh-est.com \
+  -e NUXT_PUBLIC_BASE_URL=https://api.testtkb.nguyenanhtsc.com \
   -e NUXT_ENCRYPTION_KEY=your-secret-key \
   vn_time_table:dev
 ```
@@ -101,6 +101,6 @@ Key variables in `nuxt.config.ts` (`runtimeConfig`):
 
 | Variable | Description | Default |
 | :--- | :--- | :--- |
-| `NUXT_PUBLIC_BASE_URL` | Backend API URL | `https://api.testtkb.nguyenanh-est.com` |
+| `NUXT_PUBLIC_BASE_URL` | Backend API URL | `https://api.testtkb.nguyenanhtsc.com` |
 | `NUXT_ENCRYPTION_KEY` | Key for data encryption | `default-strong-key...` |
 | `NUXT_PUBLIC_BUILD_TAG` | Build version/tag | `dev` |

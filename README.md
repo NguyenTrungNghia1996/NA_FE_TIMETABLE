@@ -49,7 +49,7 @@ yarn preview
 
 Các biến môi trường quan trọng (xem `nuxt.config.ts`):
 
-- `NUXT_PUBLIC_BASE_URL`: URL base của API backend (mặc định: https://api.testtkb.nguyenanh-est.com)
+- `NUXT_PUBLIC_BASE_URL`: URL base của API backend (mặc định: https://api.testtkb.xepthoikhoabieu.com)
 - `NUXT_ENCRYPTION_KEY`: Khóa mã hóa cho ứng dụng (ít nhất 32 ký tự)
 - `NUXT_PUBLIC_BUILD_TAG`, `NUXT_PUBLIC_BUILD_SHA`, `NUXT_PUBLIC_BUILD_TIME`: Thông tin build hiển thị trong runtime (tùy chọn)
 
@@ -75,7 +75,7 @@ docker run --rm -p 3000:3000 \
   -e NODE_ENV=production \
   -e HOST=0.0.0.0 \
   -e PORT=3000 \
-  -e NUXT_PUBLIC_BASE_URL=https://api.testtkb.nguyenanh-est.com \
+  -e NUXT_PUBLIC_BASE_URL=https://api.testtkb.xepthoikhoabieu.com \
   -e NUXT_ENCRYPTION_KEY=key-32-chars-123456 \
   vn_time_table:dev
 ```
@@ -85,13 +85,13 @@ Hoặc dùng `docker-compose.yml` với image build sẵn:
 ```yaml
 services:
   frontend:
-    image: registry.nguyenanh-est.com/nguyen_anh_est/vn_time_table:latest
+    image: registry.nguyenanhtsc.com/nguyen_anh_est/vn_time_table:latest
     restart: unless-stopped
     environment:
       NODE_ENV: production
       HOST: 0.0.0.0
       PORT: 3000
-      NUXT_PUBLIC_BASE_URL: https://api-test-tkb.nguyenanh-est.com
+      NUXT_PUBLIC_BASE_URL: https://api-test-tkb.xepthoikhoabieu.com
       NUXT_ENCRYPTION_KEY: key-32-chars-123456
     ports:
       - "3000:3000"
