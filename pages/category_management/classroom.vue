@@ -95,10 +95,13 @@
       <div v-for="block in busy_data.ds_Ca" :key="block.id" style="margin-bottom: 2rem">
         <Timetable :block="block" />
       </div>
-      <div class="flex justify-end gap-2 mt-6">
-        <a-button @click="handleBusyCancel">Hủy</a-button>
-        <a-button @click="saveBusy" :loading="confirmLoading">Lưu</a-button>
-        <a-button type="primary" @click="handleBusyOk" :loading="confirmLoading">Cập Nhật</a-button>
+      <div class="flex justify-between items-center gap-2 mt-6">
+        <a-checkbox v-model:checked="applyAll">áp dụng cho tất cả các phòng</a-checkbox>
+        <div class="flex gap-2">
+          <a-button @click="handleBusyCancel">Hủy</a-button>
+          <a-button @click="saveBusy" :loading="confirmLoading">Lưu</a-button>
+          <a-button type="primary" @click="handleBusyOk" :loading="confirmLoading">Cập Nhật</a-button>
+        </div>
       </div>
     </a-modal>
     <a-drawer v-model:open="busy_manager_modal" title="Cài đặt tiết bận" @close="closeBusyManager" height="100vh" placement="bottom" :footer="null">
@@ -120,9 +123,12 @@
           <div v-for="block in busy_data.ds_Ca" :key="block.id" class="mb-8">
             <Timetable :block="block" />
           </div>
-          <div class="flex justify-end gap-2 mt-auto pt-2">
-            <a-button @click="closeBusyManager">Hủy</a-button>
-            <a-button @click="saveBusy" :loading="confirmLoading">Lưu</a-button>
+          <div class="flex justify-between items-center gap-2 mt-auto pt-2">
+            <a-checkbox v-model:checked="applyAll">áp dụng cho tất cả các phòng</a-checkbox>
+            <div class="flex gap-2">
+              <a-button @click="closeBusyManager">Hủy</a-button>
+              <a-button @click="saveBusy" :loading="confirmLoading">Lưu</a-button>
+            </div>
           </div>
         </div>
       </div>
@@ -139,6 +145,7 @@ const busy_modal = ref(false);
 const busy_manager_modal = ref(false);
 const selectedClassroom = ref(null);
 const busy_data = ref();
+const applyAll = ref(false);
 
 const param = ref({ PageIndex: 1, PageSize: 10, search: "" });
 const searchText = ref("");
@@ -289,10 +296,12 @@ const closeBusyManager = () => {
   busy_manager_modal.value = false;
   selectedClassroom.value = null;
   busy_data.value = null;
+  applyAll.value = false;
 };
 
 const selectClassroom = async record => {
   selectedClassroom.value = record;
+  applyAll.value = false;
   try {
     const { data } = await RestApi.classroom.get_busy({ params: { id: record.id } });
     if (data.value?.status === "success") {
@@ -338,6 +347,7 @@ const editItem = async record => {
   }
 };
 const editBusy = async record => {
+  applyAll.value = false;
   try {
     const { data } = await RestApi.classroom.get_busy({ params: { id: record.id } });
     if (data.value?.status === "success") {
@@ -384,7 +394,11 @@ const handleOk = async () => {
 const updateBusy = async () => {
   try {
     confirmLoading.value = true;
-    const { data, error } = await RestApi.classroom.update_busy({ body: busy_data.value });
+    const payload = {
+      ...busy_data.value,
+      apply_all: applyAll.value,
+    };
+    const { data, error } = await RestApi.classroom.update_busy({ body: payload });
     if (data.value?.status === "success") {
       message.success(data.value.message || "Cập nhật thành công");
       return true;
@@ -416,6 +430,7 @@ const handleCancel = () => {
 const handleBusyCancel = () => {
   busy_data.value = [];
   busy_modal.value = false;
+  applyAll.value = false;
 };
 const deleteItem = async id => {
   try {
