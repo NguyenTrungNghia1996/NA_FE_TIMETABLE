@@ -28,9 +28,15 @@
           <Timetable :block="block" />
         </div>
       </div>
-      <div class="flex justify-end gap-2 mt-2">
-        <a-button type="primary" :loading="saving" @click="handleSave">Lưu</a-button>
-        <a-button danger @click="reset">Hủy</a-button>
+      <div class="flex justify-between items-center gap-4 mt-4">
+        <div class="flex items-center gap-4">
+          <a-checkbox v-model:checked="applyAllGrade">áp dụng cho toàn khối</a-checkbox>
+          <a-checkbox v-model:checked="applyAllSchool">áp dụng cho toàn trường</a-checkbox>
+        </div>
+        <div class="flex gap-2">
+          <a-button type="primary" :loading="saving" @click="handleSave">Lưu</a-button>
+          <a-button @click="reset">Hủy</a-button>
+        </div>
       </div>
     </a-card>
   </div>
@@ -45,6 +51,8 @@ const loading = ref(false);
 const selectedId = ref(null);
 const schedule = ref();
 const saving = ref(false);
+const applyAllGrade = ref(false);
+const applyAllSchool = ref(false);
 
 const columns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
@@ -88,6 +96,8 @@ async function selectClass(record) {
   if (!record) return;
   classes_select.value = record;
   selectedId.value = record.id;
+  applyAllGrade.value = false;
+  applyAllSchool.value = false;
   try {
     const { data } = await RestApi.class.get_break({ params: { Id: record.id } });
     if (data.value?.status === "success") {
@@ -104,6 +114,8 @@ async function handleSave() {
     saving.value = true;
     const payload = {
       id_lop: selectedId.value,
+      applyAllGrade: applyAllGrade.value,
+      applyAllSchool: applyAllSchool.value,
       ds_Ca: schedule.value?.ds_Ca || [],
     };
     const { data, error } = await RestApi.class.update_break({ body: payload });
@@ -143,6 +155,8 @@ const rowClassName = record => (record.id === selectedId.value ? "active-row" : 
 const reset = () => {
   selectedId.value = null;
   schedule.value = undefined;
+  applyAllGrade.value = false;
+  applyAllSchool.value = false;
 };
 
 const refresh = async () => {
