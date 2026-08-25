@@ -416,6 +416,7 @@ class RestApi {
     this.lecture_schedule = new LectureSchedule(this.request);
     this.backup = new Backup(this.request);
     this.unit_info = new UnitInfo(this.request);
+    this.file_import = new FileImport(this.request);
   }
   async get_url_upload(acl, content_encoding, content_type, key, platform) {
     let data = { acl, content_encoding, content_type, key, platform };
@@ -1819,3 +1820,14 @@ class PhanphoiChuongtrinhChitiet {
     return await this.request.postForm(ENDPOINTS.PHANPHOI_CHUONGTRINH_CHITIET_IMPORT, data);
   }
 }
+
+// FILE IMPORT CLASS
+class FileImport {
+  constructor() {
+    this.request = new Request();
+  }
+  async import_file(data) {
+    return await this.request.postForm(ENDPOINTS.FILE_IMPORT, data);
+  }
+}
+
