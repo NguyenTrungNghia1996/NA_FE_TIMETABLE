@@ -93,10 +93,12 @@ const fetchClasses = async (search = "") => {
     const { data, error } = await RestApi.class.list({ params });
     if (data.value?.status === "success") {
       const items = Array.isArray(data.value?.data?.items) ? data.value.data.items : [];
-      options.value = items.map(item => ({
-        label: item.ten,
-        value: item.id,
-      }));
+      options.value = items
+        .map(item => ({
+          label: item.ten,
+          value: item.id,
+        }))
+        .sort((a, b) => (a.label || "").localeCompare(b.label || "", "vi", { numeric: true, sensitivity: "base" }));
       if (props.autoSelectFirst && !searchTerm && (props.modelValue === undefined || props.modelValue === null || props.modelValue === "" || (Array.isArray(props.modelValue) && props.modelValue.length === 0))) {
         const firstOption = options.value[0];
         if (firstOption) {

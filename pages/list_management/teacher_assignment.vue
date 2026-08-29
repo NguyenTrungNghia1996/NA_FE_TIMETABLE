@@ -161,14 +161,31 @@ async function loadTeacherSubjects() {
   }
 }
 
-const assignments = reactive({});
+const sortClass = (a, b) => (a.ten_lop || "").localeCompare(b.ten_lop || "", "vi", { numeric: true, sensitivity: "base" });
 
 const classModal = reactive({ visible: false, loading: false, classes: [], selectedIds: [], record: null, title: "", search: "" });
 const classColumns = [
   { title: "STT", key: "stt", width: 60, align: "center" },
-  { title: "Lớp học", dataIndex: "ten_lop", key: "ten_lop" },
-  { title: "Số tiết", dataIndex: "tong_tiet", key: "tong_tiet", width: 90, align: "center" },
-  { title: "Đã phân công", dataIndex: "ten_giao_vien", key: "ten_giao_vien" },
+  {
+    title: "Lớp học",
+    dataIndex: "ten_lop",
+    key: "ten_lop",
+    sorter: (a, b) => sortClass(a, b),
+  },
+  {
+    title: "Số tiết",
+    dataIndex: "tong_tiet",
+    key: "tong_tiet",
+    width: 90,
+    align: "center",
+    sorter: (a, b) => (Number(a.tong_tiet) || 0) - (Number(b.tong_tiet) || 0),
+  },
+  {
+    title: "Đã phân công",
+    dataIndex: "ten_giao_vien",
+    key: "ten_giao_vien",
+    sorter: (a, b) => (a.ten_giao_vien || "").localeCompare(b.ten_giao_vien || "", "vi"),
+  },
 ];
 
 const classRowSelection = computed(() => ({
@@ -198,7 +215,8 @@ async function loadClasses() {
     }
     const { data } = await RestApi.teacher.get_assignment_classes({ params: { idgv, idmon } });
     if (data.value?.status === "success") {
-      classModal.classes = data.value.data || [];
+      const items = data.value.data || [];
+      classModal.classes = [...items].sort(sortClass);
     } else {
       classModal.classes = [];
     }
@@ -230,7 +248,9 @@ function resetClassSelection() {
 
 async function confirmClassSelection() {
   if (!selectedTeacher.value || !classModal.record) return;
-  const selected = classModal.classes.filter(c => classModal.selectedIds.includes(c.id_lop));
+  const selected = classModal.classes
+    .filter(c => classModal.selectedIds.includes(c.id_lop))
+    .sort(sortClass);
   // Update the active subject row: id_lop array and ten_lop string
   classModal.record.id_lop = selected.map(c => c.id_lop);
   classModal.record.ten_lop = selected.map(c => c.ten_lop).join(", ");
