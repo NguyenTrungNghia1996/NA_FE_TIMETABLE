@@ -172,7 +172,12 @@ const columns = [
     align: "center",
     customRender: ({ index }) => (pagination.current - 1) * pagination.pageSize + index + 1,
   },
-  { title: "Tên phòng học", dataIndex: "ten", key: "ten" },
+  {
+    title: "Tên phòng học",
+    dataIndex: "ten",
+    key: "ten",
+    sorter: (a, b) => (a.ten || "").localeCompare(b.ten || "", "vi", { numeric: true, sensitivity: "base" }),
+  },
   { title: "Sức chứa", dataIndex: "suc_chua", key: "suc_chua", align: "center" },
   { title: "Loại phòng học", dataIndex: "ten_loai_phong_hoc", key: "ten_loai_phong_hoc" },
   { title: "Điểm trường", dataIndex: "ten_diem_truong", key: "ten_diem_truong" },
@@ -193,6 +198,7 @@ const busyColumns = [
     title: "Tên phòng học",
     dataIndex: "ten",
     key: "ten",
+    sorter: (a, b) => (a.ten || "").localeCompare(b.ten || "", "vi", { numeric: true, sensitivity: "base" }),
     customRender: ({ record }) =>
       h(
         "a",
@@ -259,7 +265,10 @@ const fetchData = async param_soure => {
   }
 };
 
-const handleTableChange = async pag => {
+const handleTableChange = async (pag, filters, sorter, extra) => {
+  if (extra?.action === "sort") {
+    return;
+  }
   pagination.current = pag.current;
   pagination.pageSize = pag.pageSize;
   param.value.PageIndex = pag.current;

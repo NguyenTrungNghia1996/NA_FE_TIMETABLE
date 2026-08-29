@@ -151,7 +151,18 @@ async function loadTeacherSubjects() {
     const type = mode.value === "subject" ? 1 : 2;
     const { data } = await RestApi.teacher.get_assignment({ params: { idgv: selectedTeacher.value.id, type } });
     if (data.value?.status === "success") {
-      subjectRows.value = data.value.data || [];
+      const rows = data.value.data || [];
+      subjectRows.value = rows.map(item => ({
+        ...item,
+        id_giao_vien: selectedTeacher.value.id,
+        id_gv: selectedTeacher.value.id,
+        idgv: selectedTeacher.value.id,
+        id_lop: Array.isArray(item.id_lop)
+          ? item.id_lop
+          : (typeof item.id_lop === "string" && item.id_lop
+              ? item.id_lop.split(",").map(s => Number(s.trim()) || s.trim()).filter(Boolean)
+              : []),
+      }));
     } else {
       subjectRows.value = [];
     }
@@ -161,6 +172,7 @@ async function loadTeacherSubjects() {
   }
 }
 
+const assignments = reactive({});
 const sortClass = (a, b) => (a.ten_lop || "").localeCompare(b.ten_lop || "", "vi", { numeric: true, sensitivity: "base" });
 
 const classModal = reactive({ visible: false, loading: false, classes: [], selectedIds: [], record: null, title: "", search: "" });
@@ -195,9 +207,12 @@ const classRowSelection = computed(() => ({
 }));
 
 const onClassRow = record => ({
-  onClick: () => {
+  onClick: e => {
+    if (e?.target?.closest?.(".ant-table-selection-column") || e?.target?.closest?.(".ant-checkbox-wrapper")) {
+      return;
+    }
     const key = record.id_lop;
-    const idx = classModal.selectedIds.findIndex(id => id === key);
+    const idx = classModal.selectedIds.findIndex(id => String(id) === String(key));
     if (idx >= 0) classModal.selectedIds.splice(idx, 1);
     else classModal.selectedIds.push(key);
   },
@@ -217,6 +232,24 @@ async function loadClasses() {
     if (data.value?.status === "success") {
       const items = data.value.data || [];
       classModal.classes = [...items].sort(sortClass);
+
+      // Pre-select classes if selectedIds is empty
+      if (classModal.selectedIds.length === 0) {
+        const teacherFullName = `${selectedTeacher.value?.ho_va_ho_dem || ""} ${selectedTeacher.value?.ten || ""}`.trim().toLowerCase();
+        const preSelected = items
+          .filter(c =>
+            (c.id_giao_vien && idgv && c.id_giao_vien == idgv) ||
+            (c.id_gv && idgv && c.id_gv == idgv) ||
+            (c.ten_giao_vien && c.ten_giao_vien.trim().toLowerCase() === teacherFullName)
+          )
+          .map(c => c.id_lop);
+        if (preSelected.length > 0) {
+          classModal.selectedIds = preSelected;
+          if (classModal.record) {
+            classModal.record.id_lop = preSelected;
+          }
+        }
+      }
     } else {
       classModal.classes = [];
     }
@@ -232,7 +265,11 @@ function openClassModal(subject) {
   if (!selectedTeacher.value) return;
   classModal.record = subject;
   classModal.title = `Danh sách lớp`;
-  const current = Array.isArray(subject.id_lop) ? subject.id_lop : [];
+  const current = Array.isArray(subject.id_lop)
+    ? subject.id_lop
+    : (typeof subject.id_lop === "string" && subject.id_lop
+        ? subject.id_lop.split(",").map(s => Number(s.trim()) || s.trim()).filter(Boolean)
+        : []);
   classModal.selectedIds = [...current];
   classModal.visible = true;
   loadClasses();
@@ -249,7 +286,7 @@ function resetClassSelection() {
 async function confirmClassSelection() {
   if (!selectedTeacher.value || !classModal.record) return;
   const selected = classModal.classes
-    .filter(c => classModal.selectedIds.includes(c.id_lop))
+    .filter(c => classModal.selectedIds.some(id => String(id) === String(c.id_lop)))
     .sort(sortClass);
   // Update the active subject row: id_lop array and ten_lop string
   classModal.record.id_lop = selected.map(c => c.id_lop);
@@ -267,7 +304,22 @@ async function handleUpdate() {
   if (!selectedTeacher.value) return;
   try {
     saving.value = true;
-    const { data, error } = await RestApi.teacher.update_assignment({ body: subjectRows.value || [] });
+    const preparedRows = (subjectRows.value || []).map(row => ({
+      ...row,
+      id_giao_vien: selectedTeacher.value.id,
+      id_gv: selectedTeacher.value.id,
+      idgv: selectedTeacher.value.id,
+      id_lop: Array.isArray(row.id_lop)
+        ? row.id_lop.map(id => Number(id) || id)
+        : (typeof row.id_lop === "string" && row.id_lop.trim()
+            ? row.id_lop.split(",").map(s => Number(s.trim()) || s.trim()).filter(Boolean)
+            : []),
+    }));
+
+    const { data, error } = await RestApi.teacher.update_assignment({
+      params: { idgv: selectedTeacher.value.id },
+      body: preparedRows,
+    });
     if (data.value?.status === "success") {
       message.success(data.value?.message || "Cập nhật thành công");
       await loadTeacherSubjects();
@@ -275,7 +327,8 @@ async function handleUpdate() {
       throw new Error(error.value?.data?.message || data.value?.message || "Cập nhật không thành công");
     }
   } catch (error) {
-    message.error(error?.message || error?.value?.data?.message || "Xóa không thành công ");
+    console.error("Update teacher assignment error", error);
+    message.error(error?.message || error?.value?.data?.message || "Cập nhật không thành công");
   } finally {
     saving.value = false;
   }
