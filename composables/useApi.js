@@ -264,7 +264,9 @@ class Request {
       },
       async onResponseError({ request, response, options }) {
         if (response.status == 401) {
-          message.info("Phiên Đăng Nhập Kết Thúc Vui Lòng Đăng Nhập Lại! ");
+          if (process.client) {
+            message.info("Phiên Đăng Nhập Kết Thúc Vui Lòng Đăng Nhập Lại! ");
+          }
           const userStore = useUserStore();
           userStore.logout();
           return await navigateTo("/login");
@@ -278,80 +280,99 @@ class Request {
     this.base_url = unitStore.baseUrl
   }
 
-  createHeaders() {
+  createHeaders(customHeaders = {}) {
     const userStore = useUserStore();
-    return {
+    const headers = {
       "Content-type": "application/json; charset=UTF-8",
-      Authorization: `Bearer ${userStore.token}`,
     };
+    if (userStore.token) {
+      headers.Authorization = `Bearer ${userStore.token}`;
+    }
+    Object.assign(headers, customHeaders);
+    if (customHeaders && customHeaders.Authorization === null) {
+      delete headers.Authorization;
+    }
+    return headers;
   }
 
-  get(url, options) {
+  get(url, options = {}) {
+    const { headers: customHeaders, ...restOptions } = options;
     return useFetch(url, {
       baseURL: this.base_url,
       method: "GET",
-      headers: this.createHeaders(),
-      ...options,
+      headers: this.createHeaders(customHeaders),
+      ...restOptions,
       ...this.handler,
     });
   }
-  post(url, options) {
+  post(url, options = {}) {
+    const { headers: customHeaders, ...restOptions } = options;
     return useFetch(url, {
       baseURL: this.base_url,
       method: "POST",
-      headers: this.createHeaders(),
-      ...options,
+      headers: this.createHeaders(customHeaders),
+      ...restOptions,
       ...this.handler,
     });
   }
   // POST multipart/form-data (for file uploads). Do not set Content-Type so browser sets boundary
-  postForm(url, options) {
+  postForm(url, options = {}) {
     const userStore = useUserStore();
-    const headers = {
-      Authorization: `Bearer ${userStore.token}`,
-    };
+    const headers = {};
+    if (userStore.token) {
+      headers.Authorization = `Bearer ${userStore.token}`;
+    }
+    const { headers: customHeaders, ...restOptions } = options;
+    Object.assign(headers, customHeaders);
+    if (customHeaders && customHeaders.Authorization === null) {
+      delete headers.Authorization;
+    }
     return useFetch(url, {
       baseURL: this.base_url,
       method: "POST",
       headers,
-      ...options,
+      ...restOptions,
       ...this.handler,
     });
   }
-  patch(url, options) {
+  patch(url, options = {}) {
+    const { headers: customHeaders, ...restOptions } = options;
     return useFetch(url, {
       baseURL: this.base_url,
       method: "PATCH",
-      headers: this.createHeaders(),
-      ...options,
+      headers: this.createHeaders(customHeaders),
+      ...restOptions,
       ...this.handler,
     });
   }
-  put(url, options) {
+  put(url, options = {}) {
+    const { headers: customHeaders, ...restOptions } = options;
     return useFetch(url, {
       baseURL: this.base_url,
       method: "PUT",
-      headers: this.createHeaders(),
-      ...options,
+      headers: this.createHeaders(customHeaders),
+      ...restOptions,
       ...this.handler,
     });
   }
-  delete(url, options) {
+  delete(url, options = {}) {
+    const { headers: customHeaders, ...restOptions } = options;
     return useFetch(url, {
       baseURL: this.base_url,
       method: "DELETE",
-      headers: this.createHeaders(),
-      ...options,
+      headers: this.createHeaders(customHeaders),
+      ...restOptions,
       ...this.handler,
     });
   }
 
-  download(url, options) {
+  download(url, options = {}) {
     const { onRequest, onRequestError, onResponseError } = this.handler;
+    const { headers: customHeaders, ...restOptions } = options;
     return useFetch(url, {
       baseURL: this.base_url,
       method: "GET",
-      headers: this.createHeaders(),
+      headers: this.createHeaders(customHeaders),
       responseType: "blob",
       onRequest,
       onRequestError,
@@ -361,7 +382,7 @@ class Request {
         const blob = response._data instanceof Blob ? response._data : new Blob([response._data]);
         response._data = { blob, headers };
       },
-      ...options,
+      ...restOptions,
     });
   }
 }
@@ -466,11 +487,25 @@ class User {
   constructor() {
     this.request = new Request();
   }
-  async login(data) {
-    return await this.request.post(ENDPOINTS.LOGIN, data);
+  async login(data = {}) {
+    const userStore = useUserStore();
+    userStore.logout();
+    return await this.request.post(ENDPOINTS.LOGIN, {
+      ...data,
+      headers: {
+        Authorization: null,
+        ...(data.headers || {}),
+      },
+    });
   }
-  async register(data) {
-    return await this.request.post(ENDPOINTS.REGISTER, data);
+  async register(data = {}) {
+    return await this.request.post(ENDPOINTS.REGISTER, {
+      ...data,
+      headers: {
+        Authorization: null,
+        ...(data.headers || {}),
+      },
+    });
   }
   async list(data) {
     return await this.request.get(ENDPOINTS.USER, data);
