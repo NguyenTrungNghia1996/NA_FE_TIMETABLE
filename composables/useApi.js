@@ -263,11 +263,17 @@ class Request {
         return response._data;
       },
       async onResponseError({ request, response, options }) {
-        if (response.status == 401) {
-          if (process.client) {
+        const url = typeof request === "string" ? request : (request?.url || options?.url || "");
+        const isAuthRequest =
+          url.includes(ENDPOINTS.LOGIN) ||
+          url.includes(ENDPOINTS.REGISTER) ||
+          url.includes("/api/users/login");
+
+        if (response.status == 401 && !isAuthRequest) {
+          const userStore = useUserStore();
+          if (userStore.token && process.client) {
             message.info("Phiên Đăng Nhập Kết Thúc Vui Lòng Đăng Nhập Lại! ");
           }
-          const userStore = useUserStore();
           userStore.logout();
           return await navigateTo("/login");
         }
