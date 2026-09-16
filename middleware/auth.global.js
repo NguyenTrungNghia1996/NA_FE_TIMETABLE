@@ -78,11 +78,13 @@ export default defineNuxtRouteMiddleware(async (to) => {
         const isTokenValid = typeof exp === "number" && Date.now() / 1000 < exp;
         if (isTokenValid) {
           return navigateTo("/dashboard", { replace: true });
+        } else {
+          // Token đã hết hạn => xóa sạch để tránh gửi token rác lên API login
+          userStore.logout();
         }
       } catch (error) {
         // Token không hợp lệ, cho phép truy cập route public
         userStore.logout();
-        return navigateTo("/login");
       }
     }
     return; // Cho phép truy cập /login nếu chưa đăng nhập hoặc token không hợp lệ

@@ -65,7 +65,7 @@ const handleLogin = async () => {
   settingStore.setLoading(true);
   try {
     const { data, status, error } = await RestApi.user.login({ body: JSON.stringify(form) });
-    if (status.value == "success") {
+    if (status.value == "success" && data.value?.status !== "error") {
       if (rememberMe.value) {
         saveCredentials(form.username, form.password);
       }
@@ -78,11 +78,13 @@ const handleLogin = async () => {
       navigateTo("/dashboard");
     } else {
       console.error("error:", error);
-      message.error("Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin");
+      const errMsg = data.value?.message || error.value?.data?.message || "Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin";
+      message.error(errMsg);
     }
   } catch (error) {
     console.error("Login failed:", error);
-    message.error("Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin");
+    const errMsg = error?.response?.data?.message || error?.message || "Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin";
+    message.error(errMsg);
   } finally {
     settingStore.setLoading(false);
     // loading.value = false;
