@@ -8,7 +8,7 @@
       <a-card class="shadow-xl">
         <h2 class="text-center text-2xl font-bold text-gray-800 mb-6">Đăng nhập hệ thống</h2>
         <a-form :model="form" layout="vertical" @finish="handleLogin" autocomplete="off">
-          <a-form-item label="Tài khoản" name="username" :rules="[{ required: true, message: 'Vui lòng nhập nhập tài khoản!' }]">
+          <a-form-item label="Tài khoản" name="username" :rules="[{ required: true, message: 'Vui lòng nhập tài khoản!' }]">
             <a-input v-model:value="form.username" placeholder="Nhập tài khoản của bạn" size="large">
               <template #prefix>
                 <UserOutlined class="text-gray-400" />
@@ -60,12 +60,79 @@ const visible = ref(false);
 // const rememberMe = ref(false);
 const loading = ref(false);
 
+const getApiErrorMessage = (err, respData) => {
+  // 1. Ưu tiên dữ liệu trả về từ API (từ error.value?.data, err.data, response._data hoặc respData)
+  const apiPayload =
+    err?.value?.data ??
+    err?.data ??
+    err?.response?._data ??
+    err?.response?.data ??
+    respData?.value ??
+    respData;
+
+  if (apiPayload) {
+    if (typeof apiPayload === "string" && apiPayload.trim()) {
+      return apiPayload.trim();
+    }
+    if (apiPayload.message) {
+      if (typeof apiPayload.message === "string" && apiPayload.message.trim()) {
+        return apiPayload.message.trim();
+      }
+      if (Array.isArray(apiPayload.message) && apiPayload.message.length) {
+        return apiPayload.message.filter(Boolean).join(", ");
+      }
+    }
+    if (typeof apiPayload.msg === "string" && apiPayload.msg.trim()) {
+      return apiPayload.msg.trim();
+    }
+    if (typeof apiPayload.error === "string" && apiPayload.error.trim()) {
+      return apiPayload.error.trim();
+    }
+    if (typeof apiPayload.detail === "string" && apiPayload.detail.trim()) {
+      return apiPayload.detail.trim();
+    }
+    if (apiPayload.errors) {
+      if (typeof apiPayload.errors === "string" && apiPayload.errors.trim()) {
+        return apiPayload.errors.trim();
+      }
+      if (Array.isArray(apiPayload.errors) && apiPayload.errors.length) {
+        return apiPayload.errors.filter(Boolean).join(", ");
+      }
+      if (typeof apiPayload.errors === "object") {
+        const flatErrors = Object.values(apiPayload.errors).flat().filter(Boolean);
+        if (flatErrors.length) return flatErrors.join(", ");
+      }
+    }
+  }
+
+  // 2. Fallback trực tiếp từ respData hoặc err
+  const directMessage = respData?.value?.message || respData?.message || err?.value?.data?.message || err?.data?.message;
+  if (typeof directMessage === "string" && directMessage.trim()) {
+    return directMessage.trim();
+  }
+
+  // 3. Fallback từ message của err nếu không phải chuỗi kỹ thuật của ofetch
+  const rawMsg = err?.message || err?.value?.message;
+  if (
+    typeof rawMsg === "string" &&
+    rawMsg.trim() &&
+    !rawMsg.includes("FetchError") &&
+    !rawMsg.includes("[POST]") &&
+    !rawMsg.includes("[GET]")
+  ) {
+    return rawMsg.trim();
+  }
+
+  return "Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin";
+};
+
 const handleLogin = async () => {
-  // loading.value = true;
+  loading.value = true;
   settingStore.setLoading(true);
   try {
     const { data, status, error } = await RestApi.user.login({ body: JSON.stringify(form) });
-    if (status.value == "success" && data.value?.status !== "error") {
+    const isSuccess = status.value === "success" && data.value?.status !== "error" && Boolean(data.value?.data);
+    if (isSuccess) {
       if (rememberMe.value) {
         saveCredentials(form.username, form.password);
       }
@@ -74,20 +141,20 @@ const handleLogin = async () => {
       await loadMenu();
       await loadPermissions();
       // setPermissions()
-      message.success("Đăng nhập thành công!");
+      message.success(data.value?.message || "Đăng nhập thành công!");
       navigateTo("/dashboard");
     } else {
-      console.error("error:", error);
-      const errMsg = data.value?.message || error.value?.data?.message || "Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin";
+      console.error("Login error:", error, data);
+      const errMsg = getApiErrorMessage(error, data);
       message.error(errMsg);
     }
   } catch (error) {
     console.error("Login failed:", error);
-    const errMsg = error?.response?.data?.message || error?.message || "Đăng nhập thất bại! Vui lòng kiểm tra lại thông tin";
+    const errMsg = getApiErrorMessage(error, null);
     message.error(errMsg);
   } finally {
     settingStore.setLoading(false);
-    // loading.value = false;
+    loading.value = false;
   }
 };
 
