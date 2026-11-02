@@ -511,7 +511,7 @@ const exportTkb = () => exportFile(() => RestApi.timetable.export({ params: { id
 // Export modal state + helpers
 const exportModal = reactive({
   visible: false,
-  loadingKey: null, // 'class' | 'school' | 'teacher' | null
+  loadingKey: null, // 'class' | 'school' | 'teacher' | 'matrix-school' | 'matrix-teacher' | 'matrix-grade' | 'matrix-expertise' | 'matrix-expertise-ca' | null
   options: {
     class: { showRoom: false, showTeacher: false },
     school: { showRoom: false, showTeacher: false },
@@ -575,6 +575,7 @@ const exportMatrixSchool = () => exportFile(() => RestApi.timetable.export_matri
 const exportMatrixTeacher = () => exportFile(() => RestApi.timetable.export_matrix_teacher({ params: { idtkb: props.timetableId } }), "matrix-teacher");
 const exportMatrixGrade = () => exportFile(() => RestApi.timetable.export_matrix_grade({ params: { idtkb: props.timetableId } }), "matrix-grade");
 const exportMatrixExpertise = () => exportFile(() => RestApi.timetable.export_matrix_expertise({ params: { idtkb: props.timetableId } }), "matrix-expertise");
+const exportMatrixExpertiseCa = () => exportFile(() => RestApi.timetable.export_matrix_expertise_ca({ params: { idtkb: props.timetableId } }), "matrix-expertise-ca");
 
 async function fetchInfo() {
   // if (!props.timetableId) return;
@@ -722,6 +723,7 @@ defineExpose({ refresh, reset });
             <a-button :loading="exportModal.loadingKey === 'matrix-teacher'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-teacher'" @click="exportMatrixTeacher">Ma trận Giáo viên</a-button>
             <a-button :loading="exportModal.loadingKey === 'matrix-grade'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-grade'" @click="exportMatrixGrade">Ma trận Khối</a-button>
             <a-button :loading="exportModal.loadingKey === 'matrix-expertise'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-expertise'" @click="exportMatrixExpertise">Ma trận Tổ chuyên môn</a-button>
+            <a-button :loading="exportModal.loadingKey === 'matrix-expertise-ca'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-expertise-ca'" @click="exportMatrixExpertiseCa">Tổ chuyên môn-Ca</a-button>
           </div>
         </a-card>
       </div>

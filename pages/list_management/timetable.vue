@@ -149,6 +149,7 @@
             <a-button :loading="exportModal.loadingKey === 'matrix-teacher'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-teacher'" @click="exportMatrixTeacher">Ma trận Giáo viên</a-button>
             <a-button :loading="exportModal.loadingKey === 'matrix-grade'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-grade'" @click="exportMatrixGrade">Ma trận Khối</a-button>
             <a-button :loading="exportModal.loadingKey === 'matrix-expertise'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-expertise'" @click="exportMatrixExpertise">Ma trận Tổ chuyên môn</a-button>
+            <a-button :loading="exportModal.loadingKey === 'matrix-expertise-ca'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-expertise-ca'" @click="exportMatrixExpertiseCa">Tổ chuyên môn-Ca</a-button>
             <a-button :loading="exportModal.loadingKey === 'matrix-class'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-class'" @click="exportMatrixClass">Ma trận Lớp học</a-button>
             <a-button :loading="exportModal.loadingKey === 'matrix-class-vertical'" :disabled="!!exportModal.loadingKey && exportModal.loadingKey !== 'matrix-class-vertical'" @click="exportMatrixClassVertical">
               Ma trận lớp - dọc
@@ -242,7 +243,7 @@ const exportModal = reactive({
   visible: false,
   timetableId: null,
   timetableName: "",
-  loadingKey: null, // 'class' | 'school' | 'teacher' | 'matrix-school' | 'matrix-teacher' | 'matrix-grade' | 'matrix-expertise' | 'matrix-class' | 'matrix-class-vertical' | 'csdl-nganh' | null
+  loadingKey: null, // 'class' | 'school' | 'teacher' | 'matrix-school' | 'matrix-teacher' | 'matrix-grade' | 'matrix-expertise' | 'matrix-expertise-ca' | 'matrix-class' | 'matrix-class-vertical' | 'csdl-nganh' | null
   options: {
     class: { showRoom: 0, showTeacher: 0 },
     school: { showRoom: 0, showTeacher: 0 },
@@ -408,6 +409,7 @@ const exportMatrixSchool = () => exportFile(() => RestApi.timetable.export_matri
 const exportMatrixTeacher = () => exportFile(() => RestApi.timetable.export_matrix_teacher({ params: { idtkb: exportModal.timetableId } }), "matrix-teacher");
 const exportMatrixGrade = () => exportFile(() => RestApi.timetable.export_matrix_grade({ params: { idtkb: exportModal.timetableId } }), "matrix-grade");
 const exportMatrixExpertise = () => exportFile(() => RestApi.timetable.export_matrix_expertise({ params: { idtkb: exportModal.timetableId } }), "matrix-expertise");
+const exportMatrixExpertiseCa = () => exportFile(() => RestApi.timetable.export_matrix_expertise_ca({ params: { idtkb: exportModal.timetableId } }), "matrix-expertise-ca");
 const exportMatrixClass = () => exportFile(() => RestApi.timetable.export_matrix_class({ params: { idtkb: exportModal.timetableId } }), "matrix-class");
 const exportMatrixClassVertical = () =>
   exportFile(() => RestApi.timetable.export_matrix_class_vertical({ params: { idtkb: exportModal.timetableId } }), "matrix-class-vertical");

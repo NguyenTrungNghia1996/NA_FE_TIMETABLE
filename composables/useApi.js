@@ -180,6 +180,7 @@ let ENDPOINTS = {
   TIMETABLE_EXPORT_MATRIX_TEACHER: "/api/export/matran/giaovien",
   TIMETABLE_EXPORT_MATRIX_GRADE: "/api/export/matran/khoi",
   TIMETABLE_EXPORT_MATRIX_EXPERTISE: "/api/export/matran/tohopmon",
+  TIMETABLE_EXPORT_MATRIX_EXPERTISE_CA: "/api/export/matran/tohopmon-ca",
   TIMETABLE_EXPORT_MATRIX_CLASS: "/api/export/matran/lop",
   TIMETABLE_EXPORT_MATRIX_CLASS_VERTICAL: "/api/export/matran/lopdoc",
   TIMETABLE_EXPORT_CSDL_NGANH: "/api/export/csdlnganh",
@@ -1484,6 +1485,9 @@ class Timetable {
   }
   async export_matrix_expertise(data) {
     return await this.request.download(ENDPOINTS.TIMETABLE_EXPORT_MATRIX_EXPERTISE, data);
+  }
+  async export_matrix_expertise_ca(data) {
+    return await this.request.download(ENDPOINTS.TIMETABLE_EXPORT_MATRIX_EXPERTISE_CA, data);
   }
   async export_matrix_class(data) {
     return await this.request.download(ENDPOINTS.TIMETABLE_EXPORT_MATRIX_CLASS, data);

@@ -49,7 +49,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     encryptionKey: process.env.NUXT_ENCRYPTION_KEY || "default-strong-key-32-chars-123456",
     public: {
-      baseURL: process.env.NUXT_PUBLIC_BASE_URL || "https://api.testtkb.xepthoikhoabieu.com",
+      baseURL: process.env.NUXT_PUBLIC_BASE_URL || "https://api.tkb.xepthoikhoabieu.com",
       // Docker build/version info (injected via ENV or build args)
       buildTag: process.env.NUXT_PUBLIC_BUILD_TAG || "dev",
       buildSha: process.env.NUXT_PUBLIC_BUILD_SHA || "",
